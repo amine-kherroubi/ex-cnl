@@ -9,7 +9,7 @@ class Database:
         self.connection: duckdb.DuckDBPyConnection = connection or duckdb.connect()  # type: ignore
 
     def setup_from_excel(self, file_path: str) -> None:
-        excel_path = Path(file_path)
+        excel_path: Path = Path(file_path)
         if not excel_path.exists():
             raise FileNotFoundError(f"File not found: {excel_path}")
 
