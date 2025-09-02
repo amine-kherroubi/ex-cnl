@@ -1,5 +1,5 @@
 from __future__ import annotations
-from queries import get_queries
+from queries import QUERIES
 from excel import ExcelExporter
 from database import Database
 
@@ -15,11 +15,10 @@ def main() -> None:
         database: Database = Database()
         database.setup_from_excel(input_filename)
         database.debug_data_structure()
-        analytical_queries: dict[str, str] = get_queries()
         print("\nExecuting queries and saving results...")
         excel_exporter: ExcelExporter = ExcelExporter()
         excel_exporter.save_results_to_excel(
-            analytical_queries,
+            QUERIES,
             database,
             output_filename,
         )

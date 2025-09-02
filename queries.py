@@ -1,9 +1,9 @@
 from __future__ import annotations
+from typing import Final
 
 
-def get_queries() -> dict[str, str]:
-    return {
-        "overview_by_commune": """
+QUERIES: Final[dict[str, str]] = {
+    "overview_by_commune": """
             SELECT
                 Commune,
                 COUNT(*) as total_ovs,
@@ -16,7 +16,7 @@ def get_queries() -> dict[str, str]:
             GROUP BY Commune
             ORDER BY total_active_amount DESC
         """,
-        "program_summary": """
+    "program_summary": """
             SELECT
                 Programme,
                 "Sous programme",
@@ -29,7 +29,7 @@ def get_queries() -> dict[str, str]:
             GROUP BY Programme, "Sous programme"
             ORDER BY total_amount DESC
         """,
-        "top_beneficiaries": """
+    "top_beneficiaries": """
             SELECT
                 Nom,
                 Prénom,
@@ -43,7 +43,7 @@ def get_queries() -> dict[str, str]:
             ORDER BY total_amount DESC
             LIMIT 50
         """,
-        "tranche_analysis": """
+    "tranche_analysis": """
             SELECT
                 Tranche,
                 COUNT(*) as count_ovs,
@@ -54,7 +54,7 @@ def get_queries() -> dict[str, str]:
             GROUP BY Tranche
             ORDER BY total_amount DESC
         """,
-        "monthly_activity": """
+    "monthly_activity": """
             SELECT
                 SUBSTR("Date OV", 4, 7) as month_year,
                 COUNT(*) as total_ovs,
@@ -66,7 +66,7 @@ def get_queries() -> dict[str, str]:
             ORDER BY month_year DESC
             LIMIT 24
         """,
-        "construction_types": """
+    "construction_types": """
             SELECT
                 "Type de construction",
                 COUNT(*) as total_ovs,
@@ -77,7 +77,7 @@ def get_queries() -> dict[str, str]:
             GROUP BY "Type de construction"
             ORDER BY total_amount DESC
         """,
-        "bank_agencies": """
+    "bank_agencies": """
             SELECT
                 "Agence bancaire",
                 COUNT(*) as total_ovs,
@@ -88,7 +88,7 @@ def get_queries() -> dict[str, str]:
             GROUP BY "Agence bancaire"
             ORDER BY total_amount DESC
         """,
-        "first_tranche_count": """
+    "first_tranche_count": """
             SELECT c.Commune,
                    COALESCE((SELECT COUNT(*)
                     FROM ovs o
@@ -107,4 +107,4 @@ def get_queries() -> dict[str, str]:
             FROM commune c
             ORDER BY c.Commune
         """,
-    }
+}
