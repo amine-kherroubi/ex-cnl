@@ -8,7 +8,7 @@ def main() -> None:
     input_filename: str = (
         "Liste_OVs_Agence_TIZIOUZOU_17.09.2024_7284743114531606447.xlsx"
     )
-    output_filename: str = "resultats_requetes.xlsx"
+    output_filename: str = "result.xlsx"
 
     try:
         print("Setting up database...")
