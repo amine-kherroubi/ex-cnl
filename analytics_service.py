@@ -2,6 +2,7 @@ from __future__ import annotations
 import pandas as pd
 from data_repository import DataRepository
 from query_service import QueryService
+from time import perf_counter
 
 
 class AnalyticsService:  # Service Pattern
@@ -24,7 +25,11 @@ class AnalyticsService:  # Service Pattern
                 if not self._query_service.validate_query(query):
                     continue
 
+                start_time: float = perf_counter()
                 result: pd.DataFrame = self._repository.execute_query(query)
+                duration: float = perf_counter() - start_time
+                print(f"Query '{query_name}' executed in {duration} seconds.")
+
                 results[query_name] = result
 
             except Exception:
