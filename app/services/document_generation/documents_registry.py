@@ -50,7 +50,7 @@ class DocumentRegistry(object):  # Registry pattern
     _DOCUMENTS_DEFINITIONS: Final[dict[str, DocumentDefinition]] = {
         "activite_mensuelle_par_programme": DocumentDefinition(
             name="activite_mensuelle_par_programme",
-            display_name="Activité mensuelle par programme (à renseigner par la BNH (ex-CNL))",
+            display_name="Activité mensuelle par programme",
             category=DocumentCategory.HR,
             description=(
                 "Document de suivi mensuel des activités par programme, "
@@ -68,7 +68,7 @@ class DocumentRegistry(object):  # Registry pattern
         ),
         "situation_des_programmes": DocumentDefinition(
             name="situation_des_programmes",
-            display_name="Situation des programmes (à renseigner par la BNH (ex-CNL))",
+            display_name="Situation des programmes",
             category=DocumentCategory.HR,
             description=(
                 "Document de suivi de la situation des programmes, "

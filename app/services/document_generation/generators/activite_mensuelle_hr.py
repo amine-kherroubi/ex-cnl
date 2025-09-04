@@ -3,9 +3,15 @@ import pandas
 from openpyxl.worksheet.worksheet import Worksheet
 from app.services.document_generation.generator_template import DocumentGenerator
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from documents_registry import DocumentRegistry
 
 
 class ActiviteMensuelleHRGenerator(DocumentGenerator):
+    def __init__(self) -> None:
+        self._document_definition = DocumentRegistry.get(
+            "activite_mensuelle_par_programme"
+        )
+
     def _add_header(self, sheet: Worksheet) -> None:
         # HABITAT RURAL
         sheet.merge_cells("A1:E1")

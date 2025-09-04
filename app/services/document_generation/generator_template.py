@@ -13,14 +13,10 @@ import re
 class DocumentGenerator(ABC):  # Template Method pattern
     def __init__(self, repository: DataRepository) -> None:
         self._repository: DataRepository = repository
-        self._document_definition: DocumentDefinition | None = None
+        self._document_definition: DocumentDefinition
         self._workbook: Workbook | None = None
 
-    def generate(
-        self, document_definition: DocumentDefinition, output_path: str
-    ) -> None:
-        self._document_definition = document_definition
-
+    def generate(self, output_path: str) -> None:
         # Step 1: Validate required files
         self._validate_required_files()
 
