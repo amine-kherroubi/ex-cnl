@@ -17,6 +17,12 @@ from app.services.document_generation.documents_registry import DocumentDefiniti
 
 
 class DocumentGenerator(ABC):  # Template Method pattern
+    __slots__ = (
+        "_repository",
+        "_document_definition",
+        "_workbook",
+    )
+
     def __init__(self, repository: DataRepository) -> None:
         self._repository: DataRepository = repository
         self._document_definition: DocumentDefinition
