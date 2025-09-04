@@ -6,7 +6,7 @@ import pandas
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from data.data_repository import DataRepository
-from services.documents_generation.documents_registry import DocumentDefinition
+from services.document_generation.documents_registry import DocumentDefinition
 import re
 
 

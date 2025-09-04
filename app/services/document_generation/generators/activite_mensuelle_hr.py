@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pandas
 from openpyxl.worksheet.worksheet import Worksheet
-from app.services.documents_generation.generator_template import DocumentGenerator
+from app.services.document_generation.generator_template import DocumentGenerator
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 
