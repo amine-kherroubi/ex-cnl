@@ -17,10 +17,12 @@ from app.services.document_generation.documents_registry import DocumentDefiniti
 
 
 class ApplicationFacade(object):  # Facade pattern
-    def __init__(self) -> None:
-        # Hardcoded configuration
-        self._enable_debug = True
+    __slots__ = (
+        "_repository",
+        "_generators",
+    )
 
+    def __init__(self) -> None:
         # Dependency injection pattern
         self._repository: DuckDBRepository = DuckDBRepository()
 
@@ -33,7 +35,6 @@ class ApplicationFacade(object):  # Facade pattern
     def generate_document(
         self, document_name: str, output_path: str | None = None
     ) -> None:
-        """Generate a specific document by name"""
         try:
             if not DocumentRegistry.has(document_name):
                 available_docs = list(DocumentRegistry.all().keys())
@@ -76,7 +77,6 @@ class ApplicationFacade(object):  # Facade pattern
             self._cleanup()
 
     def list_available_documents(self) -> None:
-        """List all available documents that can be generated"""
         print("Available documents:")
         print("-" * 60)
 
@@ -93,7 +93,6 @@ class ApplicationFacade(object):  # Facade pattern
             print()
 
     def _check_required_files(self, required_patterns: list[str]) -> None:
-        """Check if required files exist in current working directory"""
         import re
 
         current_dir: Path = Path.cwd()
@@ -125,6 +124,5 @@ class ApplicationFacade(object):  # Facade pattern
             )
 
     def _cleanup(self) -> None:
-        """Clean up resources"""
         if hasattr(self, "_repository") and self._repository:
             self._repository.close()

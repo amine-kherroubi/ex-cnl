@@ -12,6 +12,8 @@ from app.services.document_generation.documents_registry import DocumentRegistry
 
 
 class SituationDesProgrammesHRGenerator(DocumentGenerator):
+    __slots__ = ()
+
     def __init__(self, repository: DataRepository) -> None:
         super().__init__(repository)
         self._document_definition = DocumentRegistry.get("situation_des_programmes")

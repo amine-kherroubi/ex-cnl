@@ -22,6 +22,11 @@ class DataRepository(Protocol):  # Repository pattern with protocol
 
 
 class DuckDBRepository(object):  # Repository pattern implementation
+    __slots__ = (
+        "_connection",
+        "_data_loaded",
+    )
+
     def __init__(self, connection: duckdb.DuckDBPyConnection | None = None) -> None:
         self._connection: duckdb.DuckDBPyConnection = connection or duckdb.connect()  # type: ignore
         self._data_loaded: bool = False

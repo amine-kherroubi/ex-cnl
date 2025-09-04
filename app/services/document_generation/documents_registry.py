@@ -12,7 +12,7 @@ class DocumentCategory(StrEnum):
     AAP = "AAP"
 
 
-@dataclass
+@dataclass(slots=True)
 class DocumentDefinition(object):
     name: str
     display_name: str
@@ -25,6 +25,8 @@ class DocumentDefinition(object):
 
 @final
 class DocumentRegistry(object):  # Registry pattern
+    __slots__ = ()
+
     def __new__(cls):
         raise RuntimeError(
             "DocumentRegistry cannot be instantiated. Use class methods."
