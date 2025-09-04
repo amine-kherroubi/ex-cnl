@@ -1,11 +1,8 @@
 from __future__ import annotations
 from typing import Any
-import pandas as pd
-from analytics_service import AnalyticsService
-from config import ApplicationConfig
-from data_repository import DuckDBRepository
-from export_service import ExcelExportStrategy, ExportService
-from query_service import QueryService
+import pandas
+from utils.config import ApplicationConfig
+from data.data_repository import DuckDBRepository
 
 
 class ApplicationFacade(object):  # Facade pattern
@@ -30,7 +27,7 @@ class ApplicationFacade(object):  # Facade pattern
                 self._show_data_summary()
 
             # Generate reports
-            results: dict[str, pd.DataFrame] = self._generate_reports()
+            results: dict[str, pandas.DataFrame] = self._generate_reports()
 
             # Export results
             self._export_results(results)
@@ -55,10 +52,10 @@ class ApplicationFacade(object):  # Facade pattern
         print("\nSample data:")
         print(summary["sample_data"])
 
-    def _generate_reports(self) -> dict[str, pd.DataFrame]:
+    def _generate_reports(self) -> dict[str, pandas.DataFrame]:
         return self._analytics_service.generate_reports()
 
-    def _export_results(self, results: dict[str, pd.DataFrame]) -> None:
+    def _export_results(self, results: dict[str, pandas.DataFrame]) -> None:
         if results:
             self._export_service.export_results(results, self._config.output_file)
 

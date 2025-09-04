@@ -2,16 +2,16 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Protocol
 import duckdb
-import pandas as pd
-from exceptions import DataLoadError, DatabaseError, QueryExecutionError
+import pandas
+from utils.exceptions import DataLoadError, DatabaseError, QueryExecutionError
 
 
 class DataRepository(Protocol):  # Repository pattern with protocol
     def load_data(self, file_path: str) -> None: ...
-    def execute_query(self, query: str) -> pd.DataFrame: ...
+    def execute_query(self, query: str) -> pandas.DataFrame: ...
     def get_record_count(self) -> int: ...
-    def get_table_description(self) -> pd.DataFrame: ...
-    def get_sample_data(self, limit: int = 5) -> pd.DataFrame: ...
+    def get_table_description(self) -> pandas.DataFrame: ...
+    def get_sample_data(self, limit: int = 5) -> pandas.DataFrame: ...
     def close(self) -> None: ...
 
 
@@ -27,7 +27,7 @@ class DuckDBRepository(object):  # Repository pattern implementation
             raise FileNotFoundError(f"File not found: {excel_path}")
 
         try:
-            dataframe: pd.DataFrame = pd.read_excel(  # type: ignore
+            dataframe: pandas.DataFrame = pandas.read_excel(  # type: ignore
                 excel_path, dtype_backend="numpy_nullable"
             )
 
@@ -37,26 +37,26 @@ class DuckDBRepository(object):  # Repository pattern implementation
         except Exception as error:
             raise DataLoadError(str(file_path), error) from error
 
-    def execute_query(self, query: str) -> pd.DataFrame:
+    def execute_query(self, query: str) -> pandas.DataFrame:
         if not self._data_loaded:
             raise DatabaseError("No data loaded")
 
         try:
-            result: pd.DataFrame = self._connection.execute(query).fetchdf()
+            result: pandas.DataFrame = self._connection.execute(query).fetchdf()
             return result
         except Exception as error:
             raise QueryExecutionError(query, error) from error
 
     def get_record_count(self) -> int:
-        result: pd.DataFrame = self.execute_query(
+        result: pandas.DataFrame = self.execute_query(
             "SELECT COUNT(*) as total_rows FROM ovs"
         )
         return int(result["total_rows"].iloc[0])
 
-    def get_table_description(self) -> pd.DataFrame:
+    def get_table_description(self) -> pandas.DataFrame:
         return self.execute_query("DESCRIBE ovs")
 
-    def get_sample_data(self, limit: int = 5) -> pd.DataFrame:
+    def get_sample_data(self, limit: int = 5) -> pandas.DataFrame:
         return self.execute_query(f"SELECT * FROM ovs LIMIT {limit}")
 
     def get_data_summary(self) -> dict[str, Any]:

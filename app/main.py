@@ -1,10 +1,8 @@
 from __future__ import annotations
-
 import sys
-
-from application_facade import ApplicationFacade
-from config import ApplicationConfig
-from exceptions import ApplicationError
+from app.application_facade import ApplicationFacade
+from utils.config import ApplicationConfig
+from utils.exceptions import ApplicationError
 
 
 def main() -> None:
