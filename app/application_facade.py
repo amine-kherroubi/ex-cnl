@@ -1,63 +1,126 @@
 from __future__ import annotations
-from typing import Any
-import pandas
-from utils.config import ApplicationConfig
-from data.data_repository import DuckDBRepository
+from pathlib import Path
+from app.services.document_generation.generator_template import DocumentGenerator
+from app.data.data_repository import DuckDBRepository
+from app.services.document_generation.documents_registry import DocumentRegistry
+from app.services.document_generation.generators.activite_mensuelle_hr import (
+    ActiviteMensuelleHRGenerator,
+)
+from app.services.document_generation.generators.situation_des_programmes_hr import (
+    SituationDesProgrammesHRGenerator,
+)
+from app.services.document_generation.documents_registry import DocumentDefinition
 
 
 class ApplicationFacade(object):  # Facade pattern
-    def __init__(self, config: ApplicationConfig) -> None:
-        self._config: ApplicationConfig = config
+    def __init__(self) -> None:
+        # Hardcoded configuration
+        self._enable_debug = True
 
         # Dependency injection pattern
         self._repository: DuckDBRepository = DuckDBRepository()
-        self._query_service: QueryService = QueryService()
-        self._export_service: ExportService = ExportService(ExcelExportStrategy())
-        self._analytics_service: AnalyticsService = AnalyticsService(
-            self._repository, self._query_service
-        )
 
-    def run(self) -> None:
+        # Document generators registry
+        self._generators: dict[str, type[DocumentGenerator]] = {
+            "activite_mensuelle_par_programme": ActiviteMensuelleHRGenerator,
+            "situation_des_programmes": SituationDesProgrammesHRGenerator,
+        }
+
+    def generate_document(
+        self, document_name: str, output_path: str | None = None
+    ) -> None:
+        """Generate a specific document by name"""
         try:
-            # Load data
-            self._load_data()
+            if not DocumentRegistry.has(document_name):
+                available_docs = list(DocumentRegistry.all().keys())
+                raise ValueError(
+                    f"Unknown document: {document_name}. Available: {available_docs}"
+                )
 
-            # Show data summary if debug enabled
-            if self._config.database.enable_debug:
-                self._show_data_summary()
+            if document_name not in self._generators:
+                raise ValueError(
+                    f"No generator available for document: {document_name}"
+                )
 
-            # Generate reports
-            results: dict[str, pandas.DataFrame] = self._generate_reports()
+            # Get document definition
+            doc_def: DocumentDefinition = DocumentRegistry.get(document_name)
+            print(f"Generating document: {doc_def.display_name}")
+            print(f"Category: {doc_def.category}")
+            print(f"Description: {doc_def.description}")
 
-            # Export results
-            self._export_results(results)
+            # Check for required files in current directory
+            self._check_required_files(doc_def.required_files)
+
+            # Load data from required files (this will be handled by the generator's validation)
+            # For now, we just create a dummy connection since the actual file loading
+            # happens in the generator's _validate_required_files method
+
+            # Create generator and generate document
+            generator_class: type[DocumentGenerator] = self._generators[document_name]
+            generator: DocumentGenerator = generator_class(self._repository)
+
+            # Determine output path
+            if output_path is None:
+                output_path = f"{doc_def.output_filename}.xlsx"
+
+            generator.generate(output_path)
+            print(f"✓ Document generated successfully: {output_path}")
 
         except Exception:
             raise
         finally:
             self._cleanup()
 
-    def _load_data(self) -> None:
-        self._repository.load_data(self._config.input_file)
+    def list_available_documents(self) -> None:
+        """List all available documents that can be generated"""
+        print("Available documents:")
+        print("-" * 60)
 
-    def _show_data_summary(self) -> None:
-        summary: dict[str, Any] = self._repository.get_data_summary()
+        for doc_name, doc_def in DocumentRegistry.all().items():
+            status = "✓ Available" if doc_name in self._generators else "✗ No generator"
+            print(f"• {doc_def.display_name}")
+            print(f"  Name: {doc_name}")
+            print(f"  Category: {doc_def.category}")
+            print(f"  Status: {status}")
+            print(f"  Description: {doc_def.description}")
+            print(f"  Required files (patterns):")
+            for pattern in doc_def.required_files:
+                print(f"    - {pattern}")
+            print()
 
-        print("Data Summary:")
-        print(f"Total records: {summary.get('total_records')}")
+    def _check_required_files(self, required_patterns: list[str]) -> None:
+        """Check if required files exist in current working directory"""
+        import re
 
-        print(f"\nTable description:")
-        print(summary.get("table_description"))
+        current_dir: Path = Path.cwd()
+        available_files: list[str] = [
+            p.name for p in current_dir.iterdir() if p.is_file()
+        ]
 
-        print("\nSample data:")
-        print(summary["sample_data"])
+        print(f"Checking for required files in: {current_dir}")
+        print(f"Available files: {available_files}")
 
-    def _generate_reports(self) -> dict[str, pandas.DataFrame]:
-        return self._analytics_service.generate_reports()
+        missing_patterns: list[str] = []
+        for pattern in required_patterns:
+            regex: re.Pattern[str] = re.compile(pattern)
+            matching_files: list[str] = [
+                file_name for file_name in available_files if regex.match(file_name)
+            ]
 
-    def _export_results(self, results: dict[str, pandas.DataFrame]) -> None:
-        if results:
-            self._export_service.export_results(results, self._config.output_file)
+            if not matching_files:
+                missing_patterns.append(pattern)
+            else:
+                print(f"✓ Found files matching '{pattern}': {matching_files}")
+
+        if missing_patterns:
+            print("✗ Missing required files matching patterns:")
+            for pattern in missing_patterns:
+                print(f"  - {pattern}")
+            raise FileNotFoundError(
+                f"Missing required files. Please ensure files matching these patterns are in the current directory: {missing_patterns}"
+            )
 
     def _cleanup(self) -> None:
-        self._repository.close()
+        """Clean up resources"""
+        if hasattr(self, "_repository") and self._repository:
+            self._repository.close()

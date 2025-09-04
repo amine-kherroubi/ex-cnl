@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Protocol
 import duckdb
 import pandas
-from utils.exceptions import DataLoadError, DatabaseError, QueryExecutionError
+from app.utils.exceptions import DataLoadError, DatabaseError, QueryExecutionError
 
 
 class DataRepository(Protocol):  # Repository pattern with protocol

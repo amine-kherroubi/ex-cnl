@@ -5,8 +5,8 @@ from typing import Any
 import pandas
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from data.data_repository import DataRepository
-from services.document_generation.documents_registry import DocumentDefinition
+from app.data.data_repository import DataRepository
+from app.services.document_generation.documents_registry import DocumentDefinition
 import re
 
 

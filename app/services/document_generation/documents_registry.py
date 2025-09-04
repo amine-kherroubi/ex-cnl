@@ -57,14 +57,14 @@ class DocumentRegistry(object):  # Registry pattern
                 "renseigné par la BNH (ex-CNL)"
             ),
             required_files=[
-                r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+$",
-                r"^Journal_payements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+$",
+                r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+                r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             ],
             queries={
                 "total_amount": "SELECT SUM(amount) FROM line_items",
                 "vendor_info": "SELECT vendor_name, vendor_id FROM vendors",
             },
-            output_filename="Activité_mensuelle_par_programme",
+            output_filename="Activité_mensuelle_par_programme.xlsx",
         ),
         "situation_des_programmes": DocumentDefinition(
             name="situation_des_programmes",
@@ -75,13 +75,13 @@ class DocumentRegistry(object):  # Registry pattern
                 "renseigné par la BNH (ex-CNL)"
             ),
             required_files=[
-                r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+$",
-                r"^Journal_payements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+$",
+                r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+                r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             ],
             queries={
                 "total_amount": "SELECT SUM(amount) FROM line_items",
                 "vendor_info": "SELECT vendor_name, vendor_id FROM vendors",
             },
-            output_filename="Situation_des_programmes",
+            output_filename="Situation_des_programmes.xlsx",
         ),
     }
