@@ -1,5 +1,9 @@
 from __future__ import annotations
+
+# Standard library imports
 from pathlib import Path
+
+# Local application imports
 from app.services.document_generation.generator_template import DocumentGenerator
 from app.data.data_repository import DuckDBRepository
 from app.services.document_generation.documents_registry import DocumentRegistry

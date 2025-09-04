@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+# Standard library imports
 from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
@@ -50,7 +52,7 @@ class DocumentRegistry(object):  # Registry pattern
     _DOCUMENTS_DEFINITIONS: Final[dict[str, DocumentDefinition]] = {
         "activite_mensuelle_par_programme": DocumentDefinition(
             name="activite_mensuelle_par_programme",
-            display_name="Activité mensuelle par programme",
+            display_name="Activité mensuelle",
             category=DocumentCategory.HR,
             description=(
                 "Document de suivi mensuel des activités par programme, "
@@ -60,10 +62,7 @@ class DocumentRegistry(object):  # Registry pattern
                 r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             ],
-            queries={
-                "total_amount": "SELECT SUM(amount) FROM line_items",
-                "vendor_info": "SELECT vendor_name, vendor_id FROM vendors",
-            },
+            queries={},
             output_filename="Activité_mensuelle_par_programme.xlsx",
         ),
         "situation_des_programmes": DocumentDefinition(
@@ -78,10 +77,7 @@ class DocumentRegistry(object):  # Registry pattern
                 r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             ],
-            queries={
-                "total_amount": "SELECT SUM(amount) FROM line_items",
-                "vendor_info": "SELECT vendor_name, vendor_id FROM vendors",
-            },
+            queries={},
             output_filename="Situation_des_programmes.xlsx",
         ),
     }

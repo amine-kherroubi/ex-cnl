@@ -1,44 +1,47 @@
 from __future__ import annotations
+
+# Third-party imports
 import pandas
 from openpyxl.worksheet.worksheet import Worksheet
-from app.services.document_generation.generator_template import DocumentGenerator
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+
+# Local application imports
+from app.data.data_repository import DataRepository
+from app.services.document_generation.generator_template import DocumentGenerator
 from app.services.document_generation.documents_registry import DocumentRegistry
 
 
 class SituationDesProgrammesHRGenerator(DocumentGenerator):
-    def __init__(self) -> None:
-        self._document_definition = DocumentRegistry.get(
-            "activite_mensuelle_par_programme"
-        )
+    def __init__(self, repository: DataRepository) -> None:
+        super().__init__(repository)
+        self._document_definition = DocumentRegistry.get("situation_des_programmes")
 
     def _add_header(self, sheet: Worksheet) -> None:
-        # HABITAT RURAL
+        # Main title - Set value first, then merge
+        sheet["A1"] = "SITUATION DES PROGRAMMES (À renseigner par la BNH (ex-CNL))"
         sheet.merge_cells("A1:E1")
-        sheet["C1"] = "SITUATION DES PROGRAMMES (À renseigner par la BNH (ex-CNL))"
-        sheet["C1"].font = Font(name="Arial", size=9, bold=True)
-        sheet["C1"].alignment = Alignment(horizontal="center", vertical="center")
+        sheet["A1"].font = Font(name="Arial", size=9, bold=True)
+        sheet["A1"].alignment = Alignment(horizontal="center", vertical="center")
 
-        # Date
+        # Date - Set value first, then merge
+        sheet["A2"] = "ARRÊTÉE AU : 20/12/2024"
         sheet.merge_cells("A2:E2")
-        sheet["C2"] = "ARRÊTÉE AU : 20/12/2024"
-        sheet["C2"].font = Font(name="Arial", size=9, bold=True)
+        sheet["A2"].font = Font(name="Arial", size=9, bold=True)
+        sheet["A2"].alignment = Alignment(horizontal="center", vertical="center")
 
     def _add_table(
         self, sheet: Worksheet, query_results: dict[str, pandas.DataFrame]
     ) -> None:
-        start_row: int = 6
+        start_row: int = 4
 
-        # Caption row (part of table)
+        # Caption row (part of table) - Set value first, then merge
+        sheet[f"A{start_row}"] = "SITUATION DES PROGRAMMES AU 20/12/2024"
         sheet.merge_cells(f"A{start_row}:E{start_row}")
-        sheet[f"C{start_row}"] = (
-            "ETAT D'EXECUTION DES TRANCHES FINANCIERES DURANT LE MOIS DE JANVIER 2021"
-        )
-        sheet[f"C{start_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"C{start_row}"].alignment = Alignment(
+        sheet[f"A{start_row}"].font = Font(name="Arial", size=9, bold=True)
+        sheet[f"A{start_row}"].alignment = Alignment(
             horizontal="center", vertical="center", wrap_text=True
         )
-        sheet[f"C{start_row}"].fill = PatternFill(
+        sheet[f"A{start_row}"].fill = PatternFill(
             start_color="D9E2F3", end_color="D9E2F3", fill_type="solid"
         )
 
@@ -71,10 +74,10 @@ class SituationDesProgrammesHRGenerator(DocumentGenerator):
 
         # Sub-headers
         sub_row: int = header_row + 1
-        sheet[f"B{sub_row}"] = "Jan-21"
-        sheet[f"C{sub_row}"] = "Cumul de JANVIER au 31 JANVIER 2021"
-        sheet[f"D{sub_row}"] = "Jan-21"
-        sheet[f"E{sub_row}"] = "Cumul de JANVIER au 31 JANVIER 2021"
+        sheet[f"B{sub_row}"] = "2024"
+        sheet[f"C{sub_row}"] = "Cumul au 20/12/2024"
+        sheet[f"D{sub_row}"] = "2024"
+        sheet[f"E{sub_row}"] = "Cumul au 20/12/2024"
 
         for col in ["B", "C", "D", "E"]:
             cell = sheet[f"{col}{sub_row}"]
@@ -88,6 +91,41 @@ class SituationDesProgrammesHRGenerator(DocumentGenerator):
                 top=Side(style="thin"),
                 bottom=Side(style="thin"),
             )
+
+        # Add some sample data rows for demonstration
+        data_start_row = sub_row + 1
+        sample_programs = [
+            "LOGEMENT PUBLIC LOCATIF (LPL)",
+            "LOGEMENT SOCIAL PARTICIPATIF (LSP)",
+            "HABITAT RURAL",
+            "TOTAL",
+        ]
+
+        for i, program in enumerate(sample_programs):
+            row = data_start_row + i
+            sheet[f"A{row}"] = program
+
+            # Add borders and formatting
+            for col in ["A", "B", "C", "D", "E"]:
+                cell = sheet[f"{col}{row}"]
+                if col == "A":
+                    cell.font = Font(name="Arial", size=9, bold=(program == "TOTAL"))
+                else:
+                    cell.value = 0  # Placeholder values
+                    cell.font = Font(name="Arial", size=9)
+
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.border = Border(
+                    left=Side(style="thin"),
+                    right=Side(style="thin"),
+                    top=Side(style="thin"),
+                    bottom=Side(style="thin"),
+                )
+
+                if program == "TOTAL":
+                    cell.fill = PatternFill(
+                        start_color="E7E6E6", end_color="E7E6E6", fill_type="solid"
+                    )
 
     def _add_footer(self, sheet: Worksheet) -> None:
         last_row: int = sheet.max_row + 2  # leave one blank line before footer

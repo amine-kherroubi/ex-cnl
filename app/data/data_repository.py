@@ -1,8 +1,14 @@
 from __future__ import annotations
+
+# Standard library imports
 from pathlib import Path
 from typing import Any, Protocol
+
+# Third-party imports
 import duckdb
 import pandas
+
+# Local application imports
 from app.utils.exceptions import DataLoadError, DatabaseError, QueryExecutionError
 
 

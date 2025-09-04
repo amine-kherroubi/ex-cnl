@@ -1,13 +1,19 @@
 from __future__ import annotations
+
+# Standard library imports
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+import re
+
+# Third-party imports
 import pandas
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
+
+# Local application imports
 from app.data.data_repository import DataRepository
 from app.services.document_generation.documents_registry import DocumentDefinition
-import re
 
 
 class DocumentGenerator(ABC):  # Template Method pattern
