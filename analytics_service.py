@@ -5,7 +5,7 @@ from query_service import QueryService
 from time import perf_counter
 
 
-class AnalyticsService:  # Service Pattern
+class AnalyticsService(object):  # Service pattern
     def __init__(self, repository: DataRepository, query_service: QueryService) -> None:
         self._repository: DataRepository = repository
         self._query_service: QueryService = query_service

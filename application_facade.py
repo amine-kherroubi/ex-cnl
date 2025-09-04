@@ -8,11 +8,11 @@ from export_service import ExcelExportStrategy, ExportService
 from query_service import QueryService
 
 
-class ApplicationFacade:  # Facade Pattern
+class ApplicationFacade(object):  # Facade pattern
     def __init__(self, config: ApplicationConfig) -> None:
         self._config: ApplicationConfig = config
 
-        # Dependency Injection Pattern
+        # Dependency injection pattern
         self._repository: DuckDBRepository = DuckDBRepository()
         self._query_service: QueryService = QueryService()
         self._export_service: ExportService = ExportService(ExcelExportStrategy())

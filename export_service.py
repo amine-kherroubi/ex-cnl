@@ -6,12 +6,12 @@ from openpyxl import Workbook
 from exceptions import FileProcessingError
 
 
-class ExportStrategy(ABC):  # Strategy Pattern
+class ExportStrategy(ABC):  # Strategy pattern
     @abstractmethod
     def export(self, data: dict[str, pd.DataFrame], output_path: str) -> None: ...
 
 
-class ExcelExportStrategy(ExportStrategy):  # Strategy Pattern Implementation
+class ExcelExportStrategy(ExportStrategy):  # Strategy pattern implementation
     def export(self, data: dict[str, pd.DataFrame], output_path: str) -> None:
         try:
             workbook: Workbook = Workbook()
@@ -38,7 +38,7 @@ class ExcelExportStrategy(ExportStrategy):  # Strategy Pattern Implementation
             worksheet.append(list(row_data))
 
 
-class ExportService:  # Service Pattern with Strategy
+class ExportService(object):  # Service pattern with strategy
     def __init__(self, strategy: ExportStrategy) -> None:
         self._strategy: ExportStrategy = strategy
 

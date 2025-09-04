@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Final
 
 
-class QueryService:  # Service Pattern
+class QueryService(object):  # Service pattern
     def __init__(self) -> None:
         pass
 

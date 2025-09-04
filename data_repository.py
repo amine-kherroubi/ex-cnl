@@ -6,7 +6,7 @@ import pandas as pd
 from exceptions import DataLoadError, DatabaseError, QueryExecutionError
 
 
-class DataRepository(Protocol):  # Repository Pattern with Protocol
+class DataRepository(Protocol):  # Repository pattern with protocol
     def load_data(self, file_path: str) -> None: ...
     def execute_query(self, query: str) -> pd.DataFrame: ...
     def get_record_count(self) -> int: ...
@@ -15,7 +15,7 @@ class DataRepository(Protocol):  # Repository Pattern with Protocol
     def close(self) -> None: ...
 
 
-class DuckDBRepository:  # Repository Pattern Implementation
+class DuckDBRepository(object):  # Repository pattern implementation
     def __init__(self, connection: duckdb.DuckDBPyConnection | None = None) -> None:
         self._connection: duckdb.DuckDBPyConnection = connection or duckdb.connect()  # type: ignore
         self._data_loaded: bool = False
