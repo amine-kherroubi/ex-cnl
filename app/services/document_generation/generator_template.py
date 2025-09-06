@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from abc import ABC, abstractmethod
+from typing import Any
 
 # Third-party imports
 import pandas
@@ -47,7 +48,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
         # Step 2: Load data into in-memory database
         self._load_data_into_db(files_matching_patterns)
 
-        # Step 3: Execute queries
+        # Step 3: Execute queries with parameter substitution  # CHANGE HERE: Updated comment
         query_results: dict[str, pandas.DataFrame] = self._execute_queries()
 
         # Step 4: Create workbook and main sheet
@@ -98,6 +99,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
     def _load_data_into_db(self, files_mapping: dict[str, str]) -> None:
         for view_name, filename in files_mapping.items():
             df: pandas.DataFrame = self._storage_service.load_data_from_file(filename)
+            df.columns = [column.strip() for column in df.columns]
             self._data_repository.create_view_from_dataframe(view_name, df)
 
     def _execute_queries(self) -> dict[str, pandas.DataFrame]:
@@ -105,14 +107,74 @@ class DocumentGenerator(ABC):  # Template Method pattern
             raise ValueError("Document specification not set")
 
         results: dict[str, pandas.DataFrame] = {}
+
+        # CHANGE HERE: Added query parameter preparation and substitution
+        # This allows dynamic SQL queries based on document context (dates, locations, etc.)
+        query_params: dict[str, Any] = self._prepare_query_parameters()
+
         for query_name, query in self._document_specification.queries.items():
             try:
-                results[query_name] = self._data_repository.execute(query)
+                # CHANGE HERE: Added parameter substitution using .format()
+                # Queries can now contain placeholders like {month_start}, {wilaya}, etc.
+                formatted_query: str = query.format(**query_params)
+                results[query_name] = self._data_repository.execute(formatted_query)
             except Exception as error:
                 raise QueryExecutionError(
                     f"Required query '{query_name}' failed", error
                 )
         return results
+
+    # CHANGE HERE: Completely new method added for preparing query parameters
+    # This method extracts values from document context and formats them for SQL use
+    def _prepare_query_parameters(self) -> dict[str, Any]:
+        """Prepare parameters for SQL query substitution based on document context"""
+        params: dict[str, Any] = {}
+
+        # CHANGE HERE: Month and year parameter handling
+        # Calculates month start/end dates, formats month names in different cases
+        if self._document_context.month and self._document_context.year:
+            # Calculate month start and end dates
+            month_number: int = self._document_context.month.number
+            last_day: int = self._document_context.month.last_day(
+                self._document_context.year
+            )
+
+            params["month_start"] = (
+                f"{self._document_context.year}-{month_number:02d}-01"
+            )
+            params["month_end"] = (
+                f"{self._document_context.year}-{month_number:02d}-{last_day:02d}"
+            )
+            params["year"] = self._document_context.year
+            params["month"] = self._document_context.month.value
+            params["month_upper"] = self._document_context.month.value.upper()
+
+        # CHANGE HERE: Wilaya (administrative division) parameter handling
+        # Provides both normal and uppercase versions for flexible query usage
+        if self._document_context.wilaya:
+            params["wilaya"] = self._document_context.wilaya.value
+            params["wilaya_upper"] = self._document_context.wilaya.value.upper()
+
+        # CHANGE HERE: Semester parameter handling
+        # Calculates semester date ranges (1st semester: Jan-Jun, 2nd semester: Jul-Dec)
+        if self._document_context.semester:
+            params["semester"] = self._document_context.semester
+            # Calculate semester date ranges
+            if self._document_context.semester == 1:
+                params["semester_start"] = f"{self._document_context.year}-01-01"
+                params["semester_end"] = f"{self._document_context.year}-06-30"
+            else:
+                params["semester_start"] = f"{self._document_context.year}-07-01"
+                params["semester_end"] = f"{self._document_context.year}-12-31"
+
+        # CHANGE HERE: Report date parameter handling
+        # Formats specific report dates for SQL queries
+        if self._document_context.report_date:
+            params["report_date"] = self._document_context.report_date.strftime(
+                "%Y-%m-%d"
+            )
+
+        return params
 
     @abstractmethod
     def _add_header(self, sheet: Worksheet) -> None: ...
@@ -130,7 +192,20 @@ class DocumentGenerator(ABC):  # Template Method pattern
 
     def _save_document(self) -> None:
         if self._workbook:
+            output_filename: str = self._document_specification.output_filename
+
+            output_filename = output_filename.replace(
+                "{wilaya}", self._document_context.wilaya.value
+            )
+
+            output_filename = output_filename.replace(
+                "{date}", str(self._document_context.report_date)
+            )
+
+            if not output_filename.endswith(".xlsx"):
+                output_filename += ".xlsx"
+
             self._storage_service.save_data_to_file(
                 data=self._workbook,
-                output_filename=self._document_specification.output_filename,
+                output_filename=output_filename,
             )

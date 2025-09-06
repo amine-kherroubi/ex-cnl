@@ -111,7 +111,7 @@ class DocumentRegistry(object):  # Registry pattern
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
             queries={},
-            output_filename="Activité_mensuelle_par_programme.xlsx",
+            output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
             generator=ActiviteMensuelleHRGenerator,
         ),
         "situation_des_programmes": DocumentSpecification(
@@ -128,7 +128,50 @@ class DocumentRegistry(object):  # Registry pattern
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
             queries={},
-            output_filename="Situation_des_programmes.xlsx",
+            output_filename="Situation_des_programmes_{wilaya}_{date}.xlsx",
             generator=SituationDesProgrammesHRGenerator,
         ),
+    }
+
+    PROGRAMMES_HABITAT_RURAL: list[str] = [
+        'PEC "31/12/2004"',
+        "QUINQU 2005-2009",
+        "H PLATEAUX",
+        "SUD",
+        "RATTRAPAGE",
+        "PRESIDENT",
+        "COMPLEMENT",
+        "PROG 2008",
+        "PROG 2009",
+        "SINISTRES",
+        "QUINQU 2010-2014",
+        "COMPL 2010-2014",
+        "QUINQU 2015-2019",
+        "TR 2016",
+        "INCENDIES 2017",
+        "QUINQU 2016",
+        "QUINQU 2018",
+        "QUINQU 2019",
+        "QUINQU 2020",
+    ]
+
+    TRANCHES_LANCEMENT: set[str] = {
+        "20%  1 ERE TRANCHE",
+        "60%  Première Tranche",
+        "40%  Première Tranche",
+        "60%  1+2 EME TRANCHE",
+        "100%  Tranche totale",
+        "100%  1+2+3 EME TRANCHE",
+    }
+
+    TRANCHES_LIVRAISON: set[str] = {
+        "40%  3 EME TRANCHE",
+        "40%  Deuxième Tranche",
+        "80%  2+3 EME TRANCHE",
+        "40%  C2",
+        "60%  Deuxième Tranche",
+        "Tranche complémentaire 2",
+        "100%  Tranche totale",
+        "100%  1+2+3 EME TRANCHE",
+        "40%  2 EME TRANCHE",
     }
