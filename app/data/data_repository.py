@@ -31,7 +31,7 @@ class DataRepository(Protocol):  # Repository pattern with protocol
     def close(self) -> None: ...
 
 
-class DuckDBRepository(object):  # Repository pattern implementation
+class DuckDBRepository:  # Repository pattern implementation
     __slots__ = (
         "_config",
         "_connection",
@@ -42,39 +42,50 @@ class DuckDBRepository(object):  # Repository pattern implementation
         self._config: DatabaseConfig = db_config
 
         config_dict: dict[str, Any] = {
-            "max_memory": (db_config.max_memory if db_config.max_memory else "1GB"),
+            "max_memory": db_config.max_memory if db_config.max_memory else "1GB",
         }
-        self._connection: duckdb.DuckDBPyConnection
+
+        self._connection: duckdb.DuckDBPyConnection | None
         if db_config.path:
             self._connection = duckdb.connect(database=db_config.path, config=config_dict)  # type: ignore
         else:
-            self._connection = duckdb.connect(config=config_dict)  # type: ignore
+            self._connection = duckdb.connect(database=":memory:", config=config_dict)  # type: ignore
 
         if db_config.enable_logging:
+            if not self._connection:
+                raise DatabaseError("Failed to initialize DuckDB connection")
             self._connection.execute("PRAGMA enable_logging;")
 
         self._data_loaded: bool = False
 
+    def __enter__(self) -> DuckDBRepository:
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
+        self.close()
+        return False
+
     def create_view_from_dataframe(
         self, view_name: str, dataframe: pandas.DataFrame
     ) -> None:
+        if not self._connection:
+            raise DatabaseError("Connection is closed")
         self._connection.register(view_name, dataframe)
         self._data_loaded = True
 
     def execute(self, query: str) -> pandas.DataFrame:
+        if not self._connection:
+            raise DatabaseError("Connection is closed")
         if not self._data_loaded:
             raise DatabaseError("No data loaded")
 
         try:
-            result: pandas.DataFrame = self._connection.execute(query).fetchdf()
-            return result
+            return self._connection.execute(query).fetchdf()
         except Exception as error:
             raise QueryExecutionError(query, error) from error
 
     def count_records(self, view_name: str) -> int:
-        result: pandas.DataFrame = self.execute(
-            f"SELECT COUNT(*) as total_rows FROM {view_name}"
-        )
+        result = self.execute(f"SELECT COUNT(*) as total_rows FROM {view_name}")
         return int(result["total_rows"].iloc[0])
 
     def describe(self, view_name: str) -> pandas.DataFrame:
@@ -92,10 +103,11 @@ class DuckDBRepository(object):  # Repository pattern implementation
                 "table_description": self.describe(view_name),
                 "sample_data": self.get_data(view_name),
             }
-
         except Exception:
             return {}
 
     def close(self) -> None:
-        if self._connection:
-            self._connection.close()
+        if not self._connection:
+            return
+        self._connection.close()
+        self._connection = None

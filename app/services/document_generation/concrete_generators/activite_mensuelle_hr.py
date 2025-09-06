@@ -6,28 +6,11 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 # Local application imports
-from app.data.data_repository import DataRepository
-from app.services.document_generation.context_management.document_context import (
-    DocumentContext,
-)
 from app.services.document_generation.generator_template import DocumentGenerator
-from app.services.document_generation.documents_registry import DocumentRegistry
-from app.services.file_storage.file_storage_service import FileStorageService
 
 
 class ActiviteMensuelleHRGenerator(DocumentGenerator):
     __slots__ = ()
-
-    def __init__(
-        self,
-        storage_service: FileStorageService,
-        data_repository: DataRepository,
-        document_context: DocumentContext,
-    ) -> None:
-        super().__init__(storage_service, data_repository, document_context)
-        self._document_definition = DocumentRegistry.get(
-            "activite_mensuelle_par_programme"
-        )
 
     def _add_header(self, sheet: Worksheet) -> None:
         # HABITAT RURAL - Set value first, then merge

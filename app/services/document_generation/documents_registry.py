@@ -9,10 +9,10 @@ from pydantic import BaseModel, Field
 
 # Local application imports
 from app.services.document_generation.generator_template import DocumentGenerator
-from app.services.document_generation.generators.activite_mensuelle_hr import (
+from app.services.document_generation.concrete_generators.activite_mensuelle_hr import (
     ActiviteMensuelleHRGenerator,
 )
-from app.services.document_generation.generators.situation_des_programmes_hr import (
+from app.services.document_generation.concrete_generators.situation_des_programmes_hr import (
     SituationDesProgrammesHRGenerator,
 )
 from app.utils.space_time import Periodicity
@@ -76,10 +76,8 @@ class DocumentSpecification(BaseModel):
 class DocumentRegistry(object):  # Registry pattern
     __slots__ = ()
 
-    def __new__(cls):
-        raise RuntimeError(
-            "DocumentRegistry cannot be instantiated. Use class methods."
-        )
+    def __init__(self):
+        raise TypeError(f"{self.__class__.__name__} is not meant to be instantiated")
 
     @classmethod
     def get(cls, document_name: str) -> DocumentSpecification:

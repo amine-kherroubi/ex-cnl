@@ -3,7 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from pathlib import Path
 import re
-from typing import Any
+from typing import Any, Protocol
 
 # Third-party imports
 import pandas
@@ -14,11 +14,19 @@ from app.utils.exceptions import DataLoadError
 from app.config import StorageConfig
 
 
+class StorageService(Protocol):
+    def load_data_from_file(self, filename: str) -> pandas.DataFrame: ...
+    def save_data_to_file(self, data: Any, output_filename: str) -> None: ...
+    def find_filename_matching_pattern(self, pattern: str) -> str | None: ...
+
+
 class FileStorageService(object):
     __slots__ = ("_config",)
 
     def __init__(self, storage_config: StorageConfig) -> None:
         self._config: StorageConfig = storage_config
+        self._config.uploads_dir.mkdir(parents=True, exist_ok=True)
+        self._config.results_dir.mkdir(parents=True, exist_ok=True)
 
     def load_data_from_file(self, filename: str) -> pandas.DataFrame:
         file_path: Path = self._config.uploads_dir / filename

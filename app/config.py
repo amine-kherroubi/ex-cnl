@@ -71,6 +71,3 @@ class AppConfig(BaseSettings):
         "env_file": ".env",
         "env_file_encoding": "utf-8",
     }
-
-
-config: AppConfig = AppConfig()  # Ready-to-use instance

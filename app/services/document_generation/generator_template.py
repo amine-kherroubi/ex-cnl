@@ -15,13 +15,14 @@ from app.services.file_storage.file_storage_service import FileStorageService
 from app.services.document_generation.context_management.document_context import (
     DocumentContext,
 )
+from app.utils.exceptions import QueryExecutionError
 
 
 class DocumentGenerator(ABC):  # Template Method pattern
     __slots__ = (
         "_storage_service",
         "_data_repository",
-        "_document_definition",
+        "_document_specification",
         "_document_context",
         "_workbook",
     )
@@ -30,11 +31,12 @@ class DocumentGenerator(ABC):  # Template Method pattern
         self,
         storage_service: FileStorageService,
         data_repository: DataRepository,
+        document_specification: DocumentSpecification,
         document_context: DocumentContext,
     ) -> None:
         self._storage_service: FileStorageService = storage_service
         self._data_repository: DataRepository = data_repository
-        self._document_definition: DocumentSpecification
+        self._document_specification: DocumentSpecification = document_specification
         self._document_context: DocumentContext = document_context
         self._workbook: Workbook | None = None
 
@@ -52,7 +54,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
         self._workbook = Workbook()
         self._workbook.remove(self._workbook.active)  # type: ignore
         sheet: Worksheet = self._workbook.create_sheet(
-            self._document_definition.display_name
+            self._document_specification.display_name
         )
 
         # Step 5: Add header (subclass responsibility)
@@ -71,13 +73,13 @@ class DocumentGenerator(ABC):  # Template Method pattern
         self._save_document()
 
     def _validate_required_files(self) -> dict[str, str]:
-        if not self._document_definition:
+        if not self._document_specification:
             raise ValueError("Document specification not set")
 
         missing_patterns: list[str] = []
         files_mapping: dict[str, str] = {}
 
-        for pattern, view_name in self._document_definition.required_files.items():
+        for pattern, view_name in self._document_specification.required_files.items():
             filename: str | None = self._storage_service.find_filename_matching_pattern(
                 pattern
             )
@@ -99,16 +101,17 @@ class DocumentGenerator(ABC):  # Template Method pattern
             self._data_repository.create_view_from_dataframe(view_name, df)
 
     def _execute_queries(self) -> dict[str, pandas.DataFrame]:
-        if not self._document_definition:
+        if not self._document_specification:
             raise ValueError("Document specification not set")
 
         results: dict[str, pandas.DataFrame] = {}
-        for query_name, query in self._document_definition.queries.items():
+        for query_name, query in self._document_specification.queries.items():
             try:
                 results[query_name] = self._data_repository.execute(query)
-            except Exception as e:
-                print(f"Query '{query_name}' failed: {e}")
-                results[query_name] = pandas.DataFrame()
+            except Exception as error:
+                raise QueryExecutionError(
+                    f"Required query '{query_name}' failed", error
+                )
         return results
 
     @abstractmethod
@@ -129,5 +132,5 @@ class DocumentGenerator(ABC):  # Template Method pattern
         if self._workbook:
             self._storage_service.save_data_to_file(
                 data=self._workbook,
-                output_filename=self._document_definition.output_filename,
+                output_filename=self._document_specification.output_filename,
             )

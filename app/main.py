@@ -9,6 +9,7 @@ from typing import Final
 # Local application imports
 from app.application_facade import ApplicationFacade
 from app.utils.exceptions import ApplicationError
+from app.config import AppConfig
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -117,7 +118,7 @@ def main() -> None:
         args: argparse.Namespace = parser.parse_args()
         validate_arguments(args)
 
-        app: ApplicationFacade = ApplicationFacade()
+        app: ApplicationFacade = ApplicationFacade(config=AppConfig())
 
         if args.list:
             print("Available documents:")

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # Standard library imports
-from datetime import date
 from calendar import monthrange
 from enum import StrEnum
 
@@ -66,6 +65,20 @@ class Wilaya(StrEnum):
     EL_M_GHAIR = "El M'Ghair"
     EL_MENIAA = "El Meniaa"
 
+    @property
+    def code(self) -> int:
+        return list(Wilaya).index(self) + 1
+
+    def is_south(self) -> bool:
+        return self in {
+            Wilaya.ADRAR,
+            Wilaya.TAMANRASSET,
+            Wilaya.ILLIZI,
+            Wilaya.TINDOUF,
+            Wilaya.IN_SALAH,
+            Wilaya.IN_GUEZZAM,
+        }
+
 
 class Month(StrEnum):
     JANVIER = "Janvier"
@@ -81,86 +94,19 @@ class Month(StrEnum):
     NOVEMBRE = "Novembre"
     DECEMBRE = "Décembre"
 
+    @property
+    def number(self) -> int:
+        return list(Month).index(self) + 1
+
+    @classmethod
+    def from_number(cls, n: int) -> "Month":
+        return list(cls)[n - 1]
+
+    def last_day(self, year: int) -> int:
+        return monthrange(year, self.number)[1]
+
 
 class Periodicity(StrEnum):
     MONTHLY = "monthly"
     SEMIANNUAL = "semiannual"
     ANNUAL = "annual"
-
-
-def month_to_numeric(month: Month) -> int:
-    month_mapping: dict[Month, int] = {
-        Month.JANVIER: 1,
-        Month.FEVRIER: 2,
-        Month.MARS: 3,
-        Month.AVRIL: 4,
-        Month.MAI: 5,
-        Month.JUIN: 6,
-        Month.JUILLET: 7,
-        Month.AOUT: 8,
-        Month.SEPTEMBRE: 9,
-        Month.OCTOBRE: 10,
-        Month.NOVEMBRE: 11,
-        Month.DECEMBRE: 12,
-    }
-    return month_mapping[month]
-
-
-def numeric_to_month(month_num: int) -> Month:
-    if not 1 <= month_num <= 12:
-        raise ValueError(f"Month number must be between 1 and 12, got {month_num}")
-
-    month_mapping: dict[int, Month] = {
-        1: Month.JANVIER,
-        2: Month.FEVRIER,
-        3: Month.MARS,
-        4: Month.AVRIL,
-        5: Month.MAI,
-        6: Month.JUIN,
-        7: Month.JUILLET,
-        8: Month.AOUT,
-        9: Month.SEPTEMBRE,
-        10: Month.OCTOBRE,
-        11: Month.NOVEMBRE,
-        12: Month.DECEMBRE,
-    }
-    return month_mapping[month_num]
-
-
-def get_last_day_of_month(year: int, month: Month) -> int:
-    month_numeric: int = month_to_numeric(month)
-    _, last_day = monthrange(year, month_numeric)
-    return last_day
-
-
-def format_french_date(date_obj: date) -> str:
-    """Format date as DD/MM/YYYY (French format)."""
-    return date_obj.strftime("%d/%m/%Y")
-
-
-def format_period_range(start_month: Month, start_year: int, end_date: date) -> str:
-    """Format a period range like 'JANVIER au 31 JANVIER 2021'."""
-    end_month = numeric_to_month(end_date.month)
-
-    if start_month == end_month and start_year == end_date.year:
-        return f"{start_month.value.upper()} au {end_date.day} {end_month.value.upper()} {end_date.year}"
-    else:
-        return f"{start_month.value.upper()} {start_year} au {end_date.day} {end_month.value.upper()} {end_date.year}"
-
-
-def format_cumulative_period(from_month: Month, from_year: int, to_date: date) -> str:
-    """Format cumulative period like 'Cumul de JANVIER au 31 JANVIER 2021'."""
-    period_range = format_period_range(from_month, from_year, to_date)
-    return f"Cumul de {period_range}"
-
-
-def is_end_of_month(date_obj: date) -> bool:
-    """Check if the given date is the last day of its month."""
-    _, last_day = monthrange(date_obj.year, date_obj.month)
-    return date_obj.day == last_day
-
-
-def is_within_period(date_obj: date, month: Month, year: int) -> bool:
-    """Check if date falls within the specified month and year."""
-    month_numeric = month_to_numeric(month)
-    return date_obj.year == year and date_obj.month == month_numeric

@@ -7,14 +7,7 @@ from datetime import date
 from app.services.document_generation.context_management.document_context import (
     DocumentContext,
 )
-from app.utils.space_time import (
-    Periodicity,
-    get_last_day_of_month,
-    Month,
-    month_to_numeric,
-    numeric_to_month,
-    Wilaya,
-)
+from app.utils.space_time import Periodicity, Month, Wilaya
 
 
 class DocumentContextFactory(object):
@@ -51,14 +44,14 @@ class DocumentContextFactory(object):
     def _monthly(
         wilaya: Wilaya, year: int | None, month: Month | None, report_date: date | None
     ) -> DocumentContext:
-        today = date.today()
+        today: date = date.today()
         year = year or today.year
-        month = month or numeric_to_month(today.month)
+        month = month or Month.from_number(today.month)
 
         if report_date is None:
             # Default to end of month
-            last_day = get_last_day_of_month(year, month)
-            report_date = date(year, month_to_numeric(month), last_day)
+            last_day: int = month.last_day(year)
+            report_date = date(year, month.number, last_day)
 
         return DocumentContext(
             wilaya=wilaya,
@@ -77,9 +70,9 @@ class DocumentContextFactory(object):
 
         if report_date is None:
             # Default to end of semester
-            end_month = 6 if semester == 1 else 12
-            last_day = get_last_day_of_month(year, numeric_to_month(end_month))
-            report_date = date(year, end_month, last_day)
+            end_month_number = 6 if semester == 1 else 12
+            last_day: int = Month.from_number(end_month_number).last_day(year)
+            report_date = date(year, end_month_number, last_day)
 
         return DocumentContext(
             wilaya=wilaya, year=year, semester=semester, report_date=report_date
