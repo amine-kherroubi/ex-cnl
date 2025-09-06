@@ -37,13 +37,6 @@ class ApplicationFacade(object):  # Facade pattern
             self._config.storage_config
         )
 
-    def __enter__(self) -> ApplicationFacade:
-        self._data_repository.__enter__()
-        return self
-
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        self._data_repository.__exit__(exc_type, exc_val, exc_tb)
-
     def generate_document(
         self, document_name: str, output_path: str | None = None
     ) -> None:

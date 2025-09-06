@@ -58,13 +58,6 @@ class DuckDBRepository:  # Repository pattern implementation
 
         self._data_loaded: bool = False
 
-    def __enter__(self) -> DuckDBRepository:
-        return self
-
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
-        self.close()
-        return False
-
     def create_view_from_dataframe(
         self, view_name: str, dataframe: pandas.DataFrame
     ) -> None:
