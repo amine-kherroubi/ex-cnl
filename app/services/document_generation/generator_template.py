@@ -2,7 +2,6 @@ from __future__ import annotations
 
 # Standard library imports
 from abc import ABC, abstractmethod
-from typing import Any
 
 # Third-party imports
 import pandas
@@ -13,6 +12,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 from app.data.data_repository import DataRepository
 from app.services.document_generation.documents_registry import DocumentSpecification
 from app.services.file_storage.file_storage_service import FileStorageService
+from app.services.document_generation.context_management.document_context import (
+    DocumentContext,
+)
 
 
 class DocumentGenerator(ABC):  # Template Method pattern
@@ -20,15 +22,20 @@ class DocumentGenerator(ABC):  # Template Method pattern
         "_storage_service",
         "_data_repository",
         "_document_definition",
+        "_document_context",
         "_workbook",
     )
 
     def __init__(
-        self, storage_service: FileStorageService, data_repository: DataRepository
+        self,
+        storage_service: FileStorageService,
+        data_repository: DataRepository,
+        document_context: DocumentContext,
     ) -> None:
         self._storage_service: FileStorageService = storage_service
         self._data_repository: DataRepository = data_repository
         self._document_definition: DocumentSpecification
+        self._document_context: DocumentContext = document_context
         self._workbook: Workbook | None = None
 
     def generate(self) -> None:
@@ -44,7 +51,9 @@ class DocumentGenerator(ABC):  # Template Method pattern
         # Step 4: Create workbook and main sheet
         self._workbook = Workbook()
         self._workbook.remove(self._workbook.active)  # type: ignore
-        sheet: Any = self._workbook.create_sheet(self._document_definition.display_name)
+        sheet: Worksheet = self._workbook.create_sheet(
+            self._document_definition.display_name
+        )
 
         # Step 5: Add header (subclass responsibility)
         self._add_header(sheet)

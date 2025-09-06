@@ -15,6 +15,7 @@ from app.services.document_generation.generators.activite_mensuelle_hr import (
 from app.services.document_generation.generators.situation_des_programmes_hr import (
     SituationDesProgrammesHRGenerator,
 )
+from app.utils.space_time import Periodicity
 
 
 class DocumentCategory(StrEnum):
@@ -35,6 +36,9 @@ class DocumentSpecification(BaseModel):
     category: Annotated[
         DocumentCategory,
         Field(description="Category of the document."),
+    ]
+    periodicity: Annotated[
+        Periodicity, Field(description="How often this document is generated.")
     ]
     description: Annotated[
         str,
@@ -99,13 +103,14 @@ class DocumentRegistry(object):  # Registry pattern
             name="activite_mensuelle_par_programme",
             display_name="Activité mensuelle",
             category=DocumentCategory.HR,
+            periodicity=Periodicity.MONTHLY,
             description=(
                 "Document de suivi mensuel des activités par programme, "
                 "renseigné par la BNH (ex-CNL)"
             ),
             required_files={
                 r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "décisions",
-                r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiments",
+                r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
             queries={},
             output_filename="Activité_mensuelle_par_programme.xlsx",
@@ -115,13 +120,14 @@ class DocumentRegistry(object):  # Registry pattern
             name="situation_des_programmes",
             display_name="Situation des programmes",
             category=DocumentCategory.HR,
+            periodicity=Periodicity.MONTHLY,
             description=(
                 "Document de suivi de la situation des programmes, "
                 "renseigné par la BNH (ex-CNL)"
             ),
             required_files={
                 r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "décisions",
-                r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiments",
+                r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
             queries={},
             output_filename="Situation_des_programmes.xlsx",

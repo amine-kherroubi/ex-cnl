@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+# Standard library imports
 from typing import Any
 
 # Local application imports
@@ -8,6 +10,13 @@ from app.services.document_generation.documents_registry import DocumentRegistry
 from app.services.document_generation.documents_registry import DocumentSpecification
 from app.config import AppConfig, config
 from app.services.file_storage.file_storage_service import FileStorageService
+from app.services.document_generation.context_management.context_factory import (
+    DocumentContextFactory,
+)
+from app.services.document_generation.context_management.document_context import (
+    DocumentContext,
+)
+from app.utils.space_time import Wilaya
 
 
 class ApplicationFacade(object):  # Facade pattern
@@ -38,20 +47,26 @@ class ApplicationFacade(object):  # Facade pattern
                 )
 
             # Get document specification
-            doc_spec: DocumentSpecification = DocumentRegistry.get(document_name)
-            print(f"Generating document: {doc_spec.display_name}")
+            document_specification: DocumentSpecification = DocumentRegistry.get(
+                document_name
+            )
+            print(f"Generating document: {document_specification.display_name}")
+
+            document_context: DocumentContext = DocumentContextFactory.create_context(
+                wilaya=Wilaya.TIZI_OUZOU, periodicity=document_specification.periodicity
+            )
 
             # Create generator and generate document
-            generator: DocumentGenerator = doc_spec.generator(
-                self._storage_service, self._data_repository
+            generator: DocumentGenerator = document_specification.generator(
+                self._storage_service, self._data_repository, document_context
             )
 
             # Determine output path
             if output_path is None:
-                output_path = f"{doc_spec.output_filename}.xlsx"
+                output_path = f"{document_specification.output_filename}.xlsx"
 
             generator.generate()
-            print(f"✓ Document generated successfully: {output_path}")
+            print(f"Document generated successfully: {output_path}")
 
         except Exception:
             raise

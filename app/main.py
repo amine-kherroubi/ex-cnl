@@ -122,13 +122,16 @@ def main() -> None:
         if args.list:
             print("Available documents:")
             print("-" * 60)
-            for doc_name, doc_spec in app.get_available_documents().items():
-                print(f"• {doc_spec.display_name}")
+            for (
+                doc_name,
+                document_specification,
+            ) in app.get_available_documents().items():
+                print(f"• {document_specification.display_name}")
                 print(f"  Name: {doc_name}")
-                print(f"  Category: {doc_spec.category}")
-                print(f"  Description: {doc_spec.description}")
+                print(f"  Category: {document_specification.category}")
+                print(f"  Description: {document_specification.description}")
                 print(f"  Required files (patterns):")
-                for pattern in doc_spec.required_files:
+                for pattern in document_specification.required_files:
                     print(f"    - {pattern}")
                 print()
         elif args.document:
