@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # Standard library imports
-from pathlib import Path
 from typing import Any, Protocol
 
 # Third-party imports
@@ -9,46 +8,60 @@ import duckdb
 import pandas
 
 # Local application imports
-from app.utils.exceptions import DataLoadError, DatabaseError, QueryExecutionError
+from app.utils.exceptions import DatabaseError, QueryExecutionError
+from app.config import DatabaseConfig
 
 
 class DataRepository(Protocol):  # Repository pattern with protocol
-    def load_data(self, file_path: str) -> None: ...
-    def execute_query(self, query: str) -> pandas.DataFrame: ...
-    def get_record_count(self) -> int: ...
-    def get_table_description(self) -> pandas.DataFrame: ...
-    def get_sample_data(self, limit: int = 5) -> pandas.DataFrame: ...
+    def create_view_from_dataframe(
+        self,
+        view_name: str,
+        dataframe: pandas.DataFrame,
+    ) -> None: ...
+    def execute(self, query: str) -> pandas.DataFrame: ...
+    def count_records(self, view_name: str) -> int: ...
+    def describe(self, view_name: str) -> pandas.DataFrame: ...
+    def get_data(
+        self,
+        view_name: str,
+        offset: int = 0,
+        limit: int = 5,
+    ) -> pandas.DataFrame: ...
+    def summarize(self, view_name: str) -> dict[str, Any]: ...
     def close(self) -> None: ...
 
 
 class DuckDBRepository(object):  # Repository pattern implementation
     __slots__ = (
+        "_config",
         "_connection",
         "_data_loaded",
     )
 
-    def __init__(self, connection: duckdb.DuckDBPyConnection | None = None) -> None:
-        self._connection: duckdb.DuckDBPyConnection = connection or duckdb.connect()  # type: ignore
+    def __init__(self, db_config: DatabaseConfig) -> None:
+        self._config: DatabaseConfig = db_config
+
+        config_dict: dict[str, Any] = {
+            "max_memory": (db_config.max_memory if db_config.max_memory else "1GB"),
+        }
+        self._connection: duckdb.DuckDBPyConnection
+        if db_config.path:
+            self._connection = duckdb.connect(database=db_config.path, config=config_dict)  # type: ignore
+        else:
+            self._connection = duckdb.connect(config=config_dict)  # type: ignore
+
+        if db_config.enable_logging:
+            self._connection.execute("PRAGMA enable_logging;")
+
         self._data_loaded: bool = False
 
-    def load_data(self, file_path: str) -> None:
-        excel_path: Path = Path(file_path)
+    def create_view_from_dataframe(
+        self, view_name: str, dataframe: pandas.DataFrame
+    ) -> None:
+        self._connection.register(view_name, dataframe)
+        self._data_loaded = True
 
-        if not excel_path.exists():
-            raise FileNotFoundError(f"File not found: {excel_path}")
-
-        try:
-            dataframe: pandas.DataFrame = pandas.read_excel(  # type: ignore
-                excel_path, dtype_backend="numpy_nullable"
-            )
-
-            self._connection.register("ovs", dataframe)
-            self._data_loaded = True
-
-        except Exception as error:
-            raise DataLoadError(str(file_path), error) from error
-
-    def execute_query(self, query: str) -> pandas.DataFrame:
+    def execute(self, query: str) -> pandas.DataFrame:
         if not self._data_loaded:
             raise DatabaseError("No data loaded")
 
@@ -58,24 +71,26 @@ class DuckDBRepository(object):  # Repository pattern implementation
         except Exception as error:
             raise QueryExecutionError(query, error) from error
 
-    def get_record_count(self) -> int:
-        result: pandas.DataFrame = self.execute_query(
-            "SELECT COUNT(*) as total_rows FROM ovs"
+    def count_records(self, view_name: str) -> int:
+        result: pandas.DataFrame = self.execute(
+            f"SELECT COUNT(*) as total_rows FROM {view_name}"
         )
         return int(result["total_rows"].iloc[0])
 
-    def get_table_description(self) -> pandas.DataFrame:
-        return self.execute_query("DESCRIBE ovs")
+    def describe(self, view_name: str) -> pandas.DataFrame:
+        return self.execute(f"DESCRIBE {view_name}")
 
-    def get_sample_data(self, limit: int = 5) -> pandas.DataFrame:
-        return self.execute_query(f"SELECT * FROM ovs LIMIT {limit}")
+    def get_data(
+        self, view_name: str, offset: int = 0, limit: int = 5
+    ) -> pandas.DataFrame:
+        return self.execute(f"SELECT * FROM {view_name} OFFSET {offset} LIMIT {limit}")
 
-    def get_data_summary(self) -> dict[str, Any]:
+    def summarize(self, view_name: str) -> dict[str, Any]:
         try:
             return {
-                "total_records": self.get_record_count(),
-                "table_description": self.get_table_description(),
-                "sample_data": self.get_sample_data(),
+                "total_records": self.count_records(view_name),
+                "table_description": self.describe(view_name),
+                "sample_data": self.get_data(view_name),
             }
 
         except Exception:

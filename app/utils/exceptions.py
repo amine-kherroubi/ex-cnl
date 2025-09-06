@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# Standard library imports
+from pathlib import Path
 from typing import Final
 
 
@@ -39,7 +41,7 @@ class DataLoadError(DatabaseError):
         "original_error",
     )
 
-    def __init__(self, file_path: str, original_error: Exception) -> None:
-        self.file_path: Final[str] = file_path
+    def __init__(self, file_path: Path, original_error: Exception) -> None:
+        self.file_path: Final[Path] = file_path
         self.original_error: Final[Exception] = original_error
         super().__init__(f"Failed to load data from {file_path}: {original_error}")

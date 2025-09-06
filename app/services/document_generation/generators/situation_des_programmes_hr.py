@@ -9,13 +9,16 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from app.data.data_repository import DataRepository
 from app.services.document_generation.generator_template import DocumentGenerator
 from app.services.document_generation.documents_registry import DocumentRegistry
+from app.services.file_storage.file_storage_service import FileStorageService
 
 
 class SituationDesProgrammesHRGenerator(DocumentGenerator):
     __slots__ = ()
 
-    def __init__(self, repository: DataRepository) -> None:
-        super().__init__(repository)
+    def __init__(
+        self, storage_service: FileStorageService, data_repository: DataRepository
+    ) -> None:
+        super().__init__(storage_service, data_repository)
         self._document_definition = DocumentRegistry.get("situation_des_programmes")
 
     def _add_header(self, sheet: Worksheet) -> None:

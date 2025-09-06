@@ -120,7 +120,17 @@ def main() -> None:
         app: ApplicationFacade = ApplicationFacade()
 
         if args.list:
-            app.list_available_documents()
+            print("Available documents:")
+            print("-" * 60)
+            for doc_name, doc_spec in app.get_available_documents().items():
+                print(f"• {doc_spec.display_name}")
+                print(f"  Name: {doc_name}")
+                print(f"  Category: {doc_spec.category}")
+                print(f"  Description: {doc_spec.description}")
+                print(f"  Required files (patterns):")
+                for pattern in doc_spec.required_files:
+                    print(f"    - {pattern}")
+                print()
         elif args.document:
             if args.dry_run:
                 print(f"🔍 Dry run mode: Would generate document '{args.document}'")

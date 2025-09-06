@@ -1,36 +1,31 @@
 from __future__ import annotations
-
-# Standard library imports
-from pathlib import Path
+from typing import Any
 
 # Local application imports
 from app.services.document_generation.generator_template import DocumentGenerator
 from app.data.data_repository import DuckDBRepository
 from app.services.document_generation.documents_registry import DocumentRegistry
-from app.services.document_generation.generators.activite_mensuelle_hr import (
-    ActiviteMensuelleHRGenerator,
-)
-from app.services.document_generation.generators.situation_des_programmes_hr import (
-    SituationDesProgrammesHRGenerator,
-)
-from app.services.document_generation.documents_registry import DocumentDefinition
+from app.services.document_generation.documents_registry import DocumentSpecification
+from app.config import AppConfig, config
+from app.services.file_storage.file_storage_service import FileStorageService
 
 
 class ApplicationFacade(object):  # Facade pattern
     __slots__ = (
-        "_repository",
-        "_generators",
+        "_config",
+        "_data_repository",
+        "_storage_service",
     )
 
     def __init__(self) -> None:
         # Dependency injection pattern
-        self._repository: DuckDBRepository = DuckDBRepository()
-
-        # Document generators registry
-        self._generators: dict[str, type[DocumentGenerator]] = {
-            "activite_mensuelle_par_programme": ActiviteMensuelleHRGenerator,
-            "situation_des_programmes": SituationDesProgrammesHRGenerator,
-        }
+        self._config: AppConfig = config
+        self._data_repository: DuckDBRepository = DuckDBRepository(
+            self._config.database_config
+        )
+        self._storage_service: FileStorageService = FileStorageService(
+            self._config.storage_config
+        )
 
     def generate_document(
         self, document_name: str, output_path: str | None = None
@@ -42,33 +37,20 @@ class ApplicationFacade(object):  # Facade pattern
                     f"Unknown document: {document_name}. Available: {available_docs}"
                 )
 
-            if document_name not in self._generators:
-                raise ValueError(
-                    f"No generator available for document: {document_name}"
-                )
-
-            # Get document definition
-            doc_def: DocumentDefinition = DocumentRegistry.get(document_name)
-            print(f"Generating document: {doc_def.display_name}")
-            print(f"Category: {doc_def.category}")
-            print(f"Description: {doc_def.description}")
-
-            # Check for required files in current directory
-            self._check_required_files(doc_def.required_files)
-
-            # Load data from required files (this will be handled by the generator's validation)
-            # For now, we just create a dummy connection since the actual file loading
-            # happens in the generator's _validate_required_files method
+            # Get document specification
+            doc_spec: DocumentSpecification = DocumentRegistry.get(document_name)
+            print(f"Generating document: {doc_spec.display_name}")
 
             # Create generator and generate document
-            generator_class: type[DocumentGenerator] = self._generators[document_name]
-            generator: DocumentGenerator = generator_class(self._repository)
+            generator: DocumentGenerator = doc_spec.generator(
+                self._storage_service, self._data_repository
+            )
 
             # Determine output path
             if output_path is None:
-                output_path = f"{doc_def.output_filename}.xlsx"
+                output_path = f"{doc_spec.output_filename}.xlsx"
 
-            generator.generate(output_path)
+            generator.generate()
             print(f"✓ Document generated successfully: {output_path}")
 
         except Exception:
@@ -76,53 +58,8 @@ class ApplicationFacade(object):  # Facade pattern
         finally:
             self._cleanup()
 
-    def list_available_documents(self) -> None:
-        print("Available documents:")
-        print("-" * 60)
-
-        for doc_name, doc_def in DocumentRegistry.all().items():
-            status = "✓ Available" if doc_name in self._generators else "✗ No generator"
-            print(f"• {doc_def.display_name}")
-            print(f"  Name: {doc_name}")
-            print(f"  Category: {doc_def.category}")
-            print(f"  Status: {status}")
-            print(f"  Description: {doc_def.description}")
-            print(f"  Required files (patterns):")
-            for pattern in doc_def.required_files:
-                print(f"    - {pattern}")
-            print()
-
-    def _check_required_files(self, required_patterns: list[str]) -> None:
-        import re
-
-        current_dir: Path = Path.cwd()
-        available_files: list[str] = [
-            p.name for p in current_dir.iterdir() if p.is_file()
-        ]
-
-        print(f"Checking for required files in: {current_dir}")
-        print(f"Available files: {available_files}")
-
-        missing_patterns: list[str] = []
-        for pattern in required_patterns:
-            regex: re.Pattern[str] = re.compile(pattern)
-            matching_files: list[str] = [
-                file_name for file_name in available_files if regex.match(file_name)
-            ]
-
-            if not matching_files:
-                missing_patterns.append(pattern)
-            else:
-                print(f"✓ Found files matching '{pattern}': {matching_files}")
-
-        if missing_patterns:
-            print("✗ Missing required files matching patterns:")
-            for pattern in missing_patterns:
-                print(f"  - {pattern}")
-            raise FileNotFoundError(
-                f"Missing required files. Please ensure files matching these patterns are in the current directory: {missing_patterns}"
-            )
+    def get_available_documents(self) -> dict[str, Any]:
+        return DocumentRegistry.all()
 
     def _cleanup(self) -> None:
-        if hasattr(self, "_repository") and self._repository:
-            self._repository.close()
+        self._data_repository.close()
