@@ -3,6 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
+from logging import Logger
 
 # Third-party imports
 import pandas
@@ -17,6 +18,7 @@ from app.services.document_generation.models.document_context import (
 )
 from app.utils.exceptions import QueryExecutionError
 from app.utils.date_formatting import DateFormatter
+from app.utils.logging_setup import get_logger
 
 if TYPE_CHECKING:
     from app.services.document_generation.document_registry import (
@@ -31,6 +33,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
         "_document_specification",
         "_document_context",
         "_workbook",
+        "_logger",
     )
 
     def __init__(
@@ -40,87 +43,218 @@ class DocumentGenerator(ABC):  # Template Method pattern
         document_specification: "DocumentSpecification",
         document_context: DocumentContext,
     ) -> None:
+        self._logger: Logger = get_logger(f"app.generators.{self.__class__.__name__}")
+        self._logger.debug(f"Initializing {self.__class__.__name__}")
+
         self._storage_service: FileStorageService = storage_service
         self._data_repository: DataRepository = data_repository
         self._document_specification: "DocumentSpecification" = document_specification
         self._document_context: DocumentContext = document_context
         self._workbook: Workbook | None = None
 
-    def generate(self) -> None:
-        # Step 1: Validate required files
-        files_matching_patterns: dict[str, str] = self._validate_required_files()
-
-        # Step 2: Load data into in-memory database
-        self._load_data_into_db(files_matching_patterns)
-
-        # Step 3: Execute queries
-        query_results: dict[str, pandas.DataFrame] = self._execute_queries()
-
-        # Step 4: Create workbook and main sheet
-        self._workbook = Workbook()
-        self._workbook.remove(self._workbook.active)  # type: ignore
-        sheet: Worksheet = self._workbook.create_sheet(
-            self._document_specification.display_name
+        self._logger.info(
+            f"Generator initialized for document: {document_specification.display_name}"
+        )
+        self._logger.debug(
+            f"Document context: wilaya={document_context.wilaya.value}, date={document_context.report_date}"
         )
 
-        # Step 5: Add header (subclass responsibility)
-        self._add_header(sheet)
+    def generate(self) -> None:
+        self._logger.info("Starting document generation process")
 
-        # Step 6: Build main table (subclass responsibility)
-        self._add_table(sheet, query_results)
+        try:
+            # Step 1: Validate required files
+            self._logger.debug("Step 1: Validating required files")
+            files_matching_patterns: dict[str, str] = self._validate_required_files()
+            self._logger.info(
+                f"Found all required files: {list(files_matching_patterns.values())}"
+            )
 
-        # Step 7: Add footer (subclass responsibility)
-        self._add_footer(sheet)
+            # Step 2: Load data into in-memory database
+            self._logger.debug("Step 2: Loading data into database")
+            self._load_data_into_db(files_matching_patterns)
+            self._logger.info("Data loaded successfully into database")
 
-        # Step 8: Final formatting (subclass responsibility)
-        self._finalize_formatting(sheet)
+            # Step 3: Execute queries
+            self._logger.debug("Step 3: Executing queries")
+            query_results: dict[str, pandas.DataFrame] = self._execute_queries()
+            self._logger.info(f"Executed {len(query_results)} queries successfully")
 
-        # Step 9: Save document
-        self._save_document()
+            # Step 4: Create workbook and main sheet
+            self._logger.debug("Step 4: Creating Excel workbook")
+            self._workbook = Workbook()
+            self._workbook.remove(self._workbook.active)  # type: ignore
+            sheet: Worksheet = self._workbook.create_sheet(
+                self._document_specification.display_name
+            )
+            self._logger.info(
+                f"Created workbook with sheet: {self._document_specification.display_name}"
+            )
+
+            # Step 5: Add header (subclass responsibility)
+            self._logger.debug("Step 5: Adding document header")
+            self._add_header(sheet)
+            self._logger.debug("Header added successfully")
+
+            # Step 6: Build main table (subclass responsibility)
+            self._logger.debug("Step 6: Building main table")
+            self._add_table(sheet, query_results)
+            self._logger.debug("Main table built successfully")
+
+            # Step 7: Add footer (subclass responsibility)
+            self._logger.debug("Step 7: Adding document footer")
+            self._add_footer(sheet)
+            self._logger.debug("Footer added successfully")
+
+            # Step 8: Final formatting (subclass responsibility)
+            self._logger.debug("Step 8: Applying final formatting")
+            self._finalize_formatting(sheet)
+            self._logger.debug("Final formatting applied successfully")
+
+            # Step 9: Save document
+            self._logger.debug("Step 9: Saving document")
+            self._save_document()
+            self._logger.info("Document generation completed successfully")
+
+        except Exception as error:
+            self._logger.exception(f"Document generation failed: {error}")
+            self._logger.exception("Full error details")
+            raise
 
     def _validate_required_files(self) -> dict[str, str]:
+        self._logger.debug("Validating required files")
+
         if not self._document_specification:
-            raise ValueError("Document specification not set")
+            error_msg: str = "Document specification not set"
+            self._logger.error(error_msg)
+            raise ValueError(error_msg)
 
         missing_patterns: list[str] = []
         files_mapping: dict[str, str] = {}
 
+        self._logger.debug(
+            f"Checking {len(self._document_specification.required_files)} required file patterns"
+        )
+
         for pattern, view_name in self._document_specification.required_files.items():
+            self._logger.debug(
+                f"Looking for file matching pattern: {pattern} (view: {view_name})"
+            )
             filename: str | None = self._storage_service.find_filename_matching_pattern(
                 pattern
             )
             if filename is None:
+                self._logger.warning(f"No file found for pattern: {pattern}")
                 missing_patterns.append(pattern)
             else:
+                self._logger.info(f"Found file '{filename}' for pattern: {pattern}")
                 files_mapping[view_name] = filename
 
         if missing_patterns:
-            raise FileNotFoundError(
+            error_msg: str = (
                 f"Missing required files matching patterns: {missing_patterns}"
             )
+            self._logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
 
+        self._logger.info(f"All {len(files_mapping)} required files found")
         return files_mapping
 
     def _load_data_into_db(self, files_mapping: dict[str, str]) -> None:
+        self._logger.debug("Loading files into database views")
+
         for view_name, filename in files_mapping.items():
-            df: pandas.DataFrame = self._storage_service.load_data_from_file(filename)
-            df.columns = [column.strip() for column in df.columns]
-            self._data_repository.create_view_from_dataframe(view_name, df)
+            self._logger.debug(f"Loading file '{filename}' into view '{view_name}'")
+            try:
+                df: pandas.DataFrame = self._storage_service.load_data_from_file(
+                    filename
+                )
+
+                # Clean column names
+                original_columns: list[str] = list(df.columns)
+                df.columns = [column.strip() for column in df.columns]
+                cleaned_columns: list[str] = list(df.columns)
+
+                if original_columns != cleaned_columns:
+                    self._logger.debug(f"Cleaned column names for view '{view_name}'")
+
+                self._data_repository.create_view_from_dataframe(view_name, df)
+                self._logger.info(
+                    f"Successfully loaded view '{view_name}' with {len(df)} rows"
+                )
+
+            except Exception as error:
+                self._logger.error(
+                    f"Failed to load file '{filename}' into view '{view_name}': {error}"
+                )
+                raise
 
     def _execute_queries(self) -> dict[str, pandas.DataFrame]:
+        self._logger.debug("Executing document queries")
+
         if not self._document_specification:
-            raise ValueError("Document specification not set")
+            error_msg = "Document specification not set"
+            self._logger.error(error_msg)
+            raise ValueError(error_msg)
 
         results: dict[str, pandas.DataFrame] = {}
+        query_count: int = len(self._document_specification.queries)
+        self._logger.debug(f"Preparing to execute {query_count} queries")
 
-        for query_name, query in self._document_specification.queries.items():
+        for query_name, query_template in self._document_specification.queries.items():
+            self._logger.debug(f"Executing query '{query_name}'")
             try:
-                results[query_name] = self._data_repository.execute(query)
+                # Format query with document context
+                formatted_query: str = self._format_query_with_context(query_template)
+                self._logger.debug(
+                    f"Formatted query '{query_name}' with document context"
+                )
+
+                result_df: pandas.DataFrame = self._data_repository.execute(
+                    formatted_query
+                )
+                results[query_name] = result_df
+
+                self._logger.info(
+                    f"Query '{query_name}' returned {len(result_df)} rows"
+                )
+
             except Exception as error:
+                self._logger.exception(f"Query '{query_name}' failed: {error}")
                 raise QueryExecutionError(
                     f"Required query '{query_name}' failed", error
                 )
+
+        self._logger.info(f"All {query_count} queries executed successfully")
         return results
+
+    def _format_query_with_context(self, query_template: str) -> str:
+        self._logger.debug("Formatting query template with document context")
+
+        formatted_query: str = query_template
+
+        if self._document_context.month:
+            month_start: str = (
+                f"{self._document_context.year}-{self._document_context.month.number:02d}-01"
+            )
+            month_end_day: int = self._document_context.month.last_day(
+                self._document_context.year
+            )
+            month_end: str = (
+                f"{self._document_context.year}-{self._document_context.month.number:02d}-{month_end_day:02d}"
+            )
+
+            formatted_query = formatted_query.replace("{month_start}", month_start)
+            formatted_query = formatted_query.replace("{month_end}", month_end)
+
+            self._logger.debug(f"Added month formatting: {month_start} to {month_end}")
+
+        formatted_query = formatted_query.replace(
+            "{year}", str(self._document_context.year)
+        )
+
+        self._logger.debug("Query formatting completed")
+        return formatted_query
 
     @abstractmethod
     def _add_header(self, sheet: Worksheet) -> None: ...
@@ -137,24 +271,36 @@ class DocumentGenerator(ABC):  # Template Method pattern
     def _finalize_formatting(self, sheet: Worksheet) -> None: ...
 
     def _save_document(self) -> None:
-        if self._workbook:
-            output_filename: str = self._document_specification.output_filename
+        self._logger.debug("Preparing to save document")
 
-            # Use French date format for user-facing filenames
-            output_filename = output_filename.replace(
-                "{wilaya}", self._document_context.wilaya.value
-            )
-            output_filename = output_filename.replace(
-                "{date}",
-                DateFormatter.to_french_filename_date(
-                    self._document_context.report_date
-                ),
-            )
+        if not self._workbook:
+            error_msg: str = "No workbook created"
+            self._logger.error(error_msg)
+            raise ValueError(error_msg)
 
-            if not output_filename.endswith(".xlsx"):
-                output_filename += ".xlsx"
+        output_filename: str = self._document_specification.output_filename
+        self._logger.debug(f"Output filename template: {output_filename}")
 
+        # Use French date format for user-facing filenames
+        output_filename = output_filename.replace(
+            "{wilaya}", self._document_context.wilaya.value
+        )
+        output_filename = output_filename.replace(
+            "{date}",
+            DateFormatter.to_french_filename_date(self._document_context.report_date),
+        )
+
+        if not output_filename.endswith(".xlsx"):
+            output_filename += ".xlsx"
+
+        self._logger.info(f"Saving document as: {output_filename}")
+
+        try:
             self._storage_service.save_data_to_file(
                 data=self._workbook,
                 output_filename=output_filename,
             )
+            self._logger.info(f"Document saved successfully: {output_filename}")
+        except Exception as error:
+            self._logger.exception(f"Failed to save document: {error}")
+            raise
