@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import date
 
 # Local application imports
-from app.services.document_generation.context_management.document_context import (
+from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
 from app.utils.space_time import Periodicity, Month, Wilaya

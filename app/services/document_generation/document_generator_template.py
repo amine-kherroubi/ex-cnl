@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 # Third-party imports
 import pandas
@@ -10,13 +11,17 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 # Local application imports
 from app.data.data_repository import DataRepository
-from app.services.document_generation.documents_registry import DocumentSpecification
 from app.services.file_storage.file_storage_service import FileStorageService
-from app.services.document_generation.context_management.document_context import (
+from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
 from app.utils.exceptions import QueryExecutionError
 from app.utils.date_formatting import DateFormatter
+
+if TYPE_CHECKING:
+    from app.services.document_generation.document_registry import (
+        DocumentSpecification,
+    )
 
 
 class DocumentGenerator(ABC):  # Template Method pattern
@@ -32,12 +37,12 @@ class DocumentGenerator(ABC):  # Template Method pattern
         self,
         storage_service: FileStorageService,
         data_repository: DataRepository,
-        document_specification: DocumentSpecification,
+        document_specification: "DocumentSpecification",
         document_context: DocumentContext,
     ) -> None:
         self._storage_service: FileStorageService = storage_service
         self._data_repository: DataRepository = data_repository
-        self._document_specification: DocumentSpecification = document_specification
+        self._document_specification: "DocumentSpecification" = document_specification
         self._document_context: DocumentContext = document_context
         self._workbook: Workbook | None = None
 

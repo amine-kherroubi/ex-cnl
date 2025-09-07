@@ -6,7 +6,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 # Local application imports
-from app.services.document_generation.generator_template import DocumentGenerator
+from app.services.document_generation.document_generator_template import DocumentGenerator
 
 
 class SituationDesProgrammesHRGenerator(DocumentGenerator):

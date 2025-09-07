@@ -36,8 +36,9 @@ class FileStorageService(object):
         self._verify_file_size(file_path)
 
         try:
+            skiprows: int = self._find_table_start_row(file_path)
             return pandas.read_excel(  # type: ignore
-                file_path, dtype_backend="numpy_nullable"
+                file_path, dtype_backend="numpy_nullable", skiprows=skiprows
             )
         except Exception as error:
             raise DataLoadError(file_path, error) from error
@@ -90,3 +91,18 @@ class FileStorageService(object):
                 f"Output format '.{extension}' does not match default output format "
                 f"'{self._config.default_output_format}'"
             )
+
+    def _find_table_start_row(self, file_path: Path) -> int:
+        preview_df: pandas.DataFrame = pandas.read_excel(file_path, nrows=30, header=None)  # type: ignore
+
+        for row_idx, (_, row) in enumerate(preview_df.iterrows()):
+            first_cell: str = (
+                str(row.iloc[0]).strip() if pandas.notna(row.iloc[0]) else ""
+            )
+            if "N° d'ordre" in first_cell:
+                return row_idx
+
+        raise DataLoadError(
+            file_path,
+            Exception("Could not find 'N° d'ordre' header to determine table start"),
+        )

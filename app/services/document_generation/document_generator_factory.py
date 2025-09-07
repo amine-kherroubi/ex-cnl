@@ -8,14 +8,14 @@ from app.services.document_generation.concrete_generators.activite_mensuelle_hr 
 from app.services.document_generation.concrete_generators.situation_des_programmes_hr import (
     SituationDesProgrammesHRGenerator,
 )
-from app.services.document_generation.context_management.document_context import (
+from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
-from app.services.document_generation.documents_registry import (
+from app.services.document_generation.document_registry import (
     DocumentRegistry,
     DocumentSpecification,
 )
-from app.services.document_generation.generator_template import DocumentGenerator
+from app.services.document_generation.document_generator_template import DocumentGenerator
 from app.services.file_storage.file_storage_service import FileStorageService
 
 

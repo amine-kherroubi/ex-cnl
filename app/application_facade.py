@@ -5,20 +5,24 @@ from datetime import date
 from typing import Any
 
 # Local application imports
-from app.services.document_generation.generator_template import DocumentGenerator
+from app.services.document_generation.document_generator_template import (
+    DocumentGenerator,
+)
 from app.data.data_repository import DuckDBRepository
-from app.services.document_generation.documents_registry import DocumentRegistry
-from app.services.document_generation.documents_registry import DocumentSpecification
+from app.services.document_generation.document_registry import DocumentRegistry
+from app.services.document_generation.document_registry import DocumentSpecification
 from app.services.file_storage.file_storage_service import FileStorageService
-from app.services.document_generation.context_management.context_factory import (
+from app.services.document_generation.document_context_factory import (
     DocumentContextFactory,
 )
-from app.services.document_generation.context_management.document_context import (
+from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
 from app.utils.space_time import Wilaya
 from app.config import AppConfig
-from app.services.document_generation.generator_factory import DocumentGeneratorFactory
+from app.services.document_generation.document_generator_factory import (
+    DocumentGeneratorFactory,
+)
 
 
 class ApplicationFacade(object):  # Facade pattern
