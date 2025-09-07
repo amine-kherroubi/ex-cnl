@@ -191,6 +191,8 @@ class DocumentGenerator(ABC):  # Template Method pattern
                     f"Successfully loaded view '{view_name}' with {len(df)} rows"
                 )
 
+                print(self._data_repository.summarize(view_name))
+
             except Exception as error:
                 self._logger.error(
                     f"Failed to load file '{filename}' into view '{view_name}': {error}"
@@ -268,21 +270,23 @@ class DocumentGenerator(ABC):  # Template Method pattern
         formatted_query: str = query_template
 
         if self._document_context.month:
-            month_start: str = (
-                f"{self._document_context.year}-{self._document_context.month.number:02d}-01"
+            month_number: int = self._document_context.month.number
+            year: int = self._document_context.year
+
+            # Replace placeholders found in the query templates
+            formatted_query = formatted_query.replace(
+                "{month_number:02d}", f"{month_number:02d}"
             )
-            month_end_day: int = self._document_context.month.last_day(
-                self._document_context.year
+            formatted_query = formatted_query.replace(
+                "{month_number}", str(month_number)
             )
-            month_end: str = (
-                f"{self._document_context.year}-{self._document_context.month.number:02d}-{month_end_day:02d}"
+            formatted_query = formatted_query.replace("{year}", str(year))
+
+            self._logger.debug(
+                f"Replaced placeholders with: month_number={month_number:02d}, year={year}"
             )
 
-            formatted_query = formatted_query.replace("{month_start}", month_start)
-            formatted_query = formatted_query.replace("{month_end}", month_end)
-
-            self._logger.debug(f"Added month formatting: {month_start} to {month_end}")
-
+        # Also replace simple {year} for year-only queries
         formatted_query = formatted_query.replace(
             "{year}", str(self._document_context.year)
         )

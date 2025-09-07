@@ -78,8 +78,7 @@ class DocumentRegistry(object):
                             '100%  Tranche totale',
                             '100%  1+2+3 EME TRANCHE'
                         )
-                        AND "Date OV" >= '{month_start}' 
-                        AND "Date OV" <= '{month_end}'
+                        AND "Date OV" LIKE '%/{month_number:02d}/{year}'
                     GROUP BY Programme
                 ) data ON p.programme = data.Programme
                 ORDER BY p.display_order
@@ -102,8 +101,8 @@ class DocumentRegistry(object):
                             '100%  Tranche totale',
                             '100%  1+2+3 EME TRANCHE'
                         )
-                        AND "Date OV" >= '{year}-01-01' 
-                        AND "Date OV" <= '{month_end}'
+                        AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
+                        AND "Date OV" LIKE '%/{year}'
                     GROUP BY Programme
                 ) data ON p.programme = data.Programme
                 ORDER BY p.display_order
@@ -126,8 +125,7 @@ class DocumentRegistry(object):
                             '100%  1+2+3 EME TRANCHE',
                             'Tranche complémentaire 2'
                         )
-                        AND "Date OV" >= '{month_start}' 
-                        AND "Date OV" <= '{month_end}'
+                        AND "Date OV" LIKE '%/{month_number:02d}/{year}'
                     GROUP BY Programme
                 ) data ON p.programme = data.Programme
                 ORDER BY p.display_order
@@ -150,8 +148,8 @@ class DocumentRegistry(object):
                             '100%  1+2+3 EME TRANCHE',
                             'Tranche complémentaire 2'
                         )
-                        AND "Date OV" >= '{year}-01-01' 
-                        AND "Date OV" <= '{month_end}'
+                        AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
+                        AND "Date OV" LIKE '%/{year}'
                     GROUP BY Programme
                 ) data ON p.programme = data.Programme
                 ORDER BY p.display_order
