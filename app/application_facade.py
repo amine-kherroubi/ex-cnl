@@ -13,15 +13,15 @@ from app.data.data_repository import DuckDBRepository
 from app.services.document_generation.document_registry import DocumentRegistry
 from app.services.document_generation.document_registry import DocumentSpecification
 from app.services.file_storage.file_storage_service import FileStorageService
-from app.services.document_generation.document_context_factory import (
+from app.services.document_generation.factories.document_context_factory import (
     DocumentContextFactory,
 )
 from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
-from app.utils.space_time import Wilaya
+from app.services.document_generation.enums.space_time import Wilaya
 from app.config import AppConfig
-from app.services.document_generation.document_generator_factory import (
+from app.services.document_generation.factories.document_generator_factory import (
     DocumentGeneratorFactory,
 )
 from app.utils.logging_setup import get_logger

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 from logging import Logger
 
 # Third-party imports
@@ -12,6 +12,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 # Local application imports
 from app.data.data_repository import DataRepository
+from app.services.document_generation.business_values.programmes import (
+    get_programmes_dataframe,
+)
 from app.services.file_storage.file_storage_service import FileStorageService
 from app.services.document_generation.models.document_context import (
     DocumentContext,
@@ -75,12 +78,17 @@ class DocumentGenerator(ABC):  # Template Method pattern
             self._load_data_into_db(files_matching_patterns)
             self._logger.info("Data loaded successfully into database")
 
-            # Step 3: Execute queries
+            # Step 3: Create programmes reference table
+            self._logger.debug("Step 2.5: Creating programmes reference table")
+            self._create_reference_tables()
+            self._logger.info("Programmes reference table created successfully")
+
+            # Step 4: Execute queries
             self._logger.debug("Step 3: Executing queries")
             query_results: dict[str, pandas.DataFrame] = self._execute_queries()
             self._logger.info(f"Executed {len(query_results)} queries successfully")
 
-            # Step 4: Create workbook and main sheet
+            # Step 5: Create workbook and main sheet
             self._logger.debug("Step 4: Creating Excel workbook")
             self._workbook = Workbook()
             self._workbook.remove(self._workbook.active)  # type: ignore
@@ -91,27 +99,27 @@ class DocumentGenerator(ABC):  # Template Method pattern
                 f"Created workbook with sheet: {self._document_specification.display_name}"
             )
 
-            # Step 5: Add header (subclass responsibility)
+            # Step 6: Add header (subclass responsibility)
             self._logger.debug("Step 5: Adding document header")
             self._add_header(sheet)
             self._logger.debug("Header added successfully")
 
-            # Step 6: Build main table (subclass responsibility)
+            # Step 7: Build main table (subclass responsibility)
             self._logger.debug("Step 6: Building main table")
             self._add_table(sheet, query_results)
             self._logger.debug("Main table built successfully")
 
-            # Step 7: Add footer (subclass responsibility)
+            # Step 8: Add footer (subclass responsibility)
             self._logger.debug("Step 7: Adding document footer")
             self._add_footer(sheet)
             self._logger.debug("Footer added successfully")
 
-            # Step 8: Final formatting (subclass responsibility)
+            # Step 9: Final formatting (subclass responsibility)
             self._logger.debug("Step 8: Applying final formatting")
             self._finalize_formatting(sheet)
             self._logger.debug("Final formatting applied successfully")
 
-            # Step 9: Save document
+            # Step 10: Save document
             self._logger.debug("Step 9: Saving document")
             self._save_document()
             self._logger.info("Document generation completed successfully")
@@ -186,6 +194,32 @@ class DocumentGenerator(ABC):  # Template Method pattern
             except Exception as error:
                 self._logger.error(
                     f"Failed to load file '{filename}' into view '{view_name}': {error}"
+                )
+                raise
+
+    def _create_reference_tables(self) -> None:
+        self._logger.debug("Creating reference tables")
+
+        reference_tables: dict[str, Callable[[], pandas.DataFrame]] = {
+            "programmes": get_programmes_dataframe,
+        }
+
+        for table_name, dataframe_factory in reference_tables.items():
+            try:
+                self._logger.debug(f"Creating '{table_name}' reference table")
+
+                df: pandas.DataFrame = dataframe_factory()
+                self._data_repository.create_view_from_dataframe(table_name, df)
+
+                rows, cols = df.shape
+                self._logger.info(
+                    f"Created reference table '{table_name}' with {rows} rows and {cols} columns"
+                )
+                self._logger.debug(f"Columns for '{table_name}': {list(df.columns)}")
+
+            except Exception as error:
+                self._logger.exception(
+                    f"Failed to create reference table '{table_name}': {error}"
                 )
                 raise
 

@@ -136,75 +136,78 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         data_start_row: int = sub_row + 1
         self._logger.debug(f"Starting data rows at row {data_start_row}")
 
-        # Get all programmes first
-        all_programmes: list[str] = []
-        if "all_programmes" in query_results:
-            all_programmes = query_results["all_programmes"]["Programme"].tolist()
+        # Get all programmes with proper ordering
+        programmes: list[str] = []
+        if "programmes" in query_results:
+            # Programmes are sorted by display_order
+            programmes: list[str] = query_results["programmes"]["programme"].tolist()
             self._logger.info(
-                f"Found {len(all_programmes)} programmes: {all_programmes}"
+                f"Found {len(programmes)} programmes (pre-sorted by year): {programmes}"
             )
         else:
-            self._logger.warning("No 'all_programmes' query result found")
+            self._logger.warning("No 'programmes' query result found")
 
         # Create lookup dictionaries for each metric
         self._logger.debug("Creating lookup dictionaries from query results")
 
-        lancements_month_dict: dict[str, int] = {}
-        if "lancements_month" in query_results:
-            df_lm: pandas.DataFrame = query_results["lancements_month"]
-            lancements_month_dict = dict(zip(df_lm["Programme"], df_lm["Count"]))
+        lancements_mois_dict: dict[str, int] = {}
+        if "lancements_mois" in query_results:
+            df_lm: pandas.DataFrame = query_results["lancements_mois"]
+            lancements_mois_dict = dict(zip(df_lm["programme"], df_lm["count"]))
             self._logger.debug(
-                f"Lancements month data: {len(lancements_month_dict)} programmes"
+                f"Lancements month data: {len(lancements_mois_dict)} programmes"
             )
         else:
-            self._logger.warning("No 'lancements_month' query result found")
+            self._logger.warning("No 'lancements_mois' query result found")
 
-        lancements_ytd_dict: dict[str, int] = {}
-        if "lancements_ytd" in query_results:
-            df_ly: pandas.DataFrame = query_results["lancements_ytd"]
-            lancements_ytd_dict = dict(zip(df_ly["Programme"], df_ly["Count"]))
+        lancements_cumul_annee_dict: dict[str, int] = {}
+        if "lancements_cumul_annee" in query_results:
+            df_ly: pandas.DataFrame = query_results["lancements_cumul_annee"]
+            lancements_cumul_annee_dict = dict(zip(df_ly["programme"], df_ly["count"]))
             self._logger.debug(
-                f"Lancements YTD data: {len(lancements_ytd_dict)} programmes"
+                f"Lancements YTD data: {len(lancements_cumul_annee_dict)} programmes"
             )
         else:
-            self._logger.warning("No 'lancements_ytd' query result found")
+            self._logger.warning("No 'lancements_cumul_annee' query result found")
 
-        livraisons_month_dict: dict[str, int] = {}
-        if "livraisons_month" in query_results:
-            df_livm: pandas.DataFrame = query_results["livraisons_month"]
-            livraisons_month_dict = dict(zip(df_livm["Programme"], df_livm["Count"]))
+        livraisons_mois_dict: dict[str, int] = {}
+        if "livraisons_mois" in query_results:
+            df_livm: pandas.DataFrame = query_results["livraisons_mois"]
+            livraisons_mois_dict = dict(zip(df_livm["programme"], df_livm["count"]))
             self._logger.debug(
-                f"Livraisons month data: {len(livraisons_month_dict)} programmes"
+                f"Livraisons month data: {len(livraisons_mois_dict)} programmes"
             )
         else:
-            self._logger.warning("No 'livraisons_month' query result found")
+            self._logger.warning("No 'livraisons_mois' query result found")
 
-        livraisons_ytd_dict: dict[str, int] = {}
-        if "livraisons_ytd" in query_results:
-            df_livy: pandas.DataFrame = query_results["livraisons_ytd"]
-            livraisons_ytd_dict = dict(zip(df_livy["Programme"], df_livy["Count"]))
+        livraisons_cumul_annee_dict: dict[str, int] = {}
+        if "livraisons_cumul_annee" in query_results:
+            df_livy: pandas.DataFrame = query_results["livraisons_cumul_annee"]
+            livraisons_cumul_annee_dict = dict(
+                zip(df_livy["programme"], df_livy["count"])
+            )
             self._logger.debug(
-                f"Livraisons YTD data: {len(livraisons_ytd_dict)} programmes"
+                f"Livraisons YTD data: {len(livraisons_cumul_annee_dict)} programmes"
             )
         else:
-            self._logger.warning("No 'livraisons_ytd' query result found")
+            self._logger.warning("No 'livraisons_cumul_annee' query result found")
 
         # Calculate totals
-        total_livraisons_month: int = sum(livraisons_month_dict.values())
-        total_livraisons_ytd: int = sum(livraisons_ytd_dict.values())
-        total_lancements_month: int = sum(lancements_month_dict.values())
-        total_lancements_ytd: int = sum(lancements_ytd_dict.values())
+        total_livraisons_mois: int = sum(livraisons_mois_dict.values())
+        total_livraisons_cumul_annee: int = sum(livraisons_cumul_annee_dict.values())
+        total_lancements_mois: int = sum(lancements_mois_dict.values())
+        total_lancements_cumul_annee: int = sum(lancements_cumul_annee_dict.values())
 
         self._logger.info(
-            f"Calculated totals - Livraisons: {total_livraisons_month} (month), {total_livraisons_ytd} (YTD)"
+            f"Calculated totals - Livraisons: {total_livraisons_mois} (month), {total_livraisons_cumul_annee} (YTD)"
         )
         self._logger.info(
-            f"Calculated totals - Lancements: {total_lancements_month} (month), {total_lancements_ytd} (YTD)"
+            f"Calculated totals - Lancements: {total_lancements_mois} (month), {total_lancements_cumul_annee} (YTD)"
         )
 
         # Add data rows for each programme
-        self._logger.debug(f"Adding data rows for {len(all_programmes)} programmes")
-        for i, programme in enumerate(all_programmes):
+        self._logger.debug(f"Adding data rows for {len(programmes)} programmes")
+        for i, programme in enumerate(programmes):
             row: int = data_start_row + i
             self._logger.debug(f"Processing programme '{programme}' at row {row}")
 
@@ -213,23 +216,27 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             sheet[f"A{row}"].font = Font(name="Arial", size=9)
 
             # Column B: Livraisons (Month)
-            livraisons_month: int = livraisons_month_dict.get(programme, 0)
-            sheet[f"B{row}"] = livraisons_month
+            livraisons_mois: int = livraisons_mois_dict.get(programme, 0)
+            sheet[f"B{row}"] = livraisons_mois if livraisons_mois > 0 else "-"
             sheet[f"B{row}"].font = Font(name="Arial", size=9)
 
             # Column C: Livraisons (YTD)
-            livraisons_ytd: int = livraisons_ytd_dict.get(programme, 0)
-            sheet[f"C{row}"] = livraisons_ytd
+            livraisons_cumul_annee: int = livraisons_cumul_annee_dict.get(programme, 0)
+            sheet[f"C{row}"] = (
+                livraisons_cumul_annee if livraisons_cumul_annee > 0 else "-"
+            )
             sheet[f"C{row}"].font = Font(name="Arial", size=9)
 
             # Column D: Lancements (Month)
-            lancements_month: int = lancements_month_dict.get(programme, 0)
-            sheet[f"D{row}"] = lancements_month
+            lancements_mois: int = lancements_mois_dict.get(programme, 0)
+            sheet[f"D{row}"] = lancements_mois if lancements_mois > 0 else "-"
             sheet[f"D{row}"].font = Font(name="Arial", size=9)
 
             # Column E: Lancements (YTD)
-            lancements_ytd: int = lancements_ytd_dict.get(programme, 0)
-            sheet[f"E{row}"] = lancements_ytd
+            lancements_cumul_annee: int = lancements_cumul_annee_dict.get(programme, 0)
+            sheet[f"E{row}"] = (
+                lancements_cumul_annee if lancements_cumul_annee > 0 else "-"
+            )
             sheet[f"E{row}"].font = Font(name="Arial", size=9)
 
             # Add borders
@@ -244,24 +251,24 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 )
 
             if (
-                livraisons_month > 0
-                or lancements_month > 0
-                or livraisons_ytd > 0
-                or lancements_ytd > 0
+                livraisons_mois > 0
+                or lancements_mois > 0
+                or livraisons_cumul_annee > 0
+                or lancements_cumul_annee > 0
             ):
                 self._logger.debug(
-                    f"Programme '{programme}': L={livraisons_month}/{livraisons_ytd}, La={lancements_month}/{lancements_ytd}"
+                    f"Programme '{programme}': L={livraisons_mois}/{livraisons_cumul_annee}, La={lancements_mois}/{lancements_cumul_annee}"
                 )
 
         # Add TOTAL row
-        total_row_index: int = data_start_row + len(all_programmes)
+        total_row_index: int = data_start_row + len(programmes)
         self._logger.debug(f"Adding TOTAL row at row {total_row_index}")
 
         sheet[f"A{total_row_index}"] = "TOTAL"
-        sheet[f"B{total_row_index}"] = total_livraisons_month
-        sheet[f"C{total_row_index}"] = total_livraisons_ytd
-        sheet[f"D{total_row_index}"] = total_lancements_month
-        sheet[f"E{total_row_index}"] = total_lancements_ytd
+        sheet[f"B{total_row_index}"] = total_livraisons_mois
+        sheet[f"C{total_row_index}"] = total_livraisons_cumul_annee
+        sheet[f"D{total_row_index}"] = total_lancements_mois
+        sheet[f"E{total_row_index}"] = total_lancements_cumul_annee
 
         # Format TOTAL row
         for col in ["A", "B", "C", "D", "E"]:
@@ -279,7 +286,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             )
 
         self._logger.info(
-            f"Main table completed with {len(all_programmes)} programmes plus totals"
+            f"Main table completed with {len(programmes)} programmes plus totals"
         )
 
     def _add_footer(self, sheet: Worksheet) -> None:

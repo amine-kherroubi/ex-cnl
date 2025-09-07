@@ -7,18 +7,20 @@ from datetime import date
 from pydantic import BaseModel, Field, field_validator
 
 # Local application imports
-from app.utils.space_time import Wilaya, Month
+from app.services.document_generation.enums.space_time import Wilaya, Month
 
 
 class DocumentContext(BaseModel):
     wilaya: Wilaya = Field(
         description="The Algerian wilaya (administrative division) for this document.",
     )
+
     year: int = Field(
         description="The year for the reporting period.",
         ge=2000,
         le=2100,
     )
+
     report_date: date = Field(
         description="The specific date when the report is generated or data is extracted.",
     )
@@ -28,6 +30,7 @@ class DocumentContext(BaseModel):
         default=None,
         description="The month for the reporting period in French.",
     )
+
     semester: int | None = Field(
         default=None,
         description="Semester (1 or 2) for semiannual reports.",

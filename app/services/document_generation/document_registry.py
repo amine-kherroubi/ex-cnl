@@ -14,7 +14,7 @@ from app.services.document_generation.models.document_specification import (
     DocumentCategory,
     DocumentSpecification,
 )
-from app.utils.space_time import Periodicity
+from app.services.document_generation.enums.space_time import Periodicity
 
 
 @final
@@ -55,82 +55,106 @@ class DocumentRegistry(object):
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
             queries={
-                "lancements_month": """
-                SELECT 
-                    Programme,
-                    COUNT(*) as Count
-                FROM paiements
-                WHERE Tranche IN (
-                        '20%  1 ERE TRANCHE',
-                        '40%  Première Tranche', 
-                        '60%  Première Tranche',
-                        '60%  1+2 EME TRANCHE',
-                        '100%  Tranche totale',
-                        '100%  1+2+3 EME TRANCHE'
-                    )
-                    AND "Date OV" >= '{month_start}' 
-                    AND "Date OV" <= '{month_end}'
-                GROUP BY Programme
-                ORDER BY Programme
+                "programmes": """
+                SELECT programme
+                FROM programmes
+                ORDER BY display_order
                 """,
-                "lancements_ytd": """
+                "lancements_mois": """
                 SELECT 
-                    Programme,
-                    COUNT(*) as Count
-                FROM paiements
-                WHERE Tranche IN (
-                        '20%  1 ERE TRANCHE',
-                        '40%  Première Tranche', 
-                        '60%  Première Tranche',
-                        '60%  1+2 EME TRANCHE',
-                        '100%  Tranche totale',
-                        '100%  1+2+3 EME TRANCHE'
-                    )
-                    AND "Date OV" >= '{year}-01-01' 
-                    AND "Date OV" <= '{month_end}'
-                GROUP BY Programme
-                ORDER BY Programme
+                    p.programme,
+                    COALESCE(data.count, 0) as count
+                FROM programmes p
+                LEFT JOIN (
+                    SELECT
+                        Programme,
+                        COUNT(*) as count
+                    FROM paiements
+                    WHERE Tranche IN (
+                            '20%  1 ERE TRANCHE',
+                            '40%  Première Tranche',
+                            '60%  Première Tranche',
+                            '60%  1+2 EME TRANCHE',
+                            '100%  Tranche totale',
+                            '100%  1+2+3 EME TRANCHE'
+                        )
+                        AND "Date OV" >= '{month_start}' 
+                        AND "Date OV" <= '{month_end}'
+                    GROUP BY Programme
+                ) data ON p.programme = data.Programme
+                ORDER BY p.display_order
                 """,
-                "livraisons_month": """
+                "lancements_cumul_annee": """
                 SELECT 
-                    Programme,
-                    COUNT(*) as Count
-                FROM paiements
-                WHERE Tranche IN (
-                        '40%  3 EME TRANCHE',
-                        '40%  Deuxième Tranche',
-                        '60%  Deuxième Tranche', 
-                        '80%  2+3 EME TRANCHE',
-                        '100%  1+2+3 EME TRANCHE',
-                        'Tranche complémentaire 2'
-                    )
-                    AND "Date OV" >= '{month_start}' 
-                    AND "Date OV" <= '{month_end}'
-                GROUP BY Programme
-                ORDER BY Programme
+                    p.programme,
+                    COALESCE(data.count, 0) as count
+                FROM programmes p
+                LEFT JOIN (
+                    SELECT
+                        Programme,
+                        COUNT(*) as count
+                    FROM paiements
+                    WHERE Tranche IN (
+                            '20%  1 ERE TRANCHE',
+                            '40%  Première Tranche',
+                            '60%  Première Tranche',
+                            '60%  1+2 EME TRANCHE',
+                            '100%  Tranche totale',
+                            '100%  1+2+3 EME TRANCHE'
+                        )
+                        AND "Date OV" >= '{year}-01-01' 
+                        AND "Date OV" <= '{month_end}'
+                    GROUP BY Programme
+                ) data ON p.programme = data.Programme
+                ORDER BY p.display_order
                 """,
-                "livraisons_ytd": """
+                "livraisons_mois": """
+                SELECT
+                    p.programme,
+                    COALESCE(data.count, 0) as count
+                FROM programmes p
+                LEFT JOIN (
+                    SELECT
+                        Programme,
+                        COUNT(*) as count
+                    FROM paiements
+                    WHERE Tranche IN (
+                            '40%  3 EME TRANCHE',
+                            '40%  Deuxième Tranche',
+                            '60%  Deuxième Tranche',
+                            '80%  2+3 EME TRANCHE',
+                            '100%  1+2+3 EME TRANCHE',
+                            'Tranche complémentaire 2'
+                        )
+                        AND "Date OV" >= '{month_start}' 
+                        AND "Date OV" <= '{month_end}'
+                    GROUP BY Programme
+                ) data ON p.programme = data.Programme
+                ORDER BY p.display_order
+                """,
+                "livraisons_cumul_annee": """
                 SELECT 
-                    Programme,
-                    COUNT(*) as Count
-                FROM paiements
-                WHERE Tranche IN (
-                        '40%  3 EME TRANCHE',
-                        '40%  Deuxième Tranche',
-                        '60%  Deuxième Tranche', 
-                        '80%  2+3 EME TRANCHE',
-                        '100%  1+2+3 EME TRANCHE',
-                        'Tranche complémentaire 2'
-                    )
-                    AND "Date OV" >= '{year}-01-01' 
-                    AND "Date OV" <= '{month_end}'
-                GROUP BY Programme
-                ORDER BY Programme
-                """,
-                "all_programmes": """
-                SELECT DISTINCT Programme
-                FROM paiements
-                ORDER BY Programme
+                    p.programme,
+                    COALESCE(data.count, 0) as count
+                FROM programmes p
+                LEFT JOIN (
+                    SELECT
+                        Programme,
+                        COUNT(*) as count
+                    FROM paiements
+                    WHERE Tranche IN (
+                            '40%  3 EME TRANCHE',
+                            '40%  Deuxième Tranche',
+                            '60%  Deuxième Tranche',
+                            '80%  2+3 EME TRANCHE',
+                            '100%  1+2+3 EME TRANCHE',
+                            'Tranche complémentaire 2'
+                        )
+                        AND "Date OV" >= '{year}-01-01' 
+                        AND "Date OV" <= '{month_end}'
+                    GROUP BY Programme
+                ) data ON p.programme = data.Programme
+                ORDER BY p.display_order
                 """,
             },
             output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
@@ -153,47 +177,4 @@ class DocumentRegistry(object):
             output_filename="Situation_des_programmes_{wilaya}_{date}.xlsx",
             generator=SituationDesProgrammesHRGenerator,
         ),
-    }
-
-    PROGRAMMES_HABITAT_RURAL: list[str] = [
-        'PEC "31/12/2004"',
-        "QUINQU 2005-2009",
-        "H PLATEAUX",
-        "SUD",
-        "RATTRAPAGE",
-        "PRESIDENT",
-        "COMPLEMENT",
-        "PROG 2008",
-        "PROG 2009",
-        "SINISTRES",
-        "QUINQU 2010-2014",
-        "COMPL 2010-2014",
-        "QUINQU 2015-2019",
-        "TR 2016",
-        "INCENDIES 2017",
-        "QUINQU 2016",
-        "QUINQU 2018",
-        "QUINQU 2019",
-        "QUINQU 2020",
-    ]
-
-    TRANCHES_LANCEMENT: set[str] = {
-        "20%  1 ERE TRANCHE",
-        "60%  Première Tranche",
-        "40%  Première Tranche",
-        "60%  1+2 EME TRANCHE",
-        "100%  Tranche totale",
-        "100%  1+2+3 EME TRANCHE",
-    }
-
-    TRANCHES_LIVRAISON: set[str] = {
-        "40%  3 EME TRANCHE",
-        "40%  Deuxième Tranche",
-        "80%  2+3 EME TRANCHE",
-        "40%  C2",
-        "60%  Deuxième Tranche",
-        "Tranche complémentaire 2",
-        "100%  Tranche totale",
-        "100%  1+2+3 EME TRANCHE",
-        "40%  2 EME TRANCHE",
     }

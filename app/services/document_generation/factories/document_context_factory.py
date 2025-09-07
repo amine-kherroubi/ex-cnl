@@ -8,7 +8,7 @@ from logging import Logger
 from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
-from app.utils.space_time import Periodicity, Month, Wilaya
+from app.services.document_generation.enums.space_time import Periodicity, Month, Wilaya
 from app.utils.logging_setup import get_logger
 
 
