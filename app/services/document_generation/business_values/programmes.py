@@ -33,6 +33,15 @@ PROGRAMMES_HABITAT_RURAL_WITH_YEARS: Final[list[Programme]] = [
     Programme(name="QUINQU 2018", year_start=2018, year_end=None, display_order=17),
     Programme(name="QUINQU 2019", year_start=2019, year_end=None, display_order=18),
     Programme(name="QUINQU 2020", year_start=2020, year_end=None, display_order=19),
+    Programme(name="programme 2023", year_start=2023, year_end=2023, display_order=20),
+    Programme(name="Programme 2024", year_start=2024, year_end=2024, display_order=21),
+    Programme(
+        name="Quinquennal (2020 - 2024)",
+        year_start=2020,
+        year_end=2024,
+        display_order=22,
+    ),
+    Programme(name="PROGRAMME 2025", year_start=2025, year_end=2025, display_order=23),
 ]
 
 
