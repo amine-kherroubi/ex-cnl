@@ -66,14 +66,14 @@ class DocumentSpecification(BaseModel):
     ]
 
     model_config = {
-        "frozen": True,  # makes the model immutable
-        "str_strip_whitespace": True,  # trims whitespace in str fields
-        "validate_assignment": True,  # validate on assignment
+        "frozen": True,
+        "str_strip_whitespace": True,
+        "validate_assignment": True,
     }
 
 
 @final
-class DocumentRegistry(object):  # Registry pattern
+class DocumentRegistry(object):
     __slots__ = ()
 
     def __init__(self):
@@ -107,10 +107,93 @@ class DocumentRegistry(object):  # Registry pattern
                 "renseigné par la BNH (ex-CNL)"
             ),
             required_files={
-                r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "décisions",
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
-            queries={},
+            queries={
+                "lancements_month": """
+                SELECT 
+                    COALESCE(Programme, "Sous programme") as Programme,
+                    COUNT(*) as Count
+                FROM paiements
+                WHERE COALESCE("Annulé?", 'non') != 'oui'
+                    AND Tranche IN (
+                        '20%  1 ERE TRANCHE',
+                        '40%  Première Tranche', 
+                        '60%  Première Tranche',
+                        '60%  1+2 EME TRANCHE',
+                        '100%  Tranche totale',
+                        '100%  1+2+3 EME TRANCHE'
+                    )
+                    AND "Date OV" >= '{month_start}' 
+                    AND "Date OV" <= '{month_end}'
+                GROUP BY Programme
+                ORDER BY Programme
+                """,
+                "lancements_ytd": """
+                SELECT 
+                    COALESCE(Programme, "Sous programme") as Programme,
+                    COUNT(*) as Count
+                FROM paiements
+                WHERE COALESCE("Annulé?", 'non') != 'oui'
+                    AND Tranche IN (
+                        '20%  1 ERE TRANCHE',
+                        '40%  Première Tranche', 
+                        '60%  Première Tranche',
+                        '60%  1+2 EME TRANCHE',
+                        '100%  Tranche totale',
+                        '100%  1+2+3 EME TRANCHE'
+                    )
+                    AND "Date OV" >= '{year}-01-01' 
+                    AND "Date OV" <= '{month_end}'
+                GROUP BY Programme
+                ORDER BY Programme
+                """,
+                "livraisons_month": """
+                SELECT 
+                    COALESCE(Programme, "Sous programme") as Programme,
+                    COUNT(*) as Count
+                FROM paiements
+                WHERE COALESCE("Annulé?", 'non') != 'oui'
+                    AND Tranche IN (
+                        '40%  3 EME TRANCHE',
+                        '40%  Deuxième Tranche',
+                        '60%  Deuxième Tranche', 
+                        '80%  2+3 EME TRANCHE',
+                        '100%  1+2+3 EME TRANCHE',
+                        'Tranche complémentaire 2'
+                    )
+                    AND "Date OV" >= '{month_start}' 
+                    AND "Date OV" <= '{month_end}'
+                GROUP BY Programme
+                ORDER BY Programme
+                """,
+                "livraisons_ytd": """
+                SELECT 
+                    COALESCE(Programme, "Sous programme") as Programme,
+                    COUNT(*) as Count
+                FROM paiements
+                WHERE COALESCE("Annulé?", 'non') != 'oui'
+                    AND Tranche IN (
+                        '40%  3 EME TRANCHE',
+                        '40%  Deuxième Tranche',
+                        '60%  Deuxième Tranche', 
+                        '80%  2+3 EME TRANCHE',
+                        '100%  1+2+3 EME TRANCHE',
+                        'Tranche complémentaire 2'
+                    )
+                    AND "Date OV" >= '{year}-01-01' 
+                    AND "Date OV" <= '{month_end}'
+                GROUP BY Programme
+                ORDER BY Programme
+                """,
+                "all_programmes": """
+                SELECT DISTINCT 
+                    COALESCE(Programme, "Sous programme") as Programme
+                FROM paiements
+                WHERE COALESCE("Annulé?", 'non') != 'oui'
+                ORDER BY Programme
+                """,
+            },
             output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
             generator=ActiviteMensuelleHRGenerator,
         ),

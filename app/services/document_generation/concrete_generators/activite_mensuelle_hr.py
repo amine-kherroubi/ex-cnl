@@ -20,7 +20,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         sheet["A1"].alignment = Alignment(horizontal="center", vertical="center")
 
         # Wilaya
-        sheet["A2"] = "WILAYA DE : TIZIOUZOU"
+        sheet["A2"] = f"WILAYA DE : {self._document_context.wilaya.value.upper()}"
         sheet["A2"].font = Font(name="Arial", size=9, bold=True)
 
         # Main title - Set value first, then merge
@@ -34,7 +34,10 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         )
 
         # Month - Set value first, then merge
-        sheet["A4"] = "MOIS DE JANVIER 2021"
+        month_text: str = (
+            f"MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"
+        )
+        sheet["A4"] = month_text
         sheet.merge_cells("A4:E4")
         sheet["A4"].font = Font(name="Arial", size=9, bold=True)
         sheet["A4"].alignment = Alignment(horizontal="center", vertical="center")
@@ -45,9 +48,10 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         start_row: int = 6
 
         # Caption row (part of table) - Set value first, then merge
-        sheet[f"A{start_row}"] = (
-            "ETAT D'EXECUTION DES TRANCHES FINANCIERES DURANT LE MOIS DE JANVIER 2021"
+        caption_text: str = (
+            f"ETAT D'EXECUTION DES TRANCHES FINANCIERES DURANT LE MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"
         )
+        sheet[f"A{start_row}"] = caption_text
         sheet.merge_cells(f"A{start_row}:E{start_row}")
         sheet[f"A{start_row}"].font = Font(name="Arial", size=9, bold=True)
         sheet[f"A{start_row}"].alignment = Alignment(
@@ -86,10 +90,17 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         # Sub-headers
         sub_row: int = header_row + 1
-        sheet[f"B{sub_row}"] = "Jan-21"
-        sheet[f"C{sub_row}"] = "Cumul de JANVIER au 31 JANVIER 2021"
-        sheet[f"D{sub_row}"] = "Jan-21"
-        sheet[f"E{sub_row}"] = "Cumul de JANVIER au 31 JANVIER 2021"
+        month_short: str = self._document_context.month.value[:3].title()
+        year_short: str = str(self._document_context.year)[-2:]
+
+        sheet[f"B{sub_row}"] = f"{month_short}-{year_short}"
+        sheet[f"C{sub_row}"] = (
+            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"
+        )
+        sheet[f"D{sub_row}"] = f"{month_short}-{year_short}"
+        sheet[f"E{sub_row}"] = (
+            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"
+        )
 
         for col in ["B", "C", "D", "E"]:
             cell = sheet[f"{col}{sub_row}"]
@@ -104,28 +115,72 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 bottom=Side(style="thin"),
             )
 
-        # Add some sample data rows for demonstration
-        data_start_row = sub_row + 1
-        sample_programs = [
-            "LOGEMENT PUBLIC LOCATIF (LPL)",
-            "LOGEMENT SOCIAL PARTICIPATIF (LSP)",
-            "HABITAT RURAL",
-            "TOTAL",
-        ]
+        # Add data from query results
+        data_start_row: int = sub_row + 1
 
-        for i, program in enumerate(sample_programs):
-            row = data_start_row + i
-            sheet[f"A{row}"] = program
+        # Get all programmes first
+        all_programmes: list[str] = []
+        if "all_programmes" in query_results:
+            all_programmes = query_results["all_programmes"]["Programme"].tolist()
 
-            # Add borders and formatting
+        # Create lookup dictionaries for each metric
+        lancements_month_dict: dict[str, int] = {}
+        if "lancements_month" in query_results:
+            df_lm: pandas.DataFrame = query_results["lancements_month"]
+            lancements_month_dict = dict(zip(df_lm["Programme"], df_lm["Count"]))
+
+        lancements_ytd_dict: dict[str, int] = {}
+        if "lancements_ytd" in query_results:
+            df_ly: pandas.DataFrame = query_results["lancements_ytd"]
+            lancements_ytd_dict = dict(zip(df_ly["Programme"], df_ly["Count"]))
+
+        livraisons_month_dict: dict[str, int] = {}
+        if "livraisons_month" in query_results:
+            df_livm: pandas.DataFrame = query_results["livraisons_month"]
+            livraisons_month_dict = dict(zip(df_livm["Programme"], df_livm["Count"]))
+
+        livraisons_ytd_dict: dict[str, int] = {}
+        if "livraisons_ytd" in query_results:
+            df_livy: pandas.DataFrame = query_results["livraisons_ytd"]
+            livraisons_ytd_dict = dict(zip(df_livy["Programme"], df_livy["Count"]))
+
+        # Calculate totals
+        total_livraisons_month: int = sum(livraisons_month_dict.values())
+        total_livraisons_ytd: int = sum(livraisons_ytd_dict.values())
+        total_lancements_month: int = sum(lancements_month_dict.values())
+        total_lancements_ytd: int = sum(lancements_ytd_dict.values())
+
+        # Add data rows for each programme
+        for i, programme in enumerate(all_programmes):
+            row: int = data_start_row + i
+
+            # Column A: Programme name
+            sheet[f"A{row}"] = programme
+            sheet[f"A{row}"].font = Font(name="Arial", size=9)
+
+            # Column B: Livraisons (Month)
+            livraisons_month: int = livraisons_month_dict.get(programme, 0)
+            sheet[f"B{row}"] = livraisons_month
+            sheet[f"B{row}"].font = Font(name="Arial", size=9)
+
+            # Column C: Livraisons (YTD)
+            livraisons_ytd: int = livraisons_ytd_dict.get(programme, 0)
+            sheet[f"C{row}"] = livraisons_ytd
+            sheet[f"C{row}"].font = Font(name="Arial", size=9)
+
+            # Column D: Lancements (Month)
+            lancements_month: int = lancements_month_dict.get(programme, 0)
+            sheet[f"D{row}"] = lancements_month
+            sheet[f"D{row}"].font = Font(name="Arial", size=9)
+
+            # Column E: Lancements (YTD)
+            lancements_ytd: int = lancements_ytd_dict.get(programme, 0)
+            sheet[f"E{row}"] = lancements_ytd
+            sheet[f"E{row}"].font = Font(name="Arial", size=9)
+
+            # Add borders
             for col in ["A", "B", "C", "D", "E"]:
                 cell = sheet[f"{col}{row}"]
-                if col == "A":
-                    cell.font = Font(name="Arial", size=9, bold=(program == "TOTAL"))
-                else:
-                    cell.value = 0  # Placeholder values
-                    cell.font = Font(name="Arial", size=9)
-
                 cell.alignment = Alignment(horizontal="center", vertical="center")
                 cell.border = Border(
                     left=Side(style="thin"),
@@ -134,10 +189,28 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                     bottom=Side(style="thin"),
                 )
 
-                if program == "TOTAL":
-                    cell.fill = PatternFill(
-                        start_color="E7E6E6", end_color="E7E6E6", fill_type="solid"
-                    )
+        # Add TOTAL row
+        total_row_index: int = data_start_row + len(all_programmes)
+        sheet[f"A{total_row_index}"] = "TOTAL"
+        sheet[f"B{total_row_index}"] = total_livraisons_month
+        sheet[f"C{total_row_index}"] = total_livraisons_ytd
+        sheet[f"D{total_row_index}"] = total_lancements_month
+        sheet[f"E{total_row_index}"] = total_lancements_ytd
+
+        # Format TOTAL row
+        for col in ["A", "B", "C", "D", "E"]:
+            cell = sheet[f"{col}{total_row_index}"]
+            cell.font = Font(name="Arial", size=9, bold=True)
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            cell.fill = PatternFill(
+                start_color="E7E6E6", end_color="E7E6E6", fill_type="solid"
+            )
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            )
 
     def _add_footer(self, sheet: Worksheet) -> None:
         pass

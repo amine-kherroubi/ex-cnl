@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
+from datetime import date
 from typing import Any
 
 # Local application imports
@@ -55,7 +56,9 @@ class ApplicationFacade(object):  # Facade pattern
 
             # Create document spatiotemporal context
             document_context: DocumentContext = DocumentContextFactory.create_context(
-                wilaya=Wilaya.TIZI_OUZOU, periodicity=document_specification.periodicity
+                wilaya=Wilaya.TIZI_OUZOU,
+                periodicity=document_specification.periodicity,
+                report_date=date(2025, 9, 6),
             )
 
             # Create generator and generate document
