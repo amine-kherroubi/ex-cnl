@@ -31,12 +31,6 @@ class FileStorageService(object):
 
         self._config: StorageConfig = storage_config
 
-        self._logger.debug(f"Creating uploads directory: {self._config.uploads_dir}")
-        self._config.uploads_dir.mkdir(parents=True, exist_ok=True)
-
-        self._logger.debug(f"Creating results directory: {self._config.results_dir}")
-        self._config.results_dir.mkdir(parents=True, exist_ok=True)
-
         self._logger.info(
             f"File storage service initialized - uploads: {self._config.uploads_dir}, results: {self._config.results_dir}"
         )

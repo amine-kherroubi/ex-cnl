@@ -108,6 +108,22 @@ class StorageConfig(BaseSettings):
         description="Default output format for results.",
     )
 
+    @field_validator("uploads_dir")
+    @classmethod
+    def ensure_uploads_directory(cls, uploads_dir: Path) -> Path:
+        uploads_dir.mkdir(parents=True, exist_ok=True)
+        return uploads_dir
+
+    @field_validator("results_dir")
+    @classmethod
+    def ensure_results_directory(cls, results_dir: Path) -> Path:
+        results_dir.mkdir(parents=True, exist_ok=True)
+        return results_dir
+
+    model_config = {
+        "env_prefix": "LOG_",
+    }
+
     model_config = {
         "env_prefix": "STORAGE_",
     }
