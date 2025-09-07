@@ -10,6 +10,7 @@ from typing import Final
 from app.application_facade import ApplicationFacade
 from app.utils.exceptions import ApplicationError
 from app.config import AppConfig
+from app.utils.logging_setup import LoggingSetup, get_logger
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -63,6 +64,17 @@ def create_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="overwrite existing output files without prompting",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="enable debug logging output",
+    )
+    parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="reduce output verbosity (WARNING level and above only)",
+    )
 
     return parser
 
@@ -112,15 +124,39 @@ def validate_arguments(args: argparse.Namespace) -> None:
         )
 
 
+def setup_logging(config: AppConfig, args: argparse.Namespace) -> None:
+    if args.debug:
+        config.logging_config.level = "DEBUG"
+        config.logging_config.console_level = "DEBUG"
+    elif args.quiet:
+        config.logging_config.console_level = "WARNING"
+
+    LoggingSetup.configure(config.logging_config)
+
+
 def main() -> None:
     try:
         parser: argparse.ArgumentParser = create_argument_parser()
         args: argparse.Namespace = parser.parse_args()
+
+        # Load configuration
+        config: AppConfig = AppConfig()
+
+        # Setup logging early
+        setup_logging(config, args)
+
+        # Get logger after logging is configured
+        logger = get_logger("app.main")
+        logger.info("Application starting up")
+        logger.debug(f"Command line arguments: {vars(args)}")
+
         validate_arguments(args)
 
-        app: ApplicationFacade = ApplicationFacade(config=AppConfig())
+        app: ApplicationFacade = ApplicationFacade(config=config)
+        logger.debug("ApplicationFacade initialized")
 
         if args.list:
+            logger.info("Listing available documents")
             print("Available documents:")
             print("-" * 60)
             for (
@@ -135,25 +171,43 @@ def main() -> None:
                 for pattern in document_specification.required_files:
                     print(f"    - {pattern}")
                 print()
+            logger.info(
+                f"Listed {len(app.get_available_documents())} available documents"
+            )
+
         elif args.document:
+            logger.info(f"Processing document generation request: {args.document}")
+
             if args.dry_run:
+                logger.info("Running in dry-run mode")
                 print(f"🔍 Dry run mode: Would generate document '{args.document}'")
                 if args.output:
                     print(f"🔍 Output would be saved to: {args.output}")
                 else:
                     print("🔍 Output would use default naming")
                 print("✅ Dry run completed - no files were modified")
+                logger.info("Dry run completed successfully")
             else:
+                logger.info(f"Generating document: {args.document}")
+                if args.output:
+                    logger.debug(f"Output path specified: {args.output}")
+
                 app.generate_document(args.document, args.output)
                 print(f"✅ Document '{args.document}' generated successfully")
+                logger.info(f"Document '{args.document}' generated successfully")
 
+        logger.info("Application completed successfully")
         sys.exit(0)
 
     except KeyboardInterrupt:
+        logger = get_logger("app.main")
+        logger.warning("Operation cancelled by user")
         print("\n⚠️  Operation cancelled by user", file=sys.stderr)
         sys.exit(130)
 
     except FileNotFoundError as error:
+        logger = get_logger("app.main")
+        logger.error(f"File not found: {error}")
         print(f"❌ File error: {error}", file=sys.stderr)
         print("\n💡 Troubleshooting:", file=sys.stderr)
         print("   • Check that all required input files exist", file=sys.stderr)
@@ -164,21 +218,29 @@ def main() -> None:
         sys.exit(2)
 
     except ValueError as error:
+        logger = get_logger("app.main")
+        logger.error(f"Invalid usage: {error}")
         print(f"❌ Invalid usage: {error}", file=sys.stderr)
         print("\n💡 Use --help for detailed usage information", file=sys.stderr)
         sys.exit(2)
 
     except PermissionError as error:
+        logger = get_logger("app.main")
+        logger.error(f"Permission error: {error}")
         print(f"❌ Permission error: {error}", file=sys.stderr)
         print("\n💡 Check file/directory permissions and try again", file=sys.stderr)
         sys.exit(13)
 
     except ApplicationError as error:
+        logger = get_logger("app.main")
+        logger.error(f"Application error: {error}")
         print(f"❌ Application error: {error}", file=sys.stderr)
         print("\n💡 Check your input data and configuration", file=sys.stderr)
         sys.exit(3)
 
     except Exception as error:
+        logger = get_logger("app.main")
+        logger.exception("Unexpected error occurred")  # This logs the full traceback
         print(f"❌ Unexpected error: {error}", file=sys.stderr)
         print("\n🔍 Debug information:", file=sys.stderr)
         import traceback
@@ -188,7 +250,6 @@ def main() -> None:
             "\n💡 This appears to be a bug. Please report it with the above details.",
             file=sys.stderr,
         )
-
         sys.exit(1)
 
 
