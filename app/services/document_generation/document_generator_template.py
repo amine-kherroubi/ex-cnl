@@ -104,9 +104,9 @@ class DocumentGenerator(ABC):  # Template Method pattern
             self._add_header(sheet)
             self._logger.debug("Header added successfully")
 
-            # Step 7: Build main table (subclass responsibility)
+            # Step 7: Build tables (subclass responsibility)
             self._logger.debug("Step 6: Building main table")
-            self._add_table(sheet, query_results)
+            self._add_tables(sheet, query_results)
             self._logger.debug("Main table built successfully")
 
             # Step 8: Add footer (subclass responsibility)
@@ -298,7 +298,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
     def _add_header(self, sheet: Worksheet) -> None: ...
 
     @abstractmethod
-    def _add_table(
+    def _add_tables(
         self, sheet: Worksheet, query_results: dict[str, pandas.DataFrame]
     ) -> None: ...
 

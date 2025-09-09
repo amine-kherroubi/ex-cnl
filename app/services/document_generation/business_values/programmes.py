@@ -9,25 +9,25 @@ import pandas
 # Local application imports
 from app.services.document_generation.models.programe import Programme
 
-PROGRAMMES_HABITAT_RURAL_WITH_YEARS: Final[list[Programme]] = [
+PROGRAMMES_HABITAT_RURAL: Final[list[Programme]] = [
     Programme(name="PROGRAMME 2002", year_start=2002, year_end=2002, display_order=1),
     Programme(
-        name="COMPLEMENTAIRE 2007", year_start=2002, year_end=2002, display_order=2
+        name="COMPLEMENTAIRE 2007", year_start=2007, year_end=2007, display_order=2
     ),
-    Programme(name="PQR 2007", year_start=2002, year_end=2002, display_order=3),
+    Programme(name="PQR 2007", year_start=2007, year_end=2007, display_order=3),
     Programme(
         name="PROGRAMME INITIAL", year_start=2002, year_end=2002, display_order=4
     ),
     Programme(
-        name="COMPLEMENTAIRE 2009", year_start=2002, year_end=2002, display_order=5
+        name="COMPLEMENTAIRE 2009", year_start=2009, year_end=2009, display_order=5
     ),
-    Programme(name="PROGRAMME 2004", year_start=2002, year_end=2002, display_order=6),
-    Programme(name="PROGRAMME 2003", year_start=2002, year_end=2002, display_order=7),
+    Programme(name="PROGRAMME 2004", year_start=2004, year_end=2004, display_order=6),
+    Programme(name="PROGRAMME 2003", year_start=2003, year_end=2003, display_order=7),
     Programme(
-        name="PROGRAMME 2003 CEE", year_start=2002, year_end=2002, display_order=8
+        name="PROGRAMME 2003 CEE", year_start=2003, year_end=2003, display_order=8
     ),
     Programme(
-        name="COMPLEMENTAIRE 2008", year_start=2002, year_end=2002, display_order=9
+        name="COMPLEMENTAIRE 2008", year_start=2008, year_end=2008, display_order=9
     ),
     Programme(name="PEC", year_start=2002, year_end=2002, display_order=10),
     Programme(
@@ -122,6 +122,6 @@ def get_programmes_dataframe() -> pandas.DataFrame:
                 "year_end": prog.year_end,
                 "display_order": prog.display_order,
             }
-            for prog in PROGRAMMES_HABITAT_RURAL_WITH_YEARS
+            for prog in PROGRAMMES_HABITAT_RURAL
         ]
     )

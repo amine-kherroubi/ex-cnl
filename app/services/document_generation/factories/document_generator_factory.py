@@ -8,9 +8,6 @@ from app.data.data_repository import DataRepository
 from app.services.document_generation.concrete_generators.activite_mensuelle_hr import (
     ActiviteMensuelleHRGenerator,
 )
-from app.services.document_generation.concrete_generators.situation_des_programmes_hr import (
-    SituationDesProgrammesHRGenerator,
-)
 from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
@@ -30,7 +27,6 @@ class DocumentGeneratorFactory:
 
     _generators: dict[str, type[DocumentGenerator]] = {
         "activite_mensuelle_par_programme": ActiviteMensuelleHRGenerator,
-        "situation_des_programmes": SituationDesProgrammesHRGenerator,
     }
 
     @classmethod
@@ -45,7 +41,7 @@ class DocumentGeneratorFactory:
         cls._logger.debug(f"Available generators: {list(cls._generators.keys())}")
 
         if document_name not in cls._generators:
-            error_msg = f"Unknown document: {document_name}"
+            error_msg: str = f"Unknown document: {document_name}"
             cls._logger.error(f"{error_msg}. Available: {list(cls._generators.keys())}")
             raise ValueError(error_msg)
 
@@ -63,7 +59,7 @@ class DocumentGeneratorFactory:
             cls._logger.debug(f"Using generator class: {generator_class.__name__}")
 
             # Create generator instance
-            generator = generator_class(
+            generator: DocumentGenerator = generator_class(
                 storage_service,
                 data_repository,
                 document_specification,

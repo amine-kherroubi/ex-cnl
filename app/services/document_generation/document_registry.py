@@ -7,9 +7,6 @@ from typing import Final, final
 from app.services.document_generation.concrete_generators.activite_mensuelle_hr import (
     ActiviteMensuelleHRGenerator,
 )
-from app.services.document_generation.concrete_generators.situation_des_programmes_hr import (
-    SituationDesProgrammesHRGenerator,
-)
 from app.services.document_generation.models.document_specification import (
     DocumentCategory,
     DocumentSpecification,
@@ -67,7 +64,7 @@ class DocumentRegistry(object):
                 FROM programmes p
                 LEFT JOIN (
                     SELECT
-                        Programme,
+                        "Sous programme",
                         COUNT(*) as count
                     FROM paiements
                     WHERE Tranche IN (
@@ -79,8 +76,8 @@ class DocumentRegistry(object):
                             '100%  1+2+3 EME TRANCHE'
                         )
                         AND "Date OV" LIKE '%/{month_number:02d}/{year}'
-                    GROUP BY Programme
-                ) data ON p.programme = data.Programme
+                    GROUP BY "Sous programme"
+                ) data ON p.programme = data."Sous programme"
                 ORDER BY p.display_order
                 """,
                 "lancements_cumul_annee": """
@@ -90,7 +87,7 @@ class DocumentRegistry(object):
                 FROM programmes p
                 LEFT JOIN (
                     SELECT
-                        Programme,
+                        "Sous programme",
                         COUNT(*) as count
                     FROM paiements
                     WHERE Tranche IN (
@@ -103,8 +100,8 @@ class DocumentRegistry(object):
                         )
                         AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
                         AND "Date OV" LIKE '%/{year}'
-                    GROUP BY Programme
-                ) data ON p.programme = data.Programme
+                    GROUP BY "Sous programme"
+                ) data ON p.programme = data."Sous programme"
                 ORDER BY p.display_order
                 """,
                 "livraisons_mois": """
@@ -114,7 +111,7 @@ class DocumentRegistry(object):
                 FROM programmes p
                 LEFT JOIN (
                     SELECT
-                        Programme,
+                        "Sous programme",
                         COUNT(*) as count
                     FROM paiements
                     WHERE Tranche IN (
@@ -126,8 +123,8 @@ class DocumentRegistry(object):
                             'Tranche complémentaire 2'
                         )
                         AND "Date OV" LIKE '%/{month_number:02d}/{year}'
-                    GROUP BY Programme
-                ) data ON p.programme = data.Programme
+                    GROUP BY "Sous programme"
+                ) data ON p.programme = data."Sous programme"
                 ORDER BY p.display_order
                 """,
                 "livraisons_cumul_annee": """
@@ -137,7 +134,7 @@ class DocumentRegistry(object):
                 FROM programmes p
                 LEFT JOIN (
                     SELECT
-                        Programme,
+                        "Sous programme",
                         COUNT(*) as count
                     FROM paiements
                     WHERE Tranche IN (
@@ -150,29 +147,12 @@ class DocumentRegistry(object):
                         )
                         AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
                         AND "Date OV" LIKE '%/{year}'
-                    GROUP BY Programme
-                ) data ON p.programme = data.Programme
+                    GROUP BY "Sous programme"
+                ) data ON p.programme = data."Sous programme"
                 ORDER BY p.display_order
                 """,
             },
             output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
             generator=ActiviteMensuelleHRGenerator,
-        ),
-        "situation_des_programmes": DocumentSpecification(
-            name="situation_des_programmes",
-            display_name="Situation des programmes",
-            category=DocumentCategory.HR,
-            periodicity=Periodicity.MONTHLY,
-            description=(
-                "Document de suivi de la situation des programmes, "
-                "renseigné par la BNH (ex-CNL)"
-            ),
-            required_files={
-                r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "décisions",
-                r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
-            },
-            queries={},
-            output_filename="Situation_des_programmes_{wilaya}_{date}.xlsx",
-            generator=SituationDesProgrammesHRGenerator,
         ),
     }
