@@ -17,7 +17,7 @@ from app.services.document_generation.models.document_context import DocumentCon
 from app.services.document_generation.models.document_specification import (
     DocumentSpecification,
 )
-from app.services.io.io import IOService
+from app.services.io.io_service import IOService
 
 
 class ActiviteMensuelleHRGenerator(DocumentGenerator):

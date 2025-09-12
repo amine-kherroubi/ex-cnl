@@ -15,7 +15,7 @@ from app.data.data_repository import DataRepository
 from app.services.document_generation.business_values.programmes import (
     get_programmes_dataframe,
 )
-from app.services.io.io import IOService
+from app.services.io.io_service import IOService
 from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
