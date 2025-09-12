@@ -70,7 +70,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         # Month - Set value first, then merge
         self._current_row += 1
         month_text: str = (
-            f"MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"
+            f"MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
         )
         sheet[f"A{self._current_row}"] = month_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
@@ -93,7 +93,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         # Caption row (part of table) - Set value first, then merge
         caption_text: str = (
-            f"ETAT D'EXECUTION DES TRANCHES FINANCIERES DURANT LE MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"
+            f"ETAT D'EXECUTION DES TRANCHES FINANCIERES DURANT LE MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
         )
         sheet[f"A{self._current_row}"] = caption_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
@@ -135,16 +135,16 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         # Sub-headers
         self._current_row += 1
-        month_short: str = self._document_context.month.value[:3].title()
+        month_short: str = self._document_context.month.value[:3].title()  # type: ignore
         year_short: str = str(self._document_context.year)[-2:]
 
         sheet[f"B{self._current_row}"] = f"{month_short}-{year_short}"
         sheet[f"C{self._current_row}"] = (
-            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"
+            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
         )
         sheet[f"D{self._current_row}"] = f"{month_short}-{year_short}"
         sheet[f"E{self._current_row}"] = (
-            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"
+            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
         )
 
         for col in ["B", "C", "D", "E"]:
