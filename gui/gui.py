@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+# Standard library imports
 import tkinter as tk
 from tkinter import ttk
 from typing import Any, Callable
