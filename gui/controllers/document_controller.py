@@ -7,7 +7,7 @@ from typing import Any
 
 # Local application imports
 from app.application_facade import ApplicationFacade
-from app.config import AppConfig
+from app.config import AppConfig, StorageConfig, DatabaseConfig
 
 
 class DocumentController:
@@ -24,11 +24,21 @@ class DocumentController:
         self._results_dir = self._temp_dir / "results"
         self._results_dir.mkdir(exist_ok=True)
 
+        # Create storage config
+        storage_config = StorageConfig(
+            uploads_dir=self._uploads_dir,
+            results_dir=self._results_dir,
+        )
+
+        # Create database config (in-memory)
+        database_config = DatabaseConfig(
+            path=None,  # In-memory database
+        )
+
         # Create app config
         self._config = AppConfig(
-            uploads_dir=str(self._uploads_dir),
-            results_dir=str(self._results_dir),
-            database_url=":memory:",  # Use in-memory database
+            storage_config=storage_config,
+            database_config=database_config,
         )
 
         # Initialize facade
