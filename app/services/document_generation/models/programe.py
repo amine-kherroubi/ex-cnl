@@ -31,6 +31,14 @@ class Programme(BaseModel):
         Field(default=0, description="Order in which the programme is displayed."),
     ]
 
+    consistance: Annotated[
+        int,
+        Field(
+            default=0,
+            description="Total number of housing units planned for this programme.",
+        ),
+    ]
+
     model_config = {
         "frozen": True,
         "str_strip_whitespace": True,

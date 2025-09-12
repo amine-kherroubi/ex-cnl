@@ -87,6 +87,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
     def _add_tables(
         self, sheet: Worksheet, query_results: dict[str, pandas.DataFrame]
     ) -> None:
+        # First table (existing implementation)
         self._logger.debug("Adding main data table")
         self._logger.debug(f"Available query results: {list(query_results.keys())}")
 
@@ -160,14 +161,13 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             )
         self._logger.debug("Added sub-headers with date ranges")
 
-        # Add data from query results
+        # Add data from query results (existing implementation)
         self._current_row += 1
         self._logger.debug(f"Starting data rows at row {self._current_row}")
 
         # Get all programmes with proper ordering
         programmes: list[str] = []
         if "programmes" in query_results:
-            # Programmes are sorted by display_order
             programmes: list[str] = query_results["programmes"]["programme"].tolist()
             self._logger.info(
                 f"Found {len(programmes)} programmes (pre-sorted by year): {programmes}"
@@ -185,8 +185,6 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             self._logger.debug(
                 f"Lancements month data: {len(lancements_mois_dict)} programmes"
             )
-        else:
-            self._logger.warning("No 'lancements_mois' query result found")
 
         lancements_cumul_annee_dict: dict[str, int] = {}
         if "lancements_cumul_annee" in query_results:
@@ -195,8 +193,6 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             self._logger.debug(
                 f"Lancements YTD data: {len(lancements_cumul_annee_dict)} programmes"
             )
-        else:
-            self._logger.warning("No 'lancements_cumul_annee' query result found")
 
         livraisons_mois_dict: dict[str, int] = {}
         if "livraisons_mois" in query_results:
@@ -205,8 +201,6 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             self._logger.debug(
                 f"Livraisons month data: {len(livraisons_mois_dict)} programmes"
             )
-        else:
-            self._logger.warning("No 'livraisons_mois' query result found")
 
         livraisons_cumul_annee_dict: dict[str, int] = {}
         if "livraisons_cumul_annee" in query_results:
@@ -217,8 +211,6 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             self._logger.debug(
                 f"Livraisons YTD data: {len(livraisons_cumul_annee_dict)} programmes"
             )
-        else:
-            self._logger.warning("No 'livraisons_cumul_annee' query result found")
 
         # Calculate totals
         total_livraisons_mois: int = sum(livraisons_mois_dict.values())
@@ -278,17 +270,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                     bottom=Side(style="thin"),
                 )
 
-            if (
-                livraisons_mois > 0
-                or lancements_mois > 0
-                or livraisons_cumul_annee > 0
-                or lancements_cumul_annee > 0
-            ):
-                self._logger.debug(
-                    f"Programme '{programme}': L={livraisons_mois}/{livraisons_cumul_annee}, La={lancements_mois}/{lancements_cumul_annee}"
-                )
-
-        # Add TOTAL row
+        # Add TOTAL row for first table
         self._current_row += len(programmes)
         self._logger.debug(f"Adding TOTAL row at row {self._current_row}")
 
@@ -314,12 +296,167 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             )
 
         self._logger.info(
-            f"Main table completed with {len(programmes)} programmes plus totals"
+            f"First table completed with {len(programmes)} programmes plus totals"
         )
 
         self._current_row += 2
 
+        # Add second table header
         self._add_second_table_header(sheet)
+
+        # Add second table
+        self._add_second_table(sheet, query_results)
+
+    def _add_second_table(
+        self, sheet: Worksheet, query_results: dict[str, pandas.DataFrame]
+    ) -> None:
+        self._logger.debug("Adding second table (SITUATION DES PROGRAMMES)")
+
+        # Headers for second table
+        headers_row = self._current_row
+        headers: list[tuple[str, str]] = [
+            ("A", "PROGRAMMES"),
+            ("B", "CONSISTANCE"),
+            ("C", "ACHEVES (Dernières tranches payées)"),
+            ("D", "en cours"),
+            ("E", "non lancés (écart entre la consistance et les premières TR payées)"),
+        ]
+
+        self._logger.debug(
+            f"Adding {len(headers)} column headers for second table at row {headers_row}"
+        )
+        for col, title in headers:
+            cell = sheet[f"{col}{headers_row}"]
+            cell.value = title
+            cell.font = Font(name="Arial", size=9, bold=True)
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=True
+            )
+            cell.fill = PatternFill(
+                start_color="F2F2F2", end_color="F2F2F2", fill_type="solid"
+            )
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            )
+
+        self._current_row += 1
+
+        # Get data from query results
+        programmes_situation: list[tuple[str, int]] = []
+        if "programmes_situation" in query_results:
+            df_prog = query_results["programmes_situation"]
+            programmes_situation = list(
+                zip(df_prog["programme"], df_prog["consistance"])
+            )
+            self._logger.info(
+                f"Found {len(programmes_situation)} programmes for situation table"
+            )
+        else:
+            self._logger.warning("No 'programmes_situation' query result found")
+
+        # Create lookup dictionaries
+        acheves_dict: dict[str, int] = {}
+        if "acheves_derniere_tranche" in query_results:
+            df_acheves = query_results["acheves_derniere_tranche"]
+            acheves_dict = dict(zip(df_acheves["programme"], df_acheves["acheves"]))
+            self._logger.debug(f"Achevés data: {len(acheves_dict)} programmes")
+
+        en_cours_dict: dict[str, int] = {}
+        if "en_cours_calculation" in query_results:
+            df_en_cours = query_results["en_cours_calculation"]
+            en_cours_dict = dict(zip(df_en_cours["programme"], df_en_cours["en_cours"]))
+            self._logger.debug(f"En cours data: {len(en_cours_dict)} programmes")
+
+        non_lances_dict: dict[str, int] = {}
+        if "non_lances_premiere_tranche" in query_results:
+            df_non_lances = query_results["non_lances_premiere_tranche"]
+            non_lances_dict = dict(
+                zip(df_non_lances["programme"], df_non_lances["non_lances"])
+            )
+            self._logger.debug(f"Non lancés data: {len(non_lances_dict)} programmes")
+
+        # Add data rows
+        total_consistance = 0
+        total_acheves = 0
+        total_en_cours = 0
+        total_non_lances = 0
+
+        for i, (programme, consistance) in enumerate(programmes_situation):
+            row = self._current_row + i
+            self._logger.debug(f"Processing programme '{programme}' at row {row}")
+
+            # Column A: Programme name
+            sheet[f"A{row}"] = programme
+            sheet[f"A{row}"].font = Font(name="Arial", size=9)
+
+            # Column B: Consistance
+            sheet[f"B{row}"] = consistance
+            sheet[f"B{row}"].font = Font(name="Arial", size=9)
+            total_consistance += consistance
+
+            # Column C: Achevés
+            acheves = acheves_dict.get(programme, 0)
+            sheet[f"C{row}"] = acheves if acheves > 0 else "-"
+            sheet[f"C{row}"].font = Font(name="Arial", size=9)
+            total_acheves += acheves
+
+            # Column D: En cours
+            en_cours = en_cours_dict.get(programme, 0)
+            sheet[f"D{row}"] = en_cours if en_cours > 0 else "-"
+            sheet[f"D{row}"].font = Font(name="Arial", size=9)
+            total_en_cours += en_cours
+
+            # Column E: Non lancés
+            non_lances = non_lances_dict.get(programme, 0)
+            sheet[f"E{row}"] = non_lances if non_lances > 0 else "-"
+            sheet[f"E{row}"].font = Font(name="Arial", size=9)
+            total_non_lances += non_lances
+
+            # Add borders
+            for col in ["A", "B", "C", "D", "E"]:
+                cell = sheet[f"{col}{row}"]
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.border = Border(
+                    left=Side(style="thin"),
+                    right=Side(style="thin"),
+                    top=Side(style="thin"),
+                    bottom=Side(style="thin"),
+                )
+
+        # Add TOTAL row for second table
+        self._current_row += len(programmes_situation)
+        self._logger.debug(
+            f"Adding TOTAL row for second table at row {self._current_row}"
+        )
+
+        sheet[f"A{self._current_row}"] = "TOTAL GENERAL"
+        sheet[f"B{self._current_row}"] = total_consistance
+        sheet[f"C{self._current_row}"] = total_acheves
+        sheet[f"D{self._current_row}"] = total_en_cours
+        sheet[f"E{self._current_row}"] = total_non_lances
+
+        # Format TOTAL row
+        for col in ["A", "B", "C", "D", "E"]:
+            cell = sheet[f"{col}{self._current_row}"]
+            cell.font = Font(name="Arial", size=9, bold=True)
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            cell.fill = PatternFill(
+                start_color="E7E6E6", end_color="E7E6E6", fill_type="solid"
+            )
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            )
+
+        self._logger.info(
+            f"Second table completed with {len(programmes_situation)} programmes plus totals"
+        )
+        self._current_row += 2
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
         sheet[f"A{self._current_row}"] = (

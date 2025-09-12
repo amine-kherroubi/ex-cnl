@@ -52,105 +52,185 @@ class DocumentRegistry(object):
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
             queries={
+                # Queries for first table (ACTVITE MENSUELLE)
                 "programmes": """
-                SELECT programme
-                FROM programmes
-                ORDER BY display_order
-                """,
+                    SELECT programme
+                    FROM programmes
+                    ORDER BY display_order
+                    """,
                 "lancements_mois": """
-                SELECT 
-                    p.programme,
-                    COALESCE(data.count, 0) as count
-                FROM programmes p
-                LEFT JOIN (
-                    SELECT
-                        "Sous programme",
-                        COUNT(*) as count
-                    FROM paiements
-                    WHERE Tranche IN (
-                            '20%  1 ERE TRANCHE',
-                            '40%  Première Tranche',
-                            '60%  Première Tranche',
-                            '60%  1+2 EME TRANCHE',
-                            '100%  Tranche totale',
-                            '100%  1+2+3 EME TRANCHE'
-                        )
-                        AND "Date OV" LIKE '%/{month_number:02d}/{year}'
-                    GROUP BY "Sous programme"
-                ) data ON p.programme = data."Sous programme"
-                ORDER BY p.display_order
-                """,
+                    SELECT 
+                        p.programme,
+                        COALESCE(data.count, 0) as count
+                    FROM programmes p
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE Tranche IN (
+                                '20%  1 ERE TRANCHE',
+                                '40%  Première Tranche',
+                                '60%  Première Tranche',
+                                '60%  1+2 EME TRANCHE',
+                                '100%  Tranche totale',
+                                '100%  1+2+3 EME TRANCHE'
+                            )
+                            AND "Date OV" LIKE '%/{month_number:02d}/{year}'
+                        GROUP BY "Sous programme"
+                    ) data ON p.programme = data."Sous programme"
+                    ORDER BY p.display_order
+                    """,
                 "lancements_cumul_annee": """
-                SELECT 
-                    p.programme,
-                    COALESCE(data.count, 0) as count
-                FROM programmes p
-                LEFT JOIN (
-                    SELECT
-                        "Sous programme",
-                        COUNT(*) as count
-                    FROM paiements
-                    WHERE Tranche IN (
-                            '20%  1 ERE TRANCHE',
-                            '40%  Première Tranche',
-                            '60%  Première Tranche',
-                            '60%  1+2 EME TRANCHE',
-                            '100%  Tranche totale',
-                            '100%  1+2+3 EME TRANCHE'
-                        )
-                        AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
-                        AND "Date OV" LIKE '%/{year}'
-                    GROUP BY "Sous programme"
-                ) data ON p.programme = data."Sous programme"
-                ORDER BY p.display_order
-                """,
+                    SELECT 
+                        p.programme,
+                        COALESCE(data.count, 0) as count
+                    FROM programmes p
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE Tranche IN (
+                                '20%  1 ERE TRANCHE',
+                                '40%  Première Tranche',
+                                '60%  Première Tranche',
+                                '60%  1+2 EME TRANCHE',
+                                '100%  Tranche totale',
+                                '100%  1+2+3 EME TRANCHE'
+                            )
+                            AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
+                            AND "Date OV" LIKE '%/{year}'
+                        GROUP BY "Sous programme"
+                    ) data ON p.programme = data."Sous programme"
+                    ORDER BY p.display_order
+                    """,
                 "livraisons_mois": """
-                SELECT
-                    p.programme,
-                    COALESCE(data.count, 0) as count
-                FROM programmes p
-                LEFT JOIN (
                     SELECT
-                        "Sous programme",
-                        COUNT(*) as count
-                    FROM paiements
-                    WHERE Tranche IN (
-                            '40%  3 EME TRANCHE',
-                            '40%  Deuxième Tranche',
-                            '60%  Deuxième Tranche',
-                            '80%  2+3 EME TRANCHE',
-                            '100%  1+2+3 EME TRANCHE',
-                            'Tranche complémentaire 2'
-                        )
-                        AND "Date OV" LIKE '%/{month_number:02d}/{year}'
-                    GROUP BY "Sous programme"
-                ) data ON p.programme = data."Sous programme"
-                ORDER BY p.display_order
-                """,
+                        p.programme,
+                        COALESCE(data.count, 0) as count
+                    FROM programmes p
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE Tranche IN (
+                                '40%  3 EME TRANCHE',
+                                '40%  Deuxième Tranche',
+                                '60%  Deuxième Tranche',
+                                '80%  2+3 EME TRANCHE',
+                                '100%  1+2+3 EME TRANCHE',
+                                'Tranche complémentaire 2'
+                            )
+                            AND "Date OV" LIKE '%/{month_number:02d}/{year}'
+                        GROUP BY "Sous programme"
+                    ) data ON p.programme = data."Sous programme"
+                    ORDER BY p.display_order
+                    """,
                 "livraisons_cumul_annee": """
-                SELECT 
-                    p.programme,
-                    COALESCE(data.count, 0) as count
-                FROM programmes p
-                LEFT JOIN (
-                    SELECT
-                        "Sous programme",
-                        COUNT(*) as count
-                    FROM paiements
-                    WHERE Tranche IN (
-                            '40%  3 EME TRANCHE',
-                            '40%  Deuxième Tranche',
-                            '60%  Deuxième Tranche',
-                            '80%  2+3 EME TRANCHE',
-                            '100%  1+2+3 EME TRANCHE',
-                            'Tranche complémentaire 2'
-                        )
-                        AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
-                        AND "Date OV" LIKE '%/{year}'
-                    GROUP BY "Sous programme"
-                ) data ON p.programme = data."Sous programme"
-                ORDER BY p.display_order
-                """,
+                    SELECT 
+                        p.programme,
+                        COALESCE(data.count, 0) as count
+                    FROM programmes p
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE Tranche IN (
+                                '40%  3 EME TRANCHE',
+                                '40%  Deuxième Tranche',
+                                '60%  Deuxième Tranche',
+                                '80%  2+3 EME TRANCHE',
+                                '100%  1+2+3 EME TRANCHE',
+                                'Tranche complémentaire 2'
+                            )
+                            AND CAST(SUBSTRING("Date OV", POSITION('/' IN "Date OV") + 1, 2) AS INTEGER) <= {month_number}
+                            AND "Date OV" LIKE '%/{year}'
+                        GROUP BY "Sous programme"
+                    ) data ON p.programme = data."Sous programme"
+                    ORDER BY p.display_order
+                    """,
+                # Queries for second table (SITUATION DES PROGRAMMES)
+                "programmes_situation": """
+                    SELECT 
+                        programme,
+                        consistance,
+                        display_order
+                    FROM programmes
+                    ORDER BY display_order
+                    """,
+                "acheves_derniere_tranche": """
+                    SELECT 
+                        p.programme,
+                        p.consistance,
+                        COALESCE(data.count, 0) as acheves
+                    FROM programmes p
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE N2 > 0
+                            OR C2 > 0
+                            OR T3 > 0
+                        GROUP BY "Sous programme"
+                    ) data ON p.programme = data."Sous programme"
+                    WHERE p.consistance > 0
+                    ORDER BY p.display_order
+                    """,
+                # En cours calculation using subtraction method (easier and more reliable)
+                "en_cours_calculation": """
+                    SELECT 
+                        p.programme,
+                        p.consistance,
+                        COALESCE(lances.count, 0) as lances_count,
+                        COALESCE(acheves.count, 0) as acheves_count,
+                        GREATEST(0, COALESCE(lances.count, 0) - COALESCE(acheves.count, 0)) as en_cours
+                    FROM programmes p
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE N1 > 0
+                            OR C1 > 0
+                            OR T1 > 0
+                        GROUP BY "Sous programme"
+                    ) lances ON p.programme = lances."Sous programme"
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE N2 > 0
+                            OR C2 > 0
+                            OR T3 > 0
+                        GROUP BY "Sous programme"
+                    ) acheves ON p.programme = acheves."Sous programme"
+                    WHERE p.consistance > 0
+                    ORDER BY p.display_order
+                    """,
+                "non_lances_premiere_tranche": """
+                    SELECT 
+                        p.programme,
+                        p.consistance,
+                        COALESCE(p.consistance - data.count, p.consistance) as non_lances
+                    FROM programmes p
+                    LEFT JOIN (
+                        SELECT
+                            "Sous programme",
+                            COUNT(*) as count
+                        FROM paiements
+                        WHERE N1 > 0
+                            OR C1 > 0
+                            OR T1 > 0
+                        GROUP BY "Sous programme"
+                    ) data ON p.programme = data."Sous programme"
+                    WHERE p.consistance > 0
+                    ORDER BY p.display_order
+                    """,
             },
             output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
             generator=ActiviteMensuelleHRGenerator,
