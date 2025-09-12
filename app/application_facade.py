@@ -12,7 +12,7 @@ from app.services.document_generation.document_generator_template import (
 from app.data.data_repository import DuckDBRepository
 from app.services.document_generation.document_registry import DocumentRegistry
 from app.services.document_generation.document_registry import DocumentSpecification
-from app.services.io.io import IOService
+from app.services.io.io_service import IOService
 from app.services.document_generation.factories.document_context_factory import (
     DocumentContextFactory,
 )

@@ -18,7 +18,7 @@ from app.services.document_generation.document_registry import (
 from app.services.document_generation.document_generator_template import (
     DocumentGenerator,
 )
-from app.services.io.io import IOService
+from app.services.io.io_service import IOService
 from app.utils.logging_setup import get_logger
 
 
