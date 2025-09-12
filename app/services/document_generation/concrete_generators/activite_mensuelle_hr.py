@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 # Third-party imports
-import pandas
+import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
@@ -17,7 +17,7 @@ from app.services.document_generation.models.document_context import DocumentCon
 from app.services.document_generation.models.document_specification import (
     DocumentSpecification,
 )
-from app.services.file_storage.file_storage_service import FileStorageService
+from app.services.io.io import IOService
 
 
 class ActiviteMensuelleHRGenerator(DocumentGenerator):
@@ -25,7 +25,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
     def __init__(
         self,
-        storage_service: FileStorageService,
+        storage_service: IOService,
         data_repository: DataRepository,
         document_specification: DocumentSpecification,
         document_context: DocumentContext,
@@ -85,7 +85,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._current_row += 2
 
     def _add_tables(
-        self, sheet: Worksheet, query_results: dict[str, pandas.DataFrame]
+        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
         # First table (existing implementation)
         self._logger.debug("Adding main data table")
@@ -180,7 +180,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         lancements_mois_dict: dict[str, int] = {}
         if "lancements_mois" in query_results:
-            df_lm: pandas.DataFrame = query_results["lancements_mois"]
+            df_lm: pd.DataFrame = query_results["lancements_mois"]
             lancements_mois_dict = dict(zip(df_lm["programme"], df_lm["count"]))
             self._logger.debug(
                 f"Lancements month data: {len(lancements_mois_dict)} programmes"
@@ -188,7 +188,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         lancements_cumul_annee_dict: dict[str, int] = {}
         if "lancements_cumul_annee" in query_results:
-            df_ly: pandas.DataFrame = query_results["lancements_cumul_annee"]
+            df_ly: pd.DataFrame = query_results["lancements_cumul_annee"]
             lancements_cumul_annee_dict = dict(zip(df_ly["programme"], df_ly["count"]))
             self._logger.debug(
                 f"Lancements YTD data: {len(lancements_cumul_annee_dict)} programmes"
@@ -196,7 +196,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         livraisons_mois_dict: dict[str, int] = {}
         if "livraisons_mois" in query_results:
-            df_livm: pandas.DataFrame = query_results["livraisons_mois"]
+            df_livm: pd.DataFrame = query_results["livraisons_mois"]
             livraisons_mois_dict = dict(zip(df_livm["programme"], df_livm["count"]))
             self._logger.debug(
                 f"Livraisons month data: {len(livraisons_mois_dict)} programmes"
@@ -204,7 +204,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         livraisons_cumul_annee_dict: dict[str, int] = {}
         if "livraisons_cumul_annee" in query_results:
-            df_livy: pandas.DataFrame = query_results["livraisons_cumul_annee"]
+            df_livy: pd.DataFrame = query_results["livraisons_cumul_annee"]
             livraisons_cumul_annee_dict = dict(
                 zip(df_livy["programme"], df_livy["count"])
             )
@@ -308,7 +308,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._add_second_table(sheet, query_results)
 
     def _add_second_table(
-        self, sheet: Worksheet, query_results: dict[str, pandas.DataFrame]
+        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
         self._logger.debug("Adding second table (SITUATION DES PROGRAMMES)")
 

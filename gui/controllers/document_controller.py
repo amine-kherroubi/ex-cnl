@@ -11,8 +11,6 @@ from app.config import AppConfig, StorageConfig, DatabaseConfig
 
 
 class DocumentController:
-    """Controller for document generation operations."""
-
     def __init__(self) -> None:
         # Initialize app config with temporary directories
         self._temp_dir = Path.cwd() / "temp"
@@ -25,33 +23,31 @@ class DocumentController:
         self._results_dir.mkdir(exist_ok=True)
 
         # Create storage config
-        storage_config = StorageConfig(
+        storage_config: StorageConfig = StorageConfig(
             uploads_dir=self._uploads_dir,
             results_dir=self._results_dir,
         )
 
         # Create database config (in-memory)
-        database_config = DatabaseConfig(
+        database_config: DatabaseConfig = DatabaseConfig(
             path=None,  # In-memory database
         )
 
         # Create app config
-        self._config = AppConfig(
+        self._config: AppConfig = AppConfig(
             storage_config=storage_config,
             database_config=database_config,
         )
 
         # Initialize facade
-        self._facade = ApplicationFacade(self._config)
+        self._facade: ApplicationFacade = ApplicationFacade(self._config)
 
     def get_available_reports(self) -> dict[str, Any]:
-        """Get available report types."""
         return self._facade.get_available_documents()
 
     def generate_document(
         self, report_name: str, input_files: list[Path], output_path: Path
     ) -> str:
-        """Generate a document with the given parameters."""
         try:
             # Copy input files to temp uploads directory
             self._prepare_input_files(input_files)
@@ -60,8 +56,8 @@ class DocumentController:
             self._facade.generate_document(report_name)
 
             # Find and move the generated file to the desired output location
-            generated_file = self._find_generated_file()
-            final_output_path = output_path / generated_file.name
+            generated_file: Path = self._find_generated_file()
+            final_output_path: Path = output_path / generated_file.name
 
             # Move file to final destination
             shutil.move(str(generated_file), str(final_output_path))
@@ -77,7 +73,6 @@ class DocumentController:
             raise e
 
     def _prepare_input_files(self, input_files: list[Path]) -> None:
-        """Copy input files to the temporary uploads directory."""
         # Clear existing files
         for existing_file in self._uploads_dir.iterdir():
             if existing_file.is_file():
@@ -86,11 +81,10 @@ class DocumentController:
         # Copy new files
         for file_path in input_files:
             if file_path.exists():
-                destination = self._uploads_dir / file_path.name
+                destination: Path = self._uploads_dir / file_path.name
                 shutil.copy2(str(file_path), str(destination))
 
     def _find_generated_file(self) -> Path:
-        """Find the generated file in the results directory."""
         result_files = list(self._results_dir.glob("*.xlsx"))
 
         if not result_files:
@@ -102,7 +96,6 @@ class DocumentController:
         return result_files[0]
 
     def _cleanup_temp_files(self) -> None:
-        """Clean up temporary files."""
         for temp_file in self._uploads_dir.iterdir():
             if temp_file.is_file():
                 temp_file.unlink()

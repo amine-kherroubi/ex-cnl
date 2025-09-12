@@ -3,11 +3,11 @@ from __future__ import annotations
 # Standard library imports
 from pathlib import Path
 import re
-from typing import Any, Protocol
+from typing import Any
 from logging import Logger
 
 # Third-party imports
-import pandas
+import pandas as pd
 from openpyxl import Workbook
 
 # Local application imports
@@ -16,13 +16,7 @@ from app.config import StorageConfig
 from app.utils.logging_setup import get_logger
 
 
-class StorageService(Protocol):
-    def load_data_from_file(self, filename: str) -> pandas.DataFrame: ...
-    def save_data_to_file(self, data: Any, output_filename: str) -> None: ...
-    def find_filename_matching_pattern(self, pattern: str) -> str | None: ...
-
-
-class FileStorageService(object):
+class IOService(object):
     __slots__ = ("_config", "_logger")
 
     def __init__(self, storage_config: StorageConfig) -> None:
@@ -38,7 +32,7 @@ class FileStorageService(object):
             f"Configuration - Max file size: {self._config.max_input_file_size_mb}MB, Allowed extensions: {self._config.allowed_input_file_extensions}"
         )
 
-    def load_data_from_file(self, filename: str) -> pandas.DataFrame:
+    def load_data_from_file(self, filename: str) -> pd.DataFrame:
         self._logger.info(f"Loading data from file: {filename}")
         file_path: Path = self._config.uploads_dir / filename
         self._logger.debug(f"Full file path: {file_path}")
@@ -52,8 +46,8 @@ class FileStorageService(object):
             skiprows: int = self._find_table_start_row(file_path)
             self._logger.debug(f"Table starts at row {skiprows}")
 
-            self._logger.debug("Reading Excel file with pandas")
-            dataframe = pandas.read_excel(  # type: ignore
+            self._logger.debug("Reading Excel file with pd")
+            dataframe: pd.DataFrame = pd.read_excel(  # type: ignore
                 file_path, dtype_backend="numpy_nullable", skiprows=skiprows
             )
 
@@ -113,14 +107,14 @@ class FileStorageService(object):
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
-        matched_file = matches[0]
+        matched_file: str = matches[0]
         self._logger.info(f"Found matching file: {matched_file}")
         return matched_file
 
     def _verify_file_exists(self, file_path: Path) -> None:
         self._logger.debug(f"Verifying file exists: {file_path}")
         if not file_path.exists():
-            error_msg = f"File not found: {file_path}"
+            error_msg: str = f"File not found: {file_path}"
             self._logger.error(error_msg)
             raise FileNotFoundError(error_msg)
         self._logger.debug("File exists")
@@ -130,7 +124,7 @@ class FileStorageService(object):
         self._logger.debug(f"Verifying file extension: .{extension}")
 
         if extension not in self._config.allowed_input_file_extensions:
-            error_msg = (
+            error_msg: str = (
                 f"Extension '.{extension}' not allowed. "
                 f"Allowed: {self._config.allowed_input_file_extensions}"
             )
@@ -144,7 +138,7 @@ class FileStorageService(object):
         self._logger.debug(f"Verifying file size: {size_mb:.2f} MB")
 
         if size_mb > self._config.max_input_file_size_mb:
-            error_msg = (
+            error_msg: str = (
                 f"File {file_path} is too large ({size_mb:.2f} MB). "
                 f"Max allowed: {self._config.max_input_file_size_mb} MB"
             )
@@ -157,7 +151,7 @@ class FileStorageService(object):
         self._logger.debug(f"Verifying output extension: .{extension}")
 
         if extension != self._config.default_output_format:
-            error_msg = (
+            error_msg: str = (
                 f"Output format '.{extension}' does not match default output format "
                 f"'{self._config.default_output_format}'"
             )
@@ -171,16 +165,14 @@ class FileStorageService(object):
         )
 
         try:
-            preview_df: pandas.DataFrame = pandas.read_excel(file_path, nrows=30, header=None)  # type: ignore
+            preview_df: pd.DataFrame = pd.read_excel(file_path, nrows=30, header=None)  # type: ignore
             self._logger.debug(f"Loaded {len(preview_df)} preview rows")
         except Exception as error:
             self._logger.exception(f"Failed to read file preview: {error}")
             raise DataLoadError(file_path, error) from error
 
         for row_idx, (_, row) in enumerate(preview_df.iterrows()):
-            first_cell: str = (
-                str(row.iloc[0]).strip() if pandas.notna(row.iloc[0]) else ""
-            )
+            first_cell: str = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else ""
             self._logger.debug(
                 f"Row {row_idx}: '{first_cell[:50]}{'...' if len(first_cell) > 50 else ''}'"
             )
@@ -189,6 +181,6 @@ class FileStorageService(object):
                 self._logger.info(f"Found table header 'N° d'ordre' at row {row_idx}")
                 return row_idx
 
-        error_msg = "Could not find 'N° d'ordre' header to determine table start"
+        error_msg: str = "Could not find 'N° d'ordre' header to determine table start"
         self._logger.error(error_msg)
         raise DataLoadError(file_path, Exception(error_msg))

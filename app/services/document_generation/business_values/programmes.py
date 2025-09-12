@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Final
 
 # Third-party imports
-import pandas
+import pandas as pd
 
 # Local application imports
 from app.services.document_generation.models.programe import Programme
@@ -398,8 +398,8 @@ PROGRAMMES_HABITAT_RURAL: Final[list[Programme]] = [
 ]
 
 
-def get_programmes_dataframe() -> pandas.DataFrame:
-    return pandas.DataFrame(
+def get_programmes_dataframe() -> pd.DataFrame:
+    return pd.DataFrame(
         [
             {
                 "programme": prog.name,

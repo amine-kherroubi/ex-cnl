@@ -108,13 +108,13 @@ class StorageConfig(BaseSettings):
         description="Default output format for results.",
     )
 
-    @field_validator("uploads_dir")
+    @field_validator("uploads_dir", mode="after")
     @classmethod
     def ensure_uploads_directory(cls, uploads_dir: Path) -> Path:
         uploads_dir.mkdir(parents=True, exist_ok=True)
         return uploads_dir
 
-    @field_validator("results_dir")
+    @field_validator("results_dir", mode="after")
     @classmethod
     def ensure_results_directory(cls, results_dir: Path) -> Path:
         results_dir.mkdir(parents=True, exist_ok=True)

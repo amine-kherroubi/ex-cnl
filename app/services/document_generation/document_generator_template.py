@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Callable
 from logging import Logger
 
 # Third-party imports
-import pandas
+import pandas as pd
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -15,7 +15,7 @@ from app.data.data_repository import DataRepository
 from app.services.document_generation.business_values.programmes import (
     get_programmes_dataframe,
 )
-from app.services.file_storage.file_storage_service import FileStorageService
+from app.services.io.io import IOService
 from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
@@ -41,7 +41,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
 
     def __init__(
         self,
-        storage_service: FileStorageService,
+        storage_service: IOService,
         data_repository: DataRepository,
         document_specification: "DocumentSpecification",
         document_context: DocumentContext,
@@ -49,7 +49,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
         self._logger: Logger = get_logger(f"app.generators.{self.__class__.__name__}")
         self._logger.debug(f"Initializing {self.__class__.__name__}")
 
-        self._storage_service: FileStorageService = storage_service
+        self._storage_service: IOService = storage_service
         self._data_repository: DataRepository = data_repository
         self._document_specification: "DocumentSpecification" = document_specification
         self._document_context: DocumentContext = document_context
@@ -85,7 +85,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
 
             # Step 4: Execute queries
             self._logger.debug("Step 3: Executing queries")
-            query_results: dict[str, pandas.DataFrame] = self._execute_queries()
+            query_results: dict[str, pd.DataFrame] = self._execute_queries()
             self._logger.info(f"Executed {len(query_results)} queries successfully")
 
             # Step 5: Create workbook and main sheet
@@ -174,9 +174,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
         for view_name, filename in files_mapping.items():
             self._logger.debug(f"Loading file '{filename}' into view '{view_name}'")
             try:
-                df: pandas.DataFrame = self._storage_service.load_data_from_file(
-                    filename
-                )
+                df: pd.DataFrame = self._storage_service.load_data_from_file(filename)
 
                 # Clean column names
                 original_columns: list[str] = list(df.columns)
@@ -202,7 +200,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
     def _create_reference_tables(self) -> None:
         self._logger.debug("Creating reference tables")
 
-        reference_tables: dict[str, Callable[[], pandas.DataFrame]] = {
+        reference_tables: dict[str, Callable[[], pd.DataFrame]] = {
             "programmes": get_programmes_dataframe,
         }
 
@@ -210,7 +208,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
             try:
                 self._logger.debug(f"Creating '{table_name}' reference table")
 
-                df: pandas.DataFrame = dataframe_factory()
+                df: pd.DataFrame = dataframe_factory()
                 self._data_repository.create_view_from_dataframe(table_name, df)
 
                 rows, cols = df.shape
@@ -225,7 +223,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
                 )
                 raise
 
-    def _execute_queries(self) -> dict[str, pandas.DataFrame]:
+    def _execute_queries(self) -> dict[str, pd.DataFrame]:
         self._logger.debug("Executing document queries")
 
         if not self._document_specification:
@@ -233,7 +231,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
-        results: dict[str, pandas.DataFrame] = {}
+        results: dict[str, pd.DataFrame] = {}
         query_count: int = len(self._document_specification.queries)
         self._logger.debug(f"Preparing to execute {query_count} queries")
 
@@ -246,9 +244,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
                     f"Formatted query '{query_name}' with document context"
                 )
 
-                result_df: pandas.DataFrame = self._data_repository.execute(
-                    formatted_query
-                )
+                result_df: pd.DataFrame = self._data_repository.execute(formatted_query)
                 results[query_name] = result_df
 
                 self._logger.info(
@@ -299,7 +295,7 @@ class DocumentGenerator(ABC):  # Template Method pattern
 
     @abstractmethod
     def _add_tables(
-        self, sheet: Worksheet, query_results: dict[str, pandas.DataFrame]
+        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None: ...
 
     @abstractmethod

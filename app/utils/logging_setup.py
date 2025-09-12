@@ -161,7 +161,7 @@ class LoggingSetup:
             "propagate": True,
         }
 
-        logging_config["loggers"]["pandas"] = {
+        logging_config["loggers"]["pd"] = {
             "level": "WARNING",
             "propagate": True,
         }

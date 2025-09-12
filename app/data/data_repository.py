@@ -6,7 +6,7 @@ from logging import Logger
 
 # Third-party imports
 import duckdb
-import pandas
+import pandas as pd
 
 # Local application imports
 from app.utils.exceptions import DatabaseError, QueryExecutionError
@@ -18,17 +18,17 @@ class DataRepository(Protocol):  # Repository pattern with protocol
     def create_view_from_dataframe(
         self,
         view_name: str,
-        dataframe: pandas.DataFrame,
+        dataframe: pd.DataFrame,
     ) -> None: ...
-    def execute(self, query: str) -> pandas.DataFrame: ...
+    def execute(self, query: str) -> pd.DataFrame: ...
     def count_records(self, view_name: str) -> int: ...
-    def describe(self, view_name: str) -> pandas.DataFrame: ...
+    def describe(self, view_name: str) -> pd.DataFrame: ...
     def get_data(
         self,
         view_name: str,
         offset: int = 0,
         limit: int = 5,
-    ) -> pandas.DataFrame: ...
+    ) -> pd.DataFrame: ...
     def summarize(self, view_name: str) -> dict[str, Any]: ...
     def close(self) -> None: ...
 
@@ -72,7 +72,7 @@ class DuckDBRepository:  # Repository pattern implementation
         self._logger.info("DuckDB repository initialized successfully")
 
     def create_view_from_dataframe(
-        self, view_name: str, dataframe: pandas.DataFrame
+        self, view_name: str, dataframe: pd.DataFrame
     ) -> None:
         self._logger.debug(
             f"Creating view '{view_name}' from DataFrame with shape {dataframe.shape}"
@@ -96,7 +96,7 @@ class DuckDBRepository:  # Repository pattern implementation
             self._logger.exception(error_msg)
             raise DatabaseError(error_msg) from error
 
-    def execute(self, query: str) -> pandas.DataFrame:
+    def execute(self, query: str) -> pd.DataFrame:
         self._logger.debug(
             f"Executing query: {query[:100]}{'...' if len(query) > 100 else ''}"
         )
@@ -112,7 +112,7 @@ class DuckDBRepository:  # Repository pattern implementation
             raise DatabaseError(error_msg)
 
         try:
-            result: pandas.DataFrame = self._connection.execute(query).fetchdf()
+            result: pd.DataFrame = self._connection.execute(query).fetchdf()
             self._logger.debug(
                 f"Query returned {len(result)} rows and {len(result.columns)} columns"
             )
@@ -123,22 +123,20 @@ class DuckDBRepository:  # Repository pattern implementation
 
     def count_records(self, view_name: str) -> int:
         self._logger.debug(f"Counting records in view '{view_name}'")
-        result: pandas.DataFrame = self.execute(
+        result: pd.DataFrame = self.execute(
             f"SELECT COUNT(*) as total_rows FROM {view_name}"
         )
         count: int = int(result["total_rows"].iloc[0])
         self._logger.debug(f"View '{view_name}' contains {count} records")
         return count
 
-    def describe(self, view_name: str) -> pandas.DataFrame:
+    def describe(self, view_name: str) -> pd.DataFrame:
         self._logger.debug(f"Describing structure of view '{view_name}'")
-        result: pandas.DataFrame = self.execute(f"DESCRIBE {view_name}")
+        result: pd.DataFrame = self.execute(f"DESCRIBE {view_name}")
         self._logger.debug(f"View '{view_name}' has {len(result)} columns")
         return result
 
-    def get_data(
-        self, view_name: str, offset: int = 0, limit: int = 5
-    ) -> pandas.DataFrame:
+    def get_data(self, view_name: str, offset: int = 0, limit: int = 5) -> pd.DataFrame:
         self._logger.debug(
             f"Retrieving sample data from view '{view_name}' (offset={offset}, limit={limit})"
         )
