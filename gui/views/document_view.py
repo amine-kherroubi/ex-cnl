@@ -12,6 +12,7 @@ import customtkinter as ctk  # type: ignore
 from gui.components.file_selector import FileSelector
 from gui.components.output_selector import OutputSelector
 from gui.components.status_display import StatusDisplay
+from gui.components.email_dialog import EmailDialog
 from gui.controllers.document_controller import DocumentController
 
 
@@ -28,6 +29,7 @@ class DocumentView(ctk.CTkFrame):
         "_back_button",
         "_selected_files",
         "_output_path",
+        "_last_generated_file",
     )
 
     def __init__(
@@ -46,6 +48,7 @@ class DocumentView(ctk.CTkFrame):
         self._on_back: Callable[[], None] = on_back
         self._selected_files: list[Path] = []
         self._output_path: Path | None = None
+        self._last_generated_file: str | None = None
 
         self._setup_ui()
 
@@ -54,7 +57,7 @@ class DocumentView(ctk.CTkFrame):
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
-        # Header with back button
+        # Header with back button (stays fixed)
         header_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
         header_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
@@ -104,40 +107,46 @@ class DocumentView(ctk.CTkFrame):
         )
         desc_label.grid(row=1, column=0, pady=(5, 0), sticky="w")  # type: ignore
 
-        # Main content frame
-        content_frame: ctk.CTkFrame = ctk.CTkFrame(master=self)
-        content_frame.grid(row=1, column=0, padx=20, pady=(10, 20), sticky="nsew")  # type: ignore
-        content_frame.grid_columnconfigure(index=0, weight=1)
-        content_frame.grid_rowconfigure(index=2, weight=1)
+        # Scrollable content frame
+        scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(master=self)
+        scrollable_frame.grid(row=1, column=0, padx=20, pady=(10, 20), sticky="nsew")  # type: ignore
+        scrollable_frame.grid_columnconfigure(index=0, weight=1)
 
         # Required files section
-        self._create_required_files_section(parent=content_frame)
+        self._create_required_files_section(parent=scrollable_frame)
 
         # File selector
         self._file_selector: FileSelector = FileSelector(
-            parent=content_frame, on_files_changed=self._on_files_changed
+            parent=scrollable_frame, on_files_changed=self._on_files_changed
         )
         self._file_selector.grid(row=1, column=0, padx=20, pady=(20, 10), sticky="ew")  # type: ignore
 
         # Output selector
         self._output_selector: OutputSelector = OutputSelector(
-            parent=content_frame, on_output_changed=self._on_output_changed
+            parent=scrollable_frame, on_output_changed=self._on_output_changed
         )
         self._output_selector.grid(row=2, column=0, padx=20, pady=(10, 10), sticky="ew")  # type: ignore
 
         # Status display
-        self._status_display: StatusDisplay = StatusDisplay(parent=content_frame)
-        self._status_display.grid(row=3, column=0, padx=20, pady=(10, 20), sticky="nsew")  # type: ignore
+        self._status_display: StatusDisplay = StatusDisplay(parent=scrollable_frame)
+        self._status_display.grid(row=3, column=0, padx=20, pady=(10, 20), sticky="ew")  # type: ignore
+
+        # Button frame for Generate and Email buttons
+        button_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=scrollable_frame, fg_color="transparent"
+        )
+        button_frame.grid(row=4, column=0, padx=20, pady=(0, 20), sticky="ew")  # type: ignore
+        button_frame.grid_columnconfigure(index=0, weight=1)
 
         # Generate button
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
-            master=content_frame,
+            master=button_frame,
             text="Generate Document",
             command=self._generate_document,
             height=40,
             font=ctk.CTkFont(size=14, weight="bold"),
         )
-        self._generate_button.grid(row=4, column=0, padx=20, pady=(0, 20), sticky="ew")  # type: ignore
+        self._generate_button.grid(row=0, column=0, sticky="ew")  # type: ignore
         self._generate_button.configure(state="disabled")  # type: ignore
 
     def _create_required_files_section(self, parent: Any) -> None:
@@ -162,7 +171,7 @@ class DocumentView(ctk.CTkFrame):
         )
         info_box.grid(row=1, column=0, sticky="ew")  # type: ignore
 
-        # Required files list (placeholder - would be populated from document spec)
+        # Required files list
         req_text: str = self._get_required_files_text()
 
         req_label: ctk.CTkLabel = ctk.CTkLabel(
@@ -175,8 +184,6 @@ class DocumentView(ctk.CTkFrame):
         req_label.grid(row=0, column=0, padx=15, pady=15, sticky="w")  # type: ignore
 
     def _get_required_files_text(self) -> str:
-        # This would be extracted from document spec in real implementation
-        # For now, return a generic message
         return (
             "📁 Please select the required Excel files for this document type.\n"
             "📋 The system will validate the selected files before generation."
@@ -256,6 +263,7 @@ class DocumentView(ctk.CTkFrame):
         thread.start()
 
     def _on_generation_success(self, output_file: str) -> None:
+        self._last_generated_file = output_file
         self._status_display.add_message(
             message=f"Document generated successfully: {output_file}",
             message_type="success",
@@ -263,9 +271,31 @@ class DocumentView(ctk.CTkFrame):
         self._generate_button.configure(state="normal", text="Generate Document")  # type: ignore
         self._back_button.configure(state="normal")  # type: ignore
 
+        # Show email dialog
+        self._show_email_dialog()
+
     def _on_generation_error(self, error_message: str) -> None:
         self._status_display.add_message(
             message=f"Generation failed: {error_message}", message_type="error"
         )
         self._generate_button.configure(state="normal", text="Generate Document")  # type: ignore
         self._back_button.configure(state="normal")  # type: ignore
+
+    def _show_email_dialog(self) -> None:
+        if not self._last_generated_file:
+            return
+
+        dialog: EmailDialog = EmailDialog(
+            parent=self,
+            file_path=self._last_generated_file,
+            on_send=self._send_email,
+        )
+
+    def _send_email(self, recipients: list[str], file_path: str) -> None:
+        # This is where you would implement actual email sending
+        # For now, just show a success message
+        self._status_display.add_message(
+            message=f"Email would be sent to: {', '.join(recipients)}",
+            message_type="success",
+        )
+        print(f"Sending {file_path} to: {recipients}")

@@ -158,45 +158,6 @@ class SettingsView(ctk.CTkFrame):
         date_option.grid(row=0, column=1, padx=10, pady=10, sticky="w")  # type: ignore
         self._settings_widgets["date_range"] = date_option
 
-        # Export options section
-        export_section: SettingsSection = SettingsSection(
-            parent=parent,
-            title="Export Options",
-            description="Configure how the report should be exported",
-        )
-        export_section.grid(row=2, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
-
-        export_frame: ctk.CTkFrame = export_section.get_content_frame()
-
-        # Include charts checkbox
-        charts_checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
-            master=export_frame,
-            text="Include charts and visualizations",
-            font=ctk.CTkFont(size=13),
-        )
-        charts_checkbox.grid(row=0, column=0, padx=20, pady=5, sticky="w")  # type: ignore
-        charts_checkbox.select()  # type: ignore
-        self._settings_widgets["include_charts"] = charts_checkbox
-
-        # Include summary checkbox
-        summary_checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
-            master=export_frame,
-            text="Generate executive summary",
-            font=ctk.CTkFont(size=13),
-        )
-        summary_checkbox.grid(row=1, column=0, padx=20, pady=5, sticky="w")  # type: ignore
-        summary_checkbox.select()  # type: ignore
-        self._settings_widgets["include_summary"] = summary_checkbox
-
-        # Auto-email checkbox
-        email_checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
-            master=export_frame,
-            text="Automatically email report when generated",
-            font=ctk.CTkFont(size=13),
-        )
-        email_checkbox.grid(row=2, column=0, padx=20, pady=5, sticky="w")  # type: ignore
-        self._settings_widgets["auto_email"] = email_checkbox
-
     def _create_generic_settings(self, parent: Any) -> None:
         # General settings section
         general_section: SettingsSection = SettingsSection(

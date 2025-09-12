@@ -21,6 +21,8 @@ class MainWindow(ctk.CTk):
         "_current_view",
         "_container",
         "_title_label",
+        "_theme_button",
+        "_current_theme",
     )
 
     def __init__(self) -> None:
@@ -31,8 +33,9 @@ class MainWindow(ctk.CTk):
         self.geometry(geometry_string="900x700")
         self.minsize(width=700, height=600)
 
-        # Set theme
-        ctk.set_appearance_mode(mode_string="system")
+        # Set initial theme
+        self._current_theme: str = "system"
+        ctk.set_appearance_mode(mode_string=self._current_theme)
         ctk.set_default_color_theme(color_string="green")
 
         # Initialize state and controller
@@ -52,19 +55,61 @@ class MainWindow(ctk.CTk):
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
+        # Header frame
+        header_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
+        header_frame.grid(row=0, column=0, padx=30, pady=(30, 20), sticky="ew")  # type: ignore
+        header_frame.grid_columnconfigure(index=0, weight=1)
+
         # Title
         self._title_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
+            master=header_frame,
             text="Document Generator",
             font=ctk.CTkFont(size=28, weight="bold"),
         )
-        self._title_label.grid(row=0, column=0, padx=30, pady=(30, 20), sticky="w")  # type: ignore
+        self._title_label.grid(row=0, column=0, sticky="w")  # type: ignore
+
+        # Theme toggle button
+        self._theme_button: ctk.CTkButton = ctk.CTkButton(
+            master=header_frame,
+            text="🌙 Dark",
+            command=self._toggle_theme,
+            width=100,
+            height=32,
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray80", "gray30"),
+            border_width=2,
+            font=ctk.CTkFont(size=13),
+        )
+        self._theme_button.grid(row=0, column=1, sticky="e")  # type: ignore
+        self._update_theme_button()
 
         # Main container for views
         self._container: ctk.CTkFrame = ctk.CTkFrame(master=self)
         self._container.grid(row=1, column=0, padx=30, pady=(0, 30), sticky="nsew")  # type: ignore
         self._container.grid_columnconfigure(index=0, weight=1)
         self._container.grid_rowconfigure(index=0, weight=1)
+
+    def _toggle_theme(self) -> None:
+        # Cycle through themes: system -> dark -> light -> system
+        if self._current_theme == "system":
+            self._current_theme = "dark"
+        elif self._current_theme == "dark":
+            self._current_theme = "light"
+        else:
+            self._current_theme = "system"
+
+        ctk.set_appearance_mode(mode_string=self._current_theme)
+        self._update_theme_button()
+
+    def _update_theme_button(self) -> None:
+        # Update button text based on current theme
+        if self._current_theme == "dark":
+            self._theme_button.configure(text="🌙 Dark")  # type: ignore
+        elif self._current_theme == "light":
+            self._theme_button.configure(text="☀️ Light")  # type: ignore
+        else:
+            self._theme_button.configure(text="🖥️ System")  # type: ignore
 
     def _load_available_reports(self) -> None:
         try:
