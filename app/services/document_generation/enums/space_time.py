@@ -81,18 +81,18 @@ class Wilaya(StrEnum):
 
 
 class Month(StrEnum):
-    JANVIER = "Janvier"
-    FEVRIER = "Février"
-    MARS = "Mars"
-    AVRIL = "Avril"
-    MAI = "Mai"
-    JUIN = "Juin"
-    JUILLET = "Juillet"
-    AOUT = "Août"
-    SEPTEMBRE = "Septembre"
-    OCTOBRE = "Octobre"
-    NOVEMBRE = "Novembre"
-    DECEMBRE = "Décembre"
+    JANVIER = "janvier"
+    FEVRIER = "février"
+    MARS = "mars"
+    AVRIL = "avril"
+    MAI = "mai"
+    JUIN = "juin"
+    JUILLET = "juillet"
+    AOUT = "août"
+    SEPTEMBRE = "septembre"
+    OCTOBRE = "octobre"
+    NOVEMBRE = "novembre"
+    DECEMBRE = "décembre"
 
     @property
     def number(self) -> int:

@@ -6,7 +6,7 @@ from typing import Any
 # Third-party imports
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.styles import Alignment, Border, Font, Side
 
 # Local application imports
 from app.data.data_repository import DataRepository
@@ -39,18 +39,18 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._logger.debug("Adding document header")
 
         # HABITAT RURAL - Set value first, then merge
-        sheet[f"A{self._current_row}"] = "HABITAT RURAL"
+        sheet[f"A{self._current_row}"] = "Habitat rural"
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="center", vertical="center"
         )
-        self._logger.debug("Added main title: HABITAT RURAL")
+        self._logger.debug("Added main title: Habitat rural")
 
         self._current_row += 1
 
         # Wilaya
-        wilaya_text = f"WILAYA DE : {self._document_context.wilaya.value.upper()}"
+        wilaya_text = f"Wilaya de {self._document_context.wilaya.value}"
         sheet[f"A{self._current_row}"] = wilaya_text
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         self._logger.debug(f"Added wilaya: {wilaya_text}")
@@ -58,7 +58,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         # Main title - Set value first, then merge
         self._current_row += 1
         sheet[f"A{self._current_row}"] = (
-            "ACTIVITE MENSUELLE PAR PROGRAMMES (À renseigner par la BNH (ex-CNL))"
+            "Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
@@ -70,7 +70,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         # Month - Set value first, then merge
         self._current_row += 1
         month_text: str = (
-            f"MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
+            f"Mois de {self._document_context.month.value} {self._document_context.year}"  # type: ignore
         )
         sheet[f"A{self._current_row}"] = month_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
@@ -87,68 +87,60 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
     def _add_tables(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        # First table (existing implementation)
         self._logger.debug("Adding main data table")
         self._logger.debug(f"Available query results: {list(query_results.keys())}")
 
-        # Caption row (part of table) - Set value first, then merge
-        caption_text: str = (
-            f"ETAT D'EXECUTION DES TRANCHES FINANCIERES DURANT LE MOIS DE {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
+        # Programme cell spans 3 rows
+        sheet[f"A{self._current_row}"] = "Programme"
+        sheet.merge_cells(f"A{self._current_row}:A{self._current_row + 2}")
+        for cell in [sheet[f"A{self._current_row + i}"] for i in range(3)]:
+            cell.font = Font(name="Arial", size=9, bold=True)
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=True
+            )
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            )
+
+        sheet[f"B{self._current_row}"] = (
+            f"État d'exécution des tranches financières durant le mois de "
+            f"{self._document_context.month.value} {self._document_context.year}"  # type: ignore
         )
-        sheet[f"A{self._current_row}"] = caption_text
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center", wrap_text=True
-        )
+        sheet.merge_cells(f"B{self._current_row}:E{self._current_row}")
+        for cell in [
+            sheet[f"{column}{self._current_row}"] for column in ("B", "C", "D", "E")
+        ]:
+            cell.font = Font(name="Arial", size=9, bold=True)
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=True
+            )
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            )
+
         self._logger.debug("Added table caption")
 
         # Headers
-        self._current_row += 2
-        headers: list[tuple[str, str]] = [
-            ("A", "PROGRAMMES"),
-            ("B", "LIVRAISONS (libération de la dernière TR)"),
-            ("C", "CUMUL LIVRAISONS"),
-            ("D", "LANCEMENTS (libération de la 1ère TR)"),
-            ("E", "CUMUL LANCEMENTS"),
-        ]
-
-        self._logger.debug(
-            f"Adding {len(headers)} column headers at row {self._current_row}"
-        )
-        for col, title in headers:
-            cell = sheet[f"{col}{self._current_row}"]
-            cell.value = title
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(
-                horizontal="center", vertical="center", wrap_text=True
-            )
-            cell.fill = PatternFill(
-                start_color="F2F2F2", end_color="F2F2F2", fill_type="solid"
-            )
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
-
-        # Sub-headers
+        self._logger.debug(f"Adding column headers at row {self._current_row}")
         self._current_row += 1
-        month_short: str = self._document_context.month.value[:3].title()  # type: ignore
-        year_short: str = str(self._document_context.year)[-2:]
-
-        sheet[f"B{self._current_row}"] = f"{month_short}-{year_short}"
-        sheet[f"C{self._current_row}"] = (
-            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
+        sheet[f"B{self._current_row}"] = (
+            "Livraisons (libération de la dernière tranche)"
         )
-        sheet[f"D{self._current_row}"] = f"{month_short}-{year_short}"
-        sheet[f"E{self._current_row}"] = (
-            f"Cumul de JANVIER au 31 {self._document_context.month.value.upper()} {self._document_context.year}"  # type: ignore
+        sheet.merge_cells(f"B{self._current_row}:C{self._current_row}")
+        sheet[f"D{self._current_row}"] = (
+            "Lancements (libération de la première tranche)"
         )
+        sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
 
-        for col in ["B", "C", "D", "E"]:
-            cell = sheet[f"{col}{self._current_row}"]
+        for cell in [
+            sheet[f"{column}{self._current_row}"] for column in ("B", "C", "D", "E")
+        ]:
             cell.font = Font(name="Arial", size=9, bold=True)
             cell.alignment = Alignment(
                 horizontal="center", vertical="center", wrap_text=True
@@ -159,6 +151,36 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 top=Side(style="thin"),
                 bottom=Side(style="thin"),
             )
+
+        # Subheaders
+        self._current_row += 1
+        sheet[f"B{self._current_row}"] = (
+            f"{self._document_context.month.value.capitalize()} {self._document_context.year}"  # type: ignore
+        )
+        sheet[f"C{self._current_row}"] = (
+            f"Cumul du 1er janvier au 31 {self._document_context.month.value} {self._document_context.year}"  # type: ignore
+        )
+        sheet[f"D{self._current_row}"] = (
+            f"{self._document_context.month.value.capitalize()} {self._document_context.year}"  # type: ignore
+        )
+        sheet[f"E{self._current_row}"] = (
+            f"Cumul du 1er janvier au 31 {self._document_context.month.value} {self._document_context.year}"  # type: ignore
+        )
+
+        for cell in [
+            sheet[f"{column}{self._current_row}"] for column in ("B", "C", "D", "E")
+        ]:
+            cell.font = Font(name="Arial", size=9, bold=True)
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=True
+            )
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            )
+
         self._logger.debug("Added sub-headers with date ranges")
 
         # Add data from query results (existing implementation)
@@ -260,8 +282,8 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             sheet[f"E{row}"].font = Font(name="Arial", size=9)
 
             # Add borders
-            for col in ["A", "B", "C", "D", "E"]:
-                cell = sheet[f"{col}{row}"]
+            for column in ["A", "B", "C", "D", "E"]:
+                cell = sheet[f"{column}{row}"]
                 cell.alignment = Alignment(horizontal="center", vertical="center")
                 cell.border = Border(
                     left=Side(style="thin"),
@@ -270,24 +292,21 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                     bottom=Side(style="thin"),
                 )
 
-        # Add TOTAL row for first table
+        # Add Total row for first table
         self._current_row += len(programmes)
-        self._logger.debug(f"Adding TOTAL row at row {self._current_row}")
+        self._logger.debug(f"Adding Total row at row {self._current_row}")
 
-        sheet[f"A{self._current_row}"] = "TOTAL"
+        sheet[f"A{self._current_row}"] = "Total"
         sheet[f"B{self._current_row}"] = total_livraisons_mois
         sheet[f"C{self._current_row}"] = total_livraisons_cumul_annee
         sheet[f"D{self._current_row}"] = total_lancements_mois
         sheet[f"E{self._current_row}"] = total_lancements_cumul_annee
 
-        # Format TOTAL row
-        for col in ["A", "B", "C", "D", "E"]:
-            cell: Any = sheet[f"{col}{self._current_row}"]
+        # Format Total row
+        for column in ["A", "B", "C", "D", "E"]:
+            cell: Any = sheet[f"{column}{self._current_row}"]
             cell.font = Font(name="Arial", size=9, bold=True)
             cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.fill = PatternFill(
-                start_color="E7E6E6", end_color="E7E6E6", fill_type="solid"
-            )
             cell.border = Border(
                 left=Side(style="thin"),
                 right=Side(style="thin"),
@@ -313,27 +332,26 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._logger.debug("Adding second table (SITUATION DES PROGRAMMES)")
 
         # Headers for second table
-        headers_row = self._current_row
         headers: list[tuple[str, str]] = [
-            ("A", "PROGRAMMES"),
-            ("B", "CONSISTANCE"),
-            ("C", "ACHEVES (Dernières tranches payées)"),
-            ("D", "en cours"),
-            ("E", "non lancés (écart entre la consistance et les premières TR payées)"),
+            ("A", "Programme"),
+            ("B", "Consistance"),
+            ("C", "Achevés (dernières tranches payées)"),
+            ("D", "En cours"),
+            (
+                "E",
+                "Non lancés (consistance - premières tranches payées)",
+            ),
         ]
 
         self._logger.debug(
-            f"Adding {len(headers)} column headers for second table at row {headers_row}"
+            f"Adding {len(headers)} column headers for second table at row {self._current_row}"
         )
         for col, title in headers:
-            cell = sheet[f"{col}{headers_row}"]
+            cell = sheet[f"{col}{self._current_row}"]
             cell.value = title
             cell.font = Font(name="Arial", size=9, bold=True)
             cell.alignment = Alignment(
                 horizontal="center", vertical="center", wrap_text=True
-            )
-            cell.fill = PatternFill(
-                start_color="F2F2F2", end_color="F2F2F2", fill_type="solid"
             )
             cell.border = Border(
                 left=Side(style="thin"),
@@ -426,26 +444,23 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                     bottom=Side(style="thin"),
                 )
 
-        # Add TOTAL row for second table
+        # Add Total row for second table
         self._current_row += len(programmes_situation)
         self._logger.debug(
-            f"Adding TOTAL row for second table at row {self._current_row}"
+            f"Adding Total row for second table at row {self._current_row}"
         )
 
-        sheet[f"A{self._current_row}"] = "TOTAL GENERAL"
+        sheet[f"A{self._current_row}"] = "Total général"
         sheet[f"B{self._current_row}"] = total_consistance
         sheet[f"C{self._current_row}"] = total_acheves
         sheet[f"D{self._current_row}"] = total_en_cours
         sheet[f"E{self._current_row}"] = total_non_lances
 
-        # Format TOTAL row
+        # Format Total row
         for col in ["A", "B", "C", "D", "E"]:
             cell = sheet[f"{col}{self._current_row}"]
             cell.font = Font(name="Arial", size=9, bold=True)
             cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.fill = PatternFill(
-                start_color="E7E6E6", end_color="E7E6E6", fill_type="solid"
-            )
             cell.border = Border(
                 left=Side(style="thin"),
                 right=Side(style="thin"),
@@ -460,7 +475,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
         sheet[f"A{self._current_row}"] = (
-            "SITUATION DES PROGRAMMES (À renseigner par la BNH (ex-CNL))"
+            "Situation des programmes (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
@@ -469,7 +484,9 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         )
 
         self._current_row += 1
-        sheet[f"A{self._current_row}"] = "ARRÊTÉE AU : 20/12/2024"
+        sheet[f"A{self._current_row}"] = (
+            f"Arrêté le {self._document_context.report_date.strftime("%d/%m/%Y")}"
+        )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         sheet[f"A{self._current_row}"].alignment = Alignment(
@@ -483,7 +500,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         # Left footer text (A-B)
         sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
-        sheet[f"A{self._current_row}"] = "VISA DU DIRECTEUR REGIONAL BNH (ex-CNL)"
+        sheet[f"A{self._current_row}"] = "Visa du directeur régional de la BNH (ex-CNL)"
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="left", vertical="center"
@@ -491,7 +508,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         # Right footer text (D-E)
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
-        sheet[f"D{self._current_row}"] = "VISA DU DIRECTEUR DU LOGEMENT"
+        sheet[f"D{self._current_row}"] = "Visa du directeur du logement"
         sheet[f"D{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         sheet[f"D{self._current_row}"].alignment = Alignment(
             horizontal="right", vertical="center"
