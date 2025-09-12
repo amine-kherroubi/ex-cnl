@@ -5,4 +5,4 @@ from enum import StrEnum
 
 
 class DocumentCategory(StrEnum):
-    HR = "HR"
+    HABITAT_RURAL = "Habitat rural"

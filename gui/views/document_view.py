@@ -253,10 +253,11 @@ class DocumentView(ctk.CTkFrame):
                     ms=0, func=lambda: self._on_generation_success(output_file=result)
                 )
 
-            except Exception as e:
+            except Exception as error:
                 # Update UI on error (thread-safe)
                 self.after(
-                    ms=0, func=lambda: self._on_generation_error(error_message=str(e))
+                    ms=0,
+                    func=lambda: self._on_generation_error(error_message=str(error)),
                 )
 
         thread: threading.Thread = threading.Thread(target=generate_thread, daemon=True)

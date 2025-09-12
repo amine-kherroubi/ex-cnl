@@ -42,7 +42,7 @@ class DocumentRegistry(object):
         "activite_mensuelle_par_programme": DocumentSpecification(
             name="activite_mensuelle_par_programme",
             display_name="Activité mensuelle",
-            category=DocumentCategory.HR,
+            category=DocumentCategory.HABITAT_RURAL,
             periodicity=Periodicity.MONTHLY,
             description=(
                 "Document de suivi mensuel des activités par programme, "
