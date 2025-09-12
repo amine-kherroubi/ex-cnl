@@ -13,15 +13,17 @@ MessageType: TypeAlias = Literal["info", "success", "warning", "error"]
 
 
 class StatusDisplay(ctk.CTkFrame):
+    __slots__ = ("_status_text",)
+
     def __init__(self, parent: Any) -> None:
-        super().__init__(parent)  # type: ignore
+        super().__init__(master=parent)  # type: ignore
 
         self._setup_ui()
 
     def _setup_ui(self) -> None:
         # Configure grid
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(index=0, weight=1)
+        self.grid_rowconfigure(index=1, weight=1)
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
@@ -36,13 +38,13 @@ class StatusDisplay(ctk.CTkFrame):
         self._status_text.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")  # type: ignore
 
         # Initialize with welcome message
-        self.add_message("Ready to generate documents", "info")
+        self.add_message(message="Ready to generate documents", message_type="info")
 
     def add_message(self, message: str, message_type: MessageType = "info") -> None:
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
         # Choose emoji based on message type
-        emoji_map: dict[str, str] = {
+        emoji_map: dict[MessageType, str] = {
             "info": "ℹ️",
             "success": "✅",
             "warning": "⚠️",

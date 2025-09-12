@@ -11,15 +11,17 @@ from app.config import AppConfig, StorageConfig, DatabaseConfig
 
 
 class DocumentController:
+    __slots__ = ("_temp_dir", "_uploads_dir", "_results_dir", "_config", "_facade")
+
     def __init__(self) -> None:
         # Initialize app config with temporary directories
-        self._temp_dir = Path.cwd() / "temp"
+        self._temp_dir: Path = Path.cwd() / "temp"
         self._temp_dir.mkdir(exist_ok=True)
 
-        self._uploads_dir = self._temp_dir / "uploads"
+        self._uploads_dir: Path = self._temp_dir / "uploads"
         self._uploads_dir.mkdir(exist_ok=True)
 
-        self._results_dir = self._temp_dir / "results"
+        self._results_dir: Path = self._temp_dir / "results"
         self._results_dir.mkdir(exist_ok=True)
 
         # Create storage config
@@ -50,17 +52,17 @@ class DocumentController:
     ) -> str:
         try:
             # Copy input files to temp uploads directory
-            self._prepare_input_files(input_files)
+            self._prepare_input_files(input_files=input_files)
 
             # Generate the document (it will be saved to temp results)
-            self._facade.generate_document(report_name)
+            self._facade.generate_document(document_name=report_name)
 
             # Find and move the generated file to the desired output location
             generated_file: Path = self._find_generated_file()
             final_output_path: Path = output_path / generated_file.name
 
             # Move file to final destination
-            shutil.move(str(generated_file), str(final_output_path))
+            shutil.move(src=str(generated_file), dst=str(final_output_path))
 
             # Cleanup temp files
             self._cleanup_temp_files()
@@ -82,10 +84,10 @@ class DocumentController:
         for file_path in input_files:
             if file_path.exists():
                 destination: Path = self._uploads_dir / file_path.name
-                shutil.copy2(str(file_path), str(destination))
+                shutil.copy2(src=str(file_path), dst=str(destination))
 
     def _find_generated_file(self) -> Path:
-        result_files = list(self._results_dir.glob("*.xlsx"))
+        result_files: list[Path] = list(self._results_dir.glob(pattern="*.xlsx"))
 
         if not result_files:
             raise FileNotFoundError("No generated file found")

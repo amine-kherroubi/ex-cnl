@@ -8,10 +8,17 @@ import customtkinter as ctk  # type: ignore
 
 
 class ReportSelector(ctk.CTkFrame):
+    __slots__ = (
+        "_on_report_changed",
+        "_reports",
+        "_report_dropdown",
+        "_description_text",
+    )
+
     def __init__(
         self, parent: Any, on_report_changed: Callable[[str | None], None]
     ) -> None:
-        super().__init__(parent)  # type: ignore
+        super().__init__(master=parent)  # type: ignore
 
         self._on_report_changed: Callable[[str | None], None] = on_report_changed
         self._reports: dict[str, Any] = {}
@@ -20,7 +27,7 @@ class ReportSelector(ctk.CTkFrame):
 
     def _setup_ui(self) -> None:
         # Configure grid
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(index=1, weight=1)
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
@@ -33,11 +40,11 @@ class ReportSelector(ctk.CTkFrame):
             master=self, values=[], command=self._on_report_selected, state="readonly"
         )
         self._report_dropdown.grid(row=0, column=1, padx=(5, 10), pady=10, sticky="ew")  # type: ignore
-        self._report_dropdown.set("Select a report type...")
+        self._report_dropdown.set(value="Select a report type...")
 
         # Description text
         self._description_text: ctk.CTkTextbox = ctk.CTkTextbox(
-            self, height=60, state="disabled"
+            master=self, height=60, state="disabled"
         )
         self._description_text.grid(  # type: ignore
             row=1, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="ew"
@@ -51,9 +58,9 @@ class ReportSelector(ctk.CTkFrame):
         self._report_dropdown.configure(values=report_names)  # type: ignore
 
         if report_names:
-            self._report_dropdown.set("Select a report type...")
+            self._report_dropdown.set(value="Select a report type...")
         else:
-            self._report_dropdown.set("No reports available")
+            self._report_dropdown.set(value="No reports available")
 
     def _on_report_selected(self, selection: str) -> None:
         if (
@@ -78,17 +85,19 @@ class ReportSelector(ctk.CTkFrame):
         self._description_text.delete(index1="1.0", index2="end")  # type: ignore
 
         # Extract description from report specification
-        description = getattr(report_spec, "description", "No description available")
-        display_name = getattr(report_spec, "display_name", "Unknown Report")
-        category = getattr(report_spec, "category", "Unknown Category")
-        periodicity = getattr(report_spec, "periodicity", "Unknown Frequency")
+        description: str = getattr(
+            report_spec, "description", "No description available"
+        )
+        display_name: str = getattr(report_spec, "display_name", "Unknown Report")
+        category: str = getattr(report_spec, "category", "Unknown Category")
+        periodicity: str = getattr(report_spec, "periodicity", "Unknown Frequency")
 
         description_text: str = f"📊 {display_name}\n"
         description_text += f"📁 Category: {category}\n"
         description_text += f"⏰ Frequency: {periodicity}\n"
         description_text += f"📝 {description}"
 
-        self._description_text.insert("1.0", description_text)  # type: ignore
+        self._description_text.insert(index="1.0", text=description_text)  # type: ignore
         self._description_text.configure(state="disabled")  # type: ignore
 
     def _clear_description(self) -> None:

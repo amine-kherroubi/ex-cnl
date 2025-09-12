@@ -10,10 +10,12 @@ import customtkinter as ctk  # type: ignore
 
 
 class OutputSelector(ctk.CTkFrame):
+    __slots__ = ("_on_output_changed", "_output_path", "_select_button", "_path_entry")
+
     def __init__(
         self, parent: Any, on_output_changed: Callable[[Path | None], None]
     ) -> None:
-        super().__init__(parent)  # type: ignore
+        super().__init__(master=parent)  # type: ignore
 
         self._on_output_changed: Callable[[Path | None], None] = on_output_changed
         self._output_path: Path | None = None
@@ -23,7 +25,7 @@ class OutputSelector(ctk.CTkFrame):
     def _setup_ui(self) -> None:
         """Setup the user interface."""
         # Configure grid
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(index=1, weight=1)
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(

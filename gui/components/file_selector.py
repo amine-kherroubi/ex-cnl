@@ -10,6 +10,14 @@ import customtkinter as ctk  # type: ignore
 
 
 class FileSelector(ctk.CTkFrame):
+    __slots__ = (
+        "_on_files_changed",
+        "_selected_files",
+        "_select_button",
+        "_files_listbox",
+        "_clear_button",
+    )
+
     def __init__(
         self, parent: Any, on_files_changed: Callable[[list[Path]], None]
     ) -> None:
@@ -22,7 +30,7 @@ class FileSelector(ctk.CTkFrame):
 
     def _setup_ui(self) -> None:
         # Configure grid
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(index=1, weight=1)
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
@@ -76,14 +84,14 @@ class FileSelector(ctk.CTkFrame):
 
     def _update_display(self) -> None:
         self._files_listbox.configure(state="normal")  # type: ignore
-        self._files_listbox.delete("1.0", "end")  # type: ignore
+        self._files_listbox.delete(index1="1.0", index2="end")  # type: ignore
 
         if self._selected_files:
             for file_path in self._selected_files:
                 self._files_listbox.insert(index="end", text=f"📄 {file_path.name}\n")  # type: ignore
                 self._files_listbox.insert(index="end", text=f"   {file_path.parent}\n\n")  # type: ignore
         else:
-            self._files_listbox.insert("end", "No files selected")  # type: ignore
+            self._files_listbox.insert(index="end", text="No files selected")  # type: ignore
 
         self._files_listbox.configure(state="disabled")  # type: ignore
 
