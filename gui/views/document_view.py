@@ -286,7 +286,7 @@ class DocumentView(ctk.CTkFrame):
         if not self._last_generated_file:
             return
 
-        dialog: EmailDialog = EmailDialog(
+        dialog: EmailDialog = EmailDialog(  # type: ignore
             parent=self,
             file_path=self._last_generated_file,
             on_send=self._send_email,
