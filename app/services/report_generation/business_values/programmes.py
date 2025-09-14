@@ -7,7 +7,7 @@ from typing import Final
 import pandas as pd
 
 # Imports de l'application locale
-from app.services.document_generation.models.programe import Programme
+from app.services.report_generation.models.programe import Programme
 
 PROGRAMMES_HABITAT_RURAL: Final[list[Programme]] = [
     Programme(

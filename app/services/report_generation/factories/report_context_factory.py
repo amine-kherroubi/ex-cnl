@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 """
-Fabrique pour la création de contextes de documents.
+Fabrique pour la création de contextes de reports.
 
 Ce module implémente le pattern Factory pour créer des instances
-de DocumentContext selon différentes périodicités (mensuelle,
+de ReportContext selon différentes périodicités (mensuelle,
 semestrielle, annuelle) avec des paramètres par défaut appropriés.
 
 La fabrique simplifie la création de contextes en gérant
@@ -17,19 +17,19 @@ from datetime import date
 from logging import Logger
 
 # Imports de l'application locale
-from app.services.document_generation.models.document_context import (
-    DocumentContext,
+from app.services.report_generation.models.report_context import (
+    ReportContext,
 )
-from app.services.document_generation.enums.space_time import Periodicity, Month, Wilaya
+from app.services.report_generation.enums.space_time import Periodicity, Month, Wilaya
 from app.utils.logging_setup import get_logger
 
 
-class DocumentContextFactory(object):
+class ReportContextFactory(object):
     """
-    Fabrique pour la création de contextes de documents.
+    Fabrique pour la création de contextes de reports.
 
     Cette classe implémente le pattern Factory pour créer des instances
-    de DocumentContext avec la logique appropriée selon la périodicité.
+    de ReportContext avec la logique appropriée selon la périodicité.
     Elle gère automatiquement les valeurs par défaut et les calculs
     de dates de fin de période.
 
@@ -38,7 +38,7 @@ class DocumentContextFactory(object):
 
     Exemples:
         Contexte mensuel :
-        >>> context = DocumentContextFactory.create_context(
+        >>> context = ReportContextFactory.create_context(
         ...     wilaya=Wilaya.ALGER,
         ...     periodicity=Periodicity.MONTHLY,
         ...     year=2024,
@@ -46,7 +46,7 @@ class DocumentContextFactory(object):
         ... )
 
         Contexte annuel avec valeurs par défaut :
-        >>> context = DocumentContextFactory.create_context(
+        >>> context = ReportContextFactory.create_context(
         ...     wilaya=Wilaya.CONSTANTINE,
         ...     periodicity=Periodicity.ANNUAL
         ... )  # Utilise l'année courante et le 31 décembre
@@ -64,7 +64,7 @@ class DocumentContextFactory(object):
             RuntimeError: Toujours levée car cette classe ne doit pas être instanciée
         """
         raise RuntimeError(
-            "DocumentContextFactory ne peut pas être instanciée. Utilisez les méthodes de classe."
+            "ReportContextFactory ne peut pas être instanciée. Utilisez les méthodes de classe."
         )
 
     @classmethod
@@ -76,29 +76,29 @@ class DocumentContextFactory(object):
         month: Month | None = None,
         semester: int | None = None,
         report_date: date | None = None,
-    ) -> DocumentContext:
+    ) -> ReportContext:
         """
-        Crée un contexte de document selon la périodicité spécifiée.
+        Crée un contexte de report selon la périodicité spécifiée.
 
         Cette méthode orchestre la création du contexte en déléguant
         à la méthode spécialisée selon la périodicité demandée.
 
         Args:
-            wilaya: Wilaya concernée par le document
+            wilaya: Wilaya concernée par le report
             year: Année du rapport (défaut: année courante)
-            periodicity: Périodicité du document (défaut: mensuel)
+            periodicity: Périodicité du report (défaut: mensuel)
             month: Mois pour les rapports mensuels
             semester: Semestre pour les rapports semestriels
             report_date: Date spécifique du rapport
 
         Returns:
-            Instance de DocumentContext configurée selon les paramètres
+            Instance de ReportContext configurée selon les paramètres
 
         Raises:
             ValueError: Si la périodicité n'est pas supportée
         """
         cls._logger.info(
-            f"Création du contexte de document pour la wilaya : {wilaya.value}"
+            f"Création du contexte de report pour la wilaya : {wilaya.value}"
         )
         cls._logger.debug(
             f"Paramètres : année={year}, périodicité={periodicity}, mois={month}, semestre={semester}, date_rapport={report_date}"
@@ -110,13 +110,13 @@ class DocumentContextFactory(object):
         try:
             match periodicity:
                 case Periodicity.MONTHLY:
-                    cls._logger.debug("Création d'un contexte de document mensuel")
+                    cls._logger.debug("Création d'un contexte de report mensuel")
                     context = cls._monthly(wilaya, year, month, report_date)
                 case Periodicity.SEMIANNUAL:
-                    cls._logger.debug("Création d'un contexte de document semestriel")
+                    cls._logger.debug("Création d'un contexte de report semestriel")
                     context = cls._semiannual(wilaya, year, semester, report_date)
                 case Periodicity.ANNUAL:
-                    cls._logger.debug("Création d'un contexte de document annuel")
+                    cls._logger.debug("Création d'un contexte de report annuel")
                     context = cls._annual(wilaya, year, report_date)
                 case _:
                     error_msg = f"Périodicité inconnue : {periodicity}"
@@ -129,22 +129,22 @@ class DocumentContextFactory(object):
             return context
 
         except Exception as error:
-            cls._logger.error(f"Échec de la création du contexte de document : {error}")
+            cls._logger.error(f"Échec de la création du contexte de report : {error}")
             raise
 
     @staticmethod
     def _monthly(
         wilaya: Wilaya, year: int | None, month: Month | None, report_date: date | None
-    ) -> DocumentContext:
+    ) -> ReportContext:
         """
-        Crée un contexte de document pour une périodicité mensuelle.
+        Crée un contexte de report pour une périodicité mensuelle.
 
         Génère automatiquement la date de fin de mois si aucune date
         spécifique n'est fournie. Utilise le mois et l'année courants
         par défaut.
 
         Args:
-            wilaya: Wilaya concernée par le document
+            wilaya: Wilaya concernée par le report
             year: Année du rapport (défaut: année courante)
             month: Mois du rapport (défaut: mois courant)
             report_date: Date spécifique du rapport (défaut: fin de mois)
@@ -152,7 +152,7 @@ class DocumentContextFactory(object):
         Returns:
             Contexte mensuel configuré avec les paramètres fournis
         """
-        logger: Logger = DocumentContextFactory._logger
+        logger: Logger = ReportContextFactory._logger
         logger.debug("Traitement des paramètres de contexte mensuel")
 
         today: date = date.today()
@@ -171,7 +171,7 @@ class DocumentContextFactory(object):
         else:
             logger.debug(f"Utilisation de la date de rapport fournie : {report_date}")
 
-        context = DocumentContext(
+        context = ReportContext(
             wilaya=wilaya,
             year=year,
             report_date=report_date,
@@ -184,16 +184,16 @@ class DocumentContextFactory(object):
     @staticmethod
     def _semiannual(
         wilaya: Wilaya, year: int | None, semester: int | None, report_date: date | None
-    ) -> DocumentContext:
+    ) -> ReportContext:
         """
-        Crée un contexte de document pour une périodicité semestrielle.
+        Crée un contexte de report pour une périodicité semestrielle.
 
         Génère automatiquement la date de fin de semestre (30 juin ou 31 décembre)
         si aucune date spécifique n'est fournie. Détermine le semestre courant
         selon la date actuelle.
 
         Args:
-            wilaya: Wilaya concernée par le document
+            wilaya: Wilaya concernée par le report
             year: Année du rapport (défaut: année courante)
             semester: Semestre du rapport (défaut: semestre courant)
             report_date: Date spécifique du rapport (défaut: fin de semestre)
@@ -201,7 +201,7 @@ class DocumentContextFactory(object):
         Returns:
             Contexte semestriel configuré avec les paramètres fournis
         """
-        logger: Logger = DocumentContextFactory._logger
+        logger: Logger = ReportContextFactory._logger
         logger.debug("Traitement des paramètres de contexte semestriel")
 
         today: date = date.today()
@@ -221,7 +221,7 @@ class DocumentContextFactory(object):
         else:
             logger.debug(f"Utilisation de la date de rapport fournie : {report_date}")
 
-        context: DocumentContext = DocumentContext(
+        context: ReportContext = ReportContext(
             wilaya=wilaya, year=year, semester=semester, report_date=report_date
         )
 
@@ -233,23 +233,23 @@ class DocumentContextFactory(object):
     @staticmethod
     def _annual(
         wilaya: Wilaya, year: int | None, report_date: date | None
-    ) -> DocumentContext:
+    ) -> ReportContext:
         """
-        Crée un contexte de document pour une périodicité annuelle.
+        Crée un contexte de report pour une périodicité annuelle.
 
         Génère automatiquement la date de fin d'année (31 décembre)
         si aucune date spécifique n'est fournie. Utilise l'année
         courante par défaut.
 
         Args:
-            wilaya: Wilaya concernée par le document
+            wilaya: Wilaya concernée par le report
             year: Année du rapport (défaut: année courante)
             report_date: Date spécifique du rapport (défaut: 31 décembre)
 
         Returns:
             Contexte annuel configuré avec les paramètres fournis
         """
-        logger: Logger = DocumentContextFactory._logger
+        logger: Logger = ReportContextFactory._logger
         logger.debug("Traitement des paramètres de contexte annuel")
 
         today: date = date.today()
@@ -265,7 +265,7 @@ class DocumentContextFactory(object):
         else:
             logger.debug(f"Utilisation de la date de rapport fournie : {report_date}")
 
-        context: DocumentContext = DocumentContext(
+        context: ReportContext = ReportContext(
             wilaya=wilaya, year=year, report_date=report_date
         )
 

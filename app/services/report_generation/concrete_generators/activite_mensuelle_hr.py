@@ -10,25 +10,25 @@ from openpyxl.styles import Alignment, Border, Font, Side
 
 # Imports de l'application locale
 from app.data.data_repository import DataRepository
-from app.services.document_generation.document_generator_template import (
-    DocumentGenerator,
+from app.services.report_generation.report_generator_template import (
+    ReportGenerator,
 )
-from app.services.document_generation.models.document_context import DocumentContext
-from app.services.document_generation.models.document_specification import (
-    DocumentSpecification,
+from app.services.report_generation.models.report_context import ReportContext
+from app.services.report_generation.models.report_specification import (
+    ReportSpecification,
 )
 from app.services.file_io.file_io_service import FileIOService
 
 
-class ActiviteMensuelleHRGenerator(DocumentGenerator):
+class ActiviteMensuelleHRGenerator(ReportGenerator):
     """
-    Générateur de documents pour l'activité mensuelle par programme de l'habitat rural.
+    Générateur de reports pour l'activité mensuelle par programme de l'habitat rural.
 
     Cette classe génère des rapports Excel contenant :
     - Un tableau d'activité mensuelle (lancements et livraisons par programme)
     - Un tableau de situation des programmes (consistance, achevés, en cours, non lancés)
 
-    Le document est formaté selon les standards BNH (ex-CNL) et inclut
+    Le report est formaté selon les standards BNH (ex-CNL) et inclut
     les en-têtes, pieds de page et signatures appropriés.
     """
 
@@ -38,17 +38,17 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self,
         storage_service: FileIOService,
         data_repository: DataRepository,
-        document_specification: DocumentSpecification,
-        document_context: DocumentContext,
+        report_specification: ReportSpecification,
+        report_context: ReportContext,
     ) -> None:
         super().__init__(
-            storage_service, data_repository, document_specification, document_context
+            storage_service, data_repository, report_specification, report_context
         )
         self._current_row: int = 1
 
     def _add_header(self, sheet: Worksheet) -> None:
-        """Ajoute l'en-tête du document avec titre, wilaya, et période."""
-        self._logger.debug("Ajout de l'en-tête du document")
+        """Ajoute l'en-tête du report avec titre, wilaya, et période."""
+        self._logger.debug("Ajout de l'en-tête du report")
 
         # HABITAT RURAL - Définir la valeur d'abord, puis fusionner
         sheet[f"A{self._current_row}"] = "Habitat rural"
@@ -62,7 +62,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._current_row += 1
 
         # Wilaya
-        wilaya_text = f"Wilaya de {self._document_context.wilaya.value}"
+        wilaya_text = f"Wilaya de {self._report_context.wilaya.value}"
         sheet[f"A{self._current_row}"] = wilaya_text
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         self._logger.debug(f"Wilaya ajoutée : {wilaya_text}")
@@ -77,12 +77,12 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="center", vertical="center", wrap_text=True
         )
-        self._logger.debug("Titre du document ajouté")
+        self._logger.debug("Titre du report ajouté")
 
         # Mois - Définir la valeur d'abord, puis fusionner
         self._current_row += 1
         month_text: str = (
-            f"Mois de {self._document_context.month.value} {self._document_context.year}"  # type: ignore
+            f"Mois de {self._report_context.month.value} {self._report_context.year}"  # type: ignore
         )
         sheet[f"A{self._current_row}"] = month_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
@@ -92,7 +92,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         )
         self._logger.debug(f"Mois et année ajoutés : {month_text}")
 
-        self._logger.info("En-tête du document terminé avec succès")
+        self._logger.info("En-tête du report terminé avec succès")
 
         self._current_row += 2
 
@@ -122,7 +122,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         sheet[f"B{self._current_row}"] = (
             f"État d'exécution des tranches financières durant le mois de "
-            f"{self._document_context.month.value} {self._document_context.year}"  # type: ignore
+            f"{self._report_context.month.value} {self._report_context.year}"  # type: ignore
         )
         sheet.merge_cells(f"B{self._current_row}:E{self._current_row}")
         for cell in [
@@ -172,16 +172,16 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         # Sous-en-têtes
         self._current_row += 1
         sheet[f"B{self._current_row}"] = (
-            f"{self._document_context.month.value.capitalize()} {self._document_context.year}"  # type: ignore
+            f"{self._report_context.month.value.capitalize()} {self._report_context.year}"  # type: ignore
         )
         sheet[f"C{self._current_row}"] = (
-            f"Cumul du 1er janvier au 31 {self._document_context.month.value} {self._document_context.year}"  # type: ignore
+            f"Cumul du 1er janvier au 31 {self._report_context.month.value} {self._report_context.year}"  # type: ignore
         )
         sheet[f"D{self._current_row}"] = (
-            f"{self._document_context.month.value.capitalize()} {self._document_context.year}"  # type: ignore
+            f"{self._report_context.month.value.capitalize()} {self._report_context.year}"  # type: ignore
         )
         sheet[f"E{self._current_row}"] = (
-            f"Cumul du 1er janvier au 31 {self._document_context.month.value} {self._document_context.year}"  # type: ignore
+            f"Cumul du 1er janvier au 31 {self._report_context.month.value} {self._report_context.year}"  # type: ignore
         )
 
         for cell in [
@@ -518,7 +518,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         self._current_row += 1
         sheet[f"A{self._current_row}"] = (
-            f"Arrêté le {self._document_context.report_date.strftime("%d/%m/%Y")}"
+            f"Arrêté le {self._report_context.report_date.strftime("%d/%m/%Y")}"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
@@ -529,8 +529,8 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._current_row += 2
 
     def _add_footer(self, sheet: Worksheet) -> None:
-        """Ajoute le pied de page du document avec les emplacements de signatures."""
-        self._logger.debug("Ajout du pied de page du document")
+        """Ajoute le pied de page du report avec les emplacements de signatures."""
+        self._logger.debug("Ajout du pied de page du report")
 
         # Texte de pied de page gauche (A-B)
         sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
@@ -551,7 +551,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._logger.debug("Pied de page ajouté avec succès")
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        """Applique le formatage final au document (largeurs de colonnes, orientation page)."""
+        """Applique le formatage final au report (largeurs de colonnes, orientation page)."""
         self._logger.debug("Application du formatage final")
 
         column_widths: dict[str, int] = {"A": 25, "B": 18, "C": 22, "D": 18, "E": 22}

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 """
-Modèle de spécification pour les documents générés.
+Modèle de spécification pour les reports générés.
 
-Ce module définit la structure complète d'une spécification de document,
+Ce module définit la structure complète d'une spécification de report,
 incluant les métadonnées, les requêtes SQL, les fichiers requis et
 la classe génératrice associée.
 
-La spécification sert de blueprint pour la génération de documents
+La spécification sert de blueprint pour la génération de reports
 et centralise toutes les informations nécessaires au processus.
 """
 
@@ -18,37 +18,37 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 
 # Imports de l'application locale
-from app.services.document_generation.document_generator_template import (
-    DocumentGenerator,
+from app.services.report_generation.report_generator_template import (
+    ReportGenerator,
 )
-from app.services.document_generation.enums.document_category import DocumentCategory
-from app.services.document_generation.enums.space_time import Periodicity
+from app.services.report_generation.enums.report_category import ReportCategory
+from app.services.report_generation.enums.space_time import Periodicity
 
 
-class DocumentSpecification(BaseModel):
+class ReportSpecification(BaseModel):
     """
-    Spécification complète d'un document administratif.
+    Spécification complète d'un report administratif.
 
     Cette classe définit tous les paramètres nécessaires à la génération
-    d'un document : métadonnées descriptives, fichiers d'entrée requis,
+    d'un report : métadonnées descriptives, fichiers d'entrée requis,
     requêtes de données, format de sortie et classe génératrice.
 
     Attributes:
-        name: Nom interne unique du document
+        name: Nom interne unique du report
         display_name: Nom d'affichage pour l'utilisateur
-        category: Catégorie du document (ex: Habitat Rural)
+        category: Catégorie du report (ex: Habitat Rural)
         periodicity: Fréquence de génération (mensuel, semestriel, annuel)
-        description: Description détaillée du but du document
+        description: Description détaillée du but du report
         required_files: Mapping des patterns de fichiers vers les noms de vues
         queries: Mapping des noms de requêtes vers les requêtes SQL
         output_filename: Template du nom de fichier de sortie
-        generator: Classe génératrice concrète pour ce document
+        generator: Classe génératrice concrète pour ce report
 
     Exemple:
-        >>> spec = DocumentSpecification(
+        >>> spec = ReportSpecification(
         ...     name="activite_mensuelle",
         ...     display_name="Activité mensuelle",
-        ...     category=DocumentCategory.HABITAT_RURAL,
+        ...     category=ReportCategory.HABITAT_RURAL,
         ...     periodicity=Periodicity.MONTHLY,
         ...     description="Rapport mensuel d'activité par programme",
         ...     required_files={"pattern.*\\.xlsx": "vue_donnees"},
@@ -61,7 +61,7 @@ class DocumentSpecification(BaseModel):
     name: Annotated[
         str,
         Field(
-            description="Nom interne unique du document",
+            description="Nom interne unique du report",
             min_length=1,
         ),
     ]
@@ -69,23 +69,23 @@ class DocumentSpecification(BaseModel):
     display_name: Annotated[
         str,
         Field(
-            description="Nom lisible du document pour l'affichage utilisateur",
+            description="Nom lisible du report pour l'affichage utilisateur",
             min_length=1,
         ),
     ]
 
     category: Annotated[
-        DocumentCategory,
-        Field(description="Catégorie thématique du document"),
+        ReportCategory,
+        Field(description="Catégorie thématique du report"),
     ]
 
     periodicity: Annotated[
-        Periodicity, Field(description="Fréquence de génération du document")
+        Periodicity, Field(description="Fréquence de génération du report")
     ]
 
     description: Annotated[
         str,
-        Field(description="Description détaillée de l'objectif du document"),
+        Field(description="Description détaillée de l'objectif du report"),
     ]
 
     required_files: Annotated[
@@ -108,9 +108,9 @@ class DocumentSpecification(BaseModel):
     ]
 
     generator: Annotated[
-        type[DocumentGenerator],
+        type[ReportGenerator],
         Field(
-            description="Classe génératrice concrète responsable de la production du document"
+            description="Classe génératrice concrète responsable de la production du report"
         ),
     ]
 

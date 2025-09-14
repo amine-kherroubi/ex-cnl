@@ -45,18 +45,12 @@ class FileIOService(object):
             f"Extensions autorisées : {self._config.allowed_input_file_extensions}"
         )
 
-    def load_data_from_file(self, source_file_path: Path) -> pd.DataFrame:
+    def load_data_from_file(self, source_file_path: Path | str) -> pd.DataFrame:
         """
         Charge les données d'un fichier Excel vers un DataFrame pandas.
 
-        Cette méthode effectue plusieurs vérifications :
-        - Existence du fichier
-        - Extension autorisée
-        - Taille du fichier
-        - Détection automatique de la ligne de début des données
-
         Args:
-            file_path: Chemin complet vers le fichier à charger
+            source_file_path: Chemin complet vers le fichier à charger (Path ou str)
 
         Returns:
             DataFrame pandas contenant les données du fichier
@@ -66,6 +60,10 @@ class FileIOService(object):
             ValueError: Si l'extension ou la taille n'est pas valide
             DataLoadError: Si le chargement échoue pour une autre raison
         """
+        # Convert to Path object if it's a string
+        if isinstance(source_file_path, str):
+            source_file_path = Path(source_file_path)
+
         self._logger.info(
             f"Chargement des données depuis le fichier : {source_file_path}"
         )
@@ -96,21 +94,21 @@ class FileIOService(object):
             )
             raise DataLoadError(source_file_path, error) from error
 
-    def save_data_to_file(self, data: Any, output_file_path: Path) -> None:
+    def save_data_to_file(self, data: Any, output_file_path: Path | str) -> None:
         """
         Sauvegarde les données vers un fichier de sortie.
 
-        Actuellement supporte uniquement les objets Workbook d'openpyxl
-        pour la génération de fichiers Excel.
-
         Args:
             data: Données à sauvegarder (doit être un objet Workbook)
-            output_file_path: Chemin complet du fichier de sortie
+            output_filename: Nom ou chemin complet du fichier de sortie
 
         Raises:
-            ValueError: Si le type de données n'est pas supporté ou
-                       si l'extension n'est pas valide
+            ValueError: Si le type de données n'est pas supporté
         """
+        # Convert to Path object if it's a string
+        if isinstance(output_file_path, str):
+            output_file_path = Path(output_file_path)
+
         self._logger.info(
             f"Sauvegarde des données vers le fichier : {output_file_path}"
         )
@@ -118,6 +116,8 @@ class FileIOService(object):
         try:
             if isinstance(data, Workbook):
                 self._logger.debug("Sauvegarde du classeur Excel")
+                # Ensure parent directory exists
+                output_file_path.parent.mkdir(parents=True, exist_ok=True)
                 data.save(output_file_path)
                 self._logger.info(
                     f"Classeur sauvegardé avec succès vers {output_file_path}"

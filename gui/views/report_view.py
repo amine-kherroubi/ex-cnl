@@ -9,19 +9,19 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.services.document_generation.models.document_specification import (
-    DocumentSpecification,
+from app.services.report_generation.models.report_specification import (
+    ReportSpecification,
 )
 from gui.components.file_selector import FileSelector
 from gui.components.output_selector import OutputSelector
 from gui.components.status_display import StatusDisplay
 from gui.components.email_dialog import EmailDialog
-from gui.controllers.document_controller import DocumentController
+from gui.controllers.report_controller import ReportController
 
 
-class DocumentView(ctk.CTkFrame):
+class ReportView(ctk.CTkFrame):
     __slots__ = (
-        "_document_spec",
+        "_report_spec",
         "_controller",
         "_on_back",
         "_file_selector",
@@ -37,13 +37,13 @@ class DocumentView(ctk.CTkFrame):
     def __init__(
         self,
         parent: Any,
-        document_spec: DocumentSpecification,
-        controller: DocumentController,
+        report_spec: ReportSpecification,
+        controller: ReportController,
         on_back: Callable[[], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
-        self._document_spec: DocumentSpecification = document_spec
-        self._controller: DocumentController = controller
+        self._report_spec: ReportSpecification = report_spec
+        self._controller: ReportController = controller
         self._on_back: Callable[[], None] = on_back
         self._selected_files: list[Path] = []
         self._output_path: Path | None = None
@@ -75,24 +75,24 @@ class DocumentView(ctk.CTkFrame):
         )
         self._back_button.grid(row=0, column=0, padx=(0, 20), sticky="w")  # type: ignore
 
-        # Document info
+        # Report info
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=header_frame, fg_color="transparent"
         )
         info_frame.grid(row=0, column=1, sticky="ew")  # type: ignore
 
-        # Document title
+        # Report title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=self._document_spec.display_name,
+            text=self._report_spec.display_name,
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Document description
+        # Report description
         desc_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=self._document_spec.description,
+            text=self._report_spec.description,
             font=ctk.CTkFont(size=13),
             text_color=("gray30", "gray70"),
         )
@@ -133,7 +133,7 @@ class DocumentView(ctk.CTkFrame):
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
             master=button_frame,
             text="Générer le rapport",
-            command=self._generate_document,
+            command=self._generate_report,
             height=40,
             font=ctk.CTkFont(size=14, weight="bold"),
         )
@@ -219,7 +219,7 @@ class DocumentView(ctk.CTkFrame):
         else:
             self._generate_button.configure(state="disabled")  # type: ignore
 
-    def _generate_document(self) -> None:
+    def _generate_report(self) -> None:
         if not all([self._selected_files, self._output_path]):
             return
 
@@ -236,10 +236,19 @@ class DocumentView(ctk.CTkFrame):
         # Run generation in background thread
         def generate_thread() -> None:
             try:
-                result: str = self._controller.generate_document(
-                    report_name=self._document_spec.display_name,
+                # First validate the files
+                self._status_display.add_message(
+                    message="Validation des fichiers d'entrée...",
+                    message_type="information",
+                )
+
+                # Use the report's name (key) instead of display_name
+                report_name = self._report_spec.name
+
+                result: str = self._controller.generate_report(
+                    report_name=report_name,  # Use internal name, not display_name
                     input_files=self._selected_files,
-                    output_path=self._output_path,  # type: ignore
+                    output_directory=self._output_path,  # type: ignore
                 )
 
                 # Update UI on success (thread-safe)
@@ -247,8 +256,16 @@ class DocumentView(ctk.CTkFrame):
                     ms=0, func=lambda: self._on_generation_success(output_file=result)
                 )
 
+            except ValueError as validation_error:
+                # Handle validation errors specifically
+                self.after(
+                    ms=0,
+                    func=lambda: self._on_validation_error(
+                        error_message=str(validation_error)
+                    ),
+                )
             except Exception as error:
-                # Update UI on error (thread-safe)
+                # Handle other errors
                 self.after(
                     ms=0,
                     func=lambda: self._on_generation_error(error_message=str(error)),
@@ -256,6 +273,17 @@ class DocumentView(ctk.CTkFrame):
 
         thread: threading.Thread = threading.Thread(target=generate_thread, daemon=True)
         thread.start()
+
+    def _on_validation_error(self, error_message: str) -> None:
+        self._status_display.add_message(
+            message=f"Erreur de validation : {error_message}", message_type="erreur"
+        )
+        self._status_display.add_message(
+            message="Veuillez vérifier que vos fichiers correspondent aux exigences du rapport",
+            message_type="avertissement",
+        )
+        self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
+        self._back_button.configure(state="normal")  # type: ignore
 
     def _on_generation_success(self, output_file: str) -> None:
         self._last_generated_file = output_file

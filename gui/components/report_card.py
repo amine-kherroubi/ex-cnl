@@ -7,14 +7,14 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.services.document_generation.models.document_specification import (
-    DocumentSpecification,
+from app.services.report_generation.models.report_specification import (
+    ReportSpecification,
 )
 
 
-class DocumentCard(ctk.CTkFrame):
+class ReportCard(ctk.CTkFrame):
     __slots__ = (
-        "_document_spec",
+        "_report_spec",
         "_on_generate_clicked",
         "_on_settings_clicked",
         "_generate_button",
@@ -24,12 +24,12 @@ class DocumentCard(ctk.CTkFrame):
     def __init__(
         self,
         parent: Any,
-        document_spec: DocumentSpecification,
+        report_spec: ReportSpecification,
         on_generate_clicked: Callable[[], None],
         on_settings_clicked: Callable[[], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
-        self._document_spec: DocumentSpecification = document_spec
+        self._report_spec: ReportSpecification = report_spec
         self._on_generate_clicked: Callable[[], None] = on_generate_clicked
         self._on_settings_clicked: Callable[[], None] = on_settings_clicked
 
@@ -47,7 +47,7 @@ class DocumentCard(ctk.CTkFrame):
         content_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ew")  # type: ignore
         content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Document info
+        # Report info
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=content_frame, fg_color="transparent"
         )
@@ -57,7 +57,7 @@ class DocumentCard(ctk.CTkFrame):
         # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=self._document_spec.display_name,
+            text=self._report_spec.display_name,
             font=ctk.CTkFont(size=18, weight="bold"),
             anchor="w",
         )
@@ -66,7 +66,7 @@ class DocumentCard(ctk.CTkFrame):
         # Category and periodicity
         meta_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=f"Catégorie : {self._document_spec.category} | Fréquence : {self._document_spec.periodicity}",
+            text=f"Catégorie : {self._report_spec.category} | Fréquence : {self._report_spec.periodicity}",
             font=ctk.CTkFont(size=12),
             text_color=("gray40", "gray60"),
             anchor="w",
@@ -76,7 +76,7 @@ class DocumentCard(ctk.CTkFrame):
         # Description
         desc_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=self._document_spec.description,
+            text=self._report_spec.description,
             font=ctk.CTkFont(size=14),
             anchor="w",
             wraplength=500,
@@ -104,7 +104,7 @@ class DocumentCard(ctk.CTkFrame):
         # Settings button
         self._settings_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Configurations",
+            text="Configuration",
             command=self._on_settings_clicked,
             width=100,
             height=35,

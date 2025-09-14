@@ -9,7 +9,7 @@ import customtkinter as ctk  # type: ignore
 
 class SettingsView(ctk.CTkFrame):
     __slots__ = (
-        "_document_name",
+        "_report_name",
         "_on_back",
         "_back_button",
         "_save_button",
@@ -19,12 +19,12 @@ class SettingsView(ctk.CTkFrame):
     def __init__(
         self,
         parent: Any,
-        document_name: str,
+        report_name: str,
         on_back: Callable[[], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
 
-        self._document_name: str = document_name
+        self._report_name: str = report_name
         self._on_back: Callable[[], None] = on_back
         self._settings_widgets: dict[str, Any] = {}
 
@@ -57,7 +57,7 @@ class SettingsView(ctk.CTkFrame):
         # Settings title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
-            text=f"Configuration de {self._document_name}",
+            text=f"Configuration de {self._report_name}",
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         title_label.grid(row=0, column=1, sticky="w")  # type: ignore
@@ -67,10 +67,10 @@ class SettingsView(ctk.CTkFrame):
         content_frame.grid(row=1, column=0, padx=20, pady=(10, 20), sticky="nsew")  # type: ignore
         content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Create settings based on document type
+        # Create settings based on report type
         if (
-            "mensuelle" in self._document_name.lower()
-            or "monthly" in self._document_name.lower()
+            "mensuelle" in self._report_name.lower()
+            or "monthly" in self._report_name.lower()
         ):
             self._create_monthly_settings(parent=content_frame)
         else:
@@ -132,43 +132,12 @@ class SettingsView(ctk.CTkFrame):
             checkbox.grid(row=idx, column=0, padx=20, pady=5, sticky="w")  # type: ignore
             self._settings_widgets[f"program_{idx}"] = checkbox
 
-        # Date range section
-        date_section: SettingsSection = SettingsSection(
-            parent=parent,
-            title="Paramètres de plage de dates",
-            description="Configurez la plage de dates par défaut pour la génération de rapports",
-        )
-        date_section.grid(row=1, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
-
-        date_frame: ctk.CTkFrame = date_section.get_content_frame()
-
-        # Date range option
-        date_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=date_frame,
-            text="Période par défaut :",
-            font=ctk.CTkFont(size=13),
-        )
-        date_label.grid(row=0, column=0, padx=20, pady=10, sticky="w")  # type: ignore
-
-        date_option: ctk.CTkOptionMenu = ctk.CTkOptionMenu(
-            master=date_frame,
-            values=[
-                "Mois courant",
-                "Mois précédent",
-                "30 derniers jours",
-                "Personnalisé",
-            ],
-            font=ctk.CTkFont(size=13),
-        )
-        date_option.grid(row=0, column=1, padx=10, pady=10, sticky="w")  # type: ignore
-        self._settings_widgets["date_range"] = date_option
-
     def _create_generic_settings(self, parent: Any) -> None:
         # General settings section
         general_section: SettingsSection = SettingsSection(
             parent=parent,
             title="Paramètres généraux",
-            description="Configurez les options générales pour ce type de document",
+            description="Configurez les options générales pour ce type de report",
         )
         general_section.grid(row=0, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
 
@@ -222,7 +191,7 @@ class SettingsView(ctk.CTkFrame):
     def _save_settings(self) -> None:
         # TODO: Implement actual settings saving logic
         # For now, just show a message and go back
-        print(f"Sauvegarde de la configuration pour {self._document_name}")
+        print(f"Sauvegarde de la configuration pour {self._report_name}")
 
         # Collect all settings values
         settings_values: dict[str, Any] = {}

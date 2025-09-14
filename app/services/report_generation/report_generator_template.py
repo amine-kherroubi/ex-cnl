@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Imports de la bibliothèque standard
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from logging import Logger
 
@@ -12,31 +13,31 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 # Imports de l'application locale
 from app.data.data_repository import DataRepository
-from app.services.document_generation.business_values.programmes import (
+from app.services.report_generation.business_values.programmes import (
     get_programmes_dataframe,
 )
 from app.services.file_io.file_io_service import FileIOService
-from app.services.document_generation.models.document_context import (
-    DocumentContext,
+from app.services.report_generation.models.report_context import (
+    ReportContext,
 )
 from app.utils.exceptions import QueryExecutionError
 from app.utils.date_formatting import DateFormatter
 from app.utils.logging_setup import get_logger
 
 if TYPE_CHECKING:
-    from app.services.document_generation.document_registry import (
-        DocumentSpecification,
+    from app.services.report_generation.report_specification_registry import (
+        ReportSpecification,
     )
 
 
-class DocumentGenerator(ABC):
+class ReportGenerator(ABC):
     """
-    Classe abstraite de base pour la génération de documents.
+    Classe abstraite de base pour la génération de reports.
 
     Cette classe implémente le pattern Template Method pour définir l'algorithme
-    de génération de documents en plusieurs étapes bien définies. Les sous-classes
+    de génération de reports en plusieurs étapes bien définies. Les sous-classes
     sont responsables de l'implémentation des détails spécifiques à chaque type
-    de document (en-tête, tableaux, pied de page, formatage).
+    de report (en-tête, tableaux, pied de page, formatage).
 
     Le processus de génération suit ces étapes :
     1. Validation des fichiers requis
@@ -48,7 +49,7 @@ class DocumentGenerator(ABC):
     7. Construction des tableaux (responsabilité des sous-classes)
     8. Ajout du pied de page (responsabilité des sous-classes)
     9. Formatage final (responsabilité des sous-classes)
-    10. Sauvegarde du document
+    10. Sauvegarde du report
 
     Utilise __slots__ pour optimiser l'utilisation mémoire.
     """
@@ -56,27 +57,29 @@ class DocumentGenerator(ABC):
     __slots__ = (
         "_storage_service",
         "_data_repository",
-        "_document_specification",
-        "_document_context",
+        "_report_specification",
+        "_report_context",
         "_workbook",
         "_logger",
+        "_source_file_paths",
+        "_output_file_path",
     )
 
     def __init__(
         self,
         storage_service: FileIOService,
         data_repository: DataRepository,
-        document_specification: DocumentSpecification,
-        document_context: DocumentContext,
+        report_specification: ReportSpecification,
+        report_context: ReportContext,
     ) -> None:
         """
-        Initialise le générateur de documents avec les services et contextes nécessaires.
+        Initialise le générateur de reports avec les services et contextes nécessaires.
 
         Args:
             storage_service: Service de gestion des fichiers d'entrée/sortie
             data_repository: Dépôt de données pour l'exécution de requêtes SQL
-            document_specification: Spécification complète du document à générer
-            document_context: Contexte contenant les paramètres de génération
+            report_specification: Spécification complète du report à générer
+            report_context: Contexte contenant les paramètres de génération
                             (wilaya, date, période, etc.)
         """
         self._logger: Logger = get_logger(f"app.generators.{self.__class__.__name__}")
@@ -84,24 +87,28 @@ class DocumentGenerator(ABC):
 
         self._storage_service: FileIOService = storage_service
         self._data_repository: DataRepository = data_repository
-        self._document_specification: DocumentSpecification = document_specification
-        self._document_context: DocumentContext = document_context
+        self._report_specification: ReportSpecification = report_specification
+        self._report_context: ReportContext = report_context
         self._workbook: Workbook | None = None
 
         self._logger.info(
-            f"Générateur initialisé pour le document : {document_specification.display_name}"
+            f"Générateur initialisé pour le report : {report_specification.display_name}"
         )
         self._logger.debug(
-            f"Contexte du document : wilaya={document_context.wilaya.value}, date={document_context.report_date}"
+            f"Contexte du report : wilaya={report_context.wilaya.value}, date={report_context.report_date}"
         )
 
-    def generate(self) -> None:
+    def generate(
+        self,
+        source_file_paths: dict[str, Path],
+        output_file_path: Path,
+    ) -> None:
         """
-        Lance le processus complet de génération du document.
+        Lance le processus complet de génération du report.
 
-        Cette méthode orchestre toutes les étapes de génération selon le
-        pattern Template Method. Les étapes spécifiques au format sont
-        déléguées aux sous-classes via les méthodes abstraites.
+        Args:
+            file_paths: Optional dictionary mapping table names to file paths
+            output_path: Optional output path for the generated report
 
         Raises:
             FileNotFoundError: Si des fichiers requis sont manquants
@@ -109,7 +116,11 @@ class DocumentGenerator(ABC):
             ValueError: Si la configuration ou les données sont invalides
             Exception: Pour toute autre erreur durant la génération
         """
-        self._logger.info("Début du processus de génération du document")
+        self._logger.info("Début du processus de génération du report")
+
+        # Store the file paths for use in validation
+        self._source_file_paths: dict[str, Path] = source_file_paths
+        self._output_file_path: Path = output_file_path
 
         try:
             # Étape 1 : Validation des fichiers requis
@@ -139,14 +150,14 @@ class DocumentGenerator(ABC):
             self._workbook = Workbook()
             self._workbook.remove(self._workbook.active)  # type: ignore
             sheet: Worksheet = self._workbook.create_sheet(
-                self._document_specification.display_name
+                self._report_specification.display_name
             )
             self._logger.info(
-                f"Classeur créé avec la feuille : {self._document_specification.display_name}"
+                f"Classeur créé avec la feuille : {self._report_specification.display_name}"
             )
 
             # Étape 6 : Ajout de l'en-tête (responsabilité de la sous-classe)
-            self._logger.debug("Étape 5 : Ajout de l'en-tête du document")
+            self._logger.debug("Étape 5 : Ajout de l'en-tête du report")
             self._add_header(sheet)
             self._logger.debug("En-tête ajouté avec succès")
 
@@ -156,7 +167,7 @@ class DocumentGenerator(ABC):
             self._logger.debug("Tableau principal construit avec succès")
 
             # Étape 8 : Ajout du pied de page (responsabilité de la sous-classe)
-            self._logger.debug("Étape 7 : Ajout du pied de page du document")
+            self._logger.debug("Étape 7 : Ajout du pied de page du report")
             self._add_footer(sheet)
             self._logger.debug("Pied de page ajouté avec succès")
 
@@ -165,13 +176,13 @@ class DocumentGenerator(ABC):
             self._finalize_formatting(sheet)
             self._logger.debug("Formatage final appliqué avec succès")
 
-            # Étape 10 : Sauvegarde du document
-            self._logger.debug("Étape 9 : Sauvegarde du document")
-            self._save_document()
-            self._logger.info("Génération du document terminée avec succès")
+            # Étape 10 : Sauvegarde du report
+            self._logger.debug("Étape 9 : Sauvegarde du report")
+            self._save_report()
+            self._logger.info("Génération du report terminée avec succès")
 
         except Exception as error:
-            self._logger.exception(f"Échec de la génération du document : {error}")
+            self._logger.exception(f"Échec de la génération du report : {error}")
             self._logger.exception("Détails complets de l'erreur")
             raise
 
@@ -179,57 +190,29 @@ class DocumentGenerator(ABC):
         """
         Valide la présence de tous les fichiers requis pour la génération.
 
-        Parcourt la liste des patterns de fichiers requis définis dans la
-        spécification du document et vérifie qu'un fichier correspondant
-        existe pour chaque pattern.
-
         Returns:
             Dictionnaire mappant les noms de vues aux noms de fichiers trouvés
 
         Raises:
-            ValueError: Si la spécification du document n'est pas définie
+            ValueError: Si la spécification du report n'est pas définie
             FileNotFoundError: Si des fichiers requis sont manquants
         """
         self._logger.debug("Validation des fichiers requis")
 
-        if not self._document_specification:
-            error_msg: str = "Spécification du document non définie"
+        if not self._report_specification:
+            error_msg: str = "Spécification du report non définie"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
-        missing_patterns: list[str] = []
         files_mapping: dict[str, str] = {}
 
-        self._logger.debug(
-            f"Vérification de {len(self._document_specification.required_files)} patterns de fichiers requis"
-        )
-
-        # Recherche de chaque fichier requis selon son pattern
-        for pattern, table_name in self._document_specification.required_files.items():
-            self._logger.debug(
-                f"Recherche d'un fichier correspondant au pattern : {pattern} (vue : {table_name})"
+        # If file paths were provided by the controller, use them
+        self._logger.debug("Using controller-provided file paths")
+        for table_name, file_path in self._source_file_paths.items():
+            files_mapping[table_name] = str(file_path)
+            self._logger.info(
+                f"Using provided file for view '{table_name}': {file_path}"
             )
-            filename: str | None = self._storage_service.find_filename_matching_pattern(
-                pattern
-            )
-            if filename is None:
-                self._logger.warning(
-                    f"Aucun fichier trouvé pour le pattern : {pattern}"
-                )
-                missing_patterns.append(pattern)
-            else:
-                self._logger.info(
-                    f"Fichier '{filename}' trouvé pour le pattern : {pattern}"
-                )
-                files_mapping[table_name] = filename
-
-        # Vérification que tous les fichiers requis sont présents
-        if missing_patterns:
-            error_msg: str = (
-                f"Fichiers requis manquants correspondant aux patterns : {missing_patterns}"
-            )
-            self._logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
 
         self._logger.info(f"Tous les {len(files_mapping)} fichiers requis trouvés")
         return files_mapping
@@ -287,7 +270,7 @@ class DocumentGenerator(ABC):
 
     def _create_reference_tables(self) -> None:
         """
-        Crée les tables de référence nécessaires à la génération du document.
+        Crée les tables de référence nécessaires à la génération du report.
 
         Les tables de référence contiennent des données métier statiques
         comme la liste des programmes avec leur ordre d'affichage et
@@ -325,9 +308,9 @@ class DocumentGenerator(ABC):
 
     def _execute_queries(self) -> dict[str, pd.DataFrame]:
         """
-        Exécute toutes les requêtes définies dans la spécification du document.
+        Exécute toutes les requêtes définies dans la spécification du report.
 
-        Les requêtes sont formatées avec le contexte du document (date, mois, année)
+        Les requêtes sont formatées avec le contexte du report (date, mois, année)
         avant d'être exécutées. Les résultats sont stockés dans un dictionnaire
         pour utilisation lors de la construction des tableaux.
 
@@ -335,28 +318,28 @@ class DocumentGenerator(ABC):
             Dictionnaire mappant les noms de requêtes aux DataFrames de résultats
 
         Raises:
-            ValueError: Si la spécification du document n'est pas définie
+            ValueError: Si la spécification du report n'est pas définie
             QueryExecutionError: Si l'exécution d'une requête échoue
         """
-        self._logger.debug("Exécution des requêtes du document")
+        self._logger.debug("Exécution des requêtes du report")
 
-        if not self._document_specification:
-            error_msg = "Spécification du document non définie"
+        if not self._report_specification:
+            error_msg = "Spécification du report non définie"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
         results: dict[str, pd.DataFrame] = {}
-        query_count: int = len(self._document_specification.queries)
+        query_count: int = len(self._report_specification.queries)
         self._logger.debug(f"Préparation de l'exécution de {query_count} requêtes")
 
         # Exécution de chaque requête définie dans la spécification
-        for query_name, query_template in self._document_specification.queries.items():
+        for query_name, query_template in self._report_specification.queries.items():
             self._logger.debug(f"Exécution de la requête '{query_name}'")
             try:
-                # Formatage de la requête avec le contexte du document
+                # Formatage de la requête avec le contexte du report
                 formatted_query: str = self._format_query_with_context(query_template)
                 self._logger.debug(
-                    f"Requête '{query_name}' formatée avec le contexte du document"
+                    f"Requête '{query_name}' formatée avec le contexte du report"
                 )
 
                 # Exécution de la requête formatée
@@ -378,7 +361,7 @@ class DocumentGenerator(ABC):
 
     def _format_query_with_context(self, query_template: str) -> str:
         """
-        Formate un template de requête SQL avec les valeurs du contexte du document.
+        Formate un template de requête SQL avec les valeurs du contexte du report.
 
         Remplace les placeholders suivants dans la requête :
         - {month_number:02d} : Numéro du mois sur 2 chiffres (ex: "03")
@@ -392,15 +375,15 @@ class DocumentGenerator(ABC):
             Requête SQL avec les placeholders remplacés par les valeurs réelles
         """
         self._logger.debug(
-            "Formatage du template de requête avec le contexte du document"
+            "Formatage du template de requête avec le contexte du report"
         )
 
         formatted_query: str = query_template
 
         # Remplacement des placeholders de date si un mois est spécifié
-        if self._document_context.month:
-            month_number: int = self._document_context.month.number
-            year: int = self._document_context.year
+        if self._report_context.month:
+            month_number: int = self._report_context.month.number
+            year: int = self._report_context.year
 
             # Remplacement des placeholders trouvés dans les templates de requête
             formatted_query = formatted_query.replace(
@@ -417,7 +400,7 @@ class DocumentGenerator(ABC):
 
         # Remplacement du placeholder d'année pour les requêtes annuelles uniquement
         formatted_query = formatted_query.replace(
-            "{year}", str(self._document_context.year)
+            "{year}", str(self._report_context.year)
         )
 
         self._logger.debug("Formatage de la requête terminé")
@@ -426,10 +409,10 @@ class DocumentGenerator(ABC):
     @abstractmethod
     def _add_header(self, sheet: Worksheet) -> None:
         """
-        Ajoute l'en-tête du document à la feuille Excel.
+        Ajoute l'en-tête du report à la feuille Excel.
 
         Cette méthode abstraite doit être implémentée par les sous-classes
-        pour définir l'en-tête spécifique à chaque type de document.
+        pour définir l'en-tête spécifique à chaque type de report.
 
         Args:
             sheet: Feuille Excel où ajouter l'en-tête
@@ -441,10 +424,10 @@ class DocumentGenerator(ABC):
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
         """
-        Construit les tableaux de données du document.
+        Construit les tableaux de données du report.
 
         Cette méthode abstraite doit être implémentée par les sous-classes
-        pour construire les tableaux spécifiques à chaque type de document
+        pour construire les tableaux spécifiques à chaque type de report
         en utilisant les résultats des requêtes.
 
         Args:
@@ -456,10 +439,10 @@ class DocumentGenerator(ABC):
     @abstractmethod
     def _add_footer(self, sheet: Worksheet) -> None:
         """
-        Ajoute le pied de page du document à la feuille Excel.
+        Ajoute le pied de page du report à la feuille Excel.
 
         Cette méthode abstraite doit être implémentée par les sous-classes
-        pour définir le pied de page spécifique à chaque type de document.
+        pour définir le pied de page spécifique à chaque type de report.
 
         Args:
             sheet: Feuille Excel où ajouter le pied de page
@@ -469,20 +452,20 @@ class DocumentGenerator(ABC):
     @abstractmethod
     def _finalize_formatting(self, sheet: Worksheet) -> None:
         """
-        Applique le formatage final au document.
+        Applique le formatage final au report.
 
         Cette méthode abstraite doit être implémentée par les sous-classes
         pour appliquer les styles, bordures, couleurs et autres formatages
-        spécifiques à chaque type de document.
+        spécifiques à chaque type de report.
 
         Args:
             sheet: Feuille Excel à formater
         """
         ...
 
-    def _save_document(self) -> None:
+    def _save_report(self) -> None:
         """
-        Sauvegarde le document Excel généré.
+        Sauvegarde le report Excel généré.
 
         Utilise le template de nom de fichier défini dans la spécification
         pour générer le nom final, en remplaçant les placeholders par les
@@ -492,37 +475,37 @@ class DocumentGenerator(ABC):
             ValueError: Si aucun classeur n'a été créé
             Exception: Si la sauvegarde échoue
         """
-        self._logger.debug("Préparation de la sauvegarde du document")
+        self._logger.debug("Préparation de la sauvegarde du report")
 
         if not self._workbook:
             error_msg: str = "Aucun classeur créé"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
-        output_filename: str = self._document_specification.output_filename
+        output_filename: str = self._report_specification.output_filename
         self._logger.debug(f"Template du nom de fichier de sortie : {output_filename}")
 
         # Utilisation du format de date français pour les noms de fichiers utilisateur
         output_filename = output_filename.replace(
-            "{wilaya}", self._document_context.wilaya.value
+            "{wilaya}", self._report_context.wilaya.value
         )
         output_filename = output_filename.replace(
             "{date}",
-            DateFormatter.to_french_filename_date(self._document_context.report_date),
+            DateFormatter.to_french_filename_date(self._report_context.report_date),
         )
 
         # Ajout de l'extension si nécessaire
         if not output_filename.endswith(".xlsx"):
             output_filename += ".xlsx"
 
-        self._logger.info(f"Sauvegarde du document sous : {output_filename}")
+        self._logger.info(f"Sauvegarde du report sous : {output_filename}")
 
         try:
             self._storage_service.save_data_to_file(
                 data=self._workbook,
-                output_filename=output_filename,
+                output_file_path=output_filename,
             )
-            self._logger.info(f"Document sauvegardé avec succès : {output_filename}")
+            self._logger.info(f"Report sauvegardé avec succès : {output_filename}")
         except Exception as error:
-            self._logger.exception(f"Échec de la sauvegarde du document : {error}")
+            self._logger.exception(f"Échec de la sauvegarde du report : {error}")
             raise

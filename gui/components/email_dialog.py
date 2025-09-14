@@ -48,7 +48,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Envoyer le document généré",
+            text="Envoyer le report généré",
             font=ctk.CTkFont(size=20, weight="bold"),
         )
         title_label.grid(row=0, column=0, padx=30, pady=(30, 10))  # type: ignore

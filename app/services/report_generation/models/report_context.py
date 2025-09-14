@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 """
-Modèle de contexte pour la génération de documents.
+Modèle de contexte pour la génération de reports.
 
 Ce module définit la structure des données contextuelles nécessaires
-à la génération de documents administratifs. Le contexte contient
+à la génération de reports administratifs. Le contexte contient
 les informations temporelles et géographiques qui paramètrent
 la génération des rapports.
 
@@ -19,15 +19,15 @@ from datetime import date
 from pydantic import BaseModel, Field, field_validator
 
 # Imports de l'application locale
-from app.services.document_generation.enums.space_time import Wilaya, Month
+from app.services.report_generation.enums.space_time import Wilaya, Month
 
 
-class DocumentContext(BaseModel):
+class ReportContext(BaseModel):
     """
-    Contexte de génération d'un document administratif.
+    Contexte de génération d'un report administratif.
 
     Cette classe encapsule toutes les informations contextuelles
-    nécessaires à la génération d'un document : localisation
+    nécessaires à la génération d'un report : localisation
     géographique, période temporelle et date de référence.
 
     Attributes:
@@ -39,7 +39,7 @@ class DocumentContext(BaseModel):
 
     Exemples:
         Contexte mensuel :
-        >>> context = DocumentContext(
+        >>> context = ReportContext(
         ...     wilaya=Wilaya.ALGER,
         ...     year=2024,
         ...     month=Month.JANVIER,
@@ -47,7 +47,7 @@ class DocumentContext(BaseModel):
         ... )
 
         Contexte annuel :
-        >>> context = DocumentContext(
+        >>> context = ReportContext(
         ...     wilaya=Wilaya.CONSTANTINE,
         ...     year=2023,
         ...     report_date=date(2023, 12, 31)
@@ -55,7 +55,7 @@ class DocumentContext(BaseModel):
     """
 
     wilaya: Wilaya = Field(
-        description="Division administrative algérienne pour ce document",
+        description="Division administrative algérienne pour ce report",
     )
 
     year: int = Field(

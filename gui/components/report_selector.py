@@ -7,8 +7,8 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.services.document_generation.models.document_specification import (
-    DocumentSpecification,
+from app.services.report_generation.models.report_specification import (
+    ReportSpecification,
 )
 
 
@@ -26,7 +26,7 @@ class ReportSelector(ctk.CTkFrame):
         super().__init__(master=parent)  # type: ignore
 
         self._on_report_changed: Callable[[str | None], None] = on_report_changed
-        self._reports: dict[str, DocumentSpecification] = {}
+        self._reports: dict[str, ReportSpecification] = {}
 
         self._setup_ui()
 
@@ -57,7 +57,7 @@ class ReportSelector(ctk.CTkFrame):
             row=1, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="ew"
         )
 
-    def set_reports(self, reports: dict[str, DocumentSpecification]) -> None:
+    def set_reports(self, reports: dict[str, ReportSpecification]) -> None:
         self._reports = reports
 
         # Update dropdown values
@@ -80,14 +80,14 @@ class ReportSelector(ctk.CTkFrame):
 
         # Update description
         if selection in self._reports:
-            report_spec: DocumentSpecification = self._reports[selection]
+            report_spec: ReportSpecification = self._reports[selection]
             self._update_description(report_spec)
             self._on_report_changed(selection)
         else:
             self._clear_description()
             self._on_report_changed(None)
 
-    def _update_description(self, report_spec: DocumentSpecification) -> None:
+    def _update_description(self, report_spec: ReportSpecification) -> None:
         self._description_text.configure(state="normal")  # type: ignore
         self._description_text.delete(index1="1.0", index2="end")  # type: ignore
 

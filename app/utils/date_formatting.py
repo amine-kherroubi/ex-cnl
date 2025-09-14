@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import date
 
 # Local application imports
-from app.services.document_generation.enums.space_time import Month
+from app.services.report_generation.enums.space_time import Month
 
 
 class DateFormatter(object):

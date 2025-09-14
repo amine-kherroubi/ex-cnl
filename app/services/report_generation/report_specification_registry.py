@@ -1,40 +1,40 @@
 from __future__ import annotations
 
 """
-Registre centralisé des spécifications de documents.
+Registre centralisé des spécifications de reports.
 
 Ce module implémente le pattern Registry pour maintenir un catalogue
-de toutes les spécifications de documents supportées par l'application.
+de toutes les spécifications de reports supportées par l'application.
 Il fournit un point d'accès unique pour récupérer les définitions
-de documents avec leurs requêtes, générateurs et métadonnées.
+de reports avec leurs requêtes, générateurs et métadonnées.
 
-Le registre centralise la configuration des documents et facilite
-l'ajout de nouveaux types de documents.
+Le registre centralise la configuration des reports et facilite
+l'ajout de nouveaux types de reports.
 """
 
 # Imports de la bibliothèque standard
 from typing import Final, final
 
 # Imports de l'application locale
-from app.services.document_generation.concrete_generators.activite_mensuelle_hr import (
+from app.services.report_generation.concrete_generators.activite_mensuelle_hr import (
     ActiviteMensuelleHRGenerator,
 )
-from app.services.document_generation.models.document_specification import (
-    DocumentCategory,
-    DocumentSpecification,
+from app.services.report_generation.models.report_specification import (
+    ReportCategory,
+    ReportSpecification,
 )
-from app.services.document_generation.enums.space_time import Periodicity
+from app.services.report_generation.enums.space_time import Periodicity
 
 
 @final
-class DocumentRegistry(object):
+class RerportSpecificationRegistry(object):
     """
-    Registre centralisé des spécifications de documents disponibles.
+    Registre centralisé des spécifications de reports disponibles.
 
     Cette classe implémente le pattern Registry pour maintenir un catalogue
-    de toutes les spécifications de documents supportées par l'application.
+    de toutes les spécifications de reports supportées par l'application.
     Elle fournit un point d'accès unique pour récupérer les définitions
-    de documents avec leurs requêtes, générateurs et métadonnées.
+    de reports avec leurs requêtes, générateurs et métadonnées.
 
     Le décorateur @final empêche l'héritage et __slots__ vide optimise
     l'utilisation mémoire. Cette classe n'est pas destinée à être
@@ -42,15 +42,15 @@ class DocumentRegistry(object):
 
     Exemples:
         Récupération d'une spécification :
-        >>> spec = DocumentRegistry.get("activite_mensuelle_par_programme")
+        >>> spec = ReportRegistry.get("activite_mensuelle_par_programme")
         >>> print(spec.display_name)  # "Activité mensuelle"
 
         Vérification d'existence :
-        >>> if DocumentRegistry.has("mon_document"):
-        ...     spec = DocumentRegistry.get("mon_document")
+        >>> if ReportRegistry.has("mon_report"):
+        ...     spec = ReportRegistry.get("mon_report")
 
-        Liste de tous les documents :
-        >>> all_docs = DocumentRegistry.all()
+        Liste de tous les reports :
+        >>> all_docs = ReportRegistry.all()
         >>> print(list(all_docs.keys()))
     """
 
@@ -71,60 +71,60 @@ class DocumentRegistry(object):
         )
 
     @classmethod
-    def get(cls, document_name: str) -> DocumentSpecification:
+    def get(cls, report_name: str) -> ReportSpecification:
         """
-        Récupère la spécification d'un document par son nom.
+        Récupère la spécification d'un report par son nom.
 
         Args:
-            document_name: Nom unique du document à récupérer
+            report_name: Nom unique du report à récupérer
 
         Returns:
-            Spécification complète du document demandé
+            Spécification complète du report demandé
 
         Raises:
-            ValueError: Si le document n'existe pas dans le registre
+            ValueError: Si le report n'existe pas dans le registre
         """
-        if document_name not in cls._DOCUMENTS_DEFINITIONS:
-            available = list(cls._DOCUMENTS_DEFINITIONS.keys())
+        if report_name not in cls._REPORT_SPECIFICATIONS:
+            available = list(cls._REPORT_SPECIFICATIONS.keys())
             raise ValueError(
-                f"Document '{document_name}' introuvable. Disponibles : {available}"
+                f"Report '{report_name}' introuvable. Disponibles : {available}"
             )
-        return cls._DOCUMENTS_DEFINITIONS[document_name]
+        return cls._REPORT_SPECIFICATIONS[report_name]
 
     @classmethod
-    def has(cls, document_name: str) -> bool:
+    def has(cls, report_name: str) -> bool:
         """
-        Vérifie si un document existe dans le registre.
+        Vérifie si un report existe dans le registre.
 
         Args:
-            document_name: Nom du document à vérifier
+            report_name: Nom du report à vérifier
 
         Returns:
-            True si le document existe, False sinon
+            True si le report existe, False sinon
         """
-        return document_name in cls._DOCUMENTS_DEFINITIONS
+        return report_name in cls._REPORT_SPECIFICATIONS
 
     @classmethod
-    def all(cls) -> dict[str, DocumentSpecification]:
+    def all(cls) -> dict[str, ReportSpecification]:
         """
-        Retourne toutes les spécifications de documents disponibles.
+        Retourne toutes les spécifications de reports disponibles.
 
         Returns:
-            Dictionnaire contenant toutes les spécifications de documents,
+            Dictionnaire contenant toutes les spécifications de reports,
             avec les noms comme clés et les spécifications comme valeurs.
             Retourne une copie pour préserver l'immutabilité du registre.
         """
-        return cls._DOCUMENTS_DEFINITIONS.copy()
+        return cls._REPORT_SPECIFICATIONS.copy()
 
-    # Définitions statiques de tous les documents supportés
-    _DOCUMENTS_DEFINITIONS: Final[dict[str, DocumentSpecification]] = {
-        "activite_mensuelle_par_programme": DocumentSpecification(
+    # Définitions statiques de tous les reports supportés
+    _REPORT_SPECIFICATIONS: Final[dict[str, ReportSpecification]] = {
+        "activite_mensuelle_par_programme": ReportSpecification(
             name="activite_mensuelle_par_programme",
             display_name="Activité mensuelle",
-            category=DocumentCategory.HABITAT_RURAL,
+            category=ReportCategory.HABITAT_RURAL,
             periodicity=Periodicity.MONTHLY,
             description=(
-                "Document de suivi mensuel des activités par programme, "
+                "Report de suivi mensuel des activités par programme, "
                 "renseigné par la BNH (ex-CNL). Comprend les lancements et livraisons "
                 "ainsi que la situation globale des programmes."
             ),
@@ -325,7 +325,7 @@ class DocumentRegistry(object):
             },
             # Template du nom de fichier de sortie avec variables dynamiques
             output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
-            # Classe responsable de la génération du document
+            # Classe responsable de la génération du report
             generator=ActiviteMensuelleHRGenerator,
         ),
     }

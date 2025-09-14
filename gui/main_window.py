@@ -8,10 +8,10 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from gui.views.menu_view import MenuView
-from gui.views.document_view import DocumentView
+from gui.views.report_view import ReportView
 from gui.views.settings_view import SettingsView
 from gui.models.gui_state import GUIState
-from gui.controllers.document_controller import DocumentController
+from gui.controllers.report_controller import ReportController
 
 
 class MainWindow(ctk.CTk):
@@ -27,7 +27,7 @@ class MainWindow(ctk.CTk):
         super().__init__()  # type: ignore
 
         # Window configuration
-        self.title(string="Générateur de documents")
+        self.title(string="Générateur de reports")
         self.geometry(geometry_string="900x700")
         self.minsize(width=700, height=600)
 
@@ -37,7 +37,7 @@ class MainWindow(ctk.CTk):
 
         # Initialize state and controller
         self._state: GUIState = GUIState()
-        self._controller: DocumentController = DocumentController()
+        self._controller: ReportController = ReportController()
         self._current_view: ctk.CTkFrame | None = None
 
         # Setup UI
@@ -60,7 +60,7 @@ class MainWindow(ctk.CTk):
         # Title
         self._title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
-            text="Générateur de documents",
+            text="Générateur de rapports",
             font=ctk.CTkFont(size=28, weight="bold"),
         )
         self._title_label.grid(row=0, column=0, sticky="w")  # type: ignore
@@ -80,37 +80,37 @@ class MainWindow(ctk.CTk):
 
     def _show_menu(self) -> None:
         self._clear_current_view()
-        self._title_label.configure(text="Générateur de documents")  # type: ignore
+        self._title_label.configure(text="Générateur de rapports")  # type: ignore
 
         self._current_view = MenuView(
             parent=self._container,
-            available_documents=self._state.available_reports,
-            on_document_selected=self._show_document_view,
+            available_reports=self._state.available_reports,
+            on_report_selected=self._show_report_view,
             on_settings_selected=self._show_settings_view,
         )
         self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
 
-    def _show_document_view(self, document_name: str) -> None:
+    def _show_report_view(self, report_name: str) -> None:
         self._clear_current_view()
-        self._title_label.configure(text=f"Générer : {document_name}")  # type: ignore
+        self._title_label.configure(text=f"Générer : {report_name}")  # type: ignore
 
-        document_spec: Any = self._state.available_reports.get(document_name)
+        report_spec: Any = self._state.available_reports.get(report_name)
 
-        self._current_view = DocumentView(
+        self._current_view = ReportView(
             parent=self._container,
-            document_spec=document_spec,
+            report_spec=report_spec,
             controller=self._controller,
             on_back=self._show_menu,
         )
         self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
 
-    def _show_settings_view(self, document_name: str) -> None:
+    def _show_settings_view(self, report_name: str) -> None:
         self._clear_current_view()
-        self._title_label.configure(text=f"Configuration : {document_name}")  # type: ignore
+        self._title_label.configure(text=f"Configuration : {report_name}")  # type: ignore
 
         self._current_view = SettingsView(
             parent=self._container,
-            document_name=document_name,
+            report_name=report_name,
             on_back=self._show_menu,
         )
         self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore

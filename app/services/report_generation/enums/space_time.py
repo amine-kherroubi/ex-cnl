@@ -5,7 +5,7 @@ from __future__ import annotations
 
 Ce module définit les énumérations utilisées pour représenter
 les divisions administratives algériennes (wilayas), les mois
-en français et les périodicités de génération de documents.
+en français et les périodicités de génération de reports.
 
 Ces énumérations garantissent la cohérence des données spatiales
 et temporelles à travers l'application.
@@ -197,16 +197,16 @@ class Month(StrEnum):
 
 class Periodicity(StrEnum):
     """
-    Énumération des périodicités de génération de documents.
+    Énumération des périodicités de génération de reports.
 
     Définit les différentes fréquences selon lesquelles
-    les documents administratifs peuvent être générés.
+    les reports administratifs peuvent être générés.
 
     Exemples:
         >>> periodicite = Periodicity.MONTHLY
         >>> print(periodicite.value)  # "monthly"
     """
 
-    MONTHLY = "monthly"  # Documents générés mensuellement
-    SEMIANNUAL = "semiannual"  # Documents générés semestriellement
-    ANNUAL = "annual"  # Documents générés annuellement
+    MONTHLY = "monthly"  # Reports générés mensuellement
+    SEMIANNUAL = "semiannual"  # Reports générés semestriellement
+    ANNUAL = "annual"  # Reports générés annuellement
