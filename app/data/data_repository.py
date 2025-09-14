@@ -134,7 +134,7 @@ class DuckDBRepository:
         Raises:
             DatabaseError: Si l'initialisation de la connexion échoue
         """
-        self._logger: Logger = get_logger("app.data.repository")
+        self._logger: Logger = get_logger("app.data.data_repository")
         self._logger.debug("Initialisation du dépôt DuckDB")
 
         self._config: DatabaseConfig = db_config

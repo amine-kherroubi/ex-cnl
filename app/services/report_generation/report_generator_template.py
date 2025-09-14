@@ -82,7 +82,9 @@ class ReportGenerator(ABC):
             report_context: Contexte contenant les paramètres de génération
                             (wilaya, date, période, etc.)
         """
-        self._logger: Logger = get_logger(f"app.generators.{self.__class__.__name__}")
+        self._logger: Logger = get_logger(
+            f"app.services.report_generation.report_generator_template"
+        )
         self._logger.debug(f"Initialisation de {self.__class__.__name__}")
 
         self._storage_service: FileIOService = storage_service

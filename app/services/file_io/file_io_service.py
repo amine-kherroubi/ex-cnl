@@ -34,23 +34,22 @@ class FileIOService(object):
             storage_config: Configuration contenant les contraintes
                            pour les fichiers d'entrée et de sortie
         """
-        self._logger: Logger = get_logger("app.services.file_storage")
+        self._logger: Logger = get_logger("app.services.file_io_service")
         self._logger.debug("Initialisation du service de stockage de fichiers")
 
         self._config: FileIOConfig = storage_config
 
         self._logger.info("Service de stockage de fichiers initialisé")
         self._logger.debug(
-            f"Configuration - Taille max : {self._config.max_input_file_size_mb}MB, "
             f"Extensions autorisées : {self._config.allowed_source_file_extensions}"
         )
 
-    def load_data_from_file(self, source_file_path: Path | str) -> pd.DataFrame:
+    def load_data_from_file(self, source_file_path: Path) -> pd.DataFrame:
         """
         Charge les données d'un fichier Excel vers un DataFrame pandas.
 
         Args:
-            source_file_path: Chemin complet vers le fichier à charger (Path ou str)
+            source_file_path: Chemin complet vers le fichier à charger
 
         Returns:
             DataFrame pandas contenant les données du fichier
@@ -60,10 +59,6 @@ class FileIOService(object):
             ValueError: Si l'extension ou la taille n'est pas valide
             DataLoadError: Si le chargement échoue pour une autre raison
         """
-        # Convert to Path object if it's a string
-        if isinstance(source_file_path, str):
-            source_file_path = Path(source_file_path)
-
         self._logger.info(
             f"Chargement des données depuis le fichier : {source_file_path}"
         )
@@ -94,21 +89,17 @@ class FileIOService(object):
             )
             raise DataLoadError(source_file_path, error) from error
 
-    def save_data_to_file(self, data: Any, output_file_path: Path | str) -> None:
+    def save_data_to_file(self, data: Any, output_file_path: Path) -> None:
         """
         Sauvegarde les données vers un fichier de sortie.
 
         Args:
             data: Données à sauvegarder (doit être un objet Workbook)
-            output_filename: Nom ou chemin complet du fichier de sortie
+            output_filename: Chemin complet du fichier de sortie
 
         Raises:
             ValueError: Si le type de données n'est pas supporté
         """
-        # Convert to Path object if it's a string
-        if isinstance(output_file_path, str):
-            output_file_path = Path(output_file_path)
-
         self._logger.info(
             f"Sauvegarde des données vers le fichier : {output_file_path}"
         )
@@ -135,7 +126,7 @@ class FileIOService(object):
             )
             raise
 
-    def _find_table_start_row(self, file_path: Path) -> int:
+    def _find_table_start_row(self, source_file_path: Path) -> int:
         """
         Trouve automatiquement la ligne où commence le tableau de données.
 
@@ -159,13 +150,13 @@ class FileIOService(object):
 
         try:
             # Lecture des premières lignes pour analyse
-            preview_df: pd.DataFrame = pd.read_excel(file_path, nrows=30, header=None)  # type: ignore
+            preview_df: pd.DataFrame = pd.read_excel(source_file_path, nrows=30, header=None)  # type: ignore
             self._logger.debug(f"Chargement de {len(preview_df)} lignes d'aperçu")
         except Exception as error:
             self._logger.exception(
                 f"Échec de la lecture de l'aperçu du fichier : {error}"
             )
-            raise DataLoadError(file_path, error) from error
+            raise DataLoadError(source_file_path, error) from error
 
         # Recherche de l'en-tête "N° d'ordre" dans les premières cellules de chaque ligne
         for row_idx, (_, row) in enumerate(preview_df.iterrows()):
@@ -185,4 +176,4 @@ class FileIOService(object):
             "Impossible de trouver l'en-tête 'N° d'ordre' pour déterminer le début du tableau"
         )
         self._logger.error(error_msg)
-        raise DataLoadError(file_path, Exception(error_msg))
+        raise DataLoadError(source_file_path, Exception(error_msg))
