@@ -68,7 +68,6 @@ class MenuView(ctk.CTkFrame):
         for idx, (doc_name, doc_spec) in enumerate(self._available_documents.items()):
             card: DocumentCard = DocumentCard(
                 parent=scrollable_frame,
-                document_name=doc_name,
                 document_spec=doc_spec,
                 on_generate_clicked=lambda name=doc_name: self._on_document_selected(
                     name

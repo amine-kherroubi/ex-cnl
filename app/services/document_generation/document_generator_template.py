@@ -205,9 +205,9 @@ class DocumentGenerator(ABC):
         )
 
         # Recherche de chaque fichier requis selon son pattern
-        for pattern, view_name in self._document_specification.required_files.items():
+        for pattern, table_name in self._document_specification.required_files.items():
             self._logger.debug(
-                f"Recherche d'un fichier correspondant au pattern : {pattern} (vue : {view_name})"
+                f"Recherche d'un fichier correspondant au pattern : {pattern} (vue : {table_name})"
             )
             filename: str | None = self._storage_service.find_filename_matching_pattern(
                 pattern
@@ -221,7 +221,7 @@ class DocumentGenerator(ABC):
                 self._logger.info(
                     f"Fichier '{filename}' trouvé pour le pattern : {pattern}"
                 )
-                files_mapping[view_name] = filename
+                files_mapping[table_name] = filename
 
         # Vérification que tous les fichiers requis sont présents
         if missing_patterns:
@@ -252,9 +252,9 @@ class DocumentGenerator(ABC):
         """
         self._logger.debug("Chargement des fichiers dans les vues de base de données")
 
-        for view_name, filename in files_mapping.items():
+        for table_name, filename in files_mapping.items():
             self._logger.debug(
-                f"Chargement du fichier '{filename}' dans la vue '{view_name}'"
+                f"Chargement du fichier '{filename}' dans la vue '{table_name}'"
             )
             try:
                 # Chargement du fichier en DataFrame
@@ -267,21 +267,21 @@ class DocumentGenerator(ABC):
 
                 if original_columns != cleaned_columns:
                     self._logger.debug(
-                        f"Noms de colonnes nettoyés pour la vue '{view_name}'"
+                        f"Noms de colonnes nettoyés pour la vue '{table_name}'"
                     )
 
                 # Création de la vue en base de données
-                self._data_repository.create_view_from_dataframe(view_name, df)
+                self._data_repository.create_table_from_dataframe(table_name, df)
                 self._logger.info(
-                    f"Vue '{view_name}' chargée avec succès : {len(df)} lignes"
+                    f"Vue '{table_name}' chargée avec succès : {len(df)} lignes"
                 )
 
                 # Affichage du résumé des données pour diagnostic
-                print(self._data_repository.summarize(view_name))
+                print(self._data_repository.summarize(table_name))
 
             except Exception as error:
                 self._logger.error(
-                    f"Échec du chargement du fichier '{filename}' dans la vue '{view_name}' : {error}"
+                    f"Échec du chargement du fichier '{filename}' dans la vue '{table_name}' : {error}"
                 )
                 raise
 
@@ -309,7 +309,7 @@ class DocumentGenerator(ABC):
 
                 # Génération du DataFrame via la fabrique
                 df: pd.DataFrame = dataframe_factory()
-                self._data_repository.create_view_from_dataframe(table_name, df)
+                self._data_repository.create_table_from_dataframe(table_name, df)
 
                 rows, cols = df.shape
                 self._logger.info(

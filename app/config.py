@@ -81,16 +81,6 @@ class LoggingConfig(BaseSettings):
 
 
 class FileIOConfig(BaseSettings):
-    uploads_dir: Path = Field(
-        default=Path("uploads"),
-        description="Directory path where uploads are stored.",
-    )
-
-    results_dir: Path = Field(
-        default=Path("results"),
-        description="Directory path where results are stored.",
-    )
-
     allowed_input_file_extensions: list[str] = Field(
         default=["xlsx", "xls"],
         description="Allowed file extensions for upload.",
@@ -107,22 +97,6 @@ class FileIOConfig(BaseSettings):
         default="xlsx",
         description="Default output format for results.",
     )
-
-    @field_validator("uploads_dir", mode="after")
-    @classmethod
-    def ensure_uploads_directory(cls, uploads_dir: Path) -> Path:
-        uploads_dir.mkdir(parents=True, exist_ok=True)
-        return uploads_dir
-
-    @field_validator("results_dir", mode="after")
-    @classmethod
-    def ensure_results_directory(cls, results_dir: Path) -> Path:
-        results_dir.mkdir(parents=True, exist_ok=True)
-        return results_dir
-
-    model_config = {
-        "env_prefix": "LOG_",
-    }
 
     model_config = {
         "env_prefix": "STORAGE_",

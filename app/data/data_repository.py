@@ -22,16 +22,16 @@ class DataRepository(Protocol):
     et permettre une implémentation modulaire avec différents backends.
     """
 
-    def create_view_from_dataframe(
+    def create_table_from_dataframe(
         self,
-        view_name: str,
+        table_name: str,
         dataframe: pd.DataFrame,
     ) -> None:
         """
         Crée une vue dans la base de données à partir d'un DataFrame pandas.
 
         Args:
-            view_name: Nom de la vue à créer
+            table_name: Nom de la vue à créer
             dataframe: DataFrame pandas contenant les données
         """
         ...
@@ -48,24 +48,24 @@ class DataRepository(Protocol):
         """
         ...
 
-    def count_records(self, view_name: str) -> int:
+    def count_records(self, table_name: str) -> int:
         """
         Compte le nombre d'enregistrements dans une vue.
 
         Args:
-            view_name: Nom de la vue
+            table_name: Nom de la vue
 
         Returns:
             Nombre total d'enregistrements
         """
         ...
 
-    def describe(self, view_name: str) -> pd.DataFrame:
+    def describe(self, table_name: str) -> pd.DataFrame:
         """
         Décrit la structure d'une vue (colonnes, types, etc.).
 
         Args:
-            view_name: Nom de la vue à décrire
+            table_name: Nom de la vue à décrire
 
         Returns:
             DataFrame décrivant la structure de la vue
@@ -74,7 +74,7 @@ class DataRepository(Protocol):
 
     def get_data(
         self,
-        view_name: str,
+        table_name: str,
         offset: int = 0,
         limit: int = 5,
     ) -> pd.DataFrame:
@@ -82,7 +82,7 @@ class DataRepository(Protocol):
         Récupère un échantillon de données d'une vue avec pagination.
 
         Args:
-            view_name: Nom de la vue
+            table_name: Nom de la vue
             offset: Nombre d'enregistrements à ignorer (défaut: 0)
             limit: Nombre maximum d'enregistrements à retourner (défaut: 5)
 
@@ -91,12 +91,12 @@ class DataRepository(Protocol):
         """
         ...
 
-    def summarize(self, view_name: str) -> dict[str, Any]:
+    def summarize(self, table_name: str) -> dict[str, Any]:
         """
         Génère un résumé complet d'une vue.
 
         Args:
-            view_name: Nom de la vue à résumer
+            table_name: Nom de la vue à résumer
 
         Returns:
             Dictionnaire contenant le résumé de la vue
@@ -166,8 +166,8 @@ class DuckDBRepository:
         self._data_loaded: bool = False
         self._logger.info("Dépôt DuckDB initialisé avec succès")
 
-    def create_view_from_dataframe(
-        self, view_name: str, dataframe: pd.DataFrame
+    def create_table_from_dataframe(
+        self, table_name: str, dataframe: pd.DataFrame
     ) -> None:
         """
         Crée une vue DuckDB à partir d'un DataFrame pandas.
@@ -176,14 +176,14 @@ class DuckDBRepository:
         dans DuckDB, permettant d'effectuer des requêtes SQL dessus.
 
         Args:
-            view_name: Nom de la vue à créer dans DuckDB
+            table_name: Nom de la vue à créer dans DuckDB
             dataframe: DataFrame pandas contenant les données à importer
 
         Raises:
             DatabaseError: Si la connexion est fermée ou si l'opération échoue
         """
         self._logger.debug(
-            f"Création de la vue '{view_name}' à partir d'un DataFrame de forme {dataframe.shape}"
+            f"Création de la vue '{table_name}' à partir d'un DataFrame de forme {dataframe.shape}"
         )
 
         if not self._connection:
@@ -193,15 +193,15 @@ class DuckDBRepository:
 
         try:
             # Enregistrement du DataFrame comme vue dans DuckDB
-            self._connection.register(view_name, dataframe)
+            self._connection.register(table_name, dataframe)
             self._data_loaded = True
             rows, cols = dataframe.shape
             self._logger.info(
-                f"Vue '{view_name}' créée avec succès : {rows} lignes et {cols} colonnes"
+                f"Vue '{table_name}' créée avec succès : {rows} lignes et {cols} colonnes"
             )
 
         except Exception as error:
-            error_msg: str = f"Échec de la création de la vue '{view_name}' : {error}"
+            error_msg: str = f"Échec de la création de la vue '{table_name}' : {error}"
             self._logger.exception(error_msg)
             raise DatabaseError(error_msg) from error
 
@@ -247,40 +247,42 @@ class DuckDBRepository:
             self._logger.exception(f"Échec de l'exécution de la requête : {error}")
             raise QueryExecutionError(query, error) from error
 
-    def count_records(self, view_name: str) -> int:
+    def count_records(self, table_name: str) -> int:
         """
         Compte le nombre total d'enregistrements dans une vue.
 
         Args:
-            view_name: Nom de la vue à analyser
+            table_name: Nom de la vue à analyser
 
         Returns:
             Nombre total d'enregistrements dans la vue
         """
-        self._logger.debug(f"Comptage des enregistrements dans la vue '{view_name}'")
+        self._logger.debug(f"Comptage des enregistrements dans la vue '{table_name}'")
         result: pd.DataFrame = self.execute(
-            f"SELECT COUNT(*) as total_rows FROM {view_name}"
+            f"SELECT COUNT(*) as total_rows FROM {table_name}"
         )
         count: int = int(result["total_rows"].iloc[0])
-        self._logger.debug(f"La vue '{view_name}' contient {count} enregistrements")
+        self._logger.debug(f"La vue '{table_name}' contient {count} enregistrements")
         return count
 
-    def describe(self, view_name: str) -> pd.DataFrame:
+    def describe(self, table_name: str) -> pd.DataFrame:
         """
         Décrit la structure d'une vue (colonnes, types de données, etc.).
 
         Args:
-            view_name: Nom de la vue à décrire
+            table_name: Nom de la vue à décrire
 
         Returns:
             DataFrame contenant la description de la structure de la vue
         """
-        self._logger.debug(f"Description de la structure de la vue '{view_name}'")
-        result: pd.DataFrame = self.execute(f"DESCRIBE {view_name}")
-        self._logger.debug(f"La vue '{view_name}' a {len(result)} colonnes")
+        self._logger.debug(f"Description de la structure de la vue '{table_name}'")
+        result: pd.DataFrame = self.execute(f"DESCRIBE {table_name}")
+        self._logger.debug(f"La vue '{table_name}' a {len(result)} colonnes")
         return result
 
-    def get_data(self, view_name: str, offset: int = 0, limit: int = 5) -> pd.DataFrame:
+    def get_data(
+        self, table_name: str, offset: int = 0, limit: int = 5
+    ) -> pd.DataFrame:
         """
         Récupère un échantillon de données d'une vue avec pagination.
 
@@ -288,7 +290,7 @@ class DuckDBRepository:
         l'ensemble complet, particulièrement pour de gros datasets.
 
         Args:
-            view_name: Nom de la vue à échantillonner
+            table_name: Nom de la vue à échantillonner
             offset: Nombre d'enregistrements à ignorer depuis le début (défaut: 0)
             limit: Nombre maximum d'enregistrements à retourner (défaut: 5)
 
@@ -296,17 +298,17 @@ class DuckDBRepository:
             DataFrame contenant l'échantillon de données demandé
         """
         self._logger.debug(
-            f"Récupération d'un échantillon de la vue '{view_name}' (offset={offset}, limit={limit})"
+            f"Récupération d'un échantillon de la vue '{table_name}' (offset={offset}, limit={limit})"
         )
-        result = self.execute(
-            f"SELECT * FROM {view_name} OFFSET {offset} LIMIT {limit}"
+        result: pd.DataFrame = self.execute(
+            f"SELECT * FROM {table_name} OFFSET {offset} LIMIT {limit}"
         )
         self._logger.debug(
-            f"Récupération de {len(result)} lignes d'échantillon de la vue '{view_name}'"
+            f"Récupération de {len(result)} lignes d'échantillon de la vue '{table_name}'"
         )
         return result
 
-    def summarize(self, view_name: str) -> dict[str, Any]:
+    def summarize(self, table_name: str) -> dict[str, Any]:
         """
         Génère un résumé complet d'une vue incluant statistiques et échantillon.
 
@@ -316,7 +318,7 @@ class DuckDBRepository:
         - Un échantillon des données
 
         Args:
-            view_name: Nom de la vue à résumer
+            table_name: Nom de la vue à résumer
 
         Returns:
             Dictionnaire contenant :
@@ -325,20 +327,20 @@ class DuckDBRepository:
             - 'sample_data': échantillon des données
             Retourne un dictionnaire vide en cas d'erreur
         """
-        self._logger.debug(f"Génération du résumé pour la vue '{view_name}'")
+        self._logger.debug(f"Génération du résumé pour la vue '{table_name}'")
         try:
             summary: dict[str, Any] = {
-                "total_records": self.count_records(view_name),
-                "table_description": self.describe(view_name),
-                "sample_data": self.get_data(view_name),
+                "total_records": self.count_records(table_name),
+                "table_description": self.describe(table_name),
+                "sample_data": self.get_data(table_name),
             }
             self._logger.info(
-                f"Résumé généré pour la vue '{view_name}' avec {summary['total_records']} enregistrements"
+                f"Résumé généré pour la vue '{table_name}' avec {summary['total_records']} enregistrements"
             )
             return summary
         except Exception as error:
             self._logger.exception(
-                f"Échec de la génération du résumé pour la vue '{view_name}' : {error}"
+                f"Échec de la génération du résumé pour la vue '{table_name}' : {error}"
             )
             return {}
 
