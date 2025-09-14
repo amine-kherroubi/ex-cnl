@@ -66,7 +66,7 @@ class DocumentCard(ctk.CTkFrame):
         # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=f"📊 {display_name}",
+            text=display_name,
             font=ctk.CTkFont(size=18, weight="bold"),
             anchor="w",
         )
@@ -75,7 +75,7 @@ class DocumentCard(ctk.CTkFrame):
         # Category and periodicity
         meta_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=f"📁 {category} • ⏰ {periodicity}",
+            text=f"Category: {category} | Frequency: {periodicity}",
             font=ctk.CTkFont(size=12),
             text_color=("gray40", "gray60"),
             anchor="w",
@@ -113,7 +113,7 @@ class DocumentCard(ctk.CTkFrame):
         # Settings button
         self._settings_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="⚙️ Settings",
+            text="Settings",
             command=self._on_settings_clicked,
             width=100,
             height=35,

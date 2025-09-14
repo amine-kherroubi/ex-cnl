@@ -65,7 +65,7 @@ class DocumentView(ctk.CTkFrame):
         # Back button
         self._back_button: ctk.CTkButton = ctk.CTkButton(
             master=header_frame,
-            text="← Back",
+            text="Back",
             command=self._on_back,
             width=100,
             height=32,
@@ -185,8 +185,8 @@ class DocumentView(ctk.CTkFrame):
 
     def _get_required_files_text(self) -> str:
         return (
-            "📁 Please select the required Excel files for this document type.\n"
-            "📋 The system will validate the selected files before generation."
+            "Please select the required Excel files for this document type.\n"
+            "The system will validate the selected files before generation."
         )
 
     def _on_files_changed(self, files: list[Path]) -> None:

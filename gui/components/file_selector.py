@@ -88,7 +88,7 @@ class FileSelector(ctk.CTkFrame):
 
         if self._selected_files:
             for file_path in self._selected_files:
-                self._files_listbox.insert(index="end", text=f"📄 {file_path.name}\n")  # type: ignore
+                self._files_listbox.insert(index="end", text=f"File: {file_path.name}\n")  # type: ignore
                 self._files_listbox.insert(index="end", text=f"   {file_path.parent}\n\n")  # type: ignore
         else:
             self._files_listbox.insert(index="end", text="No files selected")  # type: ignore

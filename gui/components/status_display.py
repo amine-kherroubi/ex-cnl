@@ -43,16 +43,16 @@ class StatusDisplay(ctk.CTkFrame):
     def add_message(self, message: str, message_type: MessageType = "info") -> None:
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
-        # Choose emoji based on message type
-        emoji_map: dict[MessageType, str] = {
-            "info": "ℹ️",
-            "success": "✅",
-            "warning": "⚠️",
-            "error": "❌",
+        # Choose prefix based on message type
+        prefix_map: dict[MessageType, str] = {
+            "info": "[INFO]",
+            "success": "[SUCCESS]",
+            "warning": "[WARNING]",
+            "error": "[ERROR]",
         }
-        emoji: str = emoji_map.get(message_type, "ℹ️")
+        prefix: str = prefix_map.get(message_type, "[INFO]")
 
-        formatted_message: str = f"[{timestamp}] {emoji} {message}\n"
+        formatted_message: str = f"[{timestamp}] {prefix} {message}\n"
 
         # Add message to text area
         self._status_text.configure(state="normal")  # type: ignore

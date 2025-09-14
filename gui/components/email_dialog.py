@@ -56,7 +56,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Success message
         success_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="✅ Document generated successfully!",
+            text="Document generated successfully!",
             font=ctk.CTkFont(size=14),
             text_color="green",
         )
@@ -72,7 +72,7 @@ class EmailDialog(ctk.CTkToplevel):
 
         file_label: ctk.CTkLabel = ctk.CTkLabel(
             master=file_frame,
-            text=f"📄 {self._file_path.split('/')[-1]}",
+            text=f"File: {self._file_path.split('/')[-1]}",
             font=ctk.CTkFont(size=13),
             anchor="w",
         )

@@ -92,10 +92,10 @@ class ReportSelector(ctk.CTkFrame):
         category: str = getattr(report_spec, "category", "Unknown Category")
         periodicity: str = getattr(report_spec, "periodicity", "Unknown Frequency")
 
-        description_text: str = f"📊 {display_name}\n"
-        description_text += f"📁 Category: {category}\n"
-        description_text += f"⏰ Frequency: {periodicity}\n"
-        description_text += f"📝 {description}"
+        description_text: str = f"Report: {display_name}\n"
+        description_text += f"Category: {category}\n"
+        description_text += f"Frequency: {periodicity}\n"
+        description_text += f"Description: {description}"
 
         self._description_text.insert(index="1.0", text=description_text)  # type: ignore
         self._description_text.configure(state="disabled")  # type: ignore

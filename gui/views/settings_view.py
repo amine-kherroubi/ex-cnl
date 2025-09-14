@@ -43,7 +43,7 @@ class SettingsView(ctk.CTkFrame):
         # Back button
         self._back_button: ctk.CTkButton = ctk.CTkButton(
             master=header_frame,
-            text="← Back",
+            text="Back",
             command=self._on_back,
             width=100,
             height=32,
