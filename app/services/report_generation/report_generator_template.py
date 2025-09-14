@@ -21,7 +21,6 @@ from app.services.report_generation.models.report_context import (
     ReportContext,
 )
 from app.utils.exceptions import QueryExecutionError
-from app.utils.date_formatting import DateFormatter
 from app.utils.logging_setup import get_logger
 
 if TYPE_CHECKING:
@@ -40,16 +39,15 @@ class ReportGenerator(ABC):
     de report (en-tête, tableaux, pied de page, formatage).
 
     Le processus de génération suit ces étapes :
-    1. Validation des fichiers requis
-    2. Chargement des données en base
-    3. Création des tables de référence
-    4. Exécution des requêtes de données
-    5. Création du classeur Excel
-    6. Ajout de l'en-tête (responsabilité des sous-classes)
-    7. Construction des tableaux (responsabilité des sous-classes)
-    8. Ajout du pied de page (responsabilité des sous-classes)
-    9. Formatage final (responsabilité des sous-classes)
-    10. Sauvegarde du report
+    1. Chargement des données en base (files are pre-validated by controller)
+    2. Création des tables de référence
+    3. Exécution des requêtes de données
+    4. Création du classeur Excel
+    5. Ajout de l'en-tête (responsabilité des sous-classes)
+    6. Construction des tableaux (responsabilité des sous-classes)
+    7. Ajout du pied de page (responsabilité des sous-classes)
+    8. Formatage final (responsabilité des sous-classes)
+    9. Sauvegarde du report
 
     Utilise __slots__ pour optimiser l'utilisation mémoire.
     """
@@ -61,8 +59,6 @@ class ReportGenerator(ABC):
         "_report_context",
         "_workbook",
         "_logger",
-        "_source_file_paths",
-        "_output_file_path",
     )
 
     def __init__(
@@ -108,46 +104,36 @@ class ReportGenerator(ABC):
         """
         Lance le processus complet de génération du report.
 
+        Note: Files are pre-validated by the controller layer.
+        This method assumes all files exist and match required patterns.
+
         Args:
-            file_paths: Optional dictionary mapping table names to file paths
-            output_path: Optional output path for the generated report
+            source_file_paths: Pre-validated mapping of view names to file paths
+            output_file_path: Complete path where the report should be saved
 
         Raises:
-            FileNotFoundError: Si des fichiers requis sont manquants
             QueryExecutionError: Si l'exécution d'une requête échoue
-            ValueError: Si la configuration ou les données sont invalides
             Exception: Pour toute autre erreur durant la génération
         """
         self._logger.info("Début du processus de génération du report")
 
-        # Store the file paths for use in validation
-        self._source_file_paths: dict[str, Path] = source_file_paths
-        self._output_file_path: Path = output_file_path
-
         try:
-            # Étape 1 : Validation des fichiers requis
-            self._logger.debug("Étape 1 : Validation des fichiers requis")
-            files_matching_patterns: dict[str, str] = self._validate_required_files()
-            self._logger.info(
-                f"Tous les fichiers requis trouvés : {list(files_matching_patterns.values())}"
-            )
-
-            # Étape 2 : Chargement des données en base de données mémoire
-            self._logger.debug("Étape 2 : Chargement des données en base de données")
-            self._load_data_into_db(files_matching_patterns)
+            # Étape 1 : Chargement des données en base de données mémoire
+            self._logger.debug("Étape 1 : Chargement des données en base de données")
+            self._load_data_into_db(source_file_paths)
             self._logger.info("Données chargées avec succès en base de données")
 
-            # Étape 3 : Création des tables de référence
-            self._logger.debug("Étape 2.5 : Création des tables de référence")
+            # Étape 2 : Création des tables de référence
+            self._logger.debug("Étape 2 : Création des tables de référence")
             self._create_reference_tables()
             self._logger.info("Table de référence des programmes créée avec succès")
 
-            # Étape 4 : Exécution des requêtes
+            # Étape 3 : Exécution des requêtes
             self._logger.debug("Étape 3 : Exécution des requêtes")
             query_results: dict[str, pd.DataFrame] = self._execute_queries()
             self._logger.info(f"Exécution réussie de {len(query_results)} requêtes")
 
-            # Étape 5 : Création du classeur et de la feuille principale
+            # Étape 4 : Création du classeur et de la feuille principale
             self._logger.debug("Étape 4 : Création du classeur Excel")
             self._workbook = Workbook()
             self._workbook.remove(self._workbook.active)  # type: ignore
@@ -158,92 +144,56 @@ class ReportGenerator(ABC):
                 f"Classeur créé avec la feuille : {self._report_specification.display_name}"
             )
 
-            # Étape 6 : Ajout de l'en-tête (responsabilité de la sous-classe)
+            # Étape 5 : Ajout de l'en-tête (responsabilité de la sous-classe)
             self._logger.debug("Étape 5 : Ajout de l'en-tête du report")
             self._add_header(sheet)
             self._logger.debug("En-tête ajouté avec succès")
 
-            # Étape 7 : Construction des tableaux (responsabilité de la sous-classe)
+            # Étape 6 : Construction des tableaux (responsabilité de la sous-classe)
             self._logger.debug("Étape 6 : Construction du tableau principal")
             self._add_tables(sheet, query_results)
             self._logger.debug("Tableau principal construit avec succès")
 
-            # Étape 8 : Ajout du pied de page (responsabilité de la sous-classe)
+            # Étape 7 : Ajout du pied de page (responsabilité de la sous-classe)
             self._logger.debug("Étape 7 : Ajout du pied de page du report")
             self._add_footer(sheet)
             self._logger.debug("Pied de page ajouté avec succès")
 
-            # Étape 9 : Formatage final (responsabilité de la sous-classe)
+            # Étape 8 : Formatage final (responsabilité de la sous-classe)
             self._logger.debug("Étape 8 : Application du formatage final")
             self._finalize_formatting(sheet)
             self._logger.debug("Formatage final appliqué avec succès")
 
-            # Étape 10 : Sauvegarde du report
-            self._logger.debug("Étape 9 : Sauvegarde du report")
-            self._save_report()
-            self._logger.info("Génération du report terminée avec succès")
+            # Étape 9 : Sauvegarde du rapport
+            self._logger.debug("Étape 9 : Sauvegarde du rapport")
+            self._save_report(output_file_path)
+            self._logger.info("Génération du rapport terminée avec succès")
 
         except Exception as error:
             self._logger.exception(f"Échec de la génération du report : {error}")
-            self._logger.exception("Détails complets de l'erreur")
             raise
 
-    def _validate_required_files(self) -> dict[str, str]:
-        """
-        Valide la présence de tous les fichiers requis pour la génération.
-
-        Returns:
-            Dictionnaire mappant les noms de vues aux noms de fichiers trouvés
-
-        Raises:
-            ValueError: Si la spécification du report n'est pas définie
-            FileNotFoundError: Si des fichiers requis sont manquants
-        """
-        self._logger.debug("Validation des fichiers requis")
-
-        if not self._report_specification:
-            error_msg: str = "Spécification du report non définie"
-            self._logger.error(error_msg)
-            raise ValueError(error_msg)
-
-        files_mapping: dict[str, str] = {}
-
-        # If file paths were provided by the controller, use them
-        self._logger.debug("Using controller-provided file paths")
-        for table_name, file_path in self._source_file_paths.items():
-            files_mapping[table_name] = str(file_path)
-            self._logger.info(
-                f"Using provided file for view '{table_name}': {file_path}"
-            )
-
-        self._logger.info(f"Tous les {len(files_mapping)} fichiers requis trouvés")
-        return files_mapping
-
-    def _load_data_into_db(self, files_mapping: dict[str, str]) -> None:
+    def _load_data_into_db(self, source_file_paths: dict[str, Path]) -> None:
         """
         Charge les fichiers de données dans des vues de base de données.
 
-        Pour chaque fichier validé, cette méthode :
-        - Charge le fichier via le service de stockage
-        - Nettoie les noms de colonnes (supprime les espaces)
-        - Crée une vue dans le dépôt de données
-        - Affiche un résumé des données chargées
+        Files are pre-validated by the controller, so we can proceed directly with loading.
 
         Args:
-            files_mapping: Dictionnaire mappant les noms de vues aux noms de fichiers
+            source_file_paths: Pre-validated mapping of view names to file paths
 
         Raises:
             Exception: Si le chargement d'un fichier échoue
         """
         self._logger.debug("Chargement des fichiers dans les vues de base de données")
 
-        for table_name, filename in files_mapping.items():
+        for view_name, file_path in source_file_paths.items():
             self._logger.debug(
-                f"Chargement du fichier '{filename}' dans la vue '{table_name}'"
+                f"Chargement du fichier '{file_path}' dans la vue '{view_name}'"
             )
             try:
                 # Chargement du fichier en DataFrame
-                df: pd.DataFrame = self._storage_service.load_data_from_file(filename)
+                df: pd.DataFrame = self._storage_service.load_data_from_file(file_path)
 
                 # Nettoyage des noms de colonnes (suppression des espaces)
                 original_columns: list[str] = list(df.columns)
@@ -252,21 +202,21 @@ class ReportGenerator(ABC):
 
                 if original_columns != cleaned_columns:
                     self._logger.debug(
-                        f"Noms de colonnes nettoyés pour la vue '{table_name}'"
+                        f"Noms de colonnes nettoyés pour la vue '{view_name}'"
                     )
 
                 # Création de la vue en base de données
-                self._data_repository.create_table_from_dataframe(table_name, df)
+                self._data_repository.create_table_from_dataframe(view_name, df)
                 self._logger.info(
-                    f"Vue '{table_name}' chargée avec succès : {len(df)} lignes"
+                    f"Vue '{view_name}' chargée avec succès : {len(df)} lignes"
                 )
 
                 # Affichage du résumé des données pour diagnostic
-                print(self._data_repository.summarize(table_name))
+                print(self._data_repository.summarize(view_name))
 
             except Exception as error:
                 self._logger.error(
-                    f"Échec du chargement du fichier '{filename}' dans la vue '{table_name}' : {error}"
+                    f"Échec du chargement du fichier '{file_path}' dans la vue '{view_name}' : {error}"
                 )
                 raise
 
@@ -320,15 +270,9 @@ class ReportGenerator(ABC):
             Dictionnaire mappant les noms de requêtes aux DataFrames de résultats
 
         Raises:
-            ValueError: Si la spécification du report n'est pas définie
             QueryExecutionError: Si l'exécution d'une requête échoue
         """
         self._logger.debug("Exécution des requêtes du report")
-
-        if not self._report_specification:
-            error_msg = "Spécification du report non définie"
-            self._logger.error(error_msg)
-            raise ValueError(error_msg)
 
         results: dict[str, pd.DataFrame] = {}
         query_count: int = len(self._report_specification.queries)
@@ -465,49 +409,30 @@ class ReportGenerator(ABC):
         """
         ...
 
-    def _save_report(self) -> None:
+    def _save_report(self, output_file_path: Path) -> None:
         """
-        Sauvegarde le report Excel généré.
+        Sauvegarde le report Excel généré au chemin spécifié.
 
-        Utilise le template de nom de fichier défini dans la spécification
-        pour générer le nom final, en remplaçant les placeholders par les
-        valeurs du contexte (wilaya, date formatée).
+        Args:
+            output_file_path: Chemin complet où sauvegarder le rapport
 
         Raises:
             ValueError: Si aucun classeur n'a été créé
             Exception: Si la sauvegarde échoue
         """
-        self._logger.debug("Préparation de la sauvegarde du report")
+        self._logger.debug(f"Sauvegarde du report vers : {output_file_path}")
 
         if not self._workbook:
             error_msg: str = "Aucun classeur créé"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
-        output_filename: str = self._report_specification.output_filename
-        self._logger.debug(f"Template du nom de fichier de sortie : {output_filename}")
-
-        # Utilisation du format de date français pour les noms de fichiers utilisateur
-        output_filename = output_filename.replace(
-            "{wilaya}", self._report_context.wilaya.value
-        )
-        output_filename = output_filename.replace(
-            "{date}",
-            DateFormatter.to_french_filename_date(self._report_context.report_date),
-        )
-
-        # Ajout de l'extension si nécessaire
-        if not output_filename.endswith(".xlsx"):
-            output_filename += ".xlsx"
-
-        self._logger.info(f"Sauvegarde du report sous : {output_filename}")
-
         try:
             self._storage_service.save_data_to_file(
                 data=self._workbook,
-                output_file_path=output_filename,
+                output_file_path=output_file_path,
             )
-            self._logger.info(f"Report sauvegardé avec succès : {output_filename}")
+            self._logger.info(f"Report sauvegardé avec succès : {output_file_path}")
         except Exception as error:
             self._logger.exception(f"Échec de la sauvegarde du report : {error}")
             raise

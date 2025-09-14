@@ -47,7 +47,7 @@ class ReportView(ctk.CTkFrame):
         self._on_back: Callable[[], None] = on_back
         self._selected_files: list[Path] = []
         self._output_path: Path | None = None
-        self._last_generated_file: str | None = None
+        self._last_generated_file: Path | None = None
 
         self._setup_ui()
 
@@ -245,15 +245,16 @@ class ReportView(ctk.CTkFrame):
                 # Use the report's name (key) instead of display_name
                 report_name = self._report_spec.name
 
-                result: str = self._controller.generate_report(
+                result_path: Path = self._controller.generate_report(
                     report_name=report_name,  # Use internal name, not display_name
-                    input_files=self._selected_files,
-                    output_directory=self._output_path,  # type: ignore
+                    source_files=self._selected_files,
+                    output_directory_path=self._output_path,  # type: ignore
                 )
 
                 # Update UI on success (thread-safe)
                 self.after(
-                    ms=0, func=lambda: self._on_generation_success(output_file=result)
+                    ms=0,
+                    func=lambda: self._on_generation_success(output_file=result_path),
                 )
 
             except ValueError as validation_error:
@@ -262,6 +263,14 @@ class ReportView(ctk.CTkFrame):
                     ms=0,
                     func=lambda: self._on_validation_error(
                         error_message=str(validation_error)
+                    ),
+                )
+            except FileNotFoundError as file_error:
+                # Handle missing file errors
+                self.after(
+                    ms=0,
+                    func=lambda: self._on_validation_error(
+                        error_message=f"Fichier manquant : {file_error}"
                     ),
                 )
             except Exception as error:
@@ -285,7 +294,7 @@ class ReportView(ctk.CTkFrame):
         self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
         self._back_button.configure(state="normal")  # type: ignore
 
-    def _on_generation_success(self, output_file: str) -> None:
+    def _on_generation_success(self, output_file: Path) -> None:
         self._last_generated_file = output_file
         self._status_display.add_message(
             message=f"Rapport généré avec succès : {output_file}",
@@ -310,7 +319,7 @@ class ReportView(ctk.CTkFrame):
 
         dialog: EmailDialog = EmailDialog(  # type: ignore
             parent=self,
-            file_path=self._last_generated_file,
+            file_path=str(self._last_generated_file),  # Convert Path to str for dialog
             on_send=self._send_email,
         )
 

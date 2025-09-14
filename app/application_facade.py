@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # Standard library imports
-from datetime import date
 from logging import Logger
 from pathlib import Path
 
@@ -41,7 +40,7 @@ class ApplicationFacade(object):  # Facade pattern
 
     def __init__(self, config: AppConfig) -> None:
         # Get logger for this class
-        self._logger: Logger = get_logger("app.facade")
+        self._logger: Logger = get_logger("app.application_facade")
         self._logger.debug("Initializing ApplicationFacade")
 
         # Dependency injection pattern
@@ -59,11 +58,30 @@ class ApplicationFacade(object):  # Facade pattern
         self,
         report_name: str,
         source_file_paths: dict[str, Path],
-        output_file_path: Path,
-    ) -> None:
+        output_directory_path: Path,
+    ) -> Path:
+        """
+        Generate a report using pre-validated files.
+
+        Note: File validation is handled by the controller layer.
+        This method assumes all files have been validated and exist.
+
+        Args:
+            report_name: Name of the report to generate
+            source_file_paths: Pre-validated mapping of view names to file paths
+            output_directory: Directory where the report should be saved
+
+        Returns:
+            Path to the generated output file
+
+        Raises:
+            ValueError: If report specification is not found
+            Exception: For any errors during report generation
+        """
         self._logger.info(f"Starting report generation: {report_name}")
 
         try:
+            # Get report specification (fail fast)
             if not RerportSpecificationRegistry.has(report_name):
                 available_docs: list[str] = list(
                     RerportSpecificationRegistry.all().keys()
@@ -74,25 +92,25 @@ class ApplicationFacade(object):  # Facade pattern
                 self._logger.error(error_msg)
                 raise ValueError(error_msg)
 
-            # Get report specification
             report_specification: ReportSpecification = (
                 RerportSpecificationRegistry.get(report_name)
             )
             self._logger.info(f"Generating report: {report_specification.display_name}")
             self._logger.debug(f"Report category: {report_specification.category}")
-            self._logger.debug(
-                f"Required files: {list(report_specification.required_files.keys())}"
-            )
 
             # Create report spatiotemporal context
             report_context: ReportContext = ReportContextFactory.create_context(
                 wilaya=Wilaya.TIZI_OUZOU,
-                periodicity=report_specification.periodicity,
-                report_date=date(2025, 9, 6),
             )
             self._logger.debug(
                 f"Report context created: {report_context.wilaya.value}, {report_context.report_date}"
             )
+
+            # Generate output filename using report specification template
+            output_filename: str = self._generate_output_filename(
+                report_specification, report_context
+            )
+            output_file_path = output_directory_path / output_filename
 
             # Create generator and generate report
             generator: ReportGenerator = ReportGeneratorFactory.create_generator(
@@ -103,8 +121,6 @@ class ApplicationFacade(object):  # Facade pattern
             )
             self._logger.debug(f"Generator created: {generator.__class__.__name__}")
 
-            self._logger.debug(f"Using specified output path: {output_file_path}")
-
             self._logger.info("Starting report generation process")
             generator.generate(
                 source_file_paths=source_file_paths, output_file_path=output_file_path
@@ -113,17 +129,40 @@ class ApplicationFacade(object):  # Facade pattern
             self._logger.info(f"Report generated successfully: {output_file_path}")
             print(f"Report generated successfully: {output_file_path}")
 
-        except FileNotFoundError as e:
-            self._logger.error(f"Required files not found: {e}")
-            raise
+            return output_file_path
+
         except ValueError as e:
-            self._logger.error(f"Configuration or data error: {e}")
+            self._logger.error(f"Configuration error: {e}")
             raise
         except Exception as e:
             self._logger.exception(f"Unexpected error during report generation: {e}")
             raise
 
+    def _generate_output_filename(
+        self, report_spec: ReportSpecification, report_context: ReportContext
+    ) -> str:
+        """Generate the output filename using the report specification template."""
+        from app.utils.date_formatting import DateFormatter
+
+        output_filename: str = report_spec.output_filename
+
+        # Replace placeholders with context values
+        output_filename = output_filename.replace(
+            "{wilaya}", report_context.wilaya.value
+        )
+        output_filename = output_filename.replace(
+            "{date}",
+            DateFormatter.to_french_filename_date(report_context.report_date),
+        )
+
+        # Add extension if necessary
+        if not output_filename.endswith(".xlsx"):
+            output_filename += ".xlsx"
+
+        return output_filename
+
     def get_available_reports(self) -> dict[str, ReportSpecification]:
+        """Get all available report specifications."""
         self._logger.debug("Retrieving available reports")
         reports: dict[str, ReportSpecification] = RerportSpecificationRegistry.all()
         self._logger.info(f"Found {len(reports)} available report types")

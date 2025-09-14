@@ -23,54 +23,42 @@ class ReportController(object):
         return self._facade.get_available_reports()
 
     def generate_report(
-        self, report_name: str, input_files: list[Path], output_directory: Path
-    ) -> str:
+        self, report_name: str, source_files: list[Path], output_directory_path: Path
+    ) -> Path:
         """
         Generate a report with validated input files.
 
         Args:
             report_name: Name of the report type to generate
-            input_files: List of input file paths selected by the user
-            output_directory: Directory where the output file should be saved
+            source_files: List of input file paths selected by the user
+            output_directory_path: Directory where the output file should be saved
 
         Returns:
             Path to the generated output file
+
+        Raises:
+            ValueError: If validation fails or report configuration is invalid
+            FileNotFoundError: If required files don't exist
         """
-        try:
-            # Validate input files against report requirements
-            validated_files: dict[str, Path] = self._validate_source_files(
-                report_name, input_files
-            )
+        # Validate input files against report requirements (fail fast)
+        validated_files: dict[str, Path] = self._validate_source_files(
+            report_name, source_files
+        )
 
-            # Get report specification for output filename
-            available_docs: dict[str, ReportSpecification] = (
-                self._facade.get_available_reports()
-            )
-            report_spec: ReportSpecification = available_docs[report_name]
+        # Generate the report (facade will handle filename generation)
+        output_file_path = self._facade.generate_report(
+            report_name=report_name,
+            source_file_paths=validated_files,
+            output_directory_path=output_directory_path,
+        )
 
-            # Create output file path
-            output_filename: str = report_spec.output_filename
-            if not output_filename.endswith(".xlsx"):
-                output_filename += ".xlsx"
-            output_file_path = output_directory / output_filename
-
-            # Generate the report
-            self._facade.generate_report(
-                report_name=report_name,
-                source_file_paths=validated_files,
-                output_file_path=output_file_path,
-            )
-
-            return str(output_file_path)
-
-        except Exception as e:
-            raise e
+        return output_file_path
 
     def _validate_source_files(
         self, report_name: str, input_files: list[Path]
     ) -> dict[str, Path]:
         """
-        Validate input files against report requirements.
+        Validate input files against report requirements (fail fast).
 
         Args:
             report_name: Name of the report type to generate
@@ -81,22 +69,23 @@ class ReportController(object):
 
         Raises:
             ValueError: If validation fails or required patterns are not matched
+            FileNotFoundError: If files don't exist
         """
-        # Get available reports to find the specification
-        available_docs: dict[str, ReportSpecification] = (
+        # Get report specification
+        available_reports: dict[str, ReportSpecification] = (
             self._facade.get_available_reports()
         )
 
-        if report_name not in available_docs:
+        if report_name not in available_reports:
             raise ValueError(f"Unknown report type: {report_name}")
 
-        report_spec: ReportSpecification = available_docs[report_name]
+        report_spec: ReportSpecification = available_reports[report_name]
         required_patterns = report_spec.required_files
 
-        # Validate that all files exist
-        missing_files: list[Path] = [f for f in input_files if not f.exists()]
-        if missing_files:
-            raise ValueError(f"The following files do not exist: {missing_files}")
+        # Validate that all files exist (fail fast)
+        for file_path in input_files:
+            if not file_path.exists():
+                raise FileNotFoundError(f"File does not exist: {file_path}")
 
         # Match files to required patterns
         matched_files: dict[str, Path] = {}
@@ -114,13 +103,13 @@ class ReportController(object):
             if not file_matched:
                 unmatched_files.append(file_path)
 
-        # Check if we have files for all required patterns
+        # Check if we have files for all required patterns (fail fast)
         missing_patterns: list[str] = []
         for pattern, view_name in required_patterns.items():
             if view_name not in matched_files:
                 missing_patterns.append(f"Pattern: '{pattern}' -> View: '{view_name}'")
 
-        # Report validation results
+        # Report validation results (fail fast)
         if missing_patterns:
             raise ValueError(
                 f"Missing files for required patterns:\n" + "\n".join(missing_patterns)

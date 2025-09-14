@@ -48,6 +48,9 @@ class FileIOService(object):
         """
         Charge les données d'un fichier Excel vers un DataFrame pandas.
 
+        Note: File existence is validated by the controller layer.
+        This method assumes the file exists and is readable.
+
         Args:
             source_file_path: Chemin complet vers le fichier à charger
 
@@ -55,9 +58,7 @@ class FileIOService(object):
             DataFrame pandas contenant les données du fichier
 
         Raises:
-            FileNotFoundError: Si le fichier n'existe pas
-            ValueError: Si l'extension ou la taille n'est pas valide
-            DataLoadError: Si le chargement échoue pour une autre raison
+            DataLoadError: Si le chargement échoue pour une raison quelconque
         """
         self._logger.info(
             f"Chargement des données depuis le fichier : {source_file_path}"
@@ -95,7 +96,7 @@ class FileIOService(object):
 
         Args:
             data: Données à sauvegarder (doit être un objet Workbook)
-            output_filename: Chemin complet du fichier de sortie
+            output_file_path: Chemin complet du fichier de sortie
 
         Raises:
             ValueError: Si le type de données n'est pas supporté
@@ -135,7 +136,7 @@ class FileIOService(object):
         d'ignorer les métadonnées et en-têtes qui peuvent précéder le tableau.
 
         Args:
-            file_path: Chemin vers le fichier Excel à analyser
+            source_file_path: Chemin vers le fichier Excel à analyser
 
         Returns:
             Index de la ligne où commence le tableau (0-indexé)
