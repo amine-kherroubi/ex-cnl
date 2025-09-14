@@ -1,103 +1,90 @@
-from __future__ import annotations
-
-# Standard library imports
+import os
+import sys
+import tempfile
+import warnings
 from pathlib import Path
 from typing import Literal
-
-# Third-party imports
-from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, Field, field_validator
 
 
-class FileIOConfig(BaseSettings):
-    allowed_source_file_extensions: list[str] = Field(
-        default=["xlsx", "xls"],
-        description="Allowed file extensions for upload.",
-    )
+def get_app_data_dir() -> Path:
+    app_name: str = "GenerateurReports"
 
-    model_config = {
-        "env_prefix": "STORAGE_",
-    }
+    if sys.platform == "win32":
+        # Windows: %LOCALAPPDATA% (preferred) or %APPDATA%
+        base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+        if base:
+            return Path(base) / app_name
+        return Path.home() / "AppData" / "Local" / app_name
 
+    elif sys.platform == "darwin":
+        # macOS: ~/Library/Application Support
+        return Path.home() / "Library" / "Application Support" / app_name
 
-class DatabaseConfig(BaseSettings):
-    path: Path | None = Field(
-        default=None,
-        description="Path to the DuckDB database file; None means in-memory.",
-    )
-
-    max_memory: str = Field(
-        default="2GB",
-        description="Maximum memory to use.",
-    )
-
-    enable_logging: bool = Field(
-        default=True,
-        description="Enable query logging for debugging.",
-    )
-
-    model_config = {
-        "env_prefix": "DATABASE_",
-    }
+    else:
+        # Linux: ~/.local/share (XDG standard)
+        xdg_data = os.environ.get("XDG_DATA_HOME")
+        if xdg_data:
+            return Path(xdg_data) / app_name.lower()
+        return Path.home() / ".local" / "share" / app_name.lower()
 
 
-class LoggingConfig(BaseSettings):
-    # Log levels
-    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
-        default="INFO",
-        description="Logging level",
-    )
+class FileIOConfig(BaseModel):
+    allowed_source_file_extensions: list[str] = ["xlsx", "xls"]
 
-    # File logging
-    enable_file_logging: bool = Field(
-        default=True,
-        description="Enable logging to file",
-    )
 
+class DatabaseConfig(BaseModel):
+    path: Path | None = None
+    max_memory: str = "2GB"
+    enable_logging: bool = True
+
+
+class LoggingConfig(BaseModel):
+    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    enable_file_logging: bool = True
     log_file: Path = Field(
-        default=Path("logs") / "app.log",
-        description="Path to log file",
+        default_factory=lambda: get_app_data_dir() / "logs" / "app.log"
     )
+    use_json_format: bool = False
+    include_traceback: bool = True
 
     @field_validator("log_file")
     @classmethod
     def ensure_log_directory(cls, log_file: Path) -> Path:
-        log_file.parent.mkdir(parents=True, exist_ok=True)
-        return log_file
+        """Ensure log directory exists with proper fallback."""
+        try:
+            # Try to create the intended log directory
+            log_file.parent.mkdir(parents=True, exist_ok=True)
 
-    # Formatting
-    use_json_format: bool = Field(
-        default=False,
-        description="Use JSON format for structured logging",
-    )
+            # Test write permissions
+            test_file = log_file.parent / ".write_test"
+            test_file.write_text("test")
+            test_file.unlink()
 
-    include_traceback: bool = Field(
-        default=True,
-        description="Include full traceback in error logs",
-    )
+            return log_file
 
-    model_config = {
-        "env_prefix": "LOG_",
-    }
+        except (OSError, PermissionError) as error:
+            # Fallback to temp directory
+            temp_dir = Path(tempfile.gettempdir()) / "GenerateurReports"
+            temp_log_file = temp_dir / "app.log"
+
+            try:
+                temp_dir.mkdir(parents=True, exist_ok=True)
+                warnings.warn(
+                    f"Cannot write to {log_file.parent}, using temporary location: {temp_log_file}",
+                    UserWarning,
+                )
+                return temp_log_file
+            except Exception:
+                # Ultimate fallback - no file logging
+                warnings.warn(
+                    "Cannot create log file anywhere, file logging will be disabled",
+                    UserWarning,
+                )
+                return Path("/dev/null")  # This will disable file logging
 
 
-class AppConfig(BaseSettings):
-    file_io_config: FileIOConfig = Field(
-        default_factory=FileIOConfig,
-        description="Storage configuration",
-    )
-
-    database_config: DatabaseConfig = Field(
-        default_factory=DatabaseConfig,
-        description="Database configuration",
-    )
-
-    logging_config: LoggingConfig = Field(
-        default_factory=LoggingConfig,
-        description="Logging configuration",
-    )
-
-    model_config = {
-        "env_file": ".env",
-        "env_file_encoding": "utf-8",
-    }
+class AppConfig(BaseModel):
+    file_io_config: FileIOConfig = Field(default_factory=FileIOConfig)
+    database_config: DatabaseConfig = Field(default_factory=DatabaseConfig)
+    logging_config: LoggingConfig = Field(default_factory=LoggingConfig)
