@@ -80,7 +80,7 @@ class LoggingConfig(BaseSettings):
     }
 
 
-class StorageConfig(BaseSettings):
+class FileIOConfig(BaseSettings):
     uploads_dir: Path = Field(
         default=Path("uploads"),
         description="Directory path where uploads are stored.",
@@ -151,8 +151,8 @@ class DatabaseConfig(BaseSettings):
 
 
 class AppConfig(BaseSettings):
-    storage_config: StorageConfig = Field(
-        default_factory=StorageConfig,
+    storage_config: FileIOConfig = Field(
+        default_factory=FileIOConfig,
         description="Storage configuration",
     )
 

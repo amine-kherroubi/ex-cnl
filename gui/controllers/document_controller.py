@@ -7,7 +7,7 @@ from typing import Any
 
 # Local application imports
 from app.application_facade import ApplicationFacade
-from app.config import AppConfig, StorageConfig, DatabaseConfig
+from app.config import AppConfig, FileIOConfig, DatabaseConfig
 
 
 class DocumentController:
@@ -25,7 +25,7 @@ class DocumentController:
         self._results_dir.mkdir(exist_ok=True)
 
         # Create storage config
-        storage_config: StorageConfig = StorageConfig(
+        storage_config: FileIOConfig = FileIOConfig(
             uploads_dir=self._uploads_dir,
             results_dir=self._results_dir,
         )

@@ -12,11 +12,11 @@ from openpyxl import Workbook
 
 # Imports de l'application locale
 from app.utils.exceptions import DataLoadError
-from app.config import StorageConfig
+from app.config import FileIOConfig
 from app.utils.logging_setup import get_logger
 
 
-class IOService(object):
+class FileIOService(object):
     """
     Service de gestion des entrées/sorties de fichiers.
 
@@ -27,7 +27,7 @@ class IOService(object):
 
     __slots__ = ("_config", "_logger")
 
-    def __init__(self, storage_config: StorageConfig) -> None:
+    def __init__(self, storage_config: FileIOConfig) -> None:
         """
         Initialise le service IO avec la configuration de stockage fournie.
 
@@ -38,7 +38,7 @@ class IOService(object):
         self._logger: Logger = get_logger("app.services.file_storage")
         self._logger.debug("Initialisation du service de stockage de fichiers")
 
-        self._config: StorageConfig = storage_config
+        self._config: FileIOConfig = storage_config
 
         self._logger.info(
             f"Service de stockage de fichiers initialisé - uploads : {self._config.uploads_dir}, résultats : {self._config.results_dir}"

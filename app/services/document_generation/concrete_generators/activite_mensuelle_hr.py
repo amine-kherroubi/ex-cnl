@@ -17,7 +17,7 @@ from app.services.document_generation.models.document_context import DocumentCon
 from app.services.document_generation.models.document_specification import (
     DocumentSpecification,
 )
-from app.services.io.io_service import IOService
+from app.services.file_io.file_io_service import FileIOService
 
 
 class ActiviteMensuelleHRGenerator(DocumentGenerator):
@@ -36,7 +36,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
     def __init__(
         self,
-        storage_service: IOService,
+        storage_service: FileIOService,
         data_repository: DataRepository,
         document_specification: DocumentSpecification,
         document_context: DocumentContext,

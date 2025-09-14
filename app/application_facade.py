@@ -12,7 +12,7 @@ from app.services.document_generation.document_generator_template import (
 from app.data.data_repository import DuckDBRepository
 from app.services.document_generation.document_registry import DocumentRegistry
 from app.services.document_generation.document_registry import DocumentSpecification
-from app.services.io.io_service import IOService
+from app.services.file_io.file_io_service import FileIOService
 from app.services.document_generation.factories.document_context_factory import (
     DocumentContextFactory,
 )
@@ -45,7 +45,9 @@ class ApplicationFacade(object):  # Facade pattern
         self._data_repository: DuckDBRepository = DuckDBRepository(
             self._config.database_config
         )
-        self._storage_service: IOService = IOService(self._config.storage_config)
+        self._storage_service: FileIOService = FileIOService(
+            self._config.storage_config
+        )
 
         self._logger.info("ApplicationFacade initialized successfully")
 

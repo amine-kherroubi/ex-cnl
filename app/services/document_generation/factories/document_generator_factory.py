@@ -31,7 +31,7 @@ from app.services.document_generation.document_registry import (
 from app.services.document_generation.document_generator_template import (
     DocumentGenerator,
 )
-from app.services.io.io_service import IOService
+from app.services.file_io.file_io_service import FileIOService
 from app.utils.logging_setup import get_logger
 
 
@@ -71,7 +71,7 @@ class DocumentGeneratorFactory:
     def create_generator(
         cls,
         document_name: str,
-        storage_service: IOService,
+        storage_service: FileIOService,
         data_repository: DataRepository,
         document_context: DocumentContext,
     ) -> DocumentGenerator:

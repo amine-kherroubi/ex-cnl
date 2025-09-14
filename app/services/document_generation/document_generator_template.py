@@ -15,7 +15,7 @@ from app.data.data_repository import DataRepository
 from app.services.document_generation.business_values.programmes import (
     get_programmes_dataframe,
 )
-from app.services.io.io_service import IOService
+from app.services.file_io.file_io_service import FileIOService
 from app.services.document_generation.models.document_context import (
     DocumentContext,
 )
@@ -64,7 +64,7 @@ class DocumentGenerator(ABC):
 
     def __init__(
         self,
-        storage_service: IOService,
+        storage_service: FileIOService,
         data_repository: DataRepository,
         document_specification: DocumentSpecification,
         document_context: DocumentContext,
@@ -82,7 +82,7 @@ class DocumentGenerator(ABC):
         self._logger: Logger = get_logger(f"app.generators.{self.__class__.__name__}")
         self._logger.debug(f"Initialisation de {self.__class__.__name__}")
 
-        self._storage_service: IOService = storage_service
+        self._storage_service: FileIOService = storage_service
         self._data_repository: DataRepository = data_repository
         self._document_specification: DocumentSpecification = document_specification
         self._document_context: DocumentContext = document_context
