@@ -66,7 +66,7 @@ class ColoredFormatter(logging.Formatter):
         return message
 
 
-class LoggingSetup:
+class LoggingSetup(object):
     @classmethod
     def configure(cls, config: LoggingConfig) -> None:
         if config.enable_file_logging:

@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 
 connection: duckdb.DuckDBPyConnection = duckdb.connect()  # type: ignore
-df: pd.DataFrame = pd.read_excel(Path("./uploads/Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx"), skiprows=5)  # type: ignore
+df: pd.DataFrame = pd.read_excel(Path(""), skiprows=5)  # type: ignore
 connection.register("paiements", df)
 
 # query1_result: pd.DataFrame = connection.execute(
