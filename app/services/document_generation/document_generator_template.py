@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-# Standard library imports
+# Imports de la bibliothèque standard
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Callable
 from logging import Logger
 
-# Third-party imports
+# Imports tiers
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-# Local application imports
+# Imports de l'application locale
 from app.data.data_repository import DataRepository
 from app.services.document_generation.business_values.programmes import (
     get_programmes_dataframe,
@@ -29,7 +29,30 @@ if TYPE_CHECKING:
     )
 
 
-class DocumentGenerator(ABC):  # Template Method pattern
+class DocumentGenerator(ABC):
+    """
+    Classe abstraite de base pour la génération de documents.
+
+    Cette classe implémente le pattern Template Method pour définir l'algorithme
+    de génération de documents en plusieurs étapes bien définies. Les sous-classes
+    sont responsables de l'implémentation des détails spécifiques à chaque type
+    de document (en-tête, tableaux, pied de page, formatage).
+
+    Le processus de génération suit ces étapes :
+    1. Validation des fichiers requis
+    2. Chargement des données en base
+    3. Création des tables de référence
+    4. Exécution des requêtes de données
+    5. Création du classeur Excel
+    6. Ajout de l'en-tête (responsabilité des sous-classes)
+    7. Construction des tableaux (responsabilité des sous-classes)
+    8. Ajout du pied de page (responsabilité des sous-classes)
+    9. Formatage final (responsabilité des sous-classes)
+    10. Sauvegarde du document
+
+    Utilise __slots__ pour optimiser l'utilisation mémoire.
+    """
+
     __slots__ = (
         "_storage_service",
         "_data_repository",
@@ -43,97 +66,134 @@ class DocumentGenerator(ABC):  # Template Method pattern
         self,
         storage_service: IOService,
         data_repository: DataRepository,
-        document_specification: "DocumentSpecification",
+        document_specification: DocumentSpecification,
         document_context: DocumentContext,
     ) -> None:
+        """
+        Initialise le générateur de documents avec les services et contextes nécessaires.
+
+        Args:
+            storage_service: Service de gestion des fichiers d'entrée/sortie
+            data_repository: Dépôt de données pour l'exécution de requêtes SQL
+            document_specification: Spécification complète du document à générer
+            document_context: Contexte contenant les paramètres de génération
+                            (wilaya, date, période, etc.)
+        """
         self._logger: Logger = get_logger(f"app.generators.{self.__class__.__name__}")
-        self._logger.debug(f"Initializing {self.__class__.__name__}")
+        self._logger.debug(f"Initialisation de {self.__class__.__name__}")
 
         self._storage_service: IOService = storage_service
         self._data_repository: DataRepository = data_repository
-        self._document_specification: "DocumentSpecification" = document_specification
+        self._document_specification: DocumentSpecification = document_specification
         self._document_context: DocumentContext = document_context
         self._workbook: Workbook | None = None
 
         self._logger.info(
-            f"Generator initialized for document: {document_specification.display_name}"
+            f"Générateur initialisé pour le document : {document_specification.display_name}"
         )
         self._logger.debug(
-            f"Document context: wilaya={document_context.wilaya.value}, date={document_context.report_date}"
+            f"Contexte du document : wilaya={document_context.wilaya.value}, date={document_context.report_date}"
         )
 
     def generate(self) -> None:
-        self._logger.info("Starting document generation process")
+        """
+        Lance le processus complet de génération du document.
+
+        Cette méthode orchestre toutes les étapes de génération selon le
+        pattern Template Method. Les étapes spécifiques au format sont
+        déléguées aux sous-classes via les méthodes abstraites.
+
+        Raises:
+            FileNotFoundError: Si des fichiers requis sont manquants
+            QueryExecutionError: Si l'exécution d'une requête échoue
+            ValueError: Si la configuration ou les données sont invalides
+            Exception: Pour toute autre erreur durant la génération
+        """
+        self._logger.info("Début du processus de génération du document")
 
         try:
-            # Step 1: Validate required files
-            self._logger.debug("Step 1: Validating required files")
+            # Étape 1 : Validation des fichiers requis
+            self._logger.debug("Étape 1 : Validation des fichiers requis")
             files_matching_patterns: dict[str, str] = self._validate_required_files()
             self._logger.info(
-                f"Found all required files: {list(files_matching_patterns.values())}"
+                f"Tous les fichiers requis trouvés : {list(files_matching_patterns.values())}"
             )
 
-            # Step 2: Load data into in-memory database
-            self._logger.debug("Step 2: Loading data into database")
+            # Étape 2 : Chargement des données en base de données mémoire
+            self._logger.debug("Étape 2 : Chargement des données en base de données")
             self._load_data_into_db(files_matching_patterns)
-            self._logger.info("Data loaded successfully into database")
+            self._logger.info("Données chargées avec succès en base de données")
 
-            # Step 3: Create programmes reference table
-            self._logger.debug("Step 2.5: Creating programmes reference table")
+            # Étape 3 : Création des tables de référence
+            self._logger.debug("Étape 2.5 : Création des tables de référence")
             self._create_reference_tables()
-            self._logger.info("Programmes reference table created successfully")
+            self._logger.info("Table de référence des programmes créée avec succès")
 
-            # Step 4: Execute queries
-            self._logger.debug("Step 3: Executing queries")
+            # Étape 4 : Exécution des requêtes
+            self._logger.debug("Étape 3 : Exécution des requêtes")
             query_results: dict[str, pd.DataFrame] = self._execute_queries()
-            self._logger.info(f"Executed {len(query_results)} queries successfully")
+            self._logger.info(f"Exécution réussie de {len(query_results)} requêtes")
 
-            # Step 5: Create workbook and main sheet
-            self._logger.debug("Step 4: Creating Excel workbook")
+            # Étape 5 : Création du classeur et de la feuille principale
+            self._logger.debug("Étape 4 : Création du classeur Excel")
             self._workbook = Workbook()
             self._workbook.remove(self._workbook.active)  # type: ignore
             sheet: Worksheet = self._workbook.create_sheet(
                 self._document_specification.display_name
             )
             self._logger.info(
-                f"Created workbook with sheet: {self._document_specification.display_name}"
+                f"Classeur créé avec la feuille : {self._document_specification.display_name}"
             )
 
-            # Step 6: Add header (subclass responsibility)
-            self._logger.debug("Step 5: Adding document header")
+            # Étape 6 : Ajout de l'en-tête (responsabilité de la sous-classe)
+            self._logger.debug("Étape 5 : Ajout de l'en-tête du document")
             self._add_header(sheet)
-            self._logger.debug("Header added successfully")
+            self._logger.debug("En-tête ajouté avec succès")
 
-            # Step 7: Build tables (subclass responsibility)
-            self._logger.debug("Step 6: Building main table")
+            # Étape 7 : Construction des tableaux (responsabilité de la sous-classe)
+            self._logger.debug("Étape 6 : Construction du tableau principal")
             self._add_tables(sheet, query_results)
-            self._logger.debug("Main table built successfully")
+            self._logger.debug("Tableau principal construit avec succès")
 
-            # Step 8: Add footer (subclass responsibility)
-            self._logger.debug("Step 7: Adding document footer")
+            # Étape 8 : Ajout du pied de page (responsabilité de la sous-classe)
+            self._logger.debug("Étape 7 : Ajout du pied de page du document")
             self._add_footer(sheet)
-            self._logger.debug("Footer added successfully")
+            self._logger.debug("Pied de page ajouté avec succès")
 
-            # Step 9: Final formatting (subclass responsibility)
-            self._logger.debug("Step 8: Applying final formatting")
+            # Étape 9 : Formatage final (responsabilité de la sous-classe)
+            self._logger.debug("Étape 8 : Application du formatage final")
             self._finalize_formatting(sheet)
-            self._logger.debug("Final formatting applied successfully")
+            self._logger.debug("Formatage final appliqué avec succès")
 
-            # Step 10: Save document
-            self._logger.debug("Step 9: Saving document")
+            # Étape 10 : Sauvegarde du document
+            self._logger.debug("Étape 9 : Sauvegarde du document")
             self._save_document()
-            self._logger.info("Document generation completed successfully")
+            self._logger.info("Génération du document terminée avec succès")
 
         except Exception as error:
-            self._logger.exception(f"Document generation failed: {error}")
-            self._logger.exception("Full error details")
+            self._logger.exception(f"Échec de la génération du document : {error}")
+            self._logger.exception("Détails complets de l'erreur")
             raise
 
     def _validate_required_files(self) -> dict[str, str]:
-        self._logger.debug("Validating required files")
+        """
+        Valide la présence de tous les fichiers requis pour la génération.
+
+        Parcourt la liste des patterns de fichiers requis définis dans la
+        spécification du document et vérifie qu'un fichier correspondant
+        existe pour chaque pattern.
+
+        Returns:
+            Dictionnaire mappant les noms de vues aux noms de fichiers trouvés
+
+        Raises:
+            ValueError: Si la spécification du document n'est pas définie
+            FileNotFoundError: Si des fichiers requis sont manquants
+        """
+        self._logger.debug("Validation des fichiers requis")
 
         if not self._document_specification:
-            error_msg: str = "Document specification not set"
+            error_msg: str = "Spécification du document non définie"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
@@ -141,135 +201,208 @@ class DocumentGenerator(ABC):  # Template Method pattern
         files_mapping: dict[str, str] = {}
 
         self._logger.debug(
-            f"Checking {len(self._document_specification.required_files)} required file patterns"
+            f"Vérification de {len(self._document_specification.required_files)} patterns de fichiers requis"
         )
 
+        # Recherche de chaque fichier requis selon son pattern
         for pattern, view_name in self._document_specification.required_files.items():
             self._logger.debug(
-                f"Looking for file matching pattern: {pattern} (view: {view_name})"
+                f"Recherche d'un fichier correspondant au pattern : {pattern} (vue : {view_name})"
             )
             filename: str | None = self._storage_service.find_filename_matching_pattern(
                 pattern
             )
             if filename is None:
-                self._logger.warning(f"No file found for pattern: {pattern}")
+                self._logger.warning(
+                    f"Aucun fichier trouvé pour le pattern : {pattern}"
+                )
                 missing_patterns.append(pattern)
             else:
-                self._logger.info(f"Found file '{filename}' for pattern: {pattern}")
+                self._logger.info(
+                    f"Fichier '{filename}' trouvé pour le pattern : {pattern}"
+                )
                 files_mapping[view_name] = filename
 
+        # Vérification que tous les fichiers requis sont présents
         if missing_patterns:
             error_msg: str = (
-                f"Missing required files matching patterns: {missing_patterns}"
+                f"Fichiers requis manquants correspondant aux patterns : {missing_patterns}"
             )
             self._logger.error(error_msg)
             raise FileNotFoundError(error_msg)
 
-        self._logger.info(f"All {len(files_mapping)} required files found")
+        self._logger.info(f"Tous les {len(files_mapping)} fichiers requis trouvés")
         return files_mapping
 
     def _load_data_into_db(self, files_mapping: dict[str, str]) -> None:
-        self._logger.debug("Loading files into database views")
+        """
+        Charge les fichiers de données dans des vues de base de données.
+
+        Pour chaque fichier validé, cette méthode :
+        - Charge le fichier via le service de stockage
+        - Nettoie les noms de colonnes (supprime les espaces)
+        - Crée une vue dans le dépôt de données
+        - Affiche un résumé des données chargées
+
+        Args:
+            files_mapping: Dictionnaire mappant les noms de vues aux noms de fichiers
+
+        Raises:
+            Exception: Si le chargement d'un fichier échoue
+        """
+        self._logger.debug("Chargement des fichiers dans les vues de base de données")
 
         for view_name, filename in files_mapping.items():
-            self._logger.debug(f"Loading file '{filename}' into view '{view_name}'")
+            self._logger.debug(
+                f"Chargement du fichier '{filename}' dans la vue '{view_name}'"
+            )
             try:
+                # Chargement du fichier en DataFrame
                 df: pd.DataFrame = self._storage_service.load_data_from_file(filename)
 
-                # Clean column names
+                # Nettoyage des noms de colonnes (suppression des espaces)
                 original_columns: list[str] = list(df.columns)
                 df.columns = [column.strip() for column in df.columns]
                 cleaned_columns: list[str] = list(df.columns)
 
                 if original_columns != cleaned_columns:
-                    self._logger.debug(f"Cleaned column names for view '{view_name}'")
+                    self._logger.debug(
+                        f"Noms de colonnes nettoyés pour la vue '{view_name}'"
+                    )
 
+                # Création de la vue en base de données
                 self._data_repository.create_view_from_dataframe(view_name, df)
                 self._logger.info(
-                    f"Successfully loaded view '{view_name}' with {len(df)} rows"
+                    f"Vue '{view_name}' chargée avec succès : {len(df)} lignes"
                 )
 
+                # Affichage du résumé des données pour diagnostic
                 print(self._data_repository.summarize(view_name))
 
             except Exception as error:
                 self._logger.error(
-                    f"Failed to load file '{filename}' into view '{view_name}': {error}"
+                    f"Échec du chargement du fichier '{filename}' dans la vue '{view_name}' : {error}"
                 )
                 raise
 
     def _create_reference_tables(self) -> None:
-        self._logger.debug("Creating reference tables")
+        """
+        Crée les tables de référence nécessaires à la génération du document.
 
+        Les tables de référence contiennent des données métier statiques
+        comme la liste des programmes avec leur ordre d'affichage et
+        leurs consistances (nombre de logements planifiés).
+
+        Raises:
+            Exception: Si la création d'une table de référence échoue
+        """
+        self._logger.debug("Création des tables de référence")
+
+        # Dictionnaire des tables de référence et de leurs fabriques
         reference_tables: dict[str, Callable[[], pd.DataFrame]] = {
             "programmes": get_programmes_dataframe,
         }
 
         for table_name, dataframe_factory in reference_tables.items():
             try:
-                self._logger.debug(f"Creating '{table_name}' reference table")
+                self._logger.debug(f"Création de la table de référence '{table_name}'")
 
+                # Génération du DataFrame via la fabrique
                 df: pd.DataFrame = dataframe_factory()
                 self._data_repository.create_view_from_dataframe(table_name, df)
 
                 rows, cols = df.shape
                 self._logger.info(
-                    f"Created reference table '{table_name}' with {rows} rows and {cols} columns"
+                    f"Table de référence '{table_name}' créée : {rows} lignes et {cols} colonnes"
                 )
-                self._logger.debug(f"Columns for '{table_name}': {list(df.columns)}")
+                self._logger.debug(f"Colonnes pour '{table_name}' : {list(df.columns)}")
 
             except Exception as error:
                 self._logger.exception(
-                    f"Failed to create reference table '{table_name}': {error}"
+                    f"Échec de la création de la table de référence '{table_name}' : {error}"
                 )
                 raise
 
     def _execute_queries(self) -> dict[str, pd.DataFrame]:
-        self._logger.debug("Executing document queries")
+        """
+        Exécute toutes les requêtes définies dans la spécification du document.
+
+        Les requêtes sont formatées avec le contexte du document (date, mois, année)
+        avant d'être exécutées. Les résultats sont stockés dans un dictionnaire
+        pour utilisation lors de la construction des tableaux.
+
+        Returns:
+            Dictionnaire mappant les noms de requêtes aux DataFrames de résultats
+
+        Raises:
+            ValueError: Si la spécification du document n'est pas définie
+            QueryExecutionError: Si l'exécution d'une requête échoue
+        """
+        self._logger.debug("Exécution des requêtes du document")
 
         if not self._document_specification:
-            error_msg = "Document specification not set"
+            error_msg = "Spécification du document non définie"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
         results: dict[str, pd.DataFrame] = {}
         query_count: int = len(self._document_specification.queries)
-        self._logger.debug(f"Preparing to execute {query_count} queries")
+        self._logger.debug(f"Préparation de l'exécution de {query_count} requêtes")
 
+        # Exécution de chaque requête définie dans la spécification
         for query_name, query_template in self._document_specification.queries.items():
-            self._logger.debug(f"Executing query '{query_name}'")
+            self._logger.debug(f"Exécution de la requête '{query_name}'")
             try:
-                # Format query with document context
+                # Formatage de la requête avec le contexte du document
                 formatted_query: str = self._format_query_with_context(query_template)
                 self._logger.debug(
-                    f"Formatted query '{query_name}' with document context"
+                    f"Requête '{query_name}' formatée avec le contexte du document"
                 )
 
+                # Exécution de la requête formatée
                 result_df: pd.DataFrame = self._data_repository.execute(formatted_query)
                 results[query_name] = result_df
 
                 self._logger.info(
-                    f"Query '{query_name}' returned {len(result_df)} rows"
+                    f"Requête '{query_name}' a retourné {len(result_df)} lignes"
                 )
 
             except Exception as error:
-                self._logger.exception(f"Query '{query_name}' failed: {error}")
+                self._logger.exception(f"Requête '{query_name}' a échoué : {error}")
                 raise QueryExecutionError(
-                    f"Required query '{query_name}' failed", error
+                    f"La requête requise '{query_name}' a échoué", error
                 )
 
-        self._logger.info(f"All {query_count} queries executed successfully")
+        self._logger.info(f"Toutes les {query_count} requêtes exécutées avec succès")
         return results
 
     def _format_query_with_context(self, query_template: str) -> str:
-        self._logger.debug("Formatting query template with document context")
+        """
+        Formate un template de requête SQL avec les valeurs du contexte du document.
+
+        Remplace les placeholders suivants dans la requête :
+        - {month_number:02d} : Numéro du mois sur 2 chiffres (ex: "03")
+        - {month_number} : Numéro du mois simple (ex: "3")
+        - {year} : Année complète (ex: "2024")
+
+        Args:
+            query_template: Template de requête SQL contenant des placeholders
+
+        Returns:
+            Requête SQL avec les placeholders remplacés par les valeurs réelles
+        """
+        self._logger.debug(
+            "Formatage du template de requête avec le contexte du document"
+        )
 
         formatted_query: str = query_template
 
+        # Remplacement des placeholders de date si un mois est spécifié
         if self._document_context.month:
             month_number: int = self._document_context.month.number
             year: int = self._document_context.year
 
-            # Replace placeholders found in the query templates
+            # Remplacement des placeholders trouvés dans les templates de requête
             formatted_query = formatted_query.replace(
                 "{month_number:02d}", f"{month_number:02d}"
             )
@@ -279,43 +412,97 @@ class DocumentGenerator(ABC):  # Template Method pattern
             formatted_query = formatted_query.replace("{year}", str(year))
 
             self._logger.debug(
-                f"Replaced placeholders with: month_number={month_number:02d}, year={year}"
+                f"Placeholders remplacés par : month_number={month_number:02d}, year={year}"
             )
 
-        # Also replace simple {year} for year-only queries
+        # Remplacement du placeholder d'année pour les requêtes annuelles uniquement
         formatted_query = formatted_query.replace(
             "{year}", str(self._document_context.year)
         )
 
-        self._logger.debug("Query formatting completed")
+        self._logger.debug("Formatage de la requête terminé")
         return formatted_query
 
     @abstractmethod
-    def _add_header(self, sheet: Worksheet) -> None: ...
+    def _add_header(self, sheet: Worksheet) -> None:
+        """
+        Ajoute l'en-tête du document à la feuille Excel.
+
+        Cette méthode abstraite doit être implémentée par les sous-classes
+        pour définir l'en-tête spécifique à chaque type de document.
+
+        Args:
+            sheet: Feuille Excel où ajouter l'en-tête
+        """
+        ...
 
     @abstractmethod
     def _add_tables(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
-    ) -> None: ...
+    ) -> None:
+        """
+        Construit les tableaux de données du document.
+
+        Cette méthode abstraite doit être implémentée par les sous-classes
+        pour construire les tableaux spécifiques à chaque type de document
+        en utilisant les résultats des requêtes.
+
+        Args:
+            sheet: Feuille Excel où ajouter les tableaux
+            query_results: Résultats des requêtes indexés par nom de requête
+        """
+        ...
 
     @abstractmethod
-    def _add_footer(self, sheet: Worksheet) -> None: ...
+    def _add_footer(self, sheet: Worksheet) -> None:
+        """
+        Ajoute le pied de page du document à la feuille Excel.
+
+        Cette méthode abstraite doit être implémentée par les sous-classes
+        pour définir le pied de page spécifique à chaque type de document.
+
+        Args:
+            sheet: Feuille Excel où ajouter le pied de page
+        """
+        ...
 
     @abstractmethod
-    def _finalize_formatting(self, sheet: Worksheet) -> None: ...
+    def _finalize_formatting(self, sheet: Worksheet) -> None:
+        """
+        Applique le formatage final au document.
+
+        Cette méthode abstraite doit être implémentée par les sous-classes
+        pour appliquer les styles, bordures, couleurs et autres formatages
+        spécifiques à chaque type de document.
+
+        Args:
+            sheet: Feuille Excel à formater
+        """
+        ...
 
     def _save_document(self) -> None:
-        self._logger.debug("Preparing to save document")
+        """
+        Sauvegarde le document Excel généré.
+
+        Utilise le template de nom de fichier défini dans la spécification
+        pour générer le nom final, en remplaçant les placeholders par les
+        valeurs du contexte (wilaya, date formatée).
+
+        Raises:
+            ValueError: Si aucun classeur n'a été créé
+            Exception: Si la sauvegarde échoue
+        """
+        self._logger.debug("Préparation de la sauvegarde du document")
 
         if not self._workbook:
-            error_msg: str = "No workbook created"
+            error_msg: str = "Aucun classeur créé"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
         output_filename: str = self._document_specification.output_filename
-        self._logger.debug(f"Output filename template: {output_filename}")
+        self._logger.debug(f"Template du nom de fichier de sortie : {output_filename}")
 
-        # Use French date format for user-facing filenames
+        # Utilisation du format de date français pour les noms de fichiers utilisateur
         output_filename = output_filename.replace(
             "{wilaya}", self._document_context.wilaya.value
         )
@@ -324,17 +511,18 @@ class DocumentGenerator(ABC):  # Template Method pattern
             DateFormatter.to_french_filename_date(self._document_context.report_date),
         )
 
+        # Ajout de l'extension si nécessaire
         if not output_filename.endswith(".xlsx"):
             output_filename += ".xlsx"
 
-        self._logger.info(f"Saving document as: {output_filename}")
+        self._logger.info(f"Sauvegarde du document sous : {output_filename}")
 
         try:
             self._storage_service.save_data_to_file(
                 data=self._workbook,
                 output_filename=output_filename,
             )
-            self._logger.info(f"Document saved successfully: {output_filename}")
+            self._logger.info(f"Document sauvegardé avec succès : {output_filename}")
         except Exception as error:
-            self._logger.exception(f"Failed to save document: {error}")
+            self._logger.exception(f"Échec de la sauvegarde du document : {error}")
             raise
