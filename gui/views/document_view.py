@@ -9,6 +9,9 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
+from app.services.document_generation.models.document_specification import (
+    DocumentSpecification,
+)
 from gui.components.file_selector import FileSelector
 from gui.components.output_selector import OutputSelector
 from gui.components.status_display import StatusDisplay
@@ -18,7 +21,6 @@ from gui.controllers.document_controller import DocumentController
 
 class DocumentView(ctk.CTkFrame):
     __slots__ = (
-        "_document_name",
         "_document_spec",
         "_controller",
         "_on_back",
@@ -35,15 +37,12 @@ class DocumentView(ctk.CTkFrame):
     def __init__(
         self,
         parent: Any,
-        document_name: str,
-        document_spec: Any,
+        document_spec: DocumentSpecification,
         controller: DocumentController,
         on_back: Callable[[], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
-
-        self._document_name: str = document_name
-        self._document_spec: Any = document_spec
+        self._document_spec: DocumentSpecification = document_spec
         self._controller: DocumentController = controller
         self._on_back: Callable[[], None] = on_back
         self._selected_files: list[Path] = []
@@ -82,18 +81,10 @@ class DocumentView(ctk.CTkFrame):
         )
         info_frame.grid(row=0, column=1, sticky="ew")  # type: ignore
 
-        # Extract document info
-        display_name: str = getattr(
-            self._document_spec, "display_name", self._document_name
-        )
-        description: str = getattr(
-            self._document_spec, "description", "No description available"
-        )
-
         # Document title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=display_name,
+            text=self._document_spec.display_name,
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
@@ -101,7 +92,7 @@ class DocumentView(ctk.CTkFrame):
         # Document description
         desc_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=description,
+            text=self._document_spec.description,
             font=ctk.CTkFont(size=13),
             text_color=("gray30", "gray70"),
         )
@@ -141,7 +132,7 @@ class DocumentView(ctk.CTkFrame):
         # Generate button
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
             master=button_frame,
-            text="Generate Document",
+            text="Générer le rapport",
             command=self._generate_document,
             height=40,
             font=ctk.CTkFont(size=14, weight="bold"),
@@ -158,7 +149,7 @@ class DocumentView(ctk.CTkFrame):
         # Title
         req_title: ctk.CTkLabel = ctk.CTkLabel(
             master=req_frame,
-            text="Required Files",
+            text="Fichiers requis",
             font=ctk.CTkFont(size=14, weight="bold"),
         )
         req_title.grid(row=0, column=0, pady=(0, 10), sticky="w")  # type: ignore
@@ -185,8 +176,8 @@ class DocumentView(ctk.CTkFrame):
 
     def _get_required_files_text(self) -> str:
         return (
-            "Please select the required Excel files for this document type.\n"
-            "The system will validate the selected files before generation."
+            "Veuillez sélectionner les fichiers Excel requis pour ce rapport.\n"
+            "Le système validera les fichiers sélectionnés avant la génération."
         )
 
     def _on_files_changed(self, files: list[Path]) -> None:
@@ -195,11 +186,12 @@ class DocumentView(ctk.CTkFrame):
 
         if files:
             self._status_display.add_message(
-                message=f"Selected {len(files)} file(s)", message_type="info"
+                message=f"{len(files)} fichier(s) sélectionné(s)",
+                message_type="information",
             )
         else:
             self._status_display.add_message(
-                message="No files selected", message_type="warning"
+                message="Aucun fichier sélectionné", message_type="avertissement"
             )
 
     def _on_output_changed(self, output_path: Path | None) -> None:
@@ -208,11 +200,13 @@ class DocumentView(ctk.CTkFrame):
 
         if output_path:
             self._status_display.add_message(
-                message=f"Output folder: {output_path}", message_type="info"
+                message=f"Répertoire de destination : {output_path}",
+                message_type="information",
             )
         else:
             self._status_display.add_message(
-                message="No output folder selected", message_type="warning"
+                message="Aucun répertoire de destination sélectionné",
+                message_type="avertissement",
             )
 
     def _update_generate_button_state(self) -> None:
@@ -230,20 +224,20 @@ class DocumentView(ctk.CTkFrame):
             return
 
         # Disable buttons during processing
-        self._generate_button.configure(state="disabled", text="Generating...")  # type: ignore
+        self._generate_button.configure(state="disabled", text="Génération en cours...")  # type: ignore
         self._back_button.configure(state="disabled")  # type: ignore
 
         # Clear previous status messages
         self._status_display.clear_messages()
         self._status_display.add_message(
-            message="Starting document generation...", message_type="info"
+            message="Début de la génération...", message_type="information"
         )
 
         # Run generation in background thread
         def generate_thread() -> None:
             try:
                 result: str = self._controller.generate_document(
-                    report_name=self._document_name,
+                    report_name=self._document_spec.display_name,
                     input_files=self._selected_files,
                     output_path=self._output_path,  # type: ignore
                 )
@@ -266,10 +260,10 @@ class DocumentView(ctk.CTkFrame):
     def _on_generation_success(self, output_file: str) -> None:
         self._last_generated_file = output_file
         self._status_display.add_message(
-            message=f"Document generated successfully: {output_file}",
-            message_type="success",
+            message=f"Rapport généré avec succès : {output_file}",
+            message_type="succès",
         )
-        self._generate_button.configure(state="normal", text="Generate Document")  # type: ignore
+        self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
         self._back_button.configure(state="normal")  # type: ignore
 
         # Show email dialog
@@ -277,9 +271,9 @@ class DocumentView(ctk.CTkFrame):
 
     def _on_generation_error(self, error_message: str) -> None:
         self._status_display.add_message(
-            message=f"Generation failed: {error_message}", message_type="error"
+            message=f"Échec de génération : {error_message}", message_type="erreur"
         )
-        self._generate_button.configure(state="normal", text="Generate Document")  # type: ignore
+        self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
         self._back_button.configure(state="normal")  # type: ignore
 
     def _show_email_dialog(self) -> None:
@@ -296,7 +290,7 @@ class DocumentView(ctk.CTkFrame):
         # This is where you would implement actual email sending
         # For now, just show a success message
         self._status_display.add_message(
-            message=f"Email would be sent to: {', '.join(recipients)}",
-            message_type="success",
+            message=f"L'email sera envoyé à : {', '.join(recipients)}",
+            message_type="succès",
         )
         print(f"Sending {file_path} to: {recipients}")

@@ -9,7 +9,7 @@ from typing import Any, Literal, TypeAlias
 import customtkinter as ctk  # type: ignore
 
 
-MessageType: TypeAlias = Literal["info", "success", "warning", "error"]
+MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
 
 
 class StatusDisplay(ctk.CTkFrame):
@@ -27,7 +27,7 @@ class StatusDisplay(ctk.CTkFrame):
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self, text="Status:", font=ctk.CTkFont(size=14, weight="bold")
+            master=self, text="Status :", font=ctk.CTkFont(size=14, weight="bold")
         )
         label.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")  # type: ignore
 
@@ -38,17 +38,21 @@ class StatusDisplay(ctk.CTkFrame):
         self._status_text.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")  # type: ignore
 
         # Initialize with welcome message
-        self.add_message(message="Ready to generate documents", message_type="info")
+        self.add_message(
+            message="Prêt à générer un rapport", message_type="information"
+        )
 
-    def add_message(self, message: str, message_type: MessageType = "info") -> None:
+    def add_message(
+        self, message: str, message_type: MessageType = "information"
+    ) -> None:
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
         # Choose prefix based on message type
         prefix_map: dict[MessageType, str] = {
-            "info": "[INFO]",
-            "success": "[SUCCESS]",
-            "warning": "[WARNING]",
-            "error": "[ERROR]",
+            "information": "[INFORMATION]",
+            "succès": "[SUCCÈS]",
+            "avertissement": "[AVERTISSEMENT]",
+            "erreur": "[ERREUR]",
         }
         prefix: str = prefix_map.get(message_type, "[INFO]")
 

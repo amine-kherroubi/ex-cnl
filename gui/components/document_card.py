@@ -6,10 +6,14 @@ from typing import Any, Callable
 # Third-party imports
 import customtkinter as ctk  # type: ignore
 
+# Local application imports
+from app.services.document_generation.models.document_specification import (
+    DocumentSpecification,
+)
+
 
 class DocumentCard(ctk.CTkFrame):
     __slots__ = (
-        "_document_name",
         "_document_spec",
         "_on_generate_clicked",
         "_on_settings_clicked",
@@ -20,15 +24,12 @@ class DocumentCard(ctk.CTkFrame):
     def __init__(
         self,
         parent: Any,
-        document_name: str,
-        document_spec: Any,
+        document_spec: DocumentSpecification,
         on_generate_clicked: Callable[[], None],
         on_settings_clicked: Callable[[], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
-
-        self._document_name: str = document_name
-        self._document_spec: Any = document_spec
+        self._document_spec: DocumentSpecification = document_spec
         self._on_generate_clicked: Callable[[], None] = on_generate_clicked
         self._on_settings_clicked: Callable[[], None] = on_settings_clicked
 
@@ -53,20 +54,10 @@ class DocumentCard(ctk.CTkFrame):
         info_frame.grid(row=0, column=0, sticky="ew")  # type: ignore
         info_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Extract document info
-        display_name: str = getattr(
-            self._document_spec, "display_name", self._document_name
-        )
-        description: str = getattr(
-            self._document_spec, "description", "No description available"
-        )
-        category: str = getattr(self._document_spec, "category", "Unknown")
-        periodicity: str = getattr(self._document_spec, "periodicity", "Unknown")
-
         # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=display_name,
+            text=self._document_spec.display_name,
             font=ctk.CTkFont(size=18, weight="bold"),
             anchor="w",
         )
@@ -75,7 +66,7 @@ class DocumentCard(ctk.CTkFrame):
         # Category and periodicity
         meta_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=f"Category: {category} | Frequency: {periodicity}",
+            text=f"Catégorie : {self._document_spec.category} | Fréquence : {self._document_spec.periodicity}",
             font=ctk.CTkFont(size=12),
             text_color=("gray40", "gray60"),
             anchor="w",
@@ -85,7 +76,7 @@ class DocumentCard(ctk.CTkFrame):
         # Description
         desc_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=description,
+            text=self._document_spec.description,
             font=ctk.CTkFont(size=14),
             anchor="w",
             wraplength=500,
@@ -103,7 +94,7 @@ class DocumentCard(ctk.CTkFrame):
         # Generate button
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Generate Document",
+            text="Générer le rapport",
             command=self._on_generate_clicked,
             height=35,
             font=ctk.CTkFont(size=14, weight="bold"),
@@ -113,7 +104,7 @@ class DocumentCard(ctk.CTkFrame):
         # Settings button
         self._settings_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Settings",
+            text="Configurations",
             command=self._on_settings_clicked,
             width=100,
             height=35,

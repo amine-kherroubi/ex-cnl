@@ -34,13 +34,18 @@ class FileSelector(ctk.CTkFrame):
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self, text="Input Files:", font=ctk.CTkFont(size=14, weight="bold")
+            master=self,
+            text="Fichiers source :",
+            font=ctk.CTkFont(size=14, weight="bold"),
         )
         label.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="w")  # type: ignore
 
         # Select files button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
-            master=self, text="Select Files", command=self._select_files, width=120
+            master=self,
+            text="Sélectionnez des fichiers",
+            command=self._select_files,
+            width=120,
         )
         self._select_button.grid(row=0, column=2, padx=(5, 10), pady=10)  # type: ignore
 
@@ -55,7 +60,7 @@ class FileSelector(ctk.CTkFrame):
         # Clear button
         self._clear_button: ctk.CTkButton = ctk.CTkButton(
             master=self,
-            text="Clear",
+            text="Réinitialiser",
             command=self._clear_files,
             width=80,
             fg_color="transparent",
@@ -68,8 +73,11 @@ class FileSelector(ctk.CTkFrame):
 
     def _select_files(self) -> None:
         files: tuple[str, ...] | Literal[""] = filedialog.askopenfilenames(
-            title="Select Input Files",
-            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+            title="Sélectionnez les fichiers source",
+            filetypes=[
+                ("Fichiers Excel", "*.xlsx"),
+                ("Tous les types de fichiers", "*.*"),
+            ],
         )
 
         if files:
@@ -91,7 +99,7 @@ class FileSelector(ctk.CTkFrame):
                 self._files_listbox.insert(index="end", text=f"File: {file_path.name}\n")  # type: ignore
                 self._files_listbox.insert(index="end", text=f"   {file_path.parent}\n\n")  # type: ignore
         else:
-            self._files_listbox.insert(index="end", text="No files selected")  # type: ignore
+            self._files_listbox.insert(index="end", text="Aucun fichier sélectionné")  # type: ignore
 
         self._files_listbox.configure(state="disabled")  # type: ignore
 

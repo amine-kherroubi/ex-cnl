@@ -28,7 +28,7 @@ class EmailDialog(ctk.CTkToplevel):
         self._on_send: Callable[[list[str], str], None] = on_send
 
         # Window configuration
-        self.title(string="Send Email")
+        self.title(string="Envoyer en email")
         self.geometry(geometry_string="500x350")
         self.resizable(width=False, height=False)
 
@@ -48,7 +48,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Send Generated Document",
+            text="Envoyer le document généré",
             font=ctk.CTkFont(size=20, weight="bold"),
         )
         title_label.grid(row=0, column=0, padx=30, pady=(30, 10))  # type: ignore
@@ -56,7 +56,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Success message
         success_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Document generated successfully!",
+            text="Le rapport a été généré avec succès !",
             font=ctk.CTkFont(size=14),
             text_color="green",
         )
@@ -72,7 +72,7 @@ class EmailDialog(ctk.CTkToplevel):
 
         file_label: ctk.CTkLabel = ctk.CTkLabel(
             master=file_frame,
-            text=f"File: {self._file_path.split('/')[-1]}",
+            text=f"Fichier : {self._file_path.split('/')[-1]}",
             font=ctk.CTkFont(size=13),
             anchor="w",
         )
@@ -81,7 +81,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Email instruction
         instruction_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Enter email addresses (separated by commas):",
+            text="Veuillez introduire des adresses email (séparées par des virgules) :",
             font=ctk.CTkFont(size=13),
         )
         instruction_label.grid(row=3, column=0, padx=30, pady=(0, 10), sticky="w")  # type: ignore
@@ -89,7 +89,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Email entry
         self._email_entry: ctk.CTkEntry = ctk.CTkEntry(
             master=self,
-            placeholder_text="email1@example.com, email2@example.com",
+            placeholder_text="example1@gmail.com, example2@gmail.com",
             height=40,
             font=ctk.CTkFont(size=13),
         )
@@ -102,7 +102,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Cancel button
         self._cancel_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Skip",
+            text="Ignorer",
             command=self._close,
             width=100,
             height=35,
@@ -117,7 +117,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Send button
         self._send_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Send Email",
+            text="Envoyer",
             command=self._send_email,
             width=120,
             height=35,
@@ -134,7 +134,7 @@ class EmailDialog(ctk.CTkToplevel):
         email_text: str = self._email_entry.get().strip()  # type: ignore
 
         if not email_text:
-            self._show_error(message="Please enter at least one email address")
+            self._show_error(message="Veuillez introduire en moins une adresse email")
             return
 
         # Parse email addresses
@@ -147,7 +147,7 @@ class EmailDialog(ctk.CTkToplevel):
                 valid_emails.append(email)
 
         if not valid_emails:
-            self._show_error(message="Please enter valid email addresses")
+            self._show_error(message="Veuillez introduire des adresses email valides")
             return
 
         # Call the callback
