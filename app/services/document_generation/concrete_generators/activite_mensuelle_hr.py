@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-# Standard library imports
+# Imports de la bibliothèque standard
 from typing import Any
 
-# Third-party imports
+# Imports tiers
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Alignment, Border, Font, Side
 
-# Local application imports
+# Imports de l'application locale
 from app.data.data_repository import DataRepository
 from app.services.document_generation.document_generator_template import (
     DocumentGenerator,
@@ -21,6 +21,17 @@ from app.services.io.io_service import IOService
 
 
 class ActiviteMensuelleHRGenerator(DocumentGenerator):
+    """
+    Générateur de documents pour l'activité mensuelle par programme de l'habitat rural.
+
+    Cette classe génère des rapports Excel contenant :
+    - Un tableau d'activité mensuelle (lancements et livraisons par programme)
+    - Un tableau de situation des programmes (consistance, achevés, en cours, non lancés)
+
+    Le document est formaté selon les standards BNH (ex-CNL) et inclut
+    les en-têtes, pieds de page et signatures appropriés.
+    """
+
     __slots__ = ("_current_row",)
 
     def __init__(
@@ -36,16 +47,17 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._current_row: int = 1
 
     def _add_header(self, sheet: Worksheet) -> None:
-        self._logger.debug("Adding document header")
+        """Ajoute l'en-tête du document avec titre, wilaya, et période."""
+        self._logger.debug("Ajout de l'en-tête du document")
 
-        # HABITAT RURAL - Set value first, then merge
+        # HABITAT RURAL - Définir la valeur d'abord, puis fusionner
         sheet[f"A{self._current_row}"] = "Habitat rural"
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="center", vertical="center"
         )
-        self._logger.debug("Added main title: Habitat rural")
+        self._logger.debug("Titre principal ajouté : Habitat rural")
 
         self._current_row += 1
 
@@ -53,9 +65,9 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         wilaya_text = f"Wilaya de {self._document_context.wilaya.value}"
         sheet[f"A{self._current_row}"] = wilaya_text
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        self._logger.debug(f"Added wilaya: {wilaya_text}")
+        self._logger.debug(f"Wilaya ajoutée : {wilaya_text}")
 
-        # Main title - Set value first, then merge
+        # Titre principal - Définir la valeur d'abord, puis fusionner
         self._current_row += 1
         sheet[f"A{self._current_row}"] = (
             "Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)"
@@ -65,9 +77,9 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="center", vertical="center", wrap_text=True
         )
-        self._logger.debug("Added document title")
+        self._logger.debug("Titre du document ajouté")
 
-        # Month - Set value first, then merge
+        # Mois - Définir la valeur d'abord, puis fusionner
         self._current_row += 1
         month_text: str = (
             f"Mois de {self._document_context.month.value} {self._document_context.year}"  # type: ignore
@@ -78,19 +90,22 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="center", vertical="center"
         )
-        self._logger.debug(f"Added month and year: {month_text}")
+        self._logger.debug(f"Mois et année ajoutés : {month_text}")
 
-        self._logger.info("Document header completed successfully")
+        self._logger.info("En-tête du document terminé avec succès")
 
         self._current_row += 2
 
     def _add_tables(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        self._logger.debug("Adding main data table")
-        self._logger.debug(f"Available query results: {list(query_results.keys())}")
+        """Ajoute les deux tableaux principaux : activité mensuelle et situation des programmes."""
+        self._logger.debug("Ajout du tableau principal de données")
+        self._logger.debug(
+            f"Résultats de requêtes disponibles : {list(query_results.keys())}"
+        )
 
-        # Programme cell spans 3 rows
+        # La cellule Programme s'étend sur 3 lignes
         sheet[f"A{self._current_row}"] = "Programme"
         sheet.merge_cells(f"A{self._current_row}:A{self._current_row + 2}")
         for cell in [sheet[f"A{self._current_row + i}"] for i in range(3)]:
@@ -124,10 +139,12 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 bottom=Side(style="thin"),
             )
 
-        self._logger.debug("Added table caption")
+        self._logger.debug("Légende du tableau ajoutée")
 
-        # Headers
-        self._logger.debug(f"Adding column headers at row {self._current_row}")
+        # En-têtes
+        self._logger.debug(
+            f"Ajout des en-têtes de colonnes à la ligne {self._current_row}"
+        )
         self._current_row += 1
         sheet[f"B{self._current_row}"] = (
             "Livraisons (libération de la dernière tranche)"
@@ -152,7 +169,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 bottom=Side(style="thin"),
             )
 
-        # Subheaders
+        # Sous-en-têtes
         self._current_row += 1
         sheet[f"B{self._current_row}"] = (
             f"{self._document_context.month.value.capitalize()} {self._document_context.year}"  # type: ignore
@@ -181,31 +198,35 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 bottom=Side(style="thin"),
             )
 
-        self._logger.debug("Added sub-headers with date ranges")
+        self._logger.debug("Sous-en-têtes ajoutés avec les plages de dates")
 
-        # Add data from query results (existing implementation)
+        # Ajouter les données des résultats de requêtes
         self._current_row += 1
-        self._logger.debug(f"Starting data rows at row {self._current_row}")
+        self._logger.debug(
+            f"Début des lignes de données à la ligne {self._current_row}"
+        )
 
-        # Get all programmes with proper ordering
+        # Obtenir tous les programmes avec l'ordre approprié
         programmes: list[str] = []
         if "programmes" in query_results:
             programmes: list[str] = query_results["programmes"]["programme"].tolist()
             self._logger.info(
-                f"Found {len(programmes)} programmes (pre-sorted by year): {programmes}"
+                f"Trouvé {len(programmes)} programmes (pré-triés par année) : {programmes}"
             )
         else:
-            self._logger.warning("No 'programmes' query result found")
+            self._logger.warning("Aucun résultat de requête 'programmes' trouvé")
 
-        # Create lookup dictionaries for each metric
-        self._logger.debug("Creating lookup dictionaries from query results")
+        # Créer des dictionnaires de recherche pour chaque métrique
+        self._logger.debug(
+            "Création des dictionnaires de recherche à partir des résultats de requêtes"
+        )
 
         lancements_mois_dict: dict[str, int] = {}
         if "lancements_mois" in query_results:
             df_lm: pd.DataFrame = query_results["lancements_mois"]
             lancements_mois_dict = dict(zip(df_lm["programme"], df_lm["count"]))
             self._logger.debug(
-                f"Lancements month data: {len(lancements_mois_dict)} programmes"
+                f"Données lancements mois : {len(lancements_mois_dict)} programmes"
             )
 
         lancements_cumul_annee_dict: dict[str, int] = {}
@@ -213,7 +234,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             df_ly: pd.DataFrame = query_results["lancements_cumul_annee"]
             lancements_cumul_annee_dict = dict(zip(df_ly["programme"], df_ly["count"]))
             self._logger.debug(
-                f"Lancements YTD data: {len(lancements_cumul_annee_dict)} programmes"
+                f"Données lancements cumulé annuel : {len(lancements_cumul_annee_dict)} programmes"
             )
 
         livraisons_mois_dict: dict[str, int] = {}
@@ -221,7 +242,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             df_livm: pd.DataFrame = query_results["livraisons_mois"]
             livraisons_mois_dict = dict(zip(df_livm["programme"], df_livm["count"]))
             self._logger.debug(
-                f"Livraisons month data: {len(livraisons_mois_dict)} programmes"
+                f"Données livraisons mois : {len(livraisons_mois_dict)} programmes"
             )
 
         livraisons_cumul_annee_dict: dict[str, int] = {}
@@ -231,57 +252,61 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 zip(df_livy["programme"], df_livy["count"])
             )
             self._logger.debug(
-                f"Livraisons YTD data: {len(livraisons_cumul_annee_dict)} programmes"
+                f"Données livraisons cumulé annuel : {len(livraisons_cumul_annee_dict)} programmes"
             )
 
-        # Calculate totals
+        # Calculer les totaux
         total_livraisons_mois: int = sum(livraisons_mois_dict.values())
         total_livraisons_cumul_annee: int = sum(livraisons_cumul_annee_dict.values())
         total_lancements_mois: int = sum(lancements_mois_dict.values())
         total_lancements_cumul_annee: int = sum(lancements_cumul_annee_dict.values())
 
         self._logger.info(
-            f"Calculated totals - Livraisons: {total_livraisons_mois} (month), {total_livraisons_cumul_annee} (YTD)"
+            f"Totaux calculés - Livraisons : {total_livraisons_mois} (mois), {total_livraisons_cumul_annee} (cumulé)"
         )
         self._logger.info(
-            f"Calculated totals - Lancements: {total_lancements_mois} (month), {total_lancements_cumul_annee} (YTD)"
+            f"Totaux calculés - Lancements : {total_lancements_mois} (mois), {total_lancements_cumul_annee} (cumulé)"
         )
 
-        # Add data rows for each programme
-        self._logger.debug(f"Adding data rows for {len(programmes)} programmes")
+        # Ajouter les lignes de données pour chaque programme
+        self._logger.debug(
+            f"Ajout des lignes de données pour {len(programmes)} programmes"
+        )
         for i, programme in enumerate(programmes):
             row: int = self._current_row + i
-            self._logger.debug(f"Processing programme '{programme}' at row {row}")
+            self._logger.debug(
+                f"Traitement du programme '{programme}' à la ligne {row}"
+            )
 
-            # Column A: Programme name
+            # Colonne A : Nom du programme
             sheet[f"A{row}"] = programme
             sheet[f"A{row}"].font = Font(name="Arial", size=9)
 
-            # Column B: Livraisons (Month)
+            # Colonne B : Livraisons (Mois)
             livraisons_mois: int = livraisons_mois_dict.get(programme, 0)
             sheet[f"B{row}"] = livraisons_mois if livraisons_mois > 0 else "-"
             sheet[f"B{row}"].font = Font(name="Arial", size=9)
 
-            # Column C: Livraisons (YTD)
+            # Colonne C : Livraisons (Cumulé)
             livraisons_cumul_annee: int = livraisons_cumul_annee_dict.get(programme, 0)
             sheet[f"C{row}"] = (
                 livraisons_cumul_annee if livraisons_cumul_annee > 0 else "-"
             )
             sheet[f"C{row}"].font = Font(name="Arial", size=9)
 
-            # Column D: Lancements (Month)
+            # Colonne D : Lancements (Mois)
             lancements_mois: int = lancements_mois_dict.get(programme, 0)
             sheet[f"D{row}"] = lancements_mois if lancements_mois > 0 else "-"
             sheet[f"D{row}"].font = Font(name="Arial", size=9)
 
-            # Column E: Lancements (YTD)
+            # Colonne E : Lancements (Cumulé)
             lancements_cumul_annee: int = lancements_cumul_annee_dict.get(programme, 0)
             sheet[f"E{row}"] = (
                 lancements_cumul_annee if lancements_cumul_annee > 0 else "-"
             )
             sheet[f"E{row}"].font = Font(name="Arial", size=9)
 
-            # Add borders
+            # Ajouter les bordures
             for column in ["A", "B", "C", "D", "E"]:
                 cell = sheet[f"{column}{row}"]
                 cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -292,9 +317,9 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                     bottom=Side(style="thin"),
                 )
 
-        # Add Total row for first table
+        # Ajouter la ligne Total pour le premier tableau
         self._current_row += len(programmes)
-        self._logger.debug(f"Adding Total row at row {self._current_row}")
+        self._logger.debug(f"Ajout de la ligne Total à la ligne {self._current_row}")
 
         sheet[f"A{self._current_row}"] = "Total"
         sheet[f"B{self._current_row}"] = total_livraisons_mois
@@ -302,7 +327,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         sheet[f"D{self._current_row}"] = total_lancements_mois
         sheet[f"E{self._current_row}"] = total_lancements_cumul_annee
 
-        # Format Total row
+        # Formater la ligne Total
         for column in ["A", "B", "C", "D", "E"]:
             cell: Any = sheet[f"{column}{self._current_row}"]
             cell.font = Font(name="Arial", size=9, bold=True)
@@ -315,23 +340,24 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             )
 
         self._logger.info(
-            f"First table completed with {len(programmes)} programmes plus totals"
+            f"Premier tableau terminé avec {len(programmes)} programmes plus les totaux"
         )
 
         self._current_row += 2
 
-        # Add second table header
+        # Ajouter l'en-tête du second tableau
         self._add_second_table_header(sheet)
 
-        # Add second table
+        # Ajouter le second tableau
         self._add_second_table(sheet, query_results)
 
     def _add_second_table(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        self._logger.debug("Adding second table (SITUATION DES PROGRAMMES)")
+        """Ajoute le second tableau affichant la situation des programmes."""
+        self._logger.debug("Ajout du second tableau (SITUATION DES PROGRAMMES)")
 
-        # Headers for second table
+        # En-têtes du second tableau
         headers: list[tuple[str, str]] = [
             ("A", "Programme"),
             ("B", "Consistance"),
@@ -344,7 +370,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         ]
 
         self._logger.debug(
-            f"Adding {len(headers)} column headers for second table at row {self._current_row}"
+            f"Ajout de {len(headers)} en-têtes de colonnes pour le second tableau à la ligne {self._current_row}"
         )
         for col, title in headers:
             cell = sheet[f"{col}{self._current_row}"]
@@ -362,7 +388,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         self._current_row += 1
 
-        # Get data from query results
+        # Obtenir les données des résultats de requêtes
         programmes_situation: list[tuple[str, int]] = []
         if "programmes_situation" in query_results:
             df_prog = query_results["programmes_situation"]
@@ -370,23 +396,25 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                 zip(df_prog["programme"], df_prog["consistance"])
             )
             self._logger.info(
-                f"Found {len(programmes_situation)} programmes for situation table"
+                f"Trouvé {len(programmes_situation)} programmes pour le tableau de situation"
             )
         else:
-            self._logger.warning("No 'programmes_situation' query result found")
+            self._logger.warning(
+                "Aucun résultat de requête 'programmes_situation' trouvé"
+            )
 
-        # Create lookup dictionaries
+        # Créer des dictionnaires de recherche
         acheves_dict: dict[str, int] = {}
         if "acheves_derniere_tranche" in query_results:
             df_acheves = query_results["acheves_derniere_tranche"]
             acheves_dict = dict(zip(df_acheves["programme"], df_acheves["acheves"]))
-            self._logger.debug(f"Achevés data: {len(acheves_dict)} programmes")
+            self._logger.debug(f"Données achevés : {len(acheves_dict)} programmes")
 
         en_cours_dict: dict[str, int] = {}
         if "en_cours_calculation" in query_results:
             df_en_cours = query_results["en_cours_calculation"]
             en_cours_dict = dict(zip(df_en_cours["programme"], df_en_cours["en_cours"]))
-            self._logger.debug(f"En cours data: {len(en_cours_dict)} programmes")
+            self._logger.debug(f"Données en cours : {len(en_cours_dict)} programmes")
 
         non_lances_dict: dict[str, int] = {}
         if "non_lances_premiere_tranche" in query_results:
@@ -394,9 +422,11 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             non_lances_dict = dict(
                 zip(df_non_lances["programme"], df_non_lances["non_lances"])
             )
-            self._logger.debug(f"Non lancés data: {len(non_lances_dict)} programmes")
+            self._logger.debug(
+                f"Données non lancés : {len(non_lances_dict)} programmes"
+            )
 
-        # Add data rows
+        # Ajouter les lignes de données
         total_consistance = 0
         total_acheves = 0
         total_en_cours = 0
@@ -404,36 +434,38 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
 
         for i, (programme, consistance) in enumerate(programmes_situation):
             row = self._current_row + i
-            self._logger.debug(f"Processing programme '{programme}' at row {row}")
+            self._logger.debug(
+                f"Traitement du programme '{programme}' à la ligne {row}"
+            )
 
-            # Column A: Programme name
+            # Colonne A : Nom du programme
             sheet[f"A{row}"] = programme
             sheet[f"A{row}"].font = Font(name="Arial", size=9)
 
-            # Column B: Consistance
+            # Colonne B : Consistance
             sheet[f"B{row}"] = consistance
             sheet[f"B{row}"].font = Font(name="Arial", size=9)
             total_consistance += consistance
 
-            # Column C: Achevés
+            # Colonne C : Achevés
             acheves = acheves_dict.get(programme, 0)
             sheet[f"C{row}"] = acheves if acheves > 0 else "-"
             sheet[f"C{row}"].font = Font(name="Arial", size=9)
             total_acheves += acheves
 
-            # Column D: En cours
+            # Colonne D : En cours
             en_cours = en_cours_dict.get(programme, 0)
             sheet[f"D{row}"] = en_cours if en_cours > 0 else "-"
             sheet[f"D{row}"].font = Font(name="Arial", size=9)
             total_en_cours += en_cours
 
-            # Column E: Non lancés
+            # Colonne E : Non lancés
             non_lances = non_lances_dict.get(programme, 0)
             sheet[f"E{row}"] = non_lances if non_lances > 0 else "-"
             sheet[f"E{row}"].font = Font(name="Arial", size=9)
             total_non_lances += non_lances
 
-            # Add borders
+            # Ajouter les bordures
             for col in ["A", "B", "C", "D", "E"]:
                 cell = sheet[f"{col}{row}"]
                 cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -444,10 +476,10 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
                     bottom=Side(style="thin"),
                 )
 
-        # Add Total row for second table
+        # Ajouter la ligne Total pour le second tableau
         self._current_row += len(programmes_situation)
         self._logger.debug(
-            f"Adding Total row for second table at row {self._current_row}"
+            f"Ajout de la ligne Total pour le second tableau à la ligne {self._current_row}"
         )
 
         sheet[f"A{self._current_row}"] = "Total général"
@@ -456,7 +488,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         sheet[f"D{self._current_row}"] = total_en_cours
         sheet[f"E{self._current_row}"] = total_non_lances
 
-        # Format Total row
+        # Formater la ligne Total
         for col in ["A", "B", "C", "D", "E"]:
             cell = sheet[f"{col}{self._current_row}"]
             cell.font = Font(name="Arial", size=9, bold=True)
@@ -469,11 +501,12 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             )
 
         self._logger.info(
-            f"Second table completed with {len(programmes_situation)} programmes plus totals"
+            f"Second tableau terminé avec {len(programmes_situation)} programmes plus les totaux"
         )
         self._current_row += 2
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
+        """Ajoute l'en-tête du second tableau avec titre et date d'arrêté."""
         sheet[f"A{self._current_row}"] = (
             "Situation des programmes (à renseigner par la BNH, ex-CNL)"
         )
@@ -496,9 +529,10 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         self._current_row += 2
 
     def _add_footer(self, sheet: Worksheet) -> None:
-        self._logger.debug("Adding document footer")
+        """Ajoute le pied de page du document avec les emplacements de signatures."""
+        self._logger.debug("Ajout du pied de page du document")
 
-        # Left footer text (A-B)
+        # Texte de pied de page gauche (A-B)
         sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
         sheet[f"A{self._current_row}"] = "Visa du directeur régional de la BNH (ex-CNL)"
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
@@ -506,7 +540,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             horizontal="left", vertical="center"
         )
 
-        # Right footer text (D-E)
+        # Texte de pied de page droit (D-E)
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
         sheet[f"D{self._current_row}"] = "Visa du directeur du logement"
         sheet[f"D{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
@@ -514,13 +548,14 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
             horizontal="right", vertical="center"
         )
 
-        self._logger.debug("Footer added successfully")
+        self._logger.debug("Pied de page ajouté avec succès")
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        self._logger.debug("Applying final formatting")
+        """Applique le formatage final au document (largeurs de colonnes, orientation page)."""
+        self._logger.debug("Application du formatage final")
 
         column_widths: dict[str, int] = {"A": 25, "B": 18, "C": 22, "D": 18, "E": 22}
-        self._logger.debug(f"Setting column widths: {column_widths}")
+        self._logger.debug(f"Définition des largeurs de colonnes : {column_widths}")
 
         for col, width in column_widths.items():
             sheet.column_dimensions[col].width = width
@@ -529,5 +564,7 @@ class ActiviteMensuelleHRGenerator(DocumentGenerator):
         sheet.page_setup.fitToWidth = 1
         sheet.page_setup.fitToHeight = 0
 
-        self._logger.debug("Set page orientation to portrait with fit to width")
-        self._logger.info("Final formatting completed successfully")
+        self._logger.debug(
+            "Orientation de page définie en portrait avec ajustement à la largeur"
+        )
+        self._logger.info("Formatage final terminé avec succès")

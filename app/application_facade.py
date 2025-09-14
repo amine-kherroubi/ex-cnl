@@ -9,7 +9,7 @@ from typing import Any
 from app.services.document_generation.document_generator_template import (
     DocumentGenerator,
 )
-from app.data.data_repository import DepotDuckDB
+from app.data.data_repository import DuckDBRepository
 from app.services.document_generation.document_registry import DocumentRegistry
 from app.services.document_generation.document_registry import DocumentSpecification
 from app.services.io.io_service import IOService
@@ -42,7 +42,9 @@ class ApplicationFacade(object):  # Facade pattern
 
         # Dependency injection pattern
         self._config: AppConfig = config
-        self._data_repository: DepotDuckDB = DepotDuckDB(self._config.database_config)
+        self._data_repository: DuckDBRepository = DuckDBRepository(
+            self._config.database_config
+        )
         self._storage_service: IOService = IOService(self._config.storage_config)
 
         self._logger.info("ApplicationFacade initialized successfully")

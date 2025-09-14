@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-# Standard library imports
+# Imports de la bibliothèque standard
 from typing import Final
 
-# Third-party imports
+# Imports tiers
 import pandas as pd
 
-# Local application imports
+# Imports de l'application locale
 from app.services.document_generation.models.programe import Programme
 
 PROGRAMMES_HABITAT_RURAL: Final[list[Programme]] = [
@@ -399,6 +399,16 @@ PROGRAMMES_HABITAT_RURAL: Final[list[Programme]] = [
 
 
 def get_programmes_dataframe() -> pd.DataFrame:
+    """
+    Retourne un DataFrame contenant tous les programmes d'habitat rural.
+
+    Convertit la liste constante des programmes en DataFrame pandas
+    pour faciliter les requêtes et manipulations de données.
+
+    Returns:
+        DataFrame avec les colonnes : programme, year_start, year_end,
+        display_order, consistance
+    """
     return pd.DataFrame(
         [
             {
