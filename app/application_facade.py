@@ -50,7 +50,7 @@ class ApplicationFacade(object):  # Facade pattern
             self._config.database_config
         )
         self._storage_service: FileIOService = FileIOService(
-            self._config.storage_config
+            self._config.file_io_config
         )
 
         self._logger.info("ApplicationFacade initialized successfully")

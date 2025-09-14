@@ -9,93 +9,10 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 
-class LoggingConfig(BaseSettings):
-    # Log levels
-    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
-        default="INFO",
-        description="Global logging level",
-    )
-
-    # File logging
-    enable_file_logging: bool = Field(
-        default=True,
-        description="Enable logging to file",
-    )
-
-    log_file: Path = Field(
-        default=Path("logs") / "app.log",
-        description="Path to log file",
-    )
-
-    max_file_size_mb: int = Field(
-        default=10,
-        description="Maximum log file size in MB before rotation",
-        gt=0,
-        le=100,
-    )
-
-    backup_count: int = Field(
-        default=5,
-        description="Number of backup log files to keep",
-        ge=0,
-        le=20,
-    )
-
-    # Console logging
-    enable_console_logging: bool = Field(
-        default=True,
-        description="Enable logging to console/CLI",
-    )
-
-    console_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
-        default="INFO",
-        description="Console-specific logging level",
-    )
-
-    # Formatting
-    use_json_format: bool = Field(
-        default=False,
-        description="Use JSON format for structured logging",
-    )
-
-    include_traceback: bool = Field(
-        default=True,
-        description="Include full traceback in error logs",
-    )
-
-    # Performance
-    disable_existing_loggers: bool = Field(
-        default=False,
-        description="Disable existing loggers when configuring",
-    )
-
-    @field_validator("log_file")
-    @classmethod
-    def ensure_log_directory(cls, log_file: Path) -> Path:
-        log_file.parent.mkdir(parents=True, exist_ok=True)
-        return log_file
-
-    model_config = {
-        "env_prefix": "LOG_",
-    }
-
-
 class FileIOConfig(BaseSettings):
-    allowed_input_file_extensions: list[str] = Field(
+    allowed_source_file_extensions: list[str] = Field(
         default=["xlsx", "xls"],
         description="Allowed file extensions for upload.",
-    )
-
-    max_input_file_size_mb: int = Field(
-        default=50,
-        description="Maximum allowed upload file size in megabytes.",
-        gt=0,
-        le=100,
-    )
-
-    default_output_format: Literal["xlsx", "xls"] = Field(
-        default="xlsx",
-        description="Default output format for results.",
     )
 
     model_config = {
@@ -110,7 +27,7 @@ class DatabaseConfig(BaseSettings):
     )
 
     max_memory: str = Field(
-        default="1GB",
+        default="2GB",
         description="Maximum memory to use.",
     )
 
@@ -124,8 +41,48 @@ class DatabaseConfig(BaseSettings):
     }
 
 
+class LoggingConfig(BaseSettings):
+    # Log levels
+    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
+        default="INFO",
+        description="Logging level",
+    )
+
+    # File logging
+    enable_file_logging: bool = Field(
+        default=True,
+        description="Enable logging to file",
+    )
+
+    log_file: Path = Field(
+        default=Path("logs") / "app.log",
+        description="Path to log file",
+    )
+
+    @field_validator("log_file")
+    @classmethod
+    def ensure_log_directory(cls, log_file: Path) -> Path:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        return log_file
+
+    # Formatting
+    use_json_format: bool = Field(
+        default=False,
+        description="Use JSON format for structured logging",
+    )
+
+    include_traceback: bool = Field(
+        default=True,
+        description="Include full traceback in error logs",
+    )
+
+    model_config = {
+        "env_prefix": "LOG_",
+    }
+
+
 class AppConfig(BaseSettings):
-    storage_config: FileIOConfig = Field(
+    file_io_config: FileIOConfig = Field(
         default_factory=FileIOConfig,
         description="Storage configuration",
     )

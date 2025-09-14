@@ -42,7 +42,7 @@ class FileIOService(object):
         self._logger.info("Service de stockage de fichiers initialisé")
         self._logger.debug(
             f"Configuration - Taille max : {self._config.max_input_file_size_mb}MB, "
-            f"Extensions autorisées : {self._config.allowed_input_file_extensions}"
+            f"Extensions autorisées : {self._config.allowed_source_file_extensions}"
         )
 
     def load_data_from_file(self, source_file_path: Path | str) -> pd.DataFrame:
