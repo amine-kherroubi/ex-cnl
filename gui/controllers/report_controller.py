@@ -46,7 +46,7 @@ class ReportController(object):
         )
 
         # Generate the report (facade will handle filename generation)
-        output_file_path = self._facade.generate_report(
+        output_file_path: Path = self._facade.generate_report(
             report_name=report_name,
             source_file_paths=validated_files,
             output_directory_path=output_directory_path,

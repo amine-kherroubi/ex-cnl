@@ -99,22 +99,8 @@ class ReportGenerator(ABC):
     def generate(
         self,
         source_file_paths: dict[str, Path],
-        output_file_path: Path,
-    ) -> None:
-        """
-        Lance le processus complet de génération du report.
-
-        Note: Files are pre-validated by the controller layer.
-        This method assumes all files exist and match required patterns.
-
-        Args:
-            source_file_paths: Pre-validated mapping of view names to file paths
-            output_file_path: Complete path where the report should be saved
-
-        Raises:
-            QueryExecutionError: Si l'exécution d'une requête échoue
-            Exception: Pour toute autre erreur durant la génération
-        """
+        output_directory_path: Path,
+    ) -> Path:
         self._logger.info("Début du processus de génération du report")
 
         try:
@@ -164,10 +150,17 @@ class ReportGenerator(ABC):
             self._finalize_formatting(sheet)
             self._logger.debug("Formatage final appliqué avec succès")
 
-            # Étape 9 : Sauvegarde du rapport
-            self._logger.debug("Étape 9 : Sauvegarde du rapport")
+            # Étape 9 : Générer le nom réel (formaté) du fichier
+            output_file_path: Path = (
+                output_directory_path / self._generate_output_filename()
+            )
+
+            # Étape 9 : Sauvegarde du report
+            self._logger.debug("Étape 9 : Sauvegarde du report")
             self._save_report(output_file_path)
-            self._logger.info("Génération du rapport terminée avec succès")
+            self._logger.info("Génération du report terminée avec succès")
+
+            return output_file_path
 
         except Exception as error:
             self._logger.exception(f"Échec de la génération du report : {error}")
@@ -408,6 +401,34 @@ class ReportGenerator(ABC):
             sheet: Feuille Excel à formater
         """
         ...
+
+    def _generate_output_filename(self) -> str:
+        """
+        Generate the output filename using the report specification template.
+
+        Returns:
+            Formatted filename with placeholders replaced by context values
+        """
+        from app.utils.date_formatting import DateFormatter
+
+        output_filename: str = self._report_specification.output_filename
+        self._logger.debug(f"Template du nom de fichier de sortie : {output_filename}")
+
+        # Replace placeholders with context values
+        output_filename = output_filename.replace(
+            "{wilaya}", self._report_context.wilaya.value
+        )
+        output_filename = output_filename.replace(
+            "{date}",
+            DateFormatter.to_french_filename_date(self._report_context.report_date),
+        )
+
+        # Add extension if necessary
+        if not output_filename.endswith(".xlsx"):
+            output_filename += ".xlsx"
+
+        self._logger.debug(f"Nom de fichier généré : {output_filename}")
+        return output_filename
 
     def _save_report(self, output_file_path: Path) -> None:
         """
