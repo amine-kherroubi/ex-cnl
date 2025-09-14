@@ -28,7 +28,7 @@ class EmailDialog(ctk.CTkToplevel):
         self._on_send: Callable[[list[str], str], None] = on_send
 
         # Window configuration
-        self.title(string="Envoyer en email")
+        self.title(string="Envoyer par email")
         self.geometry(geometry_string="500x350")
         self.resizable(width=False, height=False)
 
@@ -81,7 +81,7 @@ class EmailDialog(ctk.CTkToplevel):
         # Email instruction
         instruction_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Veuillez introduire des adresses email (séparées par des virgules) :",
+            text="Veuillez saisir des adresses email (séparées par des virgules) :",
             font=ctk.CTkFont(size=13),
         )
         instruction_label.grid(row=3, column=0, padx=30, pady=(0, 10), sticky="w")  # type: ignore
@@ -134,7 +134,7 @@ class EmailDialog(ctk.CTkToplevel):
         email_text: str = self._email_entry.get().strip()  # type: ignore
 
         if not email_text:
-            self._show_error(message="Veuillez introduire en moins une adresse email")
+            self._show_error(message="Veuillez saisir au moins une adresse email")
             return
 
         # Parse email addresses
@@ -147,7 +147,7 @@ class EmailDialog(ctk.CTkToplevel):
                 valid_emails.append(email)
 
         if not valid_emails:
-            self._show_error(message="Veuillez introduire des adresses email valides")
+            self._show_error(message="Veuillez saisir des adresses email valides")
             return
 
         # Call the callback

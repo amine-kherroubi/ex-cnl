@@ -27,7 +27,7 @@ class StatusDisplay(ctk.CTkFrame):
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self, text="Status :", font=ctk.CTkFont(size=14, weight="bold")
+            master=self, text="Statut :", font=ctk.CTkFont(size=14, weight="bold")
         )
         label.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")  # type: ignore
 

@@ -27,7 +27,7 @@ class MainWindow(ctk.CTk):
         super().__init__()  # type: ignore
 
         # Window configuration
-        self.title(string="Document Generator")
+        self.title(string="Générateur de documents")
         self.geometry(geometry_string="900x700")
         self.minsize(width=700, height=600)
 
@@ -60,7 +60,7 @@ class MainWindow(ctk.CTk):
         # Title
         self._title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
-            text="Document Generator",
+            text="Générateur de documents",
             font=ctk.CTkFont(size=28, weight="bold"),
         )
         self._title_label.grid(row=0, column=0, sticky="w")  # type: ignore
@@ -76,11 +76,11 @@ class MainWindow(ctk.CTk):
             reports: dict[str, Any] = self._controller.get_available_reports()
             self._state.available_reports = reports
         except Exception as e:
-            print(f"Error loading reports: {str(e)}")
+            print(f"Erreur lors du chargement des rapports : {str(e)}")
 
     def _show_menu(self) -> None:
         self._clear_current_view()
-        self._title_label.configure(text="Document Generator")  # type: ignore
+        self._title_label.configure(text="Générateur de documents")  # type: ignore
 
         self._current_view = MenuView(
             parent=self._container,
@@ -92,13 +92,12 @@ class MainWindow(ctk.CTk):
 
     def _show_document_view(self, document_name: str) -> None:
         self._clear_current_view()
-        self._title_label.configure(text=f"Generate: {document_name}")  # type: ignore
+        self._title_label.configure(text=f"Générer : {document_name}")  # type: ignore
 
         document_spec: Any = self._state.available_reports.get(document_name)
 
         self._current_view = DocumentView(
             parent=self._container,
-            document_name=document_name,
             document_spec=document_spec,
             controller=self._controller,
             on_back=self._show_menu,
@@ -107,7 +106,7 @@ class MainWindow(ctk.CTk):
 
     def _show_settings_view(self, document_name: str) -> None:
         self._clear_current_view()
-        self._title_label.configure(text=f"Settings: {document_name}")  # type: ignore
+        self._title_label.configure(text=f"Configuration : {document_name}")  # type: ignore
 
         self._current_view = SettingsView(
             parent=self._container,

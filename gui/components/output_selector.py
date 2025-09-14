@@ -34,7 +34,7 @@ class OutputSelector(ctk.CTkFrame):
         # Select folder button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
             master=self,
-            text="Sélectionnez un répertoire",
+            text="Sélectionner un répertoire",
             command=self._select_folder,
             width=120,
         )
@@ -50,7 +50,7 @@ class OutputSelector(ctk.CTkFrame):
 
     def _select_folder(self) -> None:
         folder: str = filedialog.askdirectory(
-            title="Sélectionnez le répertoire de destination"
+            title="Sélectionner le répertoire de destination"
         )
 
         if folder:

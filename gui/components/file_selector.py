@@ -43,7 +43,7 @@ class FileSelector(ctk.CTkFrame):
         # Select files button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
             master=self,
-            text="Sélectionnez des fichiers",
+            text="Sélectionner des fichiers",
             command=self._select_files,
             width=120,
         )
@@ -73,7 +73,7 @@ class FileSelector(ctk.CTkFrame):
 
     def _select_files(self) -> None:
         files: tuple[str, ...] | Literal[""] = filedialog.askopenfilenames(
-            title="Sélectionnez les fichiers source",
+            title="Sélectionner les fichiers source",
             filetypes=[
                 ("Fichiers Excel", "*.xlsx"),
                 ("Tous les types de fichiers", "*.*"),
@@ -96,7 +96,7 @@ class FileSelector(ctk.CTkFrame):
 
         if self._selected_files:
             for file_path in self._selected_files:
-                self._files_listbox.insert(index="end", text=f"File: {file_path.name}\n")  # type: ignore
+                self._files_listbox.insert(index="end", text=f"Fichier : {file_path.name}\n")  # type: ignore
                 self._files_listbox.insert(index="end", text=f"   {file_path.parent}\n\n")  # type: ignore
         else:
             self._files_listbox.insert(index="end", text="Aucun fichier sélectionné")  # type: ignore

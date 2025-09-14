@@ -45,14 +45,14 @@ class MenuView(ctk.CTkFrame):
 
         header_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
-            text="Select Document Type",
+            text="Sélectionner le type de document",
             font=ctk.CTkFont(size=20, weight="bold"),
         )
         header_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")  # type: ignore
 
         description_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
-            text="Choose a document type to generate or configure its settings",
+            text="Choisissez un type de document à générer ou configurez ses paramètres",
             font=ctk.CTkFont(size=14),
             text_color=("gray30", "gray70"),
         )

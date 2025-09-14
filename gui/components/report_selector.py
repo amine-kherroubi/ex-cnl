@@ -47,7 +47,7 @@ class ReportSelector(ctk.CTkFrame):
             master=self, values=[], command=self._on_report_selected, state="readonly"
         )
         self._report_dropdown.grid(row=0, column=1, padx=(5, 10), pady=10, sticky="ew")  # type: ignore
-        self._report_dropdown.set(value="Sélectionnez un type de rapports")
+        self._report_dropdown.set(value="Sélectionner un type de rapport")
 
         # Description text
         self._description_text: ctk.CTkTextbox = ctk.CTkTextbox(
@@ -65,13 +65,13 @@ class ReportSelector(ctk.CTkFrame):
         self._report_dropdown.configure(values=report_names)  # type: ignore
 
         if report_names:
-            self._report_dropdown.set(value="Sélectionnez un type de rapports")
+            self._report_dropdown.set(value="Sélectionner un type de rapport")
         else:
             self._report_dropdown.set(value="Aucun rapport disponible")
 
     def _on_report_selected(self, selection: str) -> None:
         if (
-            selection == "Sélectionnez un type de rapports"
+            selection == "Sélectionner un type de rapport"
             or selection == "Aucun rapport disponible"
         ):
             self._clear_description()
@@ -92,10 +92,10 @@ class ReportSelector(ctk.CTkFrame):
         self._description_text.delete(index1="1.0", index2="end")  # type: ignore
 
         description_text: str = (
-            f"Report: {report_spec.display_name}\n"
-            f"Category: {report_spec.category}\n"
-            f"Frequency: {report_spec.periodicity}\n"
-            f"Description: {report_spec.description}"
+            f"Rapport : {report_spec.display_name}\n"
+            f"Catégorie : {report_spec.category}\n"
+            f"Fréquence : {report_spec.periodicity}\n"
+            f"Description : {report_spec.description}"
         )
 
         self._description_text.insert(index="1.0", text=description_text)  # type: ignore
@@ -104,5 +104,5 @@ class ReportSelector(ctk.CTkFrame):
     def _clear_description(self) -> None:
         self._description_text.configure(state="normal")  # type: ignore
         self._description_text.delete(index1="1.0", index2="end")  # type: ignore
-        self._description_text.insert(index="1.0", text="Sélectionnez un type de rapports pour plus de détails")  # type: ignore
+        self._description_text.insert(index="1.0", text="Sélectionner un type de rapport pour afficher les détails")  # type: ignore
         self._description_text.configure(state="disabled")  # type: ignore

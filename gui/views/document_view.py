@@ -64,7 +64,7 @@ class DocumentView(ctk.CTkFrame):
         # Back button
         self._back_button: ctk.CTkButton = ctk.CTkButton(
             master=header_frame,
-            text="Back",
+            text="Retour",
             command=self._on_back,
             width=100,
             height=32,
@@ -271,7 +271,7 @@ class DocumentView(ctk.CTkFrame):
 
     def _on_generation_error(self, error_message: str) -> None:
         self._status_display.add_message(
-            message=f"Échec de génération : {error_message}", message_type="erreur"
+            message=f"Échec de la génération : {error_message}", message_type="erreur"
         )
         self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
         self._back_button.configure(state="normal")  # type: ignore
@@ -293,4 +293,4 @@ class DocumentView(ctk.CTkFrame):
             message=f"L'email sera envoyé à : {', '.join(recipients)}",
             message_type="succès",
         )
-        print(f"Sending {file_path} to: {recipients}")
+        print(f"Envoi de {file_path} à : {recipients}")

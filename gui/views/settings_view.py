@@ -43,7 +43,7 @@ class SettingsView(ctk.CTkFrame):
         # Back button
         self._back_button: ctk.CTkButton = ctk.CTkButton(
             master=header_frame,
-            text="Back",
+            text="Retour",
             command=self._on_back,
             width=100,
             height=32,
@@ -57,7 +57,7 @@ class SettingsView(ctk.CTkFrame):
         # Settings title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
-            text=f"Settings for {self._document_name}",
+            text=f"Configuration de {self._document_name}",
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         title_label.grid(row=0, column=1, sticky="w")  # type: ignore
@@ -84,7 +84,7 @@ class SettingsView(ctk.CTkFrame):
         # Save button
         self._save_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Save Settings",
+            text="Sauvegarder la configuration",
             command=self._save_settings,
             height=40,
             font=ctk.CTkFont(size=14, weight="bold"),
@@ -94,7 +94,7 @@ class SettingsView(ctk.CTkFrame):
         # Cancel button
         cancel_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Cancel",
+            text="Annuler",
             command=self._on_back,
             height=40,
             fg_color="transparent",
@@ -109,18 +109,18 @@ class SettingsView(ctk.CTkFrame):
         # Programs section
         programs_section: SettingsSection = SettingsSection(
             parent=parent,
-            title="Programs Configuration",
-            description="Select which programs to include in the monthly activity report",
+            title="Configuration des programmes",
+            description="Sélectionnez les programmes à inclure dans le rapport d'activité mensuelle",
         )
         programs_section.grid(row=0, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
 
         # Create program checkboxes
         programs: list[str] = [
-            "Program Alpha",
-            "Program Beta",
-            "Program Gamma",
-            "Program Delta",
-            "Program Epsilon",
+            "Programme Alpha",
+            "Programme Bêta",
+            "Programme Gamma",
+            "Programme Delta",
+            "Programme Epsilon",
         ]
 
         for idx, program in enumerate(programs):
@@ -135,8 +135,8 @@ class SettingsView(ctk.CTkFrame):
         # Date range section
         date_section: SettingsSection = SettingsSection(
             parent=parent,
-            title="Date Range Settings",
-            description="Configure the default date range for report generation",
+            title="Paramètres de plage de dates",
+            description="Configurez la plage de dates par défaut pour la génération de rapports",
         )
         date_section.grid(row=1, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
 
@@ -145,14 +145,19 @@ class SettingsView(ctk.CTkFrame):
         # Date range option
         date_label: ctk.CTkLabel = ctk.CTkLabel(
             master=date_frame,
-            text="Default Period:",
+            text="Période par défaut :",
             font=ctk.CTkFont(size=13),
         )
         date_label.grid(row=0, column=0, padx=20, pady=10, sticky="w")  # type: ignore
 
         date_option: ctk.CTkOptionMenu = ctk.CTkOptionMenu(
             master=date_frame,
-            values=["Current Month", "Previous Month", "Last 30 Days", "Custom"],
+            values=[
+                "Mois courant",
+                "Mois précédent",
+                "30 derniers jours",
+                "Personnalisé",
+            ],
             font=ctk.CTkFont(size=13),
         )
         date_option.grid(row=0, column=1, padx=10, pady=10, sticky="w")  # type: ignore
@@ -162,8 +167,8 @@ class SettingsView(ctk.CTkFrame):
         # General settings section
         general_section: SettingsSection = SettingsSection(
             parent=parent,
-            title="General Settings",
-            description="Configure general options for this document type",
+            title="Paramètres généraux",
+            description="Configurez les options générales pour ce type de document",
         )
         general_section.grid(row=0, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
 
@@ -172,7 +177,7 @@ class SettingsView(ctk.CTkFrame):
         # Output format
         format_label: ctk.CTkLabel = ctk.CTkLabel(
             master=general_frame,
-            text="Output Format:",
+            text="Format de sortie :",
             font=ctk.CTkFont(size=13),
         )
         format_label.grid(row=0, column=0, padx=20, pady=10, sticky="w")  # type: ignore
@@ -188,8 +193,8 @@ class SettingsView(ctk.CTkFrame):
         # Processing options section
         processing_section: SettingsSection = SettingsSection(
             parent=parent,
-            title="Processing Options",
-            description="Configure how the data should be processed",
+            title="Options de traitement",
+            description="Configurez la manière dont les données doivent être traitées",
         )
         processing_section.grid(row=1, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
 
@@ -198,7 +203,7 @@ class SettingsView(ctk.CTkFrame):
         # Validation checkbox
         validation_checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
             master=processing_frame,
-            text="Perform data validation before processing",
+            text="Effectuer la validation des données avant le traitement",
             font=ctk.CTkFont(size=13),
         )
         validation_checkbox.grid(row=0, column=0, padx=20, pady=5, sticky="w")  # type: ignore
@@ -208,7 +213,7 @@ class SettingsView(ctk.CTkFrame):
         # Duplicate handling
         duplicates_checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
             master=processing_frame,
-            text="Remove duplicate entries",
+            text="Supprimer les entrées en double",
             font=ctk.CTkFont(size=13),
         )
         duplicates_checkbox.grid(row=1, column=0, padx=20, pady=5, sticky="w")  # type: ignore
@@ -217,7 +222,7 @@ class SettingsView(ctk.CTkFrame):
     def _save_settings(self) -> None:
         # TODO: Implement actual settings saving logic
         # For now, just show a message and go back
-        print(f"Saving settings for {self._document_name}")
+        print(f"Sauvegarde de la configuration pour {self._document_name}")
 
         # Collect all settings values
         settings_values: dict[str, Any] = {}
@@ -227,7 +232,7 @@ class SettingsView(ctk.CTkFrame):
             elif isinstance(widget, ctk.CTkOptionMenu):
                 settings_values[key] = widget.get()  # type: ignore
 
-        print(f"Settings values: {settings_values}")
+        print(f"Valeurs de configuration : {settings_values}")
 
         # Return to menu
         self._on_back()
