@@ -1,5 +1,17 @@
 from __future__ import annotations
 
+"""
+Registre centralisé des spécifications de documents.
+
+Ce module implémente le pattern Registry pour maintenir un catalogue
+de toutes les spécifications de documents supportées par l'application.
+Il fournit un point d'accès unique pour récupérer les définitions
+de documents avec leurs requêtes, générateurs et métadonnées.
+
+Le registre centralise la configuration des documents et facilite
+l'ajout de nouveaux types de documents.
+"""
+
 # Imports de la bibliothèque standard
 from typing import Final, final
 
@@ -24,9 +36,22 @@ class DocumentRegistry(object):
     Elle fournit un point d'accès unique pour récupérer les définitions
     de documents avec leurs requêtes, générateurs et métadonnées.
 
-    Utilise le décorateur @final pour empêcher l'héritage et __slots__ vide
-    pour optimiser l'utilisation mémoire. Cette classe n'est pas destinée
-    à être instanciée (pattern Registry statique).
+    Le décorateur @final empêche l'héritage et __slots__ vide optimise
+    l'utilisation mémoire. Cette classe n'est pas destinée à être
+    instanciée (pattern Registry statique).
+
+    Exemples:
+        Récupération d'une spécification :
+        >>> spec = DocumentRegistry.get("activite_mensuelle_par_programme")
+        >>> print(spec.display_name)  # "Activité mensuelle"
+
+        Vérification d'existence :
+        >>> if DocumentRegistry.has("mon_document"):
+        ...     spec = DocumentRegistry.get("mon_document")
+
+        Liste de tous les documents :
+        >>> all_docs = DocumentRegistry.all()
+        >>> print(list(all_docs.keys()))
     """
 
     __slots__ = ()
@@ -34,6 +59,9 @@ class DocumentRegistry(object):
     def __init__(self):
         """
         Constructeur privé - cette classe n'est pas destinée à être instanciée.
+
+        Le registre fonctionne uniquement avec des méthodes de classe
+        statiques pour maintenir un état global cohérent.
 
         Raises:
             TypeError: Toujours levée car cette classe est un registre statique
@@ -97,21 +125,24 @@ class DocumentRegistry(object):
             periodicity=Periodicity.MONTHLY,
             description=(
                 "Document de suivi mensuel des activités par programme, "
-                "renseigné par la BNH (ex-CNL)"
+                "renseigné par la BNH (ex-CNL). Comprend les lancements et livraisons "
+                "ainsi que la situation globale des programmes."
             ),
             # Fichiers requis avec patterns regex pour validation
+            # Le pattern correspond aux journaux de paiements générés par le système
             required_files={
                 r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
             },
             # Ensemble de requêtes SQL pour extraire les données nécessaires
             queries={
-                # Requêtes pour le premier tableau (ACTIVITÉ MENSUELLE)
+                # --- REQUÊTES POUR LE PREMIER TABLEAU (ACTIVITÉ MENSUELLE) ---
+                # Liste des programmes triés par ordre d'affichage
                 "programmes": """
                     SELECT programme
                     FROM programmes
                     ORDER BY display_order
-                    """,
-                # Lancements du mois - première tranche de paiement
+                """,
+                # Lancements du mois - projets ayant reçu leur première tranche
                 "lancements_mois": """
                     SELECT 
                         p.programme,
@@ -134,7 +165,7 @@ class DocumentRegistry(object):
                         GROUP BY "Sous programme"
                     ) data ON p.programme = data."Sous programme"
                     ORDER BY p.display_order
-                    """,
+                """,
                 # Cumul des lancements depuis le début de l'année
                 "lancements_cumul_annee": """
                     SELECT 
@@ -159,8 +190,8 @@ class DocumentRegistry(object):
                         GROUP BY "Sous programme"
                     ) data ON p.programme = data."Sous programme"
                     ORDER BY p.display_order
-                    """,
-                # Livraisons du mois - dernière tranche de paiement
+                """,
+                # Livraisons du mois - projets ayant reçu leur dernière tranche
                 "livraisons_mois": """
                     SELECT
                         p.programme,
@@ -183,7 +214,7 @@ class DocumentRegistry(object):
                         GROUP BY "Sous programme"
                     ) data ON p.programme = data."Sous programme"
                     ORDER BY p.display_order
-                    """,
+                """,
                 # Cumul des livraisons depuis le début de l'année
                 "livraisons_cumul_annee": """
                     SELECT 
@@ -208,8 +239,9 @@ class DocumentRegistry(object):
                         GROUP BY "Sous programme"
                     ) data ON p.programme = data."Sous programme"
                     ORDER BY p.display_order
-                    """,
-                # Requêtes pour le second tableau (SITUATION DES PROGRAMMES)
+                """,
+                # --- REQUÊTES POUR LE SECOND TABLEAU (SITUATION DES PROGRAMMES) ---
+                # Programmes avec leur consistance (nombre de logements planifiés)
                 "programmes_situation": """
                     SELECT 
                         programme,
@@ -217,8 +249,8 @@ class DocumentRegistry(object):
                         display_order
                     FROM programmes
                     ORDER BY display_order
-                    """,
-                # Logements achevés - ayant reçu la dernière tranche
+                """,
+                # Logements achevés - ayant reçu la dernière tranche de paiement
                 "acheves_derniere_tranche": """
                     SELECT 
                         p.programme,
@@ -237,8 +269,8 @@ class DocumentRegistry(object):
                     ) data ON p.programme = data."Sous programme"
                     WHERE p.consistance > 0
                     ORDER BY p.display_order
-                    """,
-                # Calcul des logements en cours par différence (méthode plus fiable)
+                """,
+                # Calcul des logements en cours (lancés mais non achevés)
                 "en_cours_calculation": """
                     SELECT 
                         p.programme,
@@ -269,8 +301,8 @@ class DocumentRegistry(object):
                     ) acheves ON p.programme = acheves."Sous programme"
                     WHERE p.consistance > 0
                     ORDER BY p.display_order
-                    """,
-                # Logements non encore lancés - n'ayant pas reçu la première tranche
+                """,
+                # Logements non encore lancés (consistance - premières tranches payées)
                 "non_lances_premiere_tranche": """
                     SELECT 
                         p.programme,
@@ -289,7 +321,7 @@ class DocumentRegistry(object):
                     ) data ON p.programme = data."Sous programme"
                     WHERE p.consistance > 0
                     ORDER BY p.display_order
-                    """,
+                """,
             },
             # Template du nom de fichier de sortie avec variables dynamiques
             output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
