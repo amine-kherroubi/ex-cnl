@@ -42,11 +42,16 @@ class DatabaseConfig(BaseModel):
 class LoggingConfig(BaseModel):
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     enable_file_logging: bool = True
+    enable_console_logging: bool = True
     log_file: Path = Field(
         default_factory=lambda: get_app_data_dir() / "logs" / "app.log"
     )
     use_json_format: bool = False
     include_traceback: bool = True
+    console_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    max_file_size_mb: int = 10
+    backup_count: int = 5
+    disable_existing_loggers: bool = False
 
     @field_validator("log_file")
     @classmethod
@@ -63,7 +68,7 @@ class LoggingConfig(BaseModel):
 
             return log_file
 
-        except (OSError, PermissionError) as error:
+        except (OSError, PermissionError):
             # Fallback to temp directory
             temp_dir = Path(tempfile.gettempdir()) / "GenerateurReports"
             temp_log_file = temp_dir / "app.log"

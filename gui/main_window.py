@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
+from logging import Logger
 from typing import Any
 
 # Third-party imports
@@ -12,10 +13,14 @@ from gui.views.report_view import ReportView
 from gui.views.settings_view import SettingsView
 from gui.models.gui_state import GUIState
 from gui.controllers.report_controller import ReportController
+from app.application_facade import ApplicationFacade
+from app.utils.logging_setup import get_logger
 
 
 class MainWindow(ctk.CTk):
     __slots__ = (
+        "_logger",
+        "_facade",
         "_state",
         "_controller",
         "_current_view",
@@ -23,29 +28,31 @@ class MainWindow(ctk.CTk):
         "_title_label",
     )
 
-    def __init__(self) -> None:
+    def __init__(self, facade: ApplicationFacade) -> None:
         super().__init__()  # type: ignore
+
+        self._logger: Logger = get_logger("gui.main_window")
+        self._logger.info("Initializing main application window")
+
+        self._state: GUIState = GUIState()
+        self._controller: ReportController = ReportController(facade)
+        self._current_view: ctk.CTkFrame | None = None
 
         # Window configuration
         self.title(string="Générateur de reports")
         self.geometry(geometry_string="900x700")
         self.minsize(width=700, height=600)
 
-        # Set default theme
+        # Set theme
         ctk.set_appearance_mode(mode_string="system")
         ctk.set_default_color_theme(color_string="green")
 
-        # Initialize state and controller
-        self._state: GUIState = GUIState()
-        self._controller: ReportController = ReportController()
-        self._current_view: ctk.CTkFrame | None = None
-
         # Setup UI
         self._setup_ui()
-
-        # Load available reports and show menu
         self._load_available_reports()
         self._show_menu()
+
+        self._logger.info("Main application window initialized successfully")
 
     def _setup_ui(self) -> None:
         # Configure grid weights
@@ -75,8 +82,9 @@ class MainWindow(ctk.CTk):
         try:
             reports: dict[str, Any] = self._controller.get_available_reports()
             self._state.available_reports = reports
+            self._logger.info(f"Loaded {len(reports)} report types")
         except Exception as e:
-            print(f"Erreur lors du chargement des rapports : {str(e)}")
+            self._logger.exception(f"Failed to load available reports: {e}")
 
     def _show_menu(self) -> None:
         self._clear_current_view()
@@ -95,6 +103,9 @@ class MainWindow(ctk.CTk):
         self._title_label.configure(text=f"Générer : {report_name}")  # type: ignore
 
         report_spec: Any = self._state.available_reports.get(report_name)
+        if not report_spec:
+            self._logger.error(f"Report specification not found: {report_name}")
+            return
 
         self._current_view = ReportView(
             parent=self._container,
@@ -119,12 +130,3 @@ class MainWindow(ctk.CTk):
         if self._current_view:
             self._current_view.destroy()
             self._current_view = None
-
-
-def main() -> None:
-    app: MainWindow = MainWindow()
-    app.mainloop()  # type: ignore
-
-
-if __name__ == "__main__":
-    main()
