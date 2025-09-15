@@ -98,7 +98,7 @@ class ReportController(object):
             input_files: List of file paths selected by the user
 
         Returns:
-            Dictionary mapping view names to matching file paths
+            Dictionary mapping table names to matching file paths
 
         Raises:
             ValueError: If validation fails or required patterns are not matched
@@ -143,12 +143,12 @@ class ReportController(object):
             file_matched = False
             self._logger.debug(f"Checking file: {file_path.name}")
 
-            for pattern, view_name in required_patterns.items():
+            for pattern, table_name in required_patterns.items():
                 if re.match(pattern, file_path.name, re.IGNORECASE):
-                    matched_files[view_name] = file_path
+                    matched_files[table_name] = file_path
                     file_matched = True
                     self._logger.debug(
-                        f"File '{file_path.name}' matched pattern '{pattern}' -> view '{view_name}'"
+                        f"File '{file_path.name}' matched pattern '{pattern}' -> table '{table_name}'"
                     )
                     break
 
@@ -161,11 +161,13 @@ class ReportController(object):
         # Check if we have files for all required patterns (fail fast)
         self._logger.debug("Checking if all required patterns are satisfied")
         missing_patterns: list[str] = []
-        for pattern, view_name in required_patterns.items():
-            if view_name not in matched_files:
-                missing_patterns.append(f"Pattern: '{pattern}' -> View: '{view_name}'")
+        for pattern, table_name in required_patterns.items():
+            if table_name not in matched_files:
+                missing_patterns.append(
+                    f"Pattern: '{pattern}' -> Table: '{table_name}'"
+                )
                 self._logger.error(
-                    f"Missing file for required pattern: '{pattern}' -> '{view_name}'"
+                    f"Missing file for required pattern: '{pattern}' -> '{table_name}'"
                 )
 
         # Report validation results (fail fast)

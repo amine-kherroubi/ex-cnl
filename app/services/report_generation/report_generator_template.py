@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-# Imports de la bibliothèque standard
+# Standard library imports
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from logging import Logger
 
-# Imports tiers
+# Third-party imports
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-# Imports de l'application locale
+# Local application imports
 from app.data.data_repository import DataRepository
 from app.services.report_generation.business_values.programmes import (
     get_programmes_dataframe,
@@ -30,28 +30,6 @@ if TYPE_CHECKING:
 
 
 class ReportGenerator(ABC):
-    """
-    Classe abstraite de base pour la génération de reports.
-
-    Cette classe implémente le pattern Template Method pour définir l'algorithme
-    de génération de reports en plusieurs étapes bien définies. Les sous-classes
-    sont responsables de l'implémentation des détails spécifiques à chaque type
-    de report (en-tête, tableaux, pied de page, formatage).
-
-    Le processus de génération suit ces étapes :
-    1. Chargement des données en base (files are pre-validated by controller)
-    2. Création des tables de référence
-    3. Exécution des requêtes de données
-    4. Création du classeur Excel
-    5. Ajout de l'en-tête (responsabilité des sous-classes)
-    6. Construction des tableaux (responsabilité des sous-classes)
-    7. Ajout du pied de page (responsabilité des sous-classes)
-    8. Formatage final (responsabilité des sous-classes)
-    9. Sauvegarde du report
-
-    Utilise __slots__ pour optimiser l'utilisation mémoire.
-    """
-
     __slots__ = (
         "_storage_service",
         "_data_repository",
@@ -68,20 +46,10 @@ class ReportGenerator(ABC):
         report_specification: ReportSpecification,
         report_context: ReportContext,
     ) -> None:
-        """
-        Initialise le générateur de reports avec les services et contextes nécessaires.
-
-        Args:
-            storage_service: Service de gestion des fichiers d'entrée/sortie
-            data_repository: Dépôt de données pour l'exécution de requêtes SQL
-            report_specification: Spécification complète du report à générer
-            report_context: Contexte contenant les paramètres de génération
-                            (wilaya, date, période, etc.)
-        """
         self._logger: Logger = get_logger(
             f"app.services.report_generation.report_generator_template"
         )
-        self._logger.debug(f"Initialisation de {self.__class__.__name__}")
+        self._logger.debug(f"Initializing {self.__class__.__name__}")
 
         self._storage_service: FileIOService = storage_service
         self._data_repository: DataRepository = data_repository
@@ -90,10 +58,10 @@ class ReportGenerator(ABC):
         self._workbook: Workbook | None = None
 
         self._logger.info(
-            f"Générateur initialisé pour le report : {report_specification.display_name}"
+            f"Generator initialized for report: {report_specification.display_name}"
         )
         self._logger.debug(
-            f"Contexte du report : wilaya={report_context.wilaya.value}, date={report_context.report_date}"
+            f"Report context: wilaya={report_context.wilaya.value}, date={report_context.report_date}"
         )
 
     def generate(
@@ -101,230 +69,171 @@ class ReportGenerator(ABC):
         source_file_paths: dict[str, Path],
         output_directory_path: Path,
     ) -> Path:
-        self._logger.info("Début du processus de génération du report")
+        self._logger.info("Starting report generation process")
 
         try:
-            # Étape 1 : Chargement des données en base de données mémoire
-            self._logger.debug("Étape 1 : Chargement des données en base de données")
+            # Step 1: Loading data into in-memory database
+            self._logger.debug("Step 1: Loading data into database")
             self._load_data_into_db(source_file_paths)
-            self._logger.info("Données chargées avec succès en base de données")
+            self._logger.info("Data successfully loaded into database")
 
-            # Étape 2 : Création des tables de référence
-            self._logger.debug("Étape 2 : Création des tables de référence")
-            self._create_reference_tables()
-            self._logger.info("Table de référence des programmes créée avec succès")
+            # Step 2: Creating reference tables
+            self._logger.debug("Step 2: Creating reference tables")
+            self._create_predefined_tables()
+            self._logger.info("Program reference table created successfully")
 
-            # Étape 3 : Exécution des requêtes
-            self._logger.debug("Étape 3 : Exécution des requêtes")
+            # Step 3: Executing queries
+            self._logger.debug("Step 3: Executing queries")
             query_results: dict[str, pd.DataFrame] = self._execute_queries()
-            self._logger.info(f"Exécution réussie de {len(query_results)} requêtes")
+            self._logger.info(f"Successfully executed {len(query_results)} queries")
 
-            # Étape 4 : Création du classeur et de la feuille principale
-            self._logger.debug("Étape 4 : Création du classeur Excel")
+            # Step 4: Creating workbook and main worksheet
+            self._logger.debug("Step 4: Creating Excel workbook")
             self._workbook = Workbook()
             self._workbook.remove(self._workbook.active)  # type: ignore
             sheet: Worksheet = self._workbook.create_sheet(
                 self._report_specification.display_name
             )
             self._logger.info(
-                f"Classeur créé avec la feuille : {self._report_specification.display_name}"
+                f"Workbook created with sheet: {self._report_specification.display_name}"
             )
 
-            # Étape 5 : Ajout de l'en-tête (responsabilité de la sous-classe)
-            self._logger.debug("Étape 5 : Ajout de l'en-tête du report")
+            # Step 5: Adding header (subclass responsibility)
+            self._logger.debug("Step 5: Adding report header")
             self._add_header(sheet)
-            self._logger.debug("En-tête ajouté avec succès")
+            self._logger.debug("Header added successfully")
 
-            # Étape 6 : Construction des tableaux (responsabilité de la sous-classe)
-            self._logger.debug("Étape 6 : Construction du tableau principal")
+            # Step 6: Building tables (subclass responsibility)
+            self._logger.debug("Step 6: Building main table")
             self._add_tables(sheet, query_results)
-            self._logger.debug("Tableau principal construit avec succès")
+            self._logger.debug("Main table built successfully")
 
-            # Étape 7 : Ajout du pied de page (responsabilité de la sous-classe)
-            self._logger.debug("Étape 7 : Ajout du pied de page du report")
+            # Step 7: Adding footer (subclass responsibility)
+            self._logger.debug("Step 7: Adding report footer")
             self._add_footer(sheet)
-            self._logger.debug("Pied de page ajouté avec succès")
+            self._logger.debug("Footer added successfully")
 
-            # Étape 8 : Formatage final (responsabilité de la sous-classe)
-            self._logger.debug("Étape 8 : Application du formatage final")
+            # Step 8: Final formatting (subclass responsibility)
+            self._logger.debug("Step 8: Applying final formatting")
             self._finalize_formatting(sheet)
-            self._logger.debug("Formatage final appliqué avec succès")
+            self._logger.debug("Final formatting applied successfully")
 
-            # Étape 9 : Générer le nom réel (formaté) du fichier
+            # Step 9: Generate actual (formatted) filename
             output_file_path: Path = (
                 output_directory_path / self._generate_output_filename()
             )
 
-            # Étape 9 : Sauvegarde du report
-            self._logger.debug("Étape 9 : Sauvegarde du report")
+            # Step 10: Saving report
+            self._logger.debug("Step 10: Saving report")
             self._save_report(output_file_path)
-            self._logger.info("Génération du report terminée avec succès")
+            self._logger.info("Report generation completed successfully")
 
             return output_file_path
 
         except Exception as error:
-            self._logger.exception(f"Échec de la génération du report : {error}")
+            self._logger.exception(f"Report generation failed: {error}")
             raise
 
     def _load_data_into_db(self, source_file_paths: dict[str, Path]) -> None:
-        """
-        Charge les fichiers de données dans des vues de base de données.
+        self._logger.debug("Loading files into database views")
 
-        Files are pre-validated by the controller, so we can proceed directly with loading.
-
-        Args:
-            source_file_paths: Pre-validated mapping of view names to file paths
-
-        Raises:
-            Exception: Si le chargement d'un fichier échoue
-        """
-        self._logger.debug("Chargement des fichiers dans les vues de base de données")
-
-        for view_name, file_path in source_file_paths.items():
+        for table_name, file_path in source_file_paths.items():
             self._logger.debug(
-                f"Chargement du fichier '{file_path}' dans la vue '{view_name}'"
+                f"Loading file '{file_path}' into view '{table_name}'"
             )
             try:
-                # Chargement du fichier en DataFrame
                 df: pd.DataFrame = self._storage_service.load_data_from_file(file_path)
 
-                # Nettoyage des noms de colonnes (suppression des espaces)
                 original_columns: list[str] = list(df.columns)
                 df.columns = [column.strip() for column in df.columns]
                 cleaned_columns: list[str] = list(df.columns)
 
                 if original_columns != cleaned_columns:
                     self._logger.debug(
-                        f"Noms de colonnes nettoyés pour la vue '{view_name}'"
+                        f"Column names cleaned for view '{table_name}'"
                     )
 
-                # Création de la vue en base de données
-                self._data_repository.create_table_from_dataframe(view_name, df)
+                self._data_repository.create_table_from_dataframe(table_name, df)
                 self._logger.info(
-                    f"Vue '{view_name}' chargée avec succès : {len(df)} lignes"
+                    f"View '{table_name}' loaded successfully: {len(df)} rows"
                 )
 
-                # Affichage du résumé des données pour diagnostic
-                print(self._data_repository.summarize(view_name))
+                print(self._data_repository.summarize(table_name))
 
             except Exception as error:
                 self._logger.error(
-                    f"Échec du chargement du fichier '{file_path}' dans la vue '{view_name}' : {error}"
+                    f"Failed to load file '{file_path}' into view '{table_name}': {error}"
                 )
                 raise
 
-    def _create_reference_tables(self) -> None:
-        """
-        Crée les tables de référence nécessaires à la génération du report.
+    def _create_predefined_tables(self) -> None:
+        self._logger.debug("Creating reference tables")
 
-        Les tables de référence contiennent des données métier statiques
-        comme la liste des programmes avec leur ordre d'affichage et
-        leurs consistances (nombre de logements planifiés).
-
-        Raises:
-            Exception: Si la création d'une table de référence échoue
-        """
-        self._logger.debug("Création des tables de référence")
-
-        # Dictionnaire des tables de référence et de leurs fabriques
-        reference_tables: dict[str, Callable[[], pd.DataFrame]] = {
+        predefined_tables: dict[str, Callable[[], pd.DataFrame]] = {
             "programmes": get_programmes_dataframe,
         }
 
-        for table_name, dataframe_factory in reference_tables.items():
+        for table_name, dataframe_factory in predefined_tables.items():
             try:
-                self._logger.debug(f"Création de la table de référence '{table_name}'")
+                self._logger.debug(f"Creating reference table '{table_name}'")
 
-                # Génération du DataFrame via la fabrique
                 df: pd.DataFrame = dataframe_factory()
                 self._data_repository.create_table_from_dataframe(table_name, df)
 
                 rows, cols = df.shape
                 self._logger.info(
-                    f"Table de référence '{table_name}' créée : {rows} lignes et {cols} colonnes"
+                    f"Reference table '{table_name}' created: {rows} rows and {cols} columns"
                 )
-                self._logger.debug(f"Colonnes pour '{table_name}' : {list(df.columns)}")
+                self._logger.debug(f"Columns for '{table_name}': {list(df.columns)}")
 
             except Exception as error:
                 self._logger.exception(
-                    f"Échec de la création de la table de référence '{table_name}' : {error}"
+                    f"Failed to create reference table '{table_name}': {error}"
                 )
                 raise
 
     def _execute_queries(self) -> dict[str, pd.DataFrame]:
-        """
-        Exécute toutes les requêtes définies dans la spécification du report.
-
-        Les requêtes sont formatées avec le contexte du report (date, mois, année)
-        avant d'être exécutées. Les résultats sont stockés dans un dictionnaire
-        pour utilisation lors de la construction des tableaux.
-
-        Returns:
-            Dictionnaire mappant les noms de requêtes aux DataFrames de résultats
-
-        Raises:
-            QueryExecutionError: Si l'exécution d'une requête échoue
-        """
-        self._logger.debug("Exécution des requêtes du report")
+        self._logger.debug("Executing report queries")
 
         results: dict[str, pd.DataFrame] = {}
         query_count: int = len(self._report_specification.queries)
-        self._logger.debug(f"Préparation de l'exécution de {query_count} requêtes")
+        self._logger.debug(f"Preparing to execute {query_count} queries")
 
-        # Exécution de chaque requête définie dans la spécification
         for query_name, query_template in self._report_specification.queries.items():
-            self._logger.debug(f"Exécution de la requête '{query_name}'")
+            self._logger.debug(f"Executing query '{query_name}'")
             try:
-                # Formatage de la requête avec le contexte du report
                 formatted_query: str = self._format_query_with_context(query_template)
                 self._logger.debug(
-                    f"Requête '{query_name}' formatée avec le contexte du report"
+                    f"Query '{query_name}' formatted with report context"
                 )
 
-                # Exécution de la requête formatée
                 result_df: pd.DataFrame = self._data_repository.execute(formatted_query)
                 results[query_name] = result_df
 
                 self._logger.info(
-                    f"Requête '{query_name}' a retourné {len(result_df)} lignes"
+                    f"Query '{query_name}' returned {len(result_df)} rows"
                 )
 
             except Exception as error:
-                self._logger.exception(f"Requête '{query_name}' a échoué : {error}")
+                self._logger.exception(f"Query '{query_name}' failed: {error}")
                 raise QueryExecutionError(
-                    f"La requête requise '{query_name}' a échoué", error
+                    f"Required query '{query_name}' failed", error
                 )
 
-        self._logger.info(f"Toutes les {query_count} requêtes exécutées avec succès")
+        self._logger.info(f"All {query_count} queries executed successfully")
         return results
 
     def _format_query_with_context(self, query_template: str) -> str:
-        """
-        Formate un template de requête SQL avec les valeurs du contexte du report.
-
-        Remplace les placeholders suivants dans la requête :
-        - {month_number:02d} : Numéro du mois sur 2 chiffres (ex: "03")
-        - {month_number} : Numéro du mois simple (ex: "3")
-        - {year} : Année complète (ex: "2024")
-
-        Args:
-            query_template: Template de requête SQL contenant des placeholders
-
-        Returns:
-            Requête SQL avec les placeholders remplacés par les valeurs réelles
-        """
         self._logger.debug(
-            "Formatage du template de requête avec le contexte du report"
+            "Formatting query template with report context"
         )
 
         formatted_query: str = query_template
 
-        # Remplacement des placeholders de date si un mois est spécifié
         if self._report_context.month:
             month_number: int = self._report_context.month.number
             year: int = self._report_context.year
 
-            # Remplacement des placeholders trouvés dans les templates de requête
             formatted_query = formatted_query.replace(
                 "{month_number:02d}", f"{month_number:02d}"
             )
@@ -334,87 +243,36 @@ class ReportGenerator(ABC):
             formatted_query = formatted_query.replace("{year}", str(year))
 
             self._logger.debug(
-                f"Placeholders remplacés par : month_number={month_number:02d}, year={year}"
+                f"Placeholders replaced with: month_number={month_number:02d}, year={year}"
             )
 
-        # Remplacement du placeholder d'année pour les requêtes annuelles uniquement
         formatted_query = formatted_query.replace(
             "{year}", str(self._report_context.year)
         )
 
-        self._logger.debug("Formatage de la requête terminé")
+        self._logger.debug("Query formatting completed")
         return formatted_query
 
     @abstractmethod
-    def _add_header(self, sheet: Worksheet) -> None:
-        """
-        Ajoute l'en-tête du report à la feuille Excel.
-
-        Cette méthode abstraite doit être implémentée par les sous-classes
-        pour définir l'en-tête spécifique à chaque type de report.
-
-        Args:
-            sheet: Feuille Excel où ajouter l'en-tête
-        """
-        ...
+    def _add_header(self, sheet: Worksheet) -> None: ...
 
     @abstractmethod
     def _add_tables(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
-    ) -> None:
-        """
-        Construit les tableaux de données du report.
-
-        Cette méthode abstraite doit être implémentée par les sous-classes
-        pour construire les tableaux spécifiques à chaque type de report
-        en utilisant les résultats des requêtes.
-
-        Args:
-            sheet: Feuille Excel où ajouter les tableaux
-            query_results: Résultats des requêtes indexés par nom de requête
-        """
-        ...
+    ) -> None: ...
 
     @abstractmethod
-    def _add_footer(self, sheet: Worksheet) -> None:
-        """
-        Ajoute le pied de page du report à la feuille Excel.
-
-        Cette méthode abstraite doit être implémentée par les sous-classes
-        pour définir le pied de page spécifique à chaque type de report.
-
-        Args:
-            sheet: Feuille Excel où ajouter le pied de page
-        """
-        ...
+    def _add_footer(self, sheet: Worksheet) -> None: ...
 
     @abstractmethod
-    def _finalize_formatting(self, sheet: Worksheet) -> None:
-        """
-        Applique le formatage final au report.
-
-        Cette méthode abstraite doit être implémentée par les sous-classes
-        pour appliquer les styles, bordures, couleurs et autres formatages
-        spécifiques à chaque type de report.
-
-        Args:
-            sheet: Feuille Excel à formater
-        """
-        ...
+    def _finalize_formatting(self, sheet: Worksheet) -> None: ...
 
     def _generate_output_filename(self) -> str:
-        """
-        Generate the output filename using the report specification template.
-
-        Returns:
-            Formatted filename with placeholders replaced by context values
-        """
         from app.utils.date_formatting import DateFormatter
 
         output_filename: str = self._report_specification.output_filename
-        self._logger.debug(f"Template du nom de fichier de sortie : {output_filename}")
+        self._logger.debug(f"Output filename template: {output_filename}")
 
-        # Replace placeholders with context values
         output_filename = output_filename.replace(
             "{wilaya}", self._report_context.wilaya.value
         )
@@ -423,28 +281,17 @@ class ReportGenerator(ABC):
             DateFormatter.to_french_filename_date(self._report_context.report_date),
         )
 
-        # Add extension if necessary
         if not output_filename.endswith(".xlsx"):
             output_filename += ".xlsx"
 
-        self._logger.debug(f"Nom de fichier généré : {output_filename}")
+        self._logger.debug(f"Generated filename: {output_filename}")
         return output_filename
 
     def _save_report(self, output_file_path: Path) -> None:
-        """
-        Sauvegarde le report Excel généré au chemin spécifié.
-
-        Args:
-            output_file_path: Chemin complet où sauvegarder le rapport
-
-        Raises:
-            ValueError: Si aucun classeur n'a été créé
-            Exception: Si la sauvegarde échoue
-        """
-        self._logger.debug(f"Sauvegarde du report vers : {output_file_path}")
+        self._logger.debug(f"Saving report to: {output_file_path}")
 
         if not self._workbook:
-            error_msg: str = "Aucun classeur créé"
+            error_msg: str = "No workbook created"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
@@ -453,7 +300,7 @@ class ReportGenerator(ABC):
                 data=self._workbook,
                 output_file_path=output_file_path,
             )
-            self._logger.info(f"Report sauvegardé avec succès : {output_file_path}")
+            self._logger.info(f"Report saved successfully: {output_file_path}")
         except Exception as error:
-            self._logger.exception(f"Échec de la sauvegarde du report : {error}")
+            self._logger.exception(f"Failed to save report: {error}")
             raise
