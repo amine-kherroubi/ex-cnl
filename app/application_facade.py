@@ -35,7 +35,7 @@ class ApplicationFacade(object):  # Facade pattern
     __slots__ = (
         "_config",
         "_data_repository",
-        "_storage_service",
+        "_file_io_service",
         "_logger",
     )
 
@@ -49,7 +49,7 @@ class ApplicationFacade(object):  # Facade pattern
         self._data_repository: DuckDBRepository = DuckDBRepository(
             self._config.database_config
         )
-        self._storage_service: FileIOService = FileIOService(
+        self._file_io_service: FileIOService = FileIOService(
             self._config.file_io_config
         )
 
@@ -94,7 +94,7 @@ class ApplicationFacade(object):  # Facade pattern
             # Create generator and generate report
             generator: ReportGenerator = ReportGeneratorFactory.create_generator(
                 report_name,
-                self._storage_service,
+                self._file_io_service,
                 self._data_repository,
                 report_context,
             )

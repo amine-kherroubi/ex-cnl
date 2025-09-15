@@ -1,22 +1,11 @@
 from __future__ import annotations
 
-"""
-Fabrique pour la création de contextes de reports.
-
-Ce module implémente le pattern Factory pour créer des instances
-de ReportContext selon différentes périodicités (mensuelle,
-semestrielle, annuelle) avec des paramètres par défaut appropriés.
-
-La fabrique simplifie la création de contextes en gérant
-automatiquement les valeurs par défaut et la logique
-de génération des dates de rapport.
-"""
-
-# Imports de la bibliothèque standard
+# Standard library imports
 from datetime import date
 from logging import Logger
+from typing import final
 
-# Imports de l'application locale
+# Local application imports
 from app.services.report_generation.models.report_context import (
     ReportContext,
 )
@@ -24,47 +13,17 @@ from app.services.report_generation.enums.space_time import Periodicity, Month, 
 from app.utils.logging_setup import get_logger
 
 
+@final
 class ReportContextFactory(object):
-    """
-    Fabrique pour la création de contextes de reports.
-
-    Cette classe implémente le pattern Factory pour créer des instances
-    de ReportContext avec la logique appropriée selon la périodicité.
-    Elle gère automatiquement les valeurs par défaut et les calculs
-    de dates de fin de période.
-
-    La classe ne peut pas être instanciée - toutes les méthodes
-    sont des méthodes de classe statiques.
-
-    Exemples:
-        Contexte mensuel :
-        >>> context = ReportContextFactory.create_context(
-        ...     wilaya=Wilaya.ALGER,
-        ...     periodicity=Periodicity.MONTHLY,
-        ...     year=2024,
-        ...     month=Month.JANVIER
-        ... )
-
-        Contexte annuel avec valeurs par défaut :
-        >>> context = ReportContextFactory.create_context(
-        ...     wilaya=Wilaya.CONSTANTINE,
-        ...     periodicity=Periodicity.ANNUAL
-        ... )  # Utilise l'année courante et le 31 décembre
-    """
-
     __slots__ = ()
 
-    _logger: Logger = get_logger("app.services.context_factory")
+    _logger: Logger = get_logger(
+        "app.services.report_generation.factories.report_context_factory"
+    )
 
     def __new__(cls):
-        """
-        Empêche l'instanciation de la classe.
-
-        Raises:
-            RuntimeError: Toujours levée car cette classe ne doit pas être instanciée
-        """
         raise RuntimeError(
-            "ReportContextFactory ne peut pas être instanciée. Utilisez les méthodes de classe."
+            f"{cls.__name__} is not intended to be instantiated. Use class methods"
         )
 
     @classmethod
@@ -77,99 +36,60 @@ class ReportContextFactory(object):
         semester: int | None = None,
         report_date: date | None = None,
     ) -> ReportContext:
-        """
-        Crée un contexte de report selon la périodicité spécifiée.
-
-        Cette méthode orchestre la création du contexte en déléguant
-        à la méthode spécialisée selon la périodicité demandée.
-
-        Args:
-            wilaya: Wilaya concernée par le report
-            year: Année du rapport (défaut: année courante)
-            periodicity: Périodicité du report (défaut: mensuel)
-            month: Mois pour les rapports mensuels
-            semester: Semestre pour les rapports semestriels
-            report_date: Date spécifique du rapport
-
-        Returns:
-            Instance de ReportContext configurée selon les paramètres
-
-        Raises:
-            ValueError: Si la périodicité n'est pas supportée
-        """
-        cls._logger.info(
-            f"Création du contexte de report pour la wilaya : {wilaya.value}"
-        )
+        cls._logger.info(f"Creating report context for wilaya: {wilaya.value}")
         cls._logger.debug(
-            f"Paramètres : année={year}, périodicité={periodicity}, mois={month}, semestre={semester}, date_rapport={report_date}"
+            f"Parameters: year={year}, periodicity={periodicity}, month={month}, semester={semester}, report_date={report_date}"
         )
 
         periodicity = periodicity or Periodicity.MONTHLY
-        cls._logger.debug(f"Utilisation de la périodicité : {periodicity.value}")
+        cls._logger.debug(f"Using periodicity: {periodicity.value}")
 
         try:
             match periodicity:
                 case Periodicity.MONTHLY:
-                    cls._logger.debug("Création d'un contexte de report mensuel")
+                    cls._logger.debug("Creating monthly report context")
                     context = cls._monthly(wilaya, year, month, report_date)
-                case Periodicity.SEMIANNUAL:
-                    cls._logger.debug("Création d'un contexte de report semestriel")
+                case Periodicity.SEMESTRIAL:
+                    cls._logger.debug("Creating semiannual report context")
                     context = cls._semiannual(wilaya, year, semester, report_date)
                 case Periodicity.ANNUAL:
-                    cls._logger.debug("Création d'un contexte de report annuel")
+                    cls._logger.debug("Creating annual report context")
                     context = cls._annual(wilaya, year, report_date)
                 case _:
-                    error_msg = f"Périodicité inconnue : {periodicity}"
+                    error_msg = f"Unknown periodicity: {periodicity}"
                     cls._logger.error(error_msg)
                     raise ValueError(error_msg)
 
             cls._logger.info(
-                f"Contexte {periodicity.value} créé avec succès pour {wilaya.value} - {context.report_date}"
+                f"{periodicity.value.capitalize()} context created successfully for {wilaya.value} - {context.report_date}"
             )
             return context
 
         except Exception as error:
-            cls._logger.error(f"Échec de la création du contexte de report : {error}")
+            cls._logger.exception(f"Failed to create report context: {error}")
             raise
 
     @staticmethod
     def _monthly(
         wilaya: Wilaya, year: int | None, month: Month | None, report_date: date | None
     ) -> ReportContext:
-        """
-        Crée un contexte de report pour une périodicité mensuelle.
-
-        Génère automatiquement la date de fin de mois si aucune date
-        spécifique n'est fournie. Utilise le mois et l'année courants
-        par défaut.
-
-        Args:
-            wilaya: Wilaya concernée par le report
-            year: Année du rapport (défaut: année courante)
-            month: Mois du rapport (défaut: mois courant)
-            report_date: Date spécifique du rapport (défaut: fin de mois)
-
-        Returns:
-            Contexte mensuel configuré avec les paramètres fournis
-        """
         logger: Logger = ReportContextFactory._logger
-        logger.debug("Traitement des paramètres de contexte mensuel")
+        logger.debug("Processing monthly context parameters")
 
         today: date = date.today()
         year = year or today.year
         month = month or Month.from_number(today.month)
 
-        logger.debug(f"Année résolue : {year}, mois : {month.value}")
+        logger.debug(f"Resolved year: {year}, month: {month.value}")
 
         if report_date is None:
-            # Par défaut, utiliser la fin du mois
             last_day: int = month.last_day(year)
             report_date = date(year, month.number, last_day)
             logger.debug(
-                f"Date de rapport générée par défaut : {report_date} (fin de {month.value})"
+                f"Generated default report date: {report_date} (end of {month.value})"
             )
         else:
-            logger.debug(f"Utilisation de la date de rapport fournie : {report_date}")
+            logger.debug(f"Using provided report date: {report_date}")
 
         context = ReportContext(
             wilaya=wilaya,
@@ -178,55 +98,38 @@ class ReportContextFactory(object):
             month=month,
         )
 
-        logger.info(f"Contexte mensuel créé : {wilaya.value}, {month.value} {year}")
+        logger.info(f"Monthly context created: {wilaya.value}, {month.value} {year}")
         return context
 
     @staticmethod
     def _semiannual(
         wilaya: Wilaya, year: int | None, semester: int | None, report_date: date | None
     ) -> ReportContext:
-        """
-        Crée un contexte de report pour une périodicité semestrielle.
-
-        Génère automatiquement la date de fin de semestre (30 juin ou 31 décembre)
-        si aucune date spécifique n'est fournie. Détermine le semestre courant
-        selon la date actuelle.
-
-        Args:
-            wilaya: Wilaya concernée par le report
-            year: Année du rapport (défaut: année courante)
-            semester: Semestre du rapport (défaut: semestre courant)
-            report_date: Date spécifique du rapport (défaut: fin de semestre)
-
-        Returns:
-            Contexte semestriel configuré avec les paramètres fournis
-        """
         logger: Logger = ReportContextFactory._logger
-        logger.debug("Traitement des paramètres de contexte semestriel")
+        logger.debug("Processing semiannual context parameters")
 
         today: date = date.today()
         year = year or today.year
         semester = semester or (1 if today.month <= 6 else 2)
 
-        logger.debug(f"Année résolue : {year}, semestre : {semester}")
+        logger.debug(f"Resolved year: {year}, semester: {semester}")
 
         if report_date is None:
-            # Par défaut, utiliser la fin du semestre
             end_month_number = 6 if semester == 1 else 12
             last_day: int = Month.from_number(end_month_number).last_day(year)
             report_date = date(year, end_month_number, last_day)
             logger.debug(
-                f"Date de rapport générée par défaut : {report_date} (fin du semestre {semester})"
+                f"Generated default report date: {report_date} (end of semester {semester})"
             )
         else:
-            logger.debug(f"Utilisation de la date de rapport fournie : {report_date}")
+            logger.debug(f"Using provided report date: {report_date}")
 
         context: ReportContext = ReportContext(
             wilaya=wilaya, year=year, semester=semester, report_date=report_date
         )
 
         logger.info(
-            f"Contexte semestriel créé : {wilaya.value}, semestre {semester} de {year}"
+            f"Semiannual context created: {wilaya.value}, semester {semester} of {year}"
         )
         return context
 
@@ -234,40 +137,23 @@ class ReportContextFactory(object):
     def _annual(
         wilaya: Wilaya, year: int | None, report_date: date | None
     ) -> ReportContext:
-        """
-        Crée un contexte de report pour une périodicité annuelle.
-
-        Génère automatiquement la date de fin d'année (31 décembre)
-        si aucune date spécifique n'est fournie. Utilise l'année
-        courante par défaut.
-
-        Args:
-            wilaya: Wilaya concernée par le report
-            year: Année du rapport (défaut: année courante)
-            report_date: Date spécifique du rapport (défaut: 31 décembre)
-
-        Returns:
-            Contexte annuel configuré avec les paramètres fournis
-        """
         logger: Logger = ReportContextFactory._logger
-        logger.debug("Traitement des paramètres de contexte annuel")
+        logger.debug("Processing annual context parameters")
 
         today: date = date.today()
         year = year or today.year
 
-        logger.debug(f"Année résolue : {year}")
+        logger.debug(f"Resolved year: {year}")
 
         if report_date is None:
             report_date = date(year, 12, 31)
-            logger.debug(
-                f"Date de rapport générée par défaut : {report_date} (fin d'année)"
-            )
+            logger.debug(f"Generated default report date: {report_date} (end of year)")
         else:
-            logger.debug(f"Utilisation de la date de rapport fournie : {report_date}")
+            logger.debug(f"Using provided report date: {report_date}")
 
         context: ReportContext = ReportContext(
             wilaya=wilaya, year=year, report_date=report_date
         )
 
-        logger.info(f"Contexte annuel créé : {wilaya.value}, année {year}")
+        logger.info(f"Annual context created: {wilaya.value}, year {year}")
         return context

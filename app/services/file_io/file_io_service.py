@@ -18,13 +18,13 @@ from app.utils.logging_setup import get_logger
 class FileIOService(object):
     __slots__ = ("_config", "_logger")
 
-    def __init__(self, storage_config: FileIOConfig) -> None:
+    def __init__(self, file_io_config: FileIOConfig) -> None:
         self._logger: Logger = get_logger("app.services.file_io_service")
-        self._logger.debug("Initializing file storage service")
+        self._logger.debug("Initializing file io service")
 
-        self._config: FileIOConfig = storage_config
+        self._config: FileIOConfig = file_io_config
 
-        self._logger.info("File storage service initialized")
+        self._logger.info("File io service initialized")
         self._logger.debug(
             f"Allowed extensions: {self._config.allowed_source_file_extensions}"
         )
@@ -38,7 +38,7 @@ class FileIOService(object):
             self._logger.debug(f"Table starts at row {skiprows}")
 
             self._logger.debug("Reading Excel file with pandas")
-            dataframe: pd.DataFrame = pd.read_excel(  # type: ignore
+            dataframe: pd.DataFrame = pd.read_excel(
                 source_file_path, dtype_backend="numpy_nullable", skiprows=skiprows
             )
 
@@ -78,7 +78,9 @@ class FileIOService(object):
         )
 
         try:
-            preview_df: pd.DataFrame = pd.read_excel(source_file_path, nrows=30, header=None)  # type: ignore
+            preview_df: pd.DataFrame = pd.read_excel(
+                source_file_path, nrows=30, header=None
+            )
             self._logger.debug(f"Loaded {len(preview_df)} preview rows")
 
         except Exception as error:

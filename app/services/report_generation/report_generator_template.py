@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 class ReportGenerator(ABC):
     __slots__ = (
-        "_storage_service",
+        "_file_io_service",
         "_data_repository",
         "_report_specification",
         "_report_context",
@@ -41,7 +41,7 @@ class ReportGenerator(ABC):
 
     def __init__(
         self,
-        storage_service: FileIOService,
+        file_io_service: FileIOService,
         data_repository: DataRepository,
         report_specification: ReportSpecification,
         report_context: ReportContext,
@@ -51,7 +51,7 @@ class ReportGenerator(ABC):
         )
         self._logger.debug(f"Initializing {self.__class__.__name__}")
 
-        self._storage_service: FileIOService = storage_service
+        self._file_io_service: FileIOService = file_io_service
         self._data_repository: DataRepository = data_repository
         self._report_specification: ReportSpecification = report_specification
         self._report_context: ReportContext = report_context
@@ -138,20 +138,16 @@ class ReportGenerator(ABC):
         self._logger.debug("Loading files into database views")
 
         for table_name, file_path in source_file_paths.items():
-            self._logger.debug(
-                f"Loading file '{file_path}' into view '{table_name}'"
-            )
+            self._logger.debug(f"Loading file '{file_path}' into view '{table_name}'")
             try:
-                df: pd.DataFrame = self._storage_service.load_data_from_file(file_path)
+                df: pd.DataFrame = self._file_io_service.load_data_from_file(file_path)
 
                 original_columns: list[str] = list(df.columns)
                 df.columns = [column.strip() for column in df.columns]
                 cleaned_columns: list[str] = list(df.columns)
 
                 if original_columns != cleaned_columns:
-                    self._logger.debug(
-                        f"Column names cleaned for view '{table_name}'"
-                    )
+                    self._logger.debug(f"Column names cleaned for view '{table_name}'")
 
                 self._data_repository.create_table_from_dataframe(table_name, df)
                 self._logger.info(
@@ -224,9 +220,7 @@ class ReportGenerator(ABC):
         return results
 
     def _format_query_with_context(self, query_template: str) -> str:
-        self._logger.debug(
-            "Formatting query template with report context"
-        )
+        self._logger.debug("Formatting query template with report context")
 
         formatted_query: str = query_template
 
@@ -296,7 +290,7 @@ class ReportGenerator(ABC):
             raise ValueError(error_msg)
 
         try:
-            self._storage_service.save_data_to_file(
+            self._file_io_service.save_data_to_file(
                 data=self._workbook,
                 output_file_path=output_file_path,
             )

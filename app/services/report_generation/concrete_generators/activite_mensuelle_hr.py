@@ -36,13 +36,13 @@ class ActiviteMensuelleHRGenerator(ReportGenerator):
 
     def __init__(
         self,
-        storage_service: FileIOService,
+        file_io_service: FileIOService,
         data_repository: DataRepository,
         report_specification: ReportSpecification,
         report_context: ReportContext,
     ) -> None:
         super().__init__(
-            storage_service, data_repository, report_specification, report_context
+            file_io_service, data_repository, report_specification, report_context
         )
         self._current_row: int = 1
 

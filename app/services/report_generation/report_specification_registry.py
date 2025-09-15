@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from typing import Final, final
+from logging import Logger
 
 # Local application imports
 from app.services.report_generation.concrete_generators.activite_mensuelle_hr import (
@@ -12,31 +13,51 @@ from app.services.report_generation.models.report_specification import (
     ReportSpecification,
 )
 from app.services.report_generation.enums.space_time import Periodicity
+from app.utils.logging_setup import get_logger
 
 
 @final
-class ReportSpecificationRegistry(object):
+class ReportSpecificationRegistry:
     __slots__ = ()
 
-    def __init__(self):
-        raise TypeError(f"{self.__class__.__name__} is not intended to be instantiated")
+    _logger: Logger = get_logger(
+        "app.services.report_generation.report_specification_registry"
+    )
+
+    def __new__(cls):
+        raise RuntimeError(
+            f"{cls.__name__} is not intended to be instantiated. Use class methods"
+        )
 
     @classmethod
     def get(cls, report_name: str) -> ReportSpecification:
+        cls._logger.debug(f"Retrieving specification for report: {report_name}")
+
         if report_name not in cls._REPORT_SPECIFICATIONS:
             available = list(cls._REPORT_SPECIFICATIONS.keys())
-            raise ValueError(
-                f"Report '{report_name}' not found. Available: {available}"
-            )
-        return cls._REPORT_SPECIFICATIONS[report_name]
+            error_msg = f"Report '{report_name}' not found. Available: {available}"
+            cls._logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        specification = cls._REPORT_SPECIFICATIONS[report_name]
+        cls._logger.info(
+            f"Retrieved specification for report '{report_name}': {specification.display_name}"
+        )
+        return specification
 
     @classmethod
     def has(cls, report_name: str) -> bool:
-        return report_name in cls._REPORT_SPECIFICATIONS
+        cls._logger.debug(f"Checking existence of report: {report_name}")
+        exists = report_name in cls._REPORT_SPECIFICATIONS
+        cls._logger.debug(f"Report '{report_name}' exists: {exists}")
+        return exists
 
     @classmethod
     def all(cls) -> dict[str, ReportSpecification]:
-        return cls._REPORT_SPECIFICATIONS.copy()
+        cls._logger.debug("Retrieving all report specifications")
+        specifications = cls._REPORT_SPECIFICATIONS.copy()
+        cls._logger.info(f"Retrieved {len(specifications)} report specifications")
+        return specifications
 
     _REPORT_SPECIFICATIONS: Final[dict[str, ReportSpecification]] = {
         "activite_mensuelle_par_programme": ReportSpecification(

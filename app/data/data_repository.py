@@ -61,10 +61,12 @@ class DuckDBRepository:
         self._connection: duckdb.DuckDBPyConnection | None
         if db_config.path:
             self._logger.info(f"Connecting to DuckDB file: {db_config.path}")
-            self._connection = duckdb.connect(database=db_config.path, config=config_dict)  # type: ignore
+            self._connection = duckdb.connect(
+                database=db_config.path, config=config_dict
+            )
         else:
             self._logger.info("Creating in-memory DuckDB connection")
-            self._connection = duckdb.connect(database=":memory:", config=config_dict)  # type: ignore
+            self._connection = duckdb.connect(database=":memory:", config=config_dict)
 
         if db_config.enable_logging:
             if not self._connection:
