@@ -2,55 +2,62 @@
 ├── .gitignore
 ├── README.md
 ├── app
-│   ├── application_facade.py
-│   ├── config.py
-│   ├── data
-│   │   └── data_repository.py
-│   ├── services
-│   │   ├── file_io
-│   │   │   └── file_io_service.py
-│   │   └── report_generation
-│   │       ├── business_values
-│   │       │   ├── programmes.py
-│   │       │   └── tranches.py
-│   │       ├── concrete_generators
-│   │       │   └── activite_mensuelle_hr.py
-│   │       ├── enums
-│   │       │   ├── report_category.py
-│   │       │   └── space_time.py
-│   │       ├── factories
-│   │       │   ├── report_context_factory.py
-│   │       │   └── report_generator_factory.py
-│   │       ├── models
-│   │       │   ├── programe.py
-│   │       │   ├── report_context.py
-│   │       │   └── report_specification.py
-│   │       ├── report_generator_template.py
-│   │       └── report_specification_registry.py
-│   └── utils
-│       ├── adhoc_queries.py
-│       ├── date_formatting.py
-│       ├── exceptions.py
-│       └── logging_setup.py
-├── gui
-│   ├── components
-│   │   ├── email_dialog.py
-│   │   ├── file_selector.py
-│   │   ├── output_selector.py
-│   │   ├── report_card.py
-│   │   ├── report_selector.py
-│   │   └── status_display.py
-│   ├── controllers
-│   │   └── report_controller.py
-│   ├── main_window.py
-│   ├── models
-│   │   └── gui_state.py
-│   └── views
-│       ├── menu_view.py
-│       ├── report_view.py
-│       └── settings_view.py
-├── main.py
+│   ├── core
+│   │   ├── application_facade.py
+│   │   ├── config.py
+│   │   ├── domain
+│   │   │   ├── enums
+│   │   │   │   ├── report_category.py
+│   │   │   │   └── space_time.py
+│   │   │   ├── models
+│   │   │   │   ├── programme.py
+│   │   │   │   ├── report_context.py
+│   │   │   │   └── report_specification.py
+│   │   │   ├── predefined_objects
+│   │   │   │   ├── programmes.py
+│   │   │   │   └── tranches.py
+│   │   │   └── registry
+│   │   │       └── report_specification_registry.py
+│   │   ├── infrastructure
+│   │   │   ├── data
+│   │   │   │   └── data_repository.py
+│   │   │   └── file_io
+│   │   │       └── file_io_service.py
+│   │   ├── services
+│   │   │   └── report_generation
+│   │   │       ├── base
+│   │   │       │   └── report_generator.py
+│   │   │       ├── factories
+│   │   │       │   ├── report_context_factory.py
+│   │   │       │   └── report_generator_factory.py
+│   │   │       └── generators
+│   │   │           └── activite_mensuelle_hr.py
+│   │   └── utils
+│   │       ├── adhoc_queries.py
+│   │       ├── date_formatting.py
+│   │       ├── exceptions.py
+│   │       └── logging_setup.py
+│   ├── main.py
+│   └── presentation
+│       ├── cli
+│       └── gui
+│           ├── components
+│           │   ├── email_dialog.py
+│           │   ├── file_selector.py
+│           │   ├── output_selector.py
+│           │   ├── report_card.py
+│           │   ├── report_selector.py
+│           │   └── status_display.py
+│           ├── controllers
+│           │   └── report_controller.py
+│           ├── main_window.py
+│           ├── models
+│           │   └── gui_state.py
+│           └── views
+│               ├── menu_view.py
+│               ├── report_view.py
+│               └── settings_view.py
 ├── project_structure.txt
 └── requirements.txt
 
-17 directories, 37 files
+24 directories, 37 files
