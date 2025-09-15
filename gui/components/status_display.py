@@ -4,10 +4,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal, TypeAlias
 
-
 # Third-party imports
 import customtkinter as ctk  # type: ignore
-
 
 MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
 
