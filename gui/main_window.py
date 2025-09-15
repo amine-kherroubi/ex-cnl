@@ -31,7 +31,8 @@ class MainWindow(ctk.CTk):
     def __init__(self, facade: ApplicationFacade) -> None:
         super().__init__()  # type: ignore
 
-        self._logger: Logger = get_logger(__name__)        self._logger.info("Initializing main application window")
+        self._logger: Logger = get_logger(__name__)
+        self._logger.info("Initializing main application window")
 
         self._state: GUIState = GUIState()
         self._controller: ReportController = ReportController(facade)
