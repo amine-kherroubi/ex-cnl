@@ -233,7 +233,7 @@ class ReportGenerator(ABC):
     def _finalize_formatting(self, sheet: Worksheet) -> None: ...
 
     def _generate_output_filename(self) -> str:
-        from core.utils.date_formatting import DateFormatter
+        from app.core.utils.date_formatting import DateFormatter
 
         output_filename: str = self._report_specification.output_filename
         self._logger.debug(f"Output filename template: {output_filename}")
