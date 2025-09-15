@@ -48,7 +48,7 @@ class ReportSpecification(BaseModel):
     required_files: Annotated[
         dict[str, str],
         Field(
-            description="Mapping of regex filename patterns to corresponding SQL view names"
+            description="Mapping of regex filename patterns to corresponding SQL table names"
         ),
     ]
 

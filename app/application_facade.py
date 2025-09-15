@@ -11,7 +11,7 @@ from app.services.report_generation.report_generator_template import (
 )
 from app.data.data_repository import DuckDBRepository
 from app.services.report_generation.report_specification_registry import (
-    RerportSpecificationRegistry,
+    ReportSpecificationRegistry,
 )
 from app.services.report_generation.report_specification_registry import (
     ReportSpecification,
@@ -40,8 +40,7 @@ class ApplicationFacade(object):  # Facade pattern
     )
 
     def __init__(self, config: AppConfig) -> None:
-        # Get logger for this class
-        self._logger: Logger = get_logger("app.facade")
+        self._logger: Logger = get_logger(__name__)
         self._logger.debug("Initializing ApplicationFacade")
 
         # Dependency injection pattern
@@ -64,19 +63,8 @@ class ApplicationFacade(object):  # Facade pattern
         self._logger.info(f"Starting report generation: {report_name}")
 
         try:
-            # Get report specification (fail fast)
-            if not RerportSpecificationRegistry.has(report_name):
-                available_docs: list[str] = list(
-                    RerportSpecificationRegistry.all().keys()
-                )
-                error_msg: str = (
-                    f"Unknown report: {report_name}. Available: {available_docs}"
-                )
-                self._logger.error(error_msg)
-                raise ValueError(error_msg)
-
-            report_specification: ReportSpecification = (
-                RerportSpecificationRegistry.get(report_name)
+            report_specification: ReportSpecification = ReportSpecificationRegistry.get(
+                report_name
             )
             self._logger.info(f"Generating report: {report_specification.display_name}")
             self._logger.debug(f"Report category: {report_specification.category}")
@@ -119,8 +107,7 @@ class ApplicationFacade(object):  # Facade pattern
             raise
 
     def get_available_reports(self) -> dict[str, ReportSpecification]:
-        """Get all available report specifications."""
         self._logger.debug("Retrieving available reports")
-        reports: dict[str, ReportSpecification] = RerportSpecificationRegistry.all()
+        reports: dict[str, ReportSpecification] = ReportSpecificationRegistry.all()
         self._logger.info(f"Found {len(reports)} available report types")
         return reports

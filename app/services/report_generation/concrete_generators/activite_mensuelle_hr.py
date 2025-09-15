@@ -21,17 +21,6 @@ from app.services.file_io.file_io_service import FileIOService
 
 
 class ActiviteMensuelleHRGenerator(ReportGenerator):
-    """
-    Générateur de reports pour l'activité mensuelle par programme de l'habitat rural.
-
-    Cette classe génère des rapports Excel contenant :
-    - Un tableau d'activité mensuelle (lancements et livraisons par programme)
-    - Un tableau de situation des programmes (consistance, achevés, en cours, non lancés)
-
-    Le report est formaté selon les standards BNH (ex-CNL) et inclut
-    les en-têtes, pieds de page et signatures appropriés.
-    """
-
     __slots__ = ("_current_row",)
 
     def __init__(
@@ -46,7 +35,16 @@ class ActiviteMensuelleHRGenerator(ReportGenerator):
         )
         self._current_row: int = 1
 
-    def _add_header(self, sheet: Worksheet) -> None:
+    def _add_content(
+        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+    ) -> None:
+        self._add_first_table_header(sheet)
+        self._add_first_table(sheet, query_results)
+        self._add_second_table_header(sheet)
+        self._add_second_table(sheet, query_results)
+        self._add_footer(sheet)
+
+    def _add_first_table_header(self, sheet: Worksheet) -> None:
         """Ajoute l'en-tête du report avec titre, wilaya, et période."""
         self._logger.debug("Ajout de l'en-tête du report")
 
@@ -96,7 +94,7 @@ class ActiviteMensuelleHRGenerator(ReportGenerator):
 
         self._current_row += 2
 
-    def _add_tables(
+    def _add_first_table(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
         """Ajoute les deux tableaux principaux : activité mensuelle et situation des programmes."""
@@ -345,11 +343,28 @@ class ActiviteMensuelleHRGenerator(ReportGenerator):
 
         self._current_row += 2
 
-        # Ajouter l'en-tête du second tableau
-        self._add_second_table_header(sheet)
+    def _add_second_table_header(self, sheet: Worksheet) -> None:
+        """Ajoute l'en-tête du second tableau avec titre et date d'arrêté."""
+        sheet[f"A{self._current_row}"] = (
+            "Situation des programmes (à renseigner par la BNH, ex-CNL)"
+        )
+        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
+        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
+        sheet[f"A{self._current_row}"].alignment = Alignment(
+            horizontal="center", vertical="center"
+        )
 
-        # Ajouter le second tableau
-        self._add_second_table(sheet, query_results)
+        self._current_row += 1
+        sheet[f"A{self._current_row}"] = (
+            f"Arrêté le {self._report_context.report_date.strftime("%d/%m/%Y")}"
+        )
+        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
+        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
+        sheet[f"A{self._current_row}"].alignment = Alignment(
+            horizontal="center", vertical="center"
+        )
+
+        self._current_row += 2
 
     def _add_second_table(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
@@ -503,29 +518,6 @@ class ActiviteMensuelleHRGenerator(ReportGenerator):
         self._logger.info(
             f"Second tableau terminé avec {len(programmes_situation)} programmes plus les totaux"
         )
-        self._current_row += 2
-
-    def _add_second_table_header(self, sheet: Worksheet) -> None:
-        """Ajoute l'en-tête du second tableau avec titre et date d'arrêté."""
-        sheet[f"A{self._current_row}"] = (
-            "Situation des programmes (à renseigner par la BNH, ex-CNL)"
-        )
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
-        )
-
-        self._current_row += 1
-        sheet[f"A{self._current_row}"] = (
-            f"Arrêté le {self._report_context.report_date.strftime("%d/%m/%Y")}"
-        )
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
-        )
-
         self._current_row += 2
 
     def _add_footer(self, sheet: Worksheet) -> None:

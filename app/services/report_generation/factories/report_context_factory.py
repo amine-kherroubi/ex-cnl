@@ -17,9 +17,7 @@ from app.utils.logging_setup import get_logger
 class ReportContextFactory(object):
     __slots__ = ()
 
-    _logger: Logger = get_logger(
-        "app.services.report_generation.factories.report_context_factory"
-    )
+    _logger: Logger = get_logger(__name__)
 
     def __new__(cls):
         raise RuntimeError(

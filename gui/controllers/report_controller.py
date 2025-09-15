@@ -17,8 +17,7 @@ class ReportController(object):
     __slots__ = ("_facade", "_logger")
 
     def __init__(self, facade: ApplicationFacade) -> None:
-        self._logger: Logger = get_logger("gui.controllers.report_controller")
-        self._logger.debug("Initializing ReportController with injected facade")
+        self._logger: Logger = get_logger(__name__)        self._logger.debug("Initializing ReportController with injected facade")
 
         self._facade: ApplicationFacade = facade
         self._logger.info("ReportController initialized successfully")

@@ -19,7 +19,7 @@ class FileIOService(object):
     __slots__ = ("_config", "_logger")
 
     def __init__(self, file_io_config: FileIOConfig) -> None:
-        self._logger: Logger = get_logger("app.services.file_io_service")
+        self._logger: Logger = get_logger(__name__)
         self._logger.debug("Initializing file io service")
 
         self._config: FileIOConfig = file_io_config
@@ -38,7 +38,7 @@ class FileIOService(object):
             self._logger.debug(f"Table starts at row {skiprows}")
 
             self._logger.debug("Reading Excel file with pandas")
-            dataframe: pd.DataFrame = pd.read_excel(
+            dataframe: pd.DataFrame = pd.read_excel(  # type: ignore
                 source_file_path, dtype_backend="numpy_nullable", skiprows=skiprows
             )
 
@@ -78,7 +78,7 @@ class FileIOService(object):
         )
 
         try:
-            preview_df: pd.DataFrame = pd.read_excel(
+            preview_df: pd.DataFrame = pd.read_excel(  # type: ignore
                 source_file_path, nrows=30, header=None
             )
             self._logger.debug(f"Loaded {len(preview_df)} preview rows")

@@ -20,22 +20,16 @@ class DataRepository(Protocol):
         table_name: str,
         dataframe: pd.DataFrame,
     ) -> None: ...
-
     def execute(self, query: str) -> pd.DataFrame: ...
-
     def count_records(self, table_name: str) -> int: ...
-
     def describe(self, table_name: str) -> pd.DataFrame: ...
-
     def get_data(
         self,
         table_name: str,
         offset: int = 0,
         limit: int = 5,
     ) -> pd.DataFrame: ...
-
     def summarize(self, table_name: str) -> dict[str, Any]: ...
-
     def close(self) -> None: ...
 
 
@@ -48,7 +42,7 @@ class DuckDBRepository:
     )
 
     def __init__(self, db_config: DatabaseConfig) -> None:
-        self._logger: Logger = get_logger("app.data.data_repository")
+        self._logger: Logger = get_logger(__name__)
         self._logger.debug("Initializing DuckDB repository")
 
         self._config: DatabaseConfig = db_config
@@ -61,12 +55,12 @@ class DuckDBRepository:
         self._connection: duckdb.DuckDBPyConnection | None
         if db_config.path:
             self._logger.info(f"Connecting to DuckDB file: {db_config.path}")
-            self._connection = duckdb.connect(
+            self._connection = duckdb.connect(  # type: ignore
                 database=db_config.path, config=config_dict
             )
         else:
             self._logger.info("Creating in-memory DuckDB connection")
-            self._connection = duckdb.connect(database=":memory:", config=config_dict)
+            self._connection = duckdb.connect(database=":memory:", config=config_dict)  # type: ignore
 
         if db_config.enable_logging:
             if not self._connection:

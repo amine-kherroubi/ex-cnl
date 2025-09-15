@@ -46,9 +46,7 @@ class ReportGenerator(ABC):
         report_specification: ReportSpecification,
         report_context: ReportContext,
     ) -> None:
-        self._logger: Logger = get_logger(
-            f"app.services.report_generation.report_generator_template"
-        )
+        self._logger: Logger = get_logger(__name__)
         self._logger.debug(f"Initializing {self.__class__.__name__}")
 
         self._file_io_service: FileIOService = file_io_service
@@ -72,23 +70,21 @@ class ReportGenerator(ABC):
         self._logger.info("Starting report generation process")
 
         try:
-            # Step 1: Loading data into in-memory database
-            self._logger.debug("Step 1: Loading data into database")
+            step: int = 1
+
+            self._logger.debug(f"Generation step {step}: Loading data into database")
             self._load_data_into_db(source_file_paths)
             self._logger.info("Data successfully loaded into database")
 
-            # Step 2: Creating reference tables
-            self._logger.debug("Step 2: Creating reference tables")
+            self._logger.debug(f"Generation step {step}: Creating reference tables")
             self._create_predefined_tables()
             self._logger.info("Program reference table created successfully")
 
-            # Step 3: Executing queries
-            self._logger.debug("Step 3: Executing queries")
+            self._logger.debug(f"Generation step {step}: Executing queries")
             query_results: dict[str, pd.DataFrame] = self._execute_queries()
             self._logger.info(f"Successfully executed {len(query_results)} queries")
 
-            # Step 4: Creating workbook and main worksheet
-            self._logger.debug("Step 4: Creating Excel workbook")
+            self._logger.debug(f"Generation step {step}: Creating Excel workbook")
             self._workbook = Workbook()
             self._workbook.remove(self._workbook.active)  # type: ignore
             sheet: Worksheet = self._workbook.create_sheet(
@@ -98,33 +94,18 @@ class ReportGenerator(ABC):
                 f"Workbook created with sheet: {self._report_specification.display_name}"
             )
 
-            # Step 5: Adding header (subclass responsibility)
-            self._logger.debug("Step 5: Adding report header")
-            self._add_header(sheet)
-            self._logger.debug("Header added successfully")
+            self._logger.debug(f"Generation step {step}: Adding report content")
+            self._add_content(sheet, query_results)
+            self._logger.debug("Content added successfully")
 
-            # Step 6: Building tables (subclass responsibility)
-            self._logger.debug("Step 6: Building main table")
-            self._add_tables(sheet, query_results)
-            self._logger.debug("Main table built successfully")
-
-            # Step 7: Adding footer (subclass responsibility)
-            self._logger.debug("Step 7: Adding report footer")
-            self._add_footer(sheet)
-            self._logger.debug("Footer added successfully")
-
-            # Step 8: Final formatting (subclass responsibility)
-            self._logger.debug("Step 8: Applying final formatting")
+            self._logger.debug(f"Generation step {step}: Applying final formatting")
             self._finalize_formatting(sheet)
             self._logger.debug("Final formatting applied successfully")
 
-            # Step 9: Generate actual (formatted) filename
+            self._logger.debug(f"Generation step {step}: Saving report")
             output_file_path: Path = (
                 output_directory_path / self._generate_output_filename()
             )
-
-            # Step 10: Saving report
-            self._logger.debug("Step 10: Saving report")
             self._save_report(output_file_path)
             self._logger.info("Report generation completed successfully")
 
@@ -135,10 +116,10 @@ class ReportGenerator(ABC):
             raise
 
     def _load_data_into_db(self, source_file_paths: dict[str, Path]) -> None:
-        self._logger.debug("Loading files into database views")
+        self._logger.debug("Loading files into database tables")
 
         for table_name, file_path in source_file_paths.items():
-            self._logger.debug(f"Loading file '{file_path}' into view '{table_name}'")
+            self._logger.debug(f"Loading file '{file_path}' into table '{table_name}'")
             try:
                 df: pd.DataFrame = self._file_io_service.load_data_from_file(file_path)
 
@@ -147,18 +128,18 @@ class ReportGenerator(ABC):
                 cleaned_columns: list[str] = list(df.columns)
 
                 if original_columns != cleaned_columns:
-                    self._logger.debug(f"Column names cleaned for view '{table_name}'")
+                    self._logger.debug(f"Column names cleaned for table '{table_name}'")
 
                 self._data_repository.create_table_from_dataframe(table_name, df)
                 self._logger.info(
-                    f"View '{table_name}' loaded successfully: {len(df)} rows"
+                    f"Table '{table_name}' loaded successfully: {len(df)} rows"
                 )
 
                 print(self._data_repository.summarize(table_name))
 
             except Exception as error:
                 self._logger.error(
-                    f"Failed to load file '{file_path}' into view '{table_name}': {error}"
+                    f"Failed to load file '{file_path}' into table '{table_name}': {error}"
                 )
                 raise
 
@@ -248,15 +229,9 @@ class ReportGenerator(ABC):
         return formatted_query
 
     @abstractmethod
-    def _add_header(self, sheet: Worksheet) -> None: ...
-
-    @abstractmethod
-    def _add_tables(
+    def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None: ...
-
-    @abstractmethod
-    def _add_footer(self, sheet: Worksheet) -> None: ...
 
     @abstractmethod
     def _finalize_formatting(self, sheet: Worksheet) -> None: ...

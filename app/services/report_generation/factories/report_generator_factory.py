@@ -29,9 +29,7 @@ from app.utils.logging_setup import get_logger
 class ReportGeneratorFactory(object):
     __slots__ = ()
 
-    _logger: Logger = get_logger(
-        "app.services.report_generation.factories.report_generator_factory"
-    )
+    _logger: Logger = get_logger(__name__)
 
     _generators: dict[str, type[ReportGenerator]] = {
         "activite_mensuelle_par_programme": ActiviteMensuelleHRGenerator,
