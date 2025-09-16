@@ -39,7 +39,7 @@ class MainWindow(ctk.CTk):
         self._current_view: ctk.CTkFrame | None = None
 
         # Window configuration
-        self.title(string="Générateur de reports")
+        self.title(string="Générateur de rapports")
         self.geometry(geometry_string="900x700")
         self.minsize(width=700, height=600)
 

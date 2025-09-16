@@ -6,9 +6,7 @@ from logging import Logger
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.registry.specifications.activite_mensuelle_specification import (
-    activite_mensuelle_specification,
-)
+from app.core.domain.registry.specifications import *
 from app.core.utils.logging_setup import get_logger
 
 
@@ -57,4 +55,5 @@ class ReportSpecificationRegistry:
 
     _REPORT_SPECIFICATIONS: Final[dict[str, ReportSpecification]] = {
         "activite_mensuelle_par_programme": activite_mensuelle_specification,
+        "situation_financiere_des_programmes": situation_financiere_specification,
     }
