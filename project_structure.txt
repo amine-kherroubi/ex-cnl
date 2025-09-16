@@ -34,7 +34,7 @@
 │   │   │       │   ├── report_context_factory.py
 │   │   │       │   └── report_generator_factory.py
 │   │   │       └── generators
-│   │   │           ├── activite_mensuelle_hr.py
+│   │   │           ├── activite_mensuelle.py
 │   │   │           └── situation_financiere.py
 │   │   └── utils
 │   │       ├── adhoc_queries.py
