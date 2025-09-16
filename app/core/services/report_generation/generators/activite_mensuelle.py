@@ -16,7 +16,7 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
 
 
-class ActiviteMensuelleHRGenerator(ReportGenerator):
+class ActiviteMensuelleGenerator(ReportGenerator):
     __slots__ = ("_current_row",)
 
     def __init__(

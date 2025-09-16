@@ -12,8 +12,8 @@ from app.core.domain.registry.report_specification_registry import (
 )
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation.generators.activite_mensuelle_hr import (
-    ActiviteMensuelleHRGenerator,
+from app.core.services.report_generation.generators.activite_mensuelle import (
+    ActiviteMensuelleGenerator,
 )
 from app.core.services.report_generation.base.report_generator import ReportGenerator
 from app.core.utils.logging_setup import get_logger
@@ -26,7 +26,7 @@ class ReportGeneratorFactory(object):
     _logger: Logger = get_logger(__name__)
 
     _generators: dict[str, type[ReportGenerator]] = {
-        "activite_mensuelle_par_programme": ActiviteMensuelleHRGenerator,
+        "activite_mensuelle_par_programme": ActiviteMensuelleGenerator,
     }
 
     def __new__(cls):
