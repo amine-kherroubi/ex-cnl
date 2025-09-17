@@ -44,8 +44,12 @@ class MainWindow(ctk.CTk):
         self.minsize(width=700, height=600)
 
         # Set theme
-        ctk.set_appearance_mode(mode_string="dark")
-        ctk.set_default_color_theme(color_string="green")
+        ctk.set_appearance_mode(mode_string="light")
+        ctk.set_default_color_theme("theme.json")
+
+        # Scaling
+        ctk.set_widget_scaling(1.5)
+        ctk.set_window_scaling(1.2)
 
         # Setup UI
         self._setup_ui()
