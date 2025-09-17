@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+# Standard library imports
+from typing import Final
+
 # Payment tranches corresponding to project launches (first payment tranche)
 # These tranches indicate the effective start of a housing project
-LAUNCH_TRANCHES: set[str] = {
+TRANCHES_DE_LANCEMENT: Final[set[str]] = {
     "20%  1 ERE TRANCHE",
     "60%  Première Tranche",
     "40%  Première Tranche",
@@ -13,7 +16,7 @@ LAUNCH_TRANCHES: set[str] = {
 
 # Payment tranches corresponding to deliveries (last payment tranche)
 # These tranches indicate the complete completion of a housing project
-DELIVERY_TRANCHES: set[str] = {
+TRANCHES_DE_LIVRAISON: Final[set[str]] = {
     "40%  3 EME TRANCHE",
     "40%  Deuxième Tranche",
     "80%  2+3 EME TRANCHE",

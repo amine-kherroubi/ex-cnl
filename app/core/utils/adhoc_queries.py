@@ -9,7 +9,12 @@ import pandas as pd
 
 
 connection: duckdb.DuckDBPyConnection = duckdb.connect()  # type: ignore
-df: pd.DataFrame = pd.read_excel(Path(""), skiprows=5)  # type: ignore
+df: pd.DataFrame = pd.read_excel(  # type: ignore
+    Path(
+        "/mnt/c/Users/user/Documents/Stage/applic HR/Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx"
+    ),
+    skiprows=5,
+)
 connection.register("paiements", df)
 
 # query1_result: pd.DataFrame = connection.execute(
@@ -38,11 +43,29 @@ connection.register("paiements", df)
 # ).fetch_df()
 # print(query2_result)
 
-query3_result: pd.DataFrame = connection.execute(
+# query3_result: pd.DataFrame = connection.execute(
+#     """
+#     SELECT DISTINCT Programme,
+#             "Sous programme"
+#     FROM paiements
+#     """
+# ).fetch_df()
+# print(query3_result)
+
+query4_result: pd.DataFrame = connection.execute(
     """
-    SELECT DISTINCT Programme,
-            "Sous programme"
+    SELECT DISTINCT Daira
     FROM paiements
+    ORDER BY Daira
     """
 ).fetch_df()
-print(query3_result)
+print(query4_result)
+
+# query5_result: pd.DataFrame = connection.execute(
+#     """
+#     SELECT DISTINCT "Commune de projet"
+#     FROM paiements
+#     ORDER BY "Commune de projet"
+#     """
+# ).fetch_df()
+# print(query5_result)
