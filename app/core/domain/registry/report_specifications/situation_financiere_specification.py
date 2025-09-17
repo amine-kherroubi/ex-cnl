@@ -12,7 +12,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
     name="situation_financiere_des_programmes",
     display_name="Situation financière des programmes",
     category=ReportCategory.HABITAT_RURAL,
-    periodicity=Periodicity.MONTHLY,
+    periodicity=Periodicity.TRIMESTRIAL,
     description=(
         "Situation financière détaillée des programmes de logements aidés "
         "par programme, daira et commune. Comprend les engagements, "
