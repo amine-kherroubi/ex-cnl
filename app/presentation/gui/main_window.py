@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from logging import Logger
+from pathlib import Path
 from typing import Any
 
 # Third-party imports
@@ -45,7 +46,14 @@ class MainWindow(ctk.CTk):
 
         # Set theme
         ctk.set_appearance_mode(mode_string="light")
-        ctk.set_default_color_theme("theme.json")
+        theme_path: Path = Path(__file__).parent / "themes/theme.json"
+        if theme_path.exists():
+            ctk.set_default_color_theme(str(theme_path))
+        else:
+            self._logger.warning(
+                f"Theme file not found at {theme_path}, using default theme"
+            )
+            ctk.set_default_color_theme("blue")
 
         # Scaling
         ctk.set_widget_scaling(1.5)
