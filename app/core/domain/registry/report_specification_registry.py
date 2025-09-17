@@ -6,7 +6,7 @@ from logging import Logger
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.registry.specifications import *
+from app.core.domain.registry.report_specifications import *
 from app.core.utils.logging_setup import get_logger
 
 
