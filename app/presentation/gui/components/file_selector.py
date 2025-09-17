@@ -57,15 +57,14 @@ class FileSelector(ctk.CTkFrame):
             row=1, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew"
         )
 
-        # Clear button
+        # Clear button - secondary style
         self._clear_button: ctk.CTkButton = ctk.CTkButton(
             master=self,
             text="Réinitialiser",
             command=self._clear_files,
             width=80,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray80", "gray20"),
+            border_width=1,
         )
         self._clear_button.grid(row=2, column=2, padx=(5, 10), pady=(0, 10))  # type: ignore
 

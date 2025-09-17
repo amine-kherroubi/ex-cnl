@@ -54,7 +54,7 @@ class MenuView(ctk.CTkFrame):
             master=header_frame,
             text="Choisissez un type de rapport à générer ou configurez ses paramètres",
             font=ctk.CTkFont(size=14),
-            text_color=("gray30", "gray70"),
+            text_color="#757575",  # Medium gray for secondary text
         )
         description_label.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="w")  # type: ignore
 

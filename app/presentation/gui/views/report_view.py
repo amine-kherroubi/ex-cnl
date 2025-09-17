@@ -59,7 +59,7 @@ class ReportView(ctk.CTkFrame):
         header_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
-        # Back button
+        # Back button - secondary style
         self._back_button: ctk.CTkButton = ctk.CTkButton(
             master=header_frame,
             text="Retour",
@@ -67,8 +67,7 @@ class ReportView(ctk.CTkFrame):
             width=100,
             height=32,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray80", "gray30"),
+            border_width=1,
             font=ctk.CTkFont(size=14),
         )
         self._back_button.grid(row=0, column=0, padx=(0, 20), sticky="w")  # type: ignore
@@ -92,7 +91,7 @@ class ReportView(ctk.CTkFrame):
             master=info_frame,
             text=self._report_spec.description,
             font=ctk.CTkFont(size=13),
-            text_color=("gray30", "gray70"),
+            text_color="#757575",  # Medium gray for secondary text
         )
         desc_label.grid(row=1, column=0, pady=(5, 0), sticky="w")  # type: ignore
 
@@ -152,12 +151,8 @@ class ReportView(ctk.CTkFrame):
         )
         req_title.grid(row=0, column=0, pady=(0, 10), sticky="w")  # type: ignore
 
-        # Info box
-        info_box: ctk.CTkFrame = ctk.CTkFrame(
-            master=req_frame,
-            fg_color=("gray85", "gray25"),
-            corner_radius=8,
-        )
+        # Info box - uses theme defaults
+        info_box: ctk.CTkFrame = ctk.CTkFrame(master=req_frame)
         info_box.grid(row=1, column=0, sticky="ew")  # type: ignore
 
         # Required files list

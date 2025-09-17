@@ -47,7 +47,7 @@ class StatusDisplay(ctk.CTkFrame):
 
         # Choose prefix based on message type
         prefix_map: dict[MessageType, str] = {
-            "information": "[INFORMATION]",
+            "information": "[INFO]",
             "succès": "[SUCCÈS]",
             "avertissement": "[AVERTISSEMENT]",
             "erreur": "[ERREUR]",

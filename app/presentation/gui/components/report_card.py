@@ -37,9 +37,6 @@ class ReportCard(ctk.CTkFrame):
         # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
 
-        # Card styling
-        self.configure(fg_color=("gray90", "gray20"))  # type: ignore
-
         # Content frame
         content_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
         content_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ew")  # type: ignore
@@ -61,12 +58,12 @@ class ReportCard(ctk.CTkFrame):
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Category and periodicity
+        # Category and periodicity - using theme text colors
         meta_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=f"Catégorie : {self._report_spec.category} | Fréquence : {self._report_spec.periodicity.to_french}",
             font=ctk.CTkFont(size=12),
-            text_color=("gray40", "gray60"),
+            text_color="#757575",  # Medium gray for secondary text
             anchor="w",
         )
         meta_label.grid(row=1, column=0, pady=(5, 10), sticky="w")  # type: ignore
@@ -89,7 +86,7 @@ class ReportCard(ctk.CTkFrame):
         buttons_frame.grid(row=1, column=0, sticky="ew")  # type: ignore
         buttons_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Generate button
+        # Generate button - primary style
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
             text="Générer le rapport",
@@ -99,7 +96,7 @@ class ReportCard(ctk.CTkFrame):
         )
         self._generate_button.grid(row=0, column=0, padx=(0, 10), sticky="ew")  # type: ignore
 
-        # Settings button
+        # Settings button - secondary style
         self._settings_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
             text="Configuration",
@@ -107,9 +104,7 @@ class ReportCard(ctk.CTkFrame):
             width=100,
             height=35,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray80", "gray30"),
-            border_width=2,
+            border_width=1,
             font=ctk.CTkFont(size=14),
         )
         self._settings_button.grid(row=0, column=1, sticky="e")  # type: ignore

@@ -55,9 +55,9 @@ class MainWindow(ctk.CTk):
             )
             ctk.set_default_color_theme("blue")
 
-        # Scaling
-        ctk.set_widget_scaling(1.5)
-        ctk.set_window_scaling(1.2)
+        # Scaling - modern and appropriate for high-DPI displays
+        ctk.set_widget_scaling(1.2)
+        ctk.set_window_scaling(1.0)
 
         # Setup UI
         self._setup_ui()
@@ -76,11 +76,11 @@ class MainWindow(ctk.CTk):
         header_frame.grid(row=0, column=0, padx=30, pady=(30, 20), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title
+        # Title - using modern typography
         self._title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Générateur de rapports",
-            font=ctk.CTkFont(size=28, weight="bold"),
+            font=ctk.CTkFont(size=24, weight="bold"),
         )
         self._title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 

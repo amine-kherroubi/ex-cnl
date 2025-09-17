@@ -58,16 +58,12 @@ class EmailDialog(ctk.CTkToplevel):
             master=self,
             text="Le rapport a été généré avec succès !",
             font=ctk.CTkFont(size=14),
-            text_color="green",
+            text_color="#4caf50",  # Success green
         )
         success_label.grid(row=1, column=0, padx=30, pady=(10, 20))  # type: ignore
 
-        # File info
-        file_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self,
-            fg_color=("gray85", "gray25"),
-            corner_radius=8,
-        )
+        # File info frame - uses theme defaults
+        file_frame: ctk.CTkFrame = ctk.CTkFrame(master=self)
         file_frame.grid(row=2, column=0, padx=30, pady=(0, 20), sticky="ew")  # type: ignore
 
         file_label: ctk.CTkLabel = ctk.CTkLabel(
@@ -99,7 +95,7 @@ class EmailDialog(ctk.CTkToplevel):
         buttons_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
         buttons_frame.grid(row=5, column=0, padx=30, pady=(0, 30))  # type: ignore
 
-        # Cancel button
+        # Cancel button - secondary style
         self._cancel_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
             text="Ignorer",
@@ -107,14 +103,12 @@ class EmailDialog(ctk.CTkToplevel):
             width=100,
             height=35,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray80", "gray30"),
-            border_width=2,
+            border_width=1,
             font=ctk.CTkFont(size=13),
         )
         self._cancel_button.grid(row=0, column=0, padx=(0, 10))  # type: ignore
 
-        # Send button
+        # Send button - primary style
         self._send_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
             text="Envoyer",
@@ -158,10 +152,11 @@ class EmailDialog(ctk.CTkToplevel):
 
     def _show_error(self, message: str) -> None:
         # Flash the entry border red briefly
-        self._email_entry.configure(border_color="red")  # type: ignore
-        self.after(ms=2000, func=lambda: self._email_entry.configure(border_color=("gray70", "gray30")))  # type: ignore
-
-        # You could also show a tooltip or label with the error message
+        self._email_entry.configure(border_color="#f44336")  # type: ignore
+        self.after(
+            ms=2000,
+            func=lambda: self._email_entry.configure(border_color=None),  # type: ignore
+        )  # Reset to theme default
 
     def _close(self) -> None:
         self.grab_release()

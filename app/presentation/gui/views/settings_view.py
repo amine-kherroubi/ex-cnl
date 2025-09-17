@@ -40,7 +40,7 @@ class SettingsView(ctk.CTkFrame):
         header_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
-        # Back button
+        # Back button - secondary style
         self._back_button: ctk.CTkButton = ctk.CTkButton(
             master=header_frame,
             text="Retour",
@@ -48,8 +48,7 @@ class SettingsView(ctk.CTkFrame):
             width=100,
             height=32,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray80", "gray30"),
+            border_width=1,
             font=ctk.CTkFont(size=14),
         )
         self._back_button.grid(row=0, column=0, padx=(0, 20), sticky="w")  # type: ignore
@@ -91,16 +90,14 @@ class SettingsView(ctk.CTkFrame):
         )
         self._save_button.grid(row=0, column=1, padx=(10, 0), sticky="e")  # type: ignore
 
-        # Cancel button
+        # Cancel button - secondary style
         cancel_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
             text="Annuler",
             command=self._on_back,
             height=40,
             fg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray80", "gray30"),
-            border_width=2,
+            border_width=1,
             font=ctk.CTkFont(size=14),
         )
         cancel_button.grid(row=0, column=0, sticky="w")  # type: ignore
@@ -227,9 +224,6 @@ class SettingsSection(ctk.CTkFrame):
         # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
 
-        # Section styling
-        self.configure(fg_color=("gray90", "gray20"), corner_radius=10)  # type: ignore
-
         # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
@@ -243,7 +237,7 @@ class SettingsSection(ctk.CTkFrame):
             master=self,
             text=self._description,
             font=ctk.CTkFont(size=12),
-            text_color=("gray40", "gray60"),
+            text_color="#757575",  # Medium gray for secondary text
         )
         desc_label.grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")  # type: ignore
 
