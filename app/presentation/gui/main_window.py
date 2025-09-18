@@ -56,7 +56,7 @@ class MainWindow(ctk.CTk):
             ctk.set_default_color_theme("blue")
 
         # Scaling - modern and appropriate for high-DPI displays
-        ctk.set_widget_scaling(1.2)
+        ctk.set_widget_scaling(1.0)
         ctk.set_window_scaling(1.0)
 
         # Setup UI
