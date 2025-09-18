@@ -8,7 +8,7 @@ from typing import Any, Literal, TypeAlias
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.gui.themes.style import Color, Spacing, FontSize
+from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
 
 MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
 

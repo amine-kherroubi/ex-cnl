@@ -7,7 +7,7 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.gui.themes.style import Color, Spacing, FontSize
+from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
 
 
 class EmailDialog(ctk.CTkToplevel):

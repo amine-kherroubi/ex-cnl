@@ -9,7 +9,7 @@ from typing import Any, Callable, Literal
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.gui.themes.style import Spacing, FontSize
+from app.presentation.gui.styling.design_system import Spacing, FontSize
 
 
 class FileSelector(ctk.CTkFrame):
