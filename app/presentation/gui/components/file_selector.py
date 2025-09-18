@@ -8,6 +8,9 @@ from typing import Any, Callable, Literal
 # Third-party imports
 import customtkinter as ctk  # type: ignore
 
+# Local application imports
+from app.presentation.gui.themes.style import Spacing, FontSize
+
 
 class FileSelector(ctk.CTkFrame):
     __slots__ = (
@@ -33,12 +36,12 @@ class FileSelector(ctk.CTkFrame):
         self.grid_columnconfigure(index=1, weight=1)
 
         # Label
-        label: ctk.CTkLabel = ctk.CTkLabel(
+        source_files_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Fichiers source :",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
-        label.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="w")  # type: ignore
+        source_files_label.grid(row=0, column=0, padx=(Spacing.SM, Spacing.XS), pady=Spacing.SM, sticky="w")  # type: ignore
 
         # Select files button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
@@ -47,14 +50,19 @@ class FileSelector(ctk.CTkFrame):
             command=self._select_files,
             width=120,
         )
-        self._select_button.grid(row=0, column=2, padx=(5, 10), pady=10)  # type: ignore
+        self._select_button.grid(row=0, column=2, padx=(Spacing.XS, Spacing.SM), pady=Spacing.SM)  # type: ignore
 
         # Files listbox
         self._files_listbox: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self, height=100, state="disabled"
         )
         self._files_listbox.grid(  # type: ignore
-            row=1, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew"
+            row=1,
+            column=0,
+            columnspan=3,
+            padx=Spacing.SM,
+            pady=(Spacing.NONE, Spacing.SM),
+            sticky="ew",
         )
 
         # Clear button - secondary style
@@ -64,7 +72,7 @@ class FileSelector(ctk.CTkFrame):
             command=self._clear_files,
             width=80,
         )
-        self._clear_button.grid(row=2, column=2, padx=(5, 10), pady=(0, 10), sticky="e")  # type: ignore
+        self._clear_button.grid(row=2, column=2, padx=(Spacing.XS, Spacing.SM), pady=(Spacing.NONE, Spacing.SM), sticky="e")  # type: ignore
 
         self._update_display()
 

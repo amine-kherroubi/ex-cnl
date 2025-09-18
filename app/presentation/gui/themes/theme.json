@@ -138,17 +138,17 @@
     "CTkFont": {
         "macOS": {
             "family": "SF Pro Display",
-            "size": 13,
+            "size": 14,
             "weight": "normal"
         },
         "Windows": {
             "family": "Segoe UI",
-            "size": 13,
+            "size": 14,
             "weight": "normal"
         },
         "Linux": {
             "family": "Ubuntu",
-            "size": 13,
+            "size": 14,
             "weight": "normal"
         }
     }

@@ -6,6 +6,9 @@ from typing import Any, Callable
 # Third-party imports
 import customtkinter as ctk  # type: ignore
 
+# Local application imports
+from app.presentation.gui.themes.style import Color, Spacing, FontSize
+
 
 class EmailDialog(ctk.CTkToplevel):
     __slots__ = (
@@ -48,19 +51,19 @@ class EmailDialog(ctk.CTkToplevel):
         # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Envoyer le report généré",
-            font=ctk.CTkFont(size=20, weight="bold"),
+            text="Le rapport a été généré avec succès !",
+            font=ctk.CTkFont(size=FontSize.H2, weight="bold"),
         )
-        title_label.grid(row=0, column=0, padx=30, pady=(30, 10))  # type: ignore
+        title_label.grid(row=0, column=0, padx=Spacing.XL, pady=(Spacing.XL, Spacing.SM))  # type: ignore
 
         # Success message
         success_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Le rapport a été généré avec succès !",
-            font=ctk.CTkFont(size=14),
-            text_color="#4caf50",  # Success green
+            text="Envoyez le report généré par email",
+            font=ctk.CTkFont(size=FontSize.LABEL),
+            text_color=Color.SUCCESS,  # Success green
         )
-        success_label.grid(row=1, column=0, padx=30, pady=(10, 20))  # type: ignore
+        success_label.grid(row=1, column=0, padx=Spacing.XL, pady=(Spacing.SM, Spacing.LG))  # type: ignore
 
         # File info frame - uses theme defaults
         file_frame: ctk.CTkFrame = ctk.CTkFrame(master=self)
@@ -69,31 +72,31 @@ class EmailDialog(ctk.CTkToplevel):
         file_label: ctk.CTkLabel = ctk.CTkLabel(
             master=file_frame,
             text=f"Fichier : {self._file_path.split('/')[-1]}",
-            font=ctk.CTkFont(size=13),
+            font=ctk.CTkFont(size=FontSize.LABEL),
             anchor="w",
         )
-        file_label.grid(row=0, column=0, padx=15, pady=10, sticky="w")  # type: ignore
+        file_label.grid(row=0, column=0, padx=Spacing.MD, pady=Spacing.SM, sticky="w")  # type: ignore
 
         # Email instruction
         instruction_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Veuillez saisir des adresses email (séparées par des virgules) :",
-            font=ctk.CTkFont(size=13),
+            font=ctk.CTkFont(size=FontSize.LABEL),
         )
-        instruction_label.grid(row=3, column=0, padx=30, pady=(0, 10), sticky="w")  # type: ignore
+        instruction_label.grid(row=3, column=0, padx=Spacing.XL, pady=(Spacing.NONE, Spacing.XL), sticky="w")  # type: ignore
 
         # Email entry
         self._email_entry: ctk.CTkEntry = ctk.CTkEntry(
             master=self,
             placeholder_text="example1@gmail.com, example2@gmail.com",
             height=40,
-            font=ctk.CTkFont(size=13),
+            font=ctk.CTkFont(size=FontSize.BODY),
         )
-        self._email_entry.grid(row=4, column=0, padx=30, pady=(0, 20), sticky="ew")  # type: ignore
+        self._email_entry.grid(row=4, column=0, padx=Spacing.XL, pady=(Spacing.NONE, Spacing.LG), sticky="ew")  # type: ignore
 
         # Buttons frame
         buttons_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
-        buttons_frame.grid(row=5, column=0, padx=30, pady=(0, 30))  # type: ignore
+        buttons_frame.grid(row=5, column=0, padx=Spacing.XL, pady=(Spacing.NONE, Spacing.XL))  # type: ignore
 
         # Cancel button - secondary style
         self._cancel_button: ctk.CTkButton = ctk.CTkButton(
@@ -104,9 +107,9 @@ class EmailDialog(ctk.CTkToplevel):
             height=35,
             fg_color="transparent",
             border_width=1,
-            font=ctk.CTkFont(size=13),
+            font=ctk.CTkFont(size=FontSize.BUTTON),
         )
-        self._cancel_button.grid(row=0, column=0, padx=(0, 10))  # type: ignore
+        self._cancel_button.grid(row=0, column=0, padx=(Spacing.NONE, Spacing.SM))  # type: ignore
 
         # Send button - primary style
         self._send_button: ctk.CTkButton = ctk.CTkButton(
@@ -115,7 +118,7 @@ class EmailDialog(ctk.CTkToplevel):
             command=self._send_email,
             width=120,
             height=35,
-            font=ctk.CTkFont(size=13, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.BUTTON, weight="bold"),
         )
         self._send_button.grid(row=0, column=1)  # type: ignore
 
@@ -152,7 +155,7 @@ class EmailDialog(ctk.CTkToplevel):
 
     def _show_error(self, message: str) -> None:
         # Flash the entry border red briefly
-        self._email_entry.configure(border_color="#f44336")  # type: ignore
+        self._email_entry.configure(border_color=Color.ERROR)  # type: ignore
         self.after(
             ms=2000,
             func=lambda: self._email_entry.configure(border_color=None),  # type: ignore

@@ -8,6 +8,7 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
+from app.presentation.gui.themes.style import Color, Spacing, FontSize
 
 
 class ReportCard(ctk.CTkFrame):
@@ -39,7 +40,7 @@ class ReportCard(ctk.CTkFrame):
 
         # Content frame
         content_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
-        content_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ew")  # type: ignore
+        content_frame.grid(row=0, column=0, padx=Spacing.LG, pady=Spacing.LG, sticky="ew")  # type: ignore
         content_frame.grid_columnconfigure(index=0, weight=1)
 
         # Report info
@@ -50,34 +51,34 @@ class ReportCard(ctk.CTkFrame):
         info_frame.grid_columnconfigure(index=0, weight=1)
 
         # Title
-        title_label: ctk.CTkLabel = ctk.CTkLabel(
+        title: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.display_name,
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.H3, weight="bold"),
             anchor="w",
         )
-        title_label.grid(row=0, column=0, sticky="w")  # type: ignore
+        title.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Category and periodicity - using theme text colors
-        meta_label: ctk.CTkLabel = ctk.CTkLabel(
+        # Details
+        details: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=f"Catégorie : {self._report_spec.category} | Fréquence : {self._report_spec.periodicity.to_french}",
-            font=ctk.CTkFont(size=12),
-            text_color="#757575",  # Medium gray for secondary text
+            font=ctk.CTkFont(size=FontSize.CAPTION),
+            text_color=Color.GRAY,  # Medium gray for secondary text
             anchor="w",
         )
-        meta_label.grid(row=1, column=0, pady=(5, 10), sticky="w")  # type: ignore
+        details.grid(row=1, column=0, pady=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
 
         # Description
-        desc_label: ctk.CTkLabel = ctk.CTkLabel(
+        description: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.description,
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=FontSize.BODY),
             anchor="w",
             wraplength=500,
             justify="left",
         )
-        desc_label.grid(row=2, column=0, pady=(0, 15), sticky="w")  # type: ignore
+        description.grid(row=2, column=0, pady=(Spacing.NONE, Spacing.MD), sticky="w")  # type: ignore
 
         # Buttons frame
         buttons_frame: ctk.CTkFrame = ctk.CTkFrame(
@@ -92,9 +93,9 @@ class ReportCard(ctk.CTkFrame):
             text="Générer le rapport",
             command=self._on_generate_clicked,
             height=35,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.BUTTON, weight="bold"),
         )
-        self._generate_button.grid(row=0, column=0, padx=(0, 10), sticky="ew")  # type: ignore
+        self._generate_button.grid(row=0, column=0, padx=(Spacing.NONE, Spacing.SM), sticky="ew")  # type: ignore
 
         # Settings button - secondary style
         self._settings_button: ctk.CTkButton = ctk.CTkButton(
@@ -103,8 +104,8 @@ class ReportCard(ctk.CTkFrame):
             command=self._on_settings_clicked,
             width=120,
             height=35,
-            fg_color="#656565",
-            hover_color="#363636",
-            font=ctk.CTkFont(size=14),
+            fg_color=Color.GRAY,
+            hover_color=Color.DARKER_GRAY,
+            font=ctk.CTkFont(size=FontSize.BUTTON),
         )
         self._settings_button.grid(row=0, column=1, sticky="e")  # type: ignore

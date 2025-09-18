@@ -7,6 +7,9 @@ from typing import Any, Literal, TypeAlias
 # Third-party imports
 import customtkinter as ctk  # type: ignore
 
+# Local application imports
+from app.presentation.gui.themes.style import Color, Spacing, FontSize
+
 MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
 
 
@@ -25,15 +28,17 @@ class StatusDisplay(ctk.CTkFrame):
 
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self, text="Statut :", font=ctk.CTkFont(size=14, weight="bold")
+            master=self,
+            text="Statut :",
+            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
-        label.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")  # type: ignore
+        label.grid(row=0, column=0, padx=Spacing.SM, pady=Spacing.XS, sticky="w")  # type: ignore
 
         # Status text area
         self._status_text: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self, state="disabled"
         )
-        self._status_text.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")  # type: ignore
+        self._status_text.grid(row=1, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="nsew")  # type: ignore
 
         # Initialize with welcome message
         self.add_message(
@@ -45,21 +50,23 @@ class StatusDisplay(ctk.CTkFrame):
     ) -> None:
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
-        # Choose prefix based on message type
-        prefix_map: dict[MessageType, str] = {
-            "information": "[INFO]",
-            "succès": "[SUCCÈS]",
-            "avertissement": "[AVERTISSEMENT]",
-            "erreur": "[ERREUR]",
+        indications_map: dict[MessageType, tuple[str, str]] = {
+            "information": ("[INFO]", Color.INFO),
+            "succès": ("[SUCCÈS]", Color.SUCCESS),
+            "avertissement": ("[AVERTISSEMENT]", Color.WARNING),
+            "erreur": ("[ERREUR]", Color.ERROR),
         }
-        prefix: str = prefix_map.get(message_type, "[INFO]")
 
+        prefix: str = indications_map.get(message_type, "[INFO]")[0]
+        color: str = indications_map.get(message_type, "#000000")[1]
         formatted_message: str = f"[{timestamp}] {prefix} {message}\n"
 
         # Add message to text area
         self._status_text.configure(state="normal")  # type: ignore
-        self._status_text.insert(index="end", text=formatted_message)  # type: ignore
-        self._status_text.see(index="end")  # type: ignore # Scroll to bottom
+        self._status_text.insert("end", formatted_message, message_type)  # type: ignore
+        self._status_text.tag_config(message_type, foreground=color)  # type: ignore
+        self._status_text.see("end")  # type: ignore
+        self._status_text.see(index="end")  # type: ignore
         self._status_text.configure(state="disabled")  # type: ignore
 
     def clear_messages(self) -> None:
