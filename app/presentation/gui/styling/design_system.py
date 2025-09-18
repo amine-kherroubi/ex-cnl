@@ -17,8 +17,8 @@ class Color(StrEnum):
 
     BLACK = "#212121"
     WHITE = "#ffffff"
-    LESS_WHITE = "#f4f4f4"
-    LEAST_WHITE = "#e8e8e8"
+    LESS_WHITE = "#ececec"
+    LEAST_WHITE = "#dbdbdb"
 
     SUCCESS = "#4caf50"
     WARNING = "#ff9800"
