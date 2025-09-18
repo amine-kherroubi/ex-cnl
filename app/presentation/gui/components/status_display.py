@@ -37,7 +37,7 @@ class StatusDisplay(ctk.CTkFrame):
 
         # Initialize with welcome message
         self.add_message(
-            message="Prêt à générer un rapport", message_type="information"
+            message="Prêt à générer le rapport", message_type="information"
         )
 
     def add_message(

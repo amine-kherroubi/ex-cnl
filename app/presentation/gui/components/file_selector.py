@@ -63,10 +63,8 @@ class FileSelector(ctk.CTkFrame):
             text="Réinitialiser",
             command=self._clear_files,
             width=80,
-            fg_color="transparent",
-            border_width=1,
         )
-        self._clear_button.grid(row=2, column=2, padx=(5, 10), pady=(0, 10))  # type: ignore
+        self._clear_button.grid(row=2, column=2, padx=(5, 10), pady=(0, 10), sticky="e")  # type: ignore
 
         self._update_display()
 

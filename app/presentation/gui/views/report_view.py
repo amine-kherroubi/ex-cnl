@@ -66,8 +66,6 @@ class ReportView(ctk.CTkFrame):
             command=self._on_back,
             width=100,
             height=32,
-            fg_color="transparent",
-            border_width=1,
             font=ctk.CTkFont(size=14),
         )
         self._back_button.grid(row=0, column=0, padx=(0, 20), sticky="w")  # type: ignore
@@ -85,15 +83,6 @@ class ReportView(ctk.CTkFrame):
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
-
-        # Report description
-        desc_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=info_frame,
-            text=self._report_spec.description,
-            font=ctk.CTkFont(size=13),
-            text_color="#757575",  # Medium gray for secondary text
-        )
-        desc_label.grid(row=1, column=0, pady=(5, 0), sticky="w")  # type: ignore
 
         # Scrollable content frame
         scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(master=self)

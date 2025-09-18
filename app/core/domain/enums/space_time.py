@@ -107,17 +107,17 @@ class Month(StrEnum):
 
 
 class Periodicity(StrEnum):
-    MONTHLY = "monthly"
-    SEMESTRIAL = "semestrial"
-    TRIMESTRIAL = "trimestrial"
-    ANNUAL = "annual"
+    MONTHLY = "Monthly"
+    SEMESTRIAL = "Semestrial"
+    TRIMESTRIAL = "Trimestrial"
+    ANNUAL = "Annual"
 
     @property
     def to_french(self) -> str:
         translations: dict[Periodicity, str] = {
-            Periodicity.MONTHLY: "mensuelle",
-            Periodicity.SEMESTRIAL: "semestrielle",
-            Periodicity.TRIMESTRIAL: "trimestrielle",
-            Periodicity.ANNUAL: "annuelle",
+            Periodicity.MONTHLY: "Mensuelle",
+            Periodicity.SEMESTRIAL: "Semestrielle",
+            Periodicity.TRIMESTRIAL: "Trimestrielle",
+            Periodicity.ANNUAL: "Annuelle",
         }
         return translations[self]

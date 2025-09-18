@@ -99,12 +99,12 @@ class ReportCard(ctk.CTkFrame):
         # Settings button - secondary style
         self._settings_button: ctk.CTkButton = ctk.CTkButton(
             master=buttons_frame,
-            text="Configuration",
+            text="Configurer",
             command=self._on_settings_clicked,
-            width=100,
+            width=120,
             height=35,
-            fg_color="transparent",
-            border_width=1,
+            fg_color="#656565",
+            hover_color="#363636",
             font=ctk.CTkFont(size=14),
         )
         self._settings_button.grid(row=0, column=1, sticky="e")  # type: ignore
