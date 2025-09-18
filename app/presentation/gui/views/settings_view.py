@@ -6,6 +6,9 @@ from typing import Any, Callable
 # Third-party imports
 import customtkinter as ctk  # type: ignore
 
+# Local application imports
+from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
+
 
 class SettingsView(ctk.CTkFrame):
     __slots__ = (
@@ -36,8 +39,10 @@ class SettingsView(ctk.CTkFrame):
         self.grid_rowconfigure(index=1, weight=1)
 
         # Header with back button
-        header_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
-        header_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="ew")  # type: ignore
+        header_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self, fg_color=Color.TRANSPARENT
+        )
+        header_frame.grid(row=0, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.SM), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
         # Back button - secondary style
@@ -47,23 +52,23 @@ class SettingsView(ctk.CTkFrame):
             command=self._on_back,
             width=100,
             height=32,
-            fg_color="transparent",
+            fg_color=Color.TRANSPARENT,
             border_width=1,
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=FontSize.LABEL),
         )
-        self._back_button.grid(row=0, column=0, padx=(0, 20), sticky="w")  # type: ignore
+        self._back_button.grid(row=0, column=0, padx=(Spacing.NONE, Spacing.LG), sticky="w")  # type: ignore
 
         # Settings title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text=f"Configuration de {self._report_name}",
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.H3, weight="bold"),
         )
         title_label.grid(row=0, column=1, sticky="w")  # type: ignore
 
         # Main content scrollable frame
         content_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(master=self)
-        content_frame.grid(row=1, column=0, padx=20, pady=(10, 20), sticky="nsew")  # type: ignore
+        content_frame.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.LG), sticky="nsew")  # type: ignore
         content_frame.grid_columnconfigure(index=0, weight=1)
 
         # Create settings based on report type
@@ -76,8 +81,10 @@ class SettingsView(ctk.CTkFrame):
             self._create_generic_settings(parent=content_frame)
 
         # Bottom buttons frame
-        buttons_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
-        buttons_frame.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="ew")  # type: ignore
+        buttons_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self, fg_color=Color.TRANSPARENT
+        )
+        buttons_frame.grid(row=2, column=0, padx=Spacing.LG, pady=(Spacing.NONE, Spacing.LG), sticky="ew")  # type: ignore
         buttons_frame.grid_columnconfigure(index=0, weight=1)
 
         # Save button
@@ -86,9 +93,9 @@ class SettingsView(ctk.CTkFrame):
             text="Sauvegarder la configuration",
             command=self._save_settings,
             height=40,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
-        self._save_button.grid(row=0, column=1, padx=(10, 0), sticky="e")  # type: ignore
+        self._save_button.grid(row=0, column=1, padx=(Spacing.SM, Spacing.NONE), sticky="e")  # type: ignore
 
         # Cancel button - secondary style
         cancel_button: ctk.CTkButton = ctk.CTkButton(
@@ -96,9 +103,9 @@ class SettingsView(ctk.CTkFrame):
             text="Annuler",
             command=self._on_back,
             height=40,
-            fg_color="transparent",
+            fg_color=Color.TRANSPARENT,
             border_width=1,
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=FontSize.LABEL),
         )
         cancel_button.grid(row=0, column=0, sticky="w")  # type: ignore
 
@@ -109,7 +116,7 @@ class SettingsView(ctk.CTkFrame):
             title="Configuration des programmes",
             description="Sélectionnez les programmes à inclure dans le rapport d'activité mensuelle",
         )
-        programs_section.grid(row=0, column=0, padx=10, pady=10, sticky="ew")  # type: ignore
+        programs_section.grid(row=0, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="ew")  # type: ignore
 
         # Create program checkboxes
         programs: list[str] = [
@@ -124,9 +131,9 @@ class SettingsView(ctk.CTkFrame):
             checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
                 master=programs_section.get_content_frame(),
                 text=program,
-                font=ctk.CTkFont(size=13),
+                font=ctk.CTkFont(size=FontSize.BODY),
             )
-            checkbox.grid(row=idx, column=0, padx=20, pady=5, sticky="w")  # type: ignore
+            checkbox.grid(row=idx, column=0, padx=Spacing.LG, pady=Spacing.XS, sticky="w")  # type: ignore
             self._settings_widgets[f"program_{idx}"] = checkbox
 
     def _create_generic_settings(self, parent: Any) -> None:

@@ -39,13 +39,15 @@ class ReportCard(ctk.CTkFrame):
         self.grid_columnconfigure(index=0, weight=1)
 
         # Content frame
-        content_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
+        content_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self, fg_color=Color.TRANSPARENT
+        )
         content_frame.grid(row=0, column=0, padx=Spacing.LG, pady=Spacing.LG, sticky="ew")  # type: ignore
         content_frame.grid_columnconfigure(index=0, weight=1)
 
         # Report info
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=content_frame, fg_color="transparent"
+            master=content_frame, fg_color=Color.TRANSPARENT
         )
         info_frame.grid(row=0, column=0, sticky="ew")  # type: ignore
         info_frame.grid_columnconfigure(index=0, weight=1)
@@ -64,7 +66,7 @@ class ReportCard(ctk.CTkFrame):
             master=info_frame,
             text=f"Catégorie : {self._report_spec.category} | Fréquence : {self._report_spec.periodicity.to_french}",
             font=ctk.CTkFont(size=FontSize.CAPTION),
-            text_color=Color.GRAY,  # Medium gray for secondary text
+            text_color=Color.GRAY,
             anchor="w",
         )
         details.grid(row=1, column=0, pady=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
@@ -82,7 +84,7 @@ class ReportCard(ctk.CTkFrame):
 
         # Buttons frame
         buttons_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=content_frame, fg_color="transparent"
+            master=content_frame, fg_color=Color.TRANSPARENT
         )
         buttons_frame.grid(row=1, column=0, sticky="ew")  # type: ignore
         buttons_frame.grid_columnconfigure(index=0, weight=1)

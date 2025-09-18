@@ -38,7 +38,7 @@ class FileSelector(ctk.CTkFrame):
         # Label
         source_files_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Fichiers source :",
+            text="Fichiers source",
             font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
         source_files_label.grid(row=0, column=0, padx=(Spacing.SM, Spacing.XS), pady=Spacing.SM, sticky="w")  # type: ignore

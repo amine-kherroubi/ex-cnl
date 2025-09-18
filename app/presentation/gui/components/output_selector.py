@@ -8,6 +8,9 @@ from typing import Any, Callable
 # Third-party imports
 import customtkinter as ctk  # type: ignore
 
+# Local application imports
+from app.presentation.gui.styling.design_system import Spacing, FontSize
+
 
 class OutputSelector(ctk.CTkFrame):
     __slots__ = ("_on_output_changed", "_output_path", "_select_button", "_path_entry")
@@ -26,10 +29,10 @@ class OutputSelector(ctk.CTkFrame):
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Répertoire de destination :",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            text="Répertoire de destination",
+            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
-        label.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="w")  # type: ignore
+        label.grid(row=0, column=0, padx=(Spacing.SM, Spacing.XS), pady=Spacing.SM, sticky="w")  # type: ignore
 
         # Select folder button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
@@ -38,7 +41,7 @@ class OutputSelector(ctk.CTkFrame):
             command=self._select_folder,
             width=120,
         )
-        self._select_button.grid(row=0, column=2, padx=(5, 10), pady=10)  # type: ignore
+        self._select_button.grid(row=0, column=2, padx=(Spacing.XS, Spacing.SM), pady=Spacing.SM)  # type: ignore
 
         # Path display
         self._path_entry: ctk.CTkEntry = ctk.CTkEntry(
@@ -46,7 +49,7 @@ class OutputSelector(ctk.CTkFrame):
             placeholder_text="Aucun répertoire sélectionné",
             state="readonly",
         )
-        self._path_entry.grid(row=0, column=1, padx=(5, 5), pady=10, sticky="ew")  # type: ignore
+        self._path_entry.grid(row=0, column=1, padx=(Spacing.XS, Spacing.XS), pady=Spacing.SM, sticky="ew")  # type: ignore
 
     def _select_folder(self) -> None:
         folder: str = filedialog.askdirectory(

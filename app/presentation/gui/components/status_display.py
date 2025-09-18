@@ -29,7 +29,7 @@ class StatusDisplay(ctk.CTkFrame):
         # Label
         label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
-            text="Statut :",
+            text="Statut",
             font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
         label.grid(row=0, column=0, padx=Spacing.SM, pady=Spacing.XS, sticky="w")  # type: ignore
@@ -57,8 +57,8 @@ class StatusDisplay(ctk.CTkFrame):
             "erreur": ("[ERREUR]", Color.ERROR),
         }
 
-        prefix: str = indications_map.get(message_type, "[INFO]")[0]
-        color: str = indications_map.get(message_type, "#000000")[1]
+        prefix: str = indications_map.get(message_type, ("[INFO]", Color.INFO))[0]
+        color: str = indications_map.get(message_type, ("[INFO]", Color.INFO))[1]
         formatted_message: str = f"[{timestamp}] {prefix} {message}\n"
 
         # Add message to text area
@@ -66,7 +66,6 @@ class StatusDisplay(ctk.CTkFrame):
         self._status_text.insert("end", formatted_message, message_type)  # type: ignore
         self._status_text.tag_config(message_type, foreground=color)  # type: ignore
         self._status_text.see("end")  # type: ignore
-        self._status_text.see(index="end")  # type: ignore
         self._status_text.configure(state="disabled")  # type: ignore
 
     def clear_messages(self) -> None:

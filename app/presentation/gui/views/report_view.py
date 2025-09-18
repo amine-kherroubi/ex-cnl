@@ -15,6 +15,7 @@ from app.presentation.gui.components.output_selector import OutputSelector
 from app.presentation.gui.components.status_display import StatusDisplay
 from app.presentation.gui.components.email_dialog import EmailDialog
 from app.presentation.gui.controllers.report_controller import ReportController
+from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
 
 
 class ReportView(ctk.CTkFrame):
@@ -55,8 +56,10 @@ class ReportView(ctk.CTkFrame):
         self.grid_rowconfigure(index=1, weight=1)
 
         # Header with back button (stays fixed)
-        header_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
-        header_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="ew")  # type: ignore
+        header_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self, fg_color=Color.TRANSPARENT
+        )
+        header_frame.grid(row=0, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.SM), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
         # Back button - secondary style
@@ -66,13 +69,13 @@ class ReportView(ctk.CTkFrame):
             command=self._on_back,
             width=100,
             height=32,
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=FontSize.LABEL),
         )
-        self._back_button.grid(row=0, column=0, padx=(0, 20), sticky="w")  # type: ignore
+        self._back_button.grid(row=0, column=0, padx=(Spacing.NONE, Spacing.LG), sticky="w")  # type: ignore
 
         # Report info
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=header_frame, fg_color="transparent"
+            master=header_frame, fg_color=Color.TRANSPARENT
         )
         info_frame.grid(row=0, column=1, sticky="ew")  # type: ignore
 
@@ -80,13 +83,13 @@ class ReportView(ctk.CTkFrame):
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.display_name,
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.H3, weight="bold"),
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
         # Scrollable content frame
         scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(master=self)
-        scrollable_frame.grid(row=1, column=0, padx=20, pady=(10, 20), sticky="nsew")  # type: ignore
+        scrollable_frame.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.LG), sticky="nsew")  # type: ignore
         scrollable_frame.grid_columnconfigure(index=0, weight=1)
 
         # Required files section
@@ -96,23 +99,23 @@ class ReportView(ctk.CTkFrame):
         self._file_selector: FileSelector = FileSelector(
             parent=scrollable_frame, on_files_changed=self._on_files_changed
         )
-        self._file_selector.grid(row=1, column=0, padx=20, pady=(20, 10), sticky="ew")  # type: ignore
+        self._file_selector.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.SM), sticky="ew")  # type: ignore
 
         # Output selector
         self._output_selector: OutputSelector = OutputSelector(
             parent=scrollable_frame, on_output_changed=self._on_output_changed
         )
-        self._output_selector.grid(row=2, column=0, padx=20, pady=(10, 10), sticky="ew")  # type: ignore
+        self._output_selector.grid(row=2, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.SM), sticky="ew")  # type: ignore
 
         # Status display
         self._status_display: StatusDisplay = StatusDisplay(parent=scrollable_frame)
-        self._status_display.grid(row=3, column=0, padx=20, pady=(10, 20), sticky="ew")  # type: ignore
+        self._status_display.grid(row=3, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.LG), sticky="ew")  # type: ignore
 
         # Button frame for Generate and Email buttons
         button_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=scrollable_frame, fg_color="transparent"
+            master=scrollable_frame, fg_color=Color.TRANSPARENT
         )
-        button_frame.grid(row=4, column=0, padx=20, pady=(0, 20), sticky="ew")  # type: ignore
+        button_frame.grid(row=4, column=0, padx=Spacing.LG, pady=(Spacing.NONE, Spacing.LG), sticky="ew")  # type: ignore
         button_frame.grid_columnconfigure(index=0, weight=1)
 
         # Generate button
@@ -121,24 +124,26 @@ class ReportView(ctk.CTkFrame):
             text="Générer le rapport",
             command=self._generate_report,
             height=40,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
         self._generate_button.grid(row=0, column=0, sticky="ew")  # type: ignore
         self._generate_button.configure(state="disabled")  # type: ignore
 
     def _create_required_files_section(self, parent: Any) -> None:
         # Required files frame
-        req_frame: ctk.CTkFrame = ctk.CTkFrame(master=parent, fg_color="transparent")
-        req_frame.grid(row=0, column=0, padx=20, pady=(20, 0), sticky="ew")  # type: ignore
+        req_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=parent, fg_color=Color.TRANSPARENT
+        )
+        req_frame.grid(row=0, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.NONE), sticky="ew")  # type: ignore
         req_frame.grid_columnconfigure(index=0, weight=1)
 
         # Title
         req_title: ctk.CTkLabel = ctk.CTkLabel(
             master=req_frame,
             text="Fichiers requis",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
-        req_title.grid(row=0, column=0, pady=(0, 10), sticky="w")  # type: ignore
+        req_title.grid(row=0, column=0, pady=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
 
         # Info box - uses theme defaults
         info_box: ctk.CTkFrame = ctk.CTkFrame(master=req_frame)
@@ -150,11 +155,11 @@ class ReportView(ctk.CTkFrame):
         req_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_box,
             text=req_text,
-            font=ctk.CTkFont(size=13),
+            font=ctk.CTkFont(size=FontSize.BODY),
             justify="left",
             anchor="w",
         )
-        req_label.grid(row=0, column=0, padx=15, pady=15, sticky="w")  # type: ignore
+        req_label.grid(row=0, column=0, padx=Spacing.MD, pady=Spacing.MD, sticky="w")  # type: ignore
 
     def _get_required_files_text(self) -> str:
         return (

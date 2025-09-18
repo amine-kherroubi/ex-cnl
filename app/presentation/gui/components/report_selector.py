@@ -8,6 +8,7 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
+from app.presentation.gui.styling.design_system import Spacing, FontSize
 
 
 class ReportSelector(ctk.CTkFrame):
@@ -36,15 +37,15 @@ class ReportSelector(ctk.CTkFrame):
         label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Rapport à générer :",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
         )
-        label.grid(row=0, column=0, padx=(10, 5), pady=10, sticky="w")  # type: ignore
+        label.grid(row=0, column=0, padx=(Spacing.SM, Spacing.XS), pady=Spacing.SM, sticky="w")  # type: ignore
 
         # Report dropdown
         self._report_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
             master=self, values=[], command=self._on_report_selected, state="readonly"
         )
-        self._report_dropdown.grid(row=0, column=1, padx=(5, 10), pady=10, sticky="ew")  # type: ignore
+        self._report_dropdown.grid(row=0, column=1, padx=(Spacing.XS, Spacing.SM), pady=Spacing.SM, sticky="ew")  # type: ignore
         self._report_dropdown.set(value="Sélectionner un type de rapport")
 
         # Description text
@@ -52,7 +53,12 @@ class ReportSelector(ctk.CTkFrame):
             master=self, height=60, state="disabled"
         )
         self._description_text.grid(  # type: ignore
-            row=1, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="ew"
+            row=1,
+            column=0,
+            columnspan=2,
+            padx=Spacing.SM,
+            pady=(Spacing.NONE, Spacing.SM),
+            sticky="ew",
         )
 
     def set_reports(self, reports: dict[str, ReportSpecification]) -> None:

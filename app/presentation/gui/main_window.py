@@ -46,7 +46,7 @@ class MainWindow(ctk.CTk):
 
         # Set theme
         ctk.set_appearance_mode(mode_string="light")
-        theme_path: Path = Path(__file__).parent / "themes/theme.json"
+        theme_path: Path = Path(__file__).parent / "styling/theme.json"
         if theme_path.exists():
             ctk.set_default_color_theme(str(theme_path))
         else:
