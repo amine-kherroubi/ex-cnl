@@ -9,7 +9,9 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
+from app.core.domain.enums.space_time import Month
 from app.core.domain.models.report_specification import ReportSpecification
+from app.presentation.gui.components.date_selector import DateSelector
 from app.presentation.gui.components.file_selector import FileSelector
 from app.presentation.gui.components.output_selector import OutputSelector
 from app.presentation.gui.components.status_display import StatusDisplay
@@ -23,11 +25,14 @@ class ReportView(ctk.CTkFrame):
         "_report_spec",
         "_controller",
         "_on_back",
+        "_date_selector",
         "_file_selector",
         "_output_selector",
         "_status_display",
         "_generate_button",
         "_back_button",
+        "_selected_month",
+        "_selected_year",
         "_selected_files",
         "_output_path",
         "_last_generated_file",
@@ -44,6 +49,8 @@ class ReportView(ctk.CTkFrame):
         self._report_spec: ReportSpecification = report_spec
         self._controller: ReportController = controller
         self._on_back: Callable[[], None] = on_back
+        self._selected_month: Month | None = None
+        self._selected_year: int | None = None
         self._selected_files: list[Path] = []
         self._output_path: Path | None = None
         self._last_generated_file: Path | None = None
@@ -95,27 +102,33 @@ class ReportView(ctk.CTkFrame):
         # Required files section
         self._create_required_files_section(parent=scrollable_frame)
 
+        # Date selector
+        self._date_selector: DateSelector = DateSelector(
+            parent=scrollable_frame, on_date_changed=self._on_date_changed
+        )
+        self._date_selector.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.SM), sticky="ew")  # type: ignore
+
         # File selector
         self._file_selector: FileSelector = FileSelector(
             parent=scrollable_frame, on_files_changed=self._on_files_changed
         )
-        self._file_selector.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.SM), sticky="ew")  # type: ignore
+        self._file_selector.grid(row=2, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.SM), sticky="ew")  # type: ignore
 
         # Output selector
         self._output_selector: OutputSelector = OutputSelector(
             parent=scrollable_frame, on_output_changed=self._on_output_changed
         )
-        self._output_selector.grid(row=2, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.SM), sticky="ew")  # type: ignore
+        self._output_selector.grid(row=3, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.SM), sticky="ew")  # type: ignore
 
         # Status display
         self._status_display: StatusDisplay = StatusDisplay(parent=scrollable_frame)
-        self._status_display.grid(row=3, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.LG), sticky="ew")  # type: ignore
+        self._status_display.grid(row=4, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.LG), sticky="ew")  # type: ignore
 
         # Button frame for Generate and Email buttons
         button_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=scrollable_frame, fg_color=Color.TRANSPARENT
         )
-        button_frame.grid(row=4, column=0, padx=Spacing.LG, pady=(Spacing.NONE, Spacing.LG), sticky="ew")  # type: ignore
+        button_frame.grid(row=5, column=0, padx=Spacing.LG, pady=(Spacing.NONE, Spacing.LG), sticky="ew")  # type: ignore
         button_frame.grid_columnconfigure(index=0, weight=1)
 
         # Generate button
@@ -128,6 +141,11 @@ class ReportView(ctk.CTkFrame):
         )
         self._generate_button.grid(row=0, column=0, sticky="ew")  # type: ignore
         self._generate_button.configure(state="disabled")  # type: ignore
+
+        # Initialize the date selector values after UI is fully set up
+        self._selected_month = self._date_selector.get_selected_month()
+        self._selected_year = self._date_selector.get_selected_year()
+        self._update_generate_button_state()
 
     def _create_required_files_section(self, parent: Any) -> None:
         # Required files frame
@@ -167,38 +185,67 @@ class ReportView(ctk.CTkFrame):
             "Le système validera les fichiers sélectionnés avant la génération."
         )
 
-    def _on_files_changed(self, files: list[Path]) -> None:
-        self._selected_files = files
-        self._update_generate_button_state()
+    def _on_date_changed(self, month: Month | None, year: int | None) -> None:
+        self._selected_month = month
+        self._selected_year = year
 
-        if files:
+        # Only update button state if it exists (to handle initialization order)
+        if hasattr(self, "_generate_button"):
+            self._update_generate_button_state()
+
+        if month and year and hasattr(self, "_status_display"):
             self._status_display.add_message(
-                message=f"{len(files)} fichier(s) sélectionné(s)",
+                message=f"Période sélectionnée : {month.value.capitalize()} {year}",
                 message_type="information",
             )
-        else:
-            self._status_display.add_message(
-                message="Aucun fichier sélectionné", message_type="avertissement"
-            )
+
+    def _on_files_changed(self, files: list[Path]) -> None:
+        self._selected_files = files
+
+        # Only update button state if it exists (to handle initialization order)
+        if hasattr(self, "_generate_button"):
+            self._update_generate_button_state()
+
+        if hasattr(self, "_status_display"):
+            if files:
+                self._status_display.add_message(
+                    message=f"{len(files)} fichier(s) sélectionné(s)",
+                    message_type="information",
+                )
+            else:
+                self._status_display.add_message(
+                    message="Aucun fichier sélectionné", message_type="avertissement"
+                )
 
     def _on_output_changed(self, output_path: Path | None) -> None:
         self._output_path = output_path
-        self._update_generate_button_state()
 
-        if output_path:
-            self._status_display.add_message(
-                message=f"Répertoire de destination : {output_path}",
-                message_type="information",
-            )
-        else:
-            self._status_display.add_message(
-                message="Aucun répertoire de destination sélectionné",
-                message_type="avertissement",
-            )
+        # Only update button state if it exists (to handle initialization order)
+        if hasattr(self, "_generate_button"):
+            self._update_generate_button_state()
+
+        if hasattr(self, "_status_display"):
+            if output_path:
+                self._status_display.add_message(
+                    message=f"Répertoire de destination : {output_path}",
+                    message_type="information",
+                )
+            else:
+                self._status_display.add_message(
+                    message="Aucun répertoire de destination sélectionné",
+                    message_type="avertissement",
+                )
 
     def _update_generate_button_state(self) -> None:
+        # Ensure button exists before updating
+        if not hasattr(self, "_generate_button"):
+            return
+
         can_generate: bool = (
-            len(self._selected_files) > 0 and self._output_path is not None
+            len(self._selected_files) > 0
+            and self._output_path is not None
+            and self._selected_month is not None
+            and self._selected_year is not None
         )
 
         if can_generate:
@@ -207,7 +254,14 @@ class ReportView(ctk.CTkFrame):
             self._generate_button.configure(state="disabled")  # type: ignore
 
     def _generate_report(self) -> None:
-        if not all([self._selected_files, self._output_path]):
+        if not all(
+            [
+                self._selected_files,
+                self._output_path,
+                self._selected_month,
+                self._selected_year,
+            ]
+        ):
             return
 
         # Disable buttons during processing
@@ -236,6 +290,8 @@ class ReportView(ctk.CTkFrame):
                     report_name=report_name,  # Use internal name, not display_name
                     source_files=self._selected_files,
                     output_directory_path=self._output_path,  # type: ignore
+                    month=self._selected_month,  # type: ignore
+                    year=self._selected_year,  # type: ignore
                 )
 
                 # Update UI on success (thread-safe)

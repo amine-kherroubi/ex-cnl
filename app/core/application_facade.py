@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Local application imports
 from app.core.config import AppConfig
-from app.core.domain.enums.space_time import Wilaya
+from app.core.domain.enums.space_time import Month, Wilaya
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.registry.report_specification_registry import (
@@ -53,8 +53,15 @@ class ApplicationFacade(object):  # Facade pattern
         report_name: str,
         source_file_paths: dict[str, Path],
         output_directory_path: Path,
+        month: Month | None = None,
+        year: int | None = None,
+        wilaya: Wilaya = Wilaya.TIZI_OUZOU,
     ) -> Path:
         self._logger.info(f"Starting report generation: {report_name}")
+
+        # If month and year are provided, log them
+        if month and year:
+            self._logger.info(f"Report period: {month.value} {year}")
 
         try:
             report_specification: ReportSpecification = ReportSpecificationRegistry.get(
@@ -64,13 +71,27 @@ class ApplicationFacade(object):  # Facade pattern
             self._logger.debug(f"Report category: {report_specification.category}")
 
             # Create report spatiotemporal context
+            # Use today's date as the report_date (as per user requirement)
+            today: date = date.today()
+
+            # If month and year are not provided, use defaults
+            if month is None or year is None:
+                # Default to current month and year if not provided
+                month = Month.from_number(today.month)
+                year = today.year
+                self._logger.debug(f"Using default period: {month.value} {year}")
+
             report_context: ReportContext = ReportContextFactory.create_context(
-                wilaya=Wilaya.TIZI_OUZOU,
+                wilaya=wilaya,
                 periodicity=report_specification.periodicity,
-                report_date=date(2025, 9, 6),
+                month=month,
+                year=year,
+                report_date=today,  # Always use today as the report date
             )
+
             self._logger.debug(
-                f"Report context created: {report_context.wilaya.value}, {report_context.report_date}"
+                f"Report context created: {report_context.wilaya.value}, "
+                f"Period: {month.value} {year}, Report date: {report_context.report_date}"
             )
 
             # Create generator and generate report

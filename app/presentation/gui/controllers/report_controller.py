@@ -7,6 +7,7 @@ from pathlib import Path
 
 # Local application imports
 from app.core.application_facade import ApplicationFacade
+from app.core.domain.enums.space_time import Month
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.utils.logging_setup import get_logger
 
@@ -34,7 +35,12 @@ class ReportController(object):
             raise
 
     def generate_report(
-        self, report_name: str, source_files: list[Path], output_directory_path: Path
+        self,
+        report_name: str,
+        source_files: list[Path],
+        output_directory_path: Path,
+        month: Month,
+        year: int,
     ) -> Path:
         """
         Generate a report with validated input files.
@@ -43,6 +49,8 @@ class ReportController(object):
             report_name: Name of the report type to generate
             source_files: List of input file paths selected by the user
             output_directory_path: Directory where the output file should be saved
+            month: Month for the report context
+            year: Year for the report context
 
         Returns:
             Path to the generated output file
@@ -54,6 +62,7 @@ class ReportController(object):
         self._logger.info(f"Starting report generation: {report_name}")
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")
+        self._logger.debug(f"Period: {month.value} {year}")
 
         try:
             # Validate input files against report requirements (fail fast)
@@ -71,6 +80,8 @@ class ReportController(object):
                 report_name=report_name,
                 source_file_paths=validated_files,
                 output_directory_path=output_directory_path,
+                month=month,
+                year=year,
             )
 
             self._logger.info(
