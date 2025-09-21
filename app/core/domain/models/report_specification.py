@@ -47,11 +47,6 @@ class ReportSpecification(BaseModel):
         ),
     ]
 
-    queries: Annotated[
-        dict[str, str],
-        Field(description="Mapping of query names to corresponding SQL templates"),
-    ]
-
     output_filename: Annotated[
         str,
         Field(description="Template for output Excel filename generation"),
@@ -60,6 +55,11 @@ class ReportSpecification(BaseModel):
     generator: Annotated[
         type[ReportGenerator],
         Field(description="Concrete generator class responsible for report production"),
+    ]
+
+    queries: Annotated[
+        dict[str, str],
+        Field(description="Mapping of query names to corresponding SQL templates"),
     ]
 
     model_config = {

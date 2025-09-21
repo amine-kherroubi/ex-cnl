@@ -20,6 +20,8 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     required_files={
         r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
     },
+    output_filename="activite_mensuelle_par_programme_{wilaya}_{date}.xlsx",
+    generator=ActiviteMensuelleGenerator,
     queries={
         "programmes": """
                     SELECT programme
@@ -206,6 +208,4 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     ORDER BY p.display_order
                 """,
     },
-    output_filename="Activité_mensuelle_par_programme_{wilaya}_{date}.xlsx",
-    generator=ActiviteMensuelleGenerator,
 )

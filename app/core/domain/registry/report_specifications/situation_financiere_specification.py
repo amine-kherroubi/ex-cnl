@@ -20,7 +20,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
         r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
         r"^Journal_decisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "decisions",
     },
-    queries={},
-    output_filename="Situation_financière_des_programmes_{wilaya}_{date}.xlsx",
+    output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,
+    queries={},
 )
