@@ -64,7 +64,7 @@ class ReportCard(ctk.CTkFrame):
         # Details
         details: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
-            text=f"Catégorie : {self._report_spec.category} | Fréquence : {self._report_spec.periodicity.to_french}",
+            text=f"Catégorie : {self._report_spec.category}",
             font=ctk.CTkFont(size=FontSize.CAPTION),
             text_color=Color.GRAY,
             anchor="w",

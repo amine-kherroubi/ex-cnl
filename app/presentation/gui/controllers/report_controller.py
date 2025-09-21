@@ -42,23 +42,6 @@ class ReportController(object):
         month: Month,
         year: int,
     ) -> Path:
-        """
-        Generate a report with validated input files.
-
-        Args:
-            report_name: Name of the report type to generate
-            source_files: List of input file paths selected by the user
-            output_directory_path: Directory where the output file should be saved
-            month: Month for the report context
-            year: Year for the report context
-
-        Returns:
-            Path to the generated output file
-
-        Raises:
-            ValueError: If validation fails or report configuration is invalid
-            FileNotFoundError: If required files don't exist
-        """
         self._logger.info(f"Starting report generation: {report_name}")
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")
@@ -99,20 +82,6 @@ class ReportController(object):
     def _validate_source_files(
         self, report_name: str, input_files: list[Path]
     ) -> dict[str, Path]:
-        """
-        Validate input files against report requirements (fail fast).
-
-        Args:
-            report_name: Name of the report type to generate
-            input_files: List of file paths selected by the user
-
-        Returns:
-            Dictionary mapping table names to matching file paths
-
-        Raises:
-            ValueError: If validation fails or required patterns are not matched
-            FileNotFoundError: If files don't exist
-        """
         self._logger.debug(
             f"Validating {len(input_files)} source files for report: {report_name}"
         )

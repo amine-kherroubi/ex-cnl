@@ -22,20 +22,13 @@ class ReportContext(BaseModel):
     )
 
     report_date: date = Field(
-        description="Specific date for report generation or data extraction",
+        default_factory=date.today,
+        description="Specific date for report generation",
     )
 
-    # Optional fields - used only according to context
     month: Month | None = Field(
         default=None,
         description="Month of the report period in French (for monthly reports)",
-    )
-
-    semester: int | None = Field(
-        default=None,
-        description="Semester (1 or 2) for semi-annual reports",
-        ge=1,
-        le=2,
     )
 
     @field_validator("report_date")

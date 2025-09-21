@@ -15,9 +15,6 @@ from app.core.domain.registry.report_specification_registry import (
 )
 from app.core.infrastructure.data.data_repository import DuckDBRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation.factories.report_context_factory import (
-    ReportContextFactory,
-)
 from app.core.services.report_generation.factories.report_generator_factory import (
     ReportGeneratorFactory,
 )
@@ -75,18 +72,17 @@ class ApplicationFacade(object):  # Facade pattern
             today: date = date.today()
 
             # If month and year are not provided, use defaults
-            if month is None or year is None:
-                # Default to current month and year if not provided
+            if month is None:
                 month = Month.from_number(today.month)
+            if year is None:
+                # Default to current month and year if not provided
                 year = today.year
                 self._logger.debug(f"Using default period: {month.value} {year}")
 
-            report_context: ReportContext = ReportContextFactory.create_context(
+            report_context: ReportContext = ReportContext(
                 wilaya=wilaya,
-                periodicity=report_specification.periodicity,
-                month=month,
                 year=year,
-                report_date=today,  # Always use today as the report date
+                month=month,
             )
 
             self._logger.debug(

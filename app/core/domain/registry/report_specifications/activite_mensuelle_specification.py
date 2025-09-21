@@ -2,7 +2,6 @@ from __future__ import annotations
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
-from app.core.domain.enums.space_time import Periodicity
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.services.report_generation.generators.activite_mensuelle import (
     ActiviteMensuelleGenerator,
@@ -13,7 +12,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     name="activite_mensuelle_par_programme",
     display_name="Activité mensuelle",
     category=ReportCategory.HABITAT_RURAL,
-    periodicity=Periodicity.MONTHLY,
     description=(
         "Report de suivi mensuel des activités par programme, "
         "renseigné par la BNH (ex-CNL). Comprend les lancements et livraisons "

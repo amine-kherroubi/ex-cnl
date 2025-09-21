@@ -158,7 +158,7 @@ class SettingsView(ctk.CTkFrame):
 
         format_option: ctk.CTkOptionMenu = ctk.CTkOptionMenu(
             master=general_frame,
-            values=["Excel (.xlsx)", "CSV (.csv)", "PDF (.pdf)"],
+            values=["Excel (.xlsx)"],
             font=ctk.CTkFont(size=FontSize.BODY),
         )
         format_option.grid(row=0, column=1, padx=(Spacing.SM, Spacing.LG), pady=Spacing.SM, sticky="w")  # type: ignore

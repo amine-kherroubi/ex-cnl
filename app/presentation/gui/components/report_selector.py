@@ -98,7 +98,6 @@ class ReportSelector(ctk.CTkFrame):
         description_text: str = (
             f"Rapport : {report_spec.display_name}\n"
             f"Catégorie : {report_spec.category}\n"
-            f"Fréquence : {report_spec.periodicity}\n"
             f"Description : {report_spec.description}"
         )
 

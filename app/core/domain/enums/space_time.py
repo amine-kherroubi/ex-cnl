@@ -104,20 +104,3 @@ class Month(StrEnum):
 
     def last_day(self, year: int) -> int:
         return monthrange(year, self.number)[1]
-
-
-class Periodicity(StrEnum):
-    MONTHLY = "Monthly"
-    SEMESTRIAL = "Semestrial"
-    TRIMESTRIAL = "Trimestrial"
-    ANNUAL = "Annual"
-
-    @property
-    def to_french(self) -> str:
-        translations: dict[Periodicity, str] = {
-            Periodicity.MONTHLY: "Mensuelle",
-            Periodicity.SEMESTRIAL: "Semestrielle",
-            Periodicity.TRIMESTRIAL: "Trimestrielle",
-            Periodicity.ANNUAL: "Annuelle",
-        }
-        return translations[self]

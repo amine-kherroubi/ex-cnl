@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
-from app.core.domain.enums.space_time import Periodicity
 from app.core.services.report_generation.base.report_generator import (
     ReportGenerator,
 )
@@ -34,10 +33,6 @@ class ReportSpecification(BaseModel):
     category: Annotated[
         ReportCategory,
         Field(description="Thematic category of the report"),
-    ]
-
-    periodicity: Annotated[
-        Periodicity, Field(description="Report generation frequency")
     ]
 
     description: Annotated[
