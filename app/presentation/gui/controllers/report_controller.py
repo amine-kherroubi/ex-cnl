@@ -46,7 +46,7 @@ class ReportController(object):
         self._logger.info(f"Starting report generation: {report_name}")
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")
-        self._logger.debug(f"Period: {month.value} {year}")
+        self._logger.debug(f"Period: {month} {year}")
 
         try:
             # Validate input files against report requirements (fail fast)
@@ -68,7 +68,7 @@ class ReportController(object):
 
             self._logger.debug(
                 f"Report context created: {report_context.wilaya.value}, "
-                f"Period: {month.value} {year}, Report date: {report_context.report_date}"
+                f"Period: {month} {year}, Report date: {report_context.reporting_date}"
             )
 
             # Generate the report (facade will handle filename generation)

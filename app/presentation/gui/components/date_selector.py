@@ -42,7 +42,7 @@ class DateSelector(ctk.CTkFrame):
 
         # Initialize variables
         self._month_var: ctk.StringVar = ctk.StringVar(
-            value=self._current_month.value.capitalize()
+            value=self._current_month.capitalize()
         )
         self._year_var: ctk.StringVar = ctk.StringVar(value=str(self._current_year))
 
@@ -71,7 +71,7 @@ class DateSelector(ctk.CTkFrame):
         month_label.grid(row=1, column=0, padx=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
 
         # Month dropdown
-        month_values: list[str] = [month.value.capitalize() for month in Month]
+        month_values: list[str] = [month.capitalize() for month in Month]
         self._month_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
             master=self,
             values=month_values,
@@ -126,7 +126,7 @@ class DateSelector(ctk.CTkFrame):
         selected_month: Month | None = None
 
         for month in Month:
-            if month.value.capitalize() == month_str:
+            if month.capitalize() == month_str:
                 selected_month = month
                 break
 
@@ -143,7 +143,7 @@ class DateSelector(ctk.CTkFrame):
 
             if selected_date > today:
                 # Reset to current month/year if future date selected
-                self._month_var.set(self._current_month.value.capitalize())
+                self._month_var.set(self._current_month.capitalize())
                 self._year_var.set(str(self._current_year))
                 selected_month = self._current_month
                 selected_year = self._current_year
@@ -155,7 +155,7 @@ class DateSelector(ctk.CTkFrame):
         """Get the currently selected month."""
         month_str: str = self._month_var.get()
         for month in Month:
-            if month.value.capitalize() == month_str:
+            if month.capitalize() == month_str:
                 return month
         return None
 
@@ -168,6 +168,6 @@ class DateSelector(ctk.CTkFrame):
 
     def reset_to_current(self) -> None:
         """Reset selection to current month and year."""
-        self._month_var.set(self._current_month.value.capitalize())
+        self._month_var.set(self._current_month.capitalize())
         self._year_var.set(str(self._current_year))
         self._on_selection_changed()

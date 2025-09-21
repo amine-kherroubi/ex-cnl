@@ -54,7 +54,7 @@ class ReportGenerator(ABC):
             f"Generator initialized for report: {report_specification.display_name}"
         )
         self._logger.debug(
-            f"Report context: wilaya={report_context.wilaya.value}, date={report_context.report_date}"
+            f"Report context: wilaya={report_context.wilaya.value}, date={report_context.reporting_date}"
         )
 
     def generate(
@@ -194,7 +194,7 @@ class ReportGenerator(ABC):
         )
         output_filename = output_filename.replace(
             "{date}",
-            DateFormatter.to_french_filename_date(self._report_context.report_date),
+            DateFormatter.to_french_filename_date(self._report_context.reporting_date),
         )
 
         if not output_filename.endswith(".xlsx"):

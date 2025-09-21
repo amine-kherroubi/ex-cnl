@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from calendar import monthrange
+from datetime import date
 from enum import StrEnum
 
 
@@ -99,8 +100,12 @@ class Month(StrEnum):
         return list(Month).index(self) + 1
 
     @classmethod
-    def from_number(cls, n: int) -> "Month":
+    def from_number(cls, n: int) -> Month:
         return list(cls)[n - 1]
+
+    @property
+    def is_current(self) -> bool:
+        return self.number == date.today().month
 
     def last_day(self, year: int) -> int:
         return monthrange(year, self.number)[1]

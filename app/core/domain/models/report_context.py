@@ -21,7 +21,7 @@ class ReportContext(BaseModel):
         le=2100,
     )
 
-    report_date: date = Field(
+    reporting_date: date = Field(
         default_factory=date.today,
         description="Specific date for report generation",
     )
@@ -31,7 +31,7 @@ class ReportContext(BaseModel):
         description="Month of the report period in French (for monthly reports)",
     )
 
-    @field_validator("report_date")
+    @field_validator("reporting_date")
     @classmethod
     def validate_report_date(cls, report_date: date) -> date:
         if report_date > date.today():

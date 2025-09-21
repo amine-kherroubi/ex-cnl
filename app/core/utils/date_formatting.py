@@ -16,12 +16,12 @@ class DateFormatter(object):
     @classmethod
     def to_french_month_year(cls, month: Month, year: int) -> str:
         """Convert to French format: 'JANVIER 2025'"""
-        return f"{month.value.upper()} {year}"
+        return f"{month.upper()} {year}"
 
     @classmethod
     def to_french_date_range(cls, month: Month, year: int) -> str:
         """Convert to French date range: 'de JANVIER au 31 JANVIER 2025'"""
-        month_name = month.value.upper()
+        month_name = month.upper()
         last_day = month.last_day(year)
         return f"de {month_name} au {last_day} {month_name} {year}"
 

@@ -72,7 +72,7 @@ class ReportGeneratorFactory(object):
                 f"{generator_class.__name__} created successfully for report '{report_name}'"
             )
             cls._logger.debug(
-                f"Generator context: wilaya={report_context.wilaya.value}, date={report_context.report_date}"
+                f"Generator context: wilaya={report_context.wilaya.value}, date={report_context.reporting_date}"
             )
 
             return generator

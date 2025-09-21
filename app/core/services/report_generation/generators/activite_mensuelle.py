@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Imports de la bibliothèque standard
+from datetime import date
 from typing import Any
 
 # Imports tiers
@@ -57,24 +58,12 @@ class ActiviteMensuelleGenerator(ReportGenerator):
 
         formatted_query: str = query_template
 
-        if self._report_context.month:
-            month_number: int = self._report_context.month.number
-            year: int = self._report_context.year
-
-            formatted_query = formatted_query.replace(
-                "{month_number:02d}", f"{month_number:02d}"
-            )
-            formatted_query = formatted_query.replace(
-                "{month_number}", str(month_number)
-            )
-            formatted_query = formatted_query.replace("{year}", str(year))
-
-            self._logger.debug(
-                f"Placeholders replaced with: month_number={month_number:02d}, year={year}"
-            )
-
         formatted_query = formatted_query.replace(
-            "{year}", str(self._report_context.year)
+            "{month}", str(self._report_context.month.number)
+        ).replace("{year}", str(self._report_context.year))
+
+        self._logger.debug(
+            f"Placeholders replaced with: month={self._report_context.month.number}, year={self._report_context.year}"
         )
 
         self._logger.debug("Query formatting completed")
@@ -92,7 +81,7 @@ class ActiviteMensuelleGenerator(ReportGenerator):
     def _add_first_table_header(self, sheet: Worksheet) -> None:
         self._logger.debug("Ajout de l'en-tête du report")
 
-        # HABITAT RURAL - Définir la valeur d'abord, puis fusionner
+        # Titre
         sheet[f"A{self._current_row}"] = "Habitat rural"
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
@@ -109,8 +98,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
         self._logger.debug(f"Wilaya ajoutée : {wilaya_text}")
 
-        # Titre principal - Définir la valeur d'abord, puis fusionner
         self._current_row += 1
+
+        # Titre principal
         sheet[f"A{self._current_row}"] = (
             "Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)"
         )
@@ -121,10 +111,11 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
         self._logger.debug("Titre du report ajouté")
 
-        # Mois - Définir la valeur d'abord, puis fusionner
         self._current_row += 1
+
+        # Mois
         month_text: str = (
-            f"Mois de {self._report_context.month.value} {self._report_context.year}"  # type: ignore
+            f"Mois de {self._report_context.month} {self._report_context.year}"  # type: ignore
         )
         sheet[f"A{self._current_row}"] = month_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
@@ -163,7 +154,7 @@ class ActiviteMensuelleGenerator(ReportGenerator):
 
         sheet[f"B{self._current_row}"] = (
             f"État d'exécution des tranches financières durant le mois de "
-            f"{self._report_context.month.value} {self._report_context.year}"  # type: ignore
+            f"{self._report_context.month} {self._report_context.year}"  # type: ignore
         )
         sheet.merge_cells(f"B{self._current_row}:E{self._current_row}")
         for cell in [
@@ -182,11 +173,12 @@ class ActiviteMensuelleGenerator(ReportGenerator):
 
         self._logger.debug("Légende du tableau ajoutée")
 
+        self._current_row += 1
+
         # En-têtes
         self._logger.debug(
             f"Ajout des en-têtes de colonnes à la ligne {self._current_row}"
         )
-        self._current_row += 1
         sheet[f"B{self._current_row}"] = (
             "Livraisons (libération de la dernière tranche)"
         )
@@ -210,19 +202,29 @@ class ActiviteMensuelleGenerator(ReportGenerator):
                 bottom=Side(style="thin"),
             )
 
-        # Sous-en-têtes
         self._current_row += 1
+
+        # Sous-en-têtes
         sheet[f"B{self._current_row}"] = (
-            f"{self._report_context.month.value.capitalize()} {self._report_context.year}"  # type: ignore
+            f"{self._report_context.month.capitalize()} {self._report_context.year}"
         )
+
+        end_day: int = (
+            self._report_context.month.last_day(self._report_context.year)
+            if not self._report_context.month.is_current
+            else date.today().day
+        )
+
         sheet[f"C{self._current_row}"] = (
-            f"Cumul du 1er janvier au 31 {self._report_context.month.value} {self._report_context.year}"  # type: ignore
+            f"Cumul du 1er janvier au {end_day}"
+            f"{self._report_context.month} {self._report_context.year}"
         )
         sheet[f"D{self._current_row}"] = (
-            f"{self._report_context.month.value.capitalize()} {self._report_context.year}"  # type: ignore
+            f"{self._report_context.month.capitalize()} {self._report_context.year}"
         )
         sheet[f"E{self._current_row}"] = (
-            f"Cumul du 1er janvier au 31 {self._report_context.month.value} {self._report_context.year}"  # type: ignore
+            f"Cumul du 1er janvier au {end_day}"
+            f"{self._report_context.month} {self._report_context.year}"
         )
 
         for cell in [
@@ -241,8 +243,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
 
         self._logger.debug("Sous-en-têtes ajoutés avec les plages de dates")
 
-        # Ajouter les données des résultats de requêtes
         self._current_row += 1
+
+        # Ajouter les données des résultats de requêtes
         self._logger.debug(
             f"Début des lignes de données à la ligne {self._current_row}"
         )
@@ -397,8 +400,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
 
         self._current_row += 1
+
         sheet[f"A{self._current_row}"] = (
-            f"Arrêté le {self._report_context.report_date.strftime("%d/%m/%Y")}"
+            f"Arrêté le {self._report_context.reporting_date.strftime("%d/%m/%Y")}"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)

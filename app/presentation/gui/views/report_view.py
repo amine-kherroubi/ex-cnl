@@ -195,7 +195,7 @@ class ReportView(ctk.CTkFrame):
 
         if month and year and hasattr(self, "_status_display"):
             self._status_display.add_message(
-                message=f"Période sélectionnée : {month.value.capitalize()} {year}",
+                message=f"Période sélectionnée : {month.capitalize()} {year}",
                 message_type="information",
             )
 

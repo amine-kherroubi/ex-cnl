@@ -47,7 +47,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     '100%  Tranche totale',
                     '100%  1+2+3 EME TRANCHE'
                 )
-                AND "Date OV" LIKE '%/{month_number:02d}/{year}'
+                AND "Date OV" LIKE '%/{month}/{year}'
                 GROUP BY "Sous programme"
             ) data ON p.programme = data."Sous programme"
             ORDER BY p.display_order
@@ -71,7 +71,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     '100%  Tranche totale',
                     '100%  1+2+3 EME TRANCHE'
                 )
-                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month_number}
+                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
                 GROUP BY "Sous programme"
             ) data ON p.programme = data."Sous programme"
@@ -96,7 +96,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     '100%  1+2+3 EME TRANCHE',
                     'Tranche complémentaire 2'
                 )
-                AND "Date OV" LIKE '%/{month_number:02d}/{year}'
+                AND "Date OV" LIKE '%/{month}/{year}'
                 GROUP BY "Sous programme"
             ) data ON p.programme = data."Sous programme"
             ORDER BY p.display_order
@@ -120,7 +120,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     '100%  1+2+3 EME TRANCHE',
                     'Tranche complémentaire 2'
                 )
-                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month_number}
+                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
                 GROUP BY "Sous programme"
             ) data ON p.programme = data."Sous programme"
