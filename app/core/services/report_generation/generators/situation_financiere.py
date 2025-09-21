@@ -1,24 +1,29 @@
 from __future__ import annotations
 
-# Imports de la bibliothèque standard
-from typing import Any, Literal
-
 # Imports tiers
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.styles import Alignment, Border, Font, Side, PatternFill
+from openpyxl.styles import Alignment, Border, Font, Side
+from openpyxl.utils import get_column_letter
 
 # Imports de l'application locale
-from app.core.domain.models.programme import Programme
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
+from app.core.domain.predefined_objects.programmes import get_programmes_dataframe
+from app.core.domain.predefined_objects.dairas_et_communes import (
+    get_dairas_communes_dataframe,
+)
+from app.core.domain.predefined_objects.dairas_et_communes import (
+    DAIRA_COMMUNE_MAPPING,
+    DAIRAS_TIZI_OUZOU,
+)
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
 
 
 class SituationFinanciereGenerator(ReportGenerator):
-    __slots__ = ("_current_row", "_target_program")
+    __slots__ = ("_current_row",)
 
     def __init__(
         self,
@@ -31,10 +36,72 @@ class SituationFinanciereGenerator(ReportGenerator):
             file_io_service, data_repository, report_specification, report_context
         )
         self._current_row: int = 1
-        self._target_program: Programme | None = None
 
-    def set_target_program(self, programme: Programme) -> None:
-        self._target_program = programme
+    def _create_predefined_tables(self) -> None:
+        self._logger.debug("Creating reference tables")
+        try:
+            self._logger.debug(f"Creating reference table 'programmes'")
+
+            df: pd.DataFrame = get_programmes_dataframe()
+            self._data_repository.create_table_from_dataframe("programmes", df)
+
+            rows, cols = df.shape
+            self._logger.info(
+                f"Reference table 'programmes' created: {rows} rows and {cols} columns"
+            )
+            self._logger.debug(f"Columns for 'programmes': {list(df.columns)}")
+
+        except Exception as error:
+            self._logger.exception(
+                f"Failed to create reference table 'programmes': {error}"
+            )
+            raise
+
+        try:
+            self._logger.debug(f"Creating reference table 'dairas_communes'")
+
+            df: pd.DataFrame = get_dairas_communes_dataframe()
+            self._data_repository.create_table_from_dataframe("dairas_communes", df)
+
+            rows, cols = df.shape
+            self._logger.info(
+                f"Reference table 'dairas_communes' created: {rows} rows and {cols} columns"
+            )
+            self._logger.debug(f"Columns for 'dairas_communes': {list(df.columns)}")
+
+        except Exception as error:
+            self._logger.exception(
+                f"Failed to create reference table 'dairas_communes': {error}"
+            )
+            raise
+
+    def _format_query_with_context(self, query_template: str) -> str:
+        self._logger.debug("Formatting query template with report context")
+
+        formatted_query: str = query_template
+
+        if self._report_context.month:
+            month_number: int = self._report_context.month.number
+            year: int = self._report_context.year
+
+            formatted_query = formatted_query.replace(
+                "{month_number:02d}", f"{month_number:02d}"
+            )
+            formatted_query = formatted_query.replace(
+                "{month_number}", str(month_number)
+            )
+            formatted_query = formatted_query.replace("{year}", str(year))
+
+            self._logger.debug(
+                f"Placeholders replaced with: month_number={month_number:02d}, year={year}"
+            )
+
+        formatted_query = formatted_query.replace(
+            "{year}", str(self._report_context.year)
+        )
+
+        self._logger.debug("Query formatting completed")
+        return formatted_query
 
     def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
@@ -45,35 +112,22 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._add_totals_row(sheet, query_results)
 
     def _add_header(self, sheet: Worksheet) -> None:
-        self._logger.debug("Ajout de l'en-tête du rapport")
+        self._logger.debug("Adding report header")
 
-        # Numéro de tableau
-        sheet[f"O{self._current_row}"] = "TABLEAU 01"
-        sheet[f"O{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
+        # Tableau number in column O
+        sheet[f"O{self._current_row}"] = "TABLEAU    01"
+        sheet[f"O{self._current_row}"].font = Font(
+            name="Arial", size=10, bold=True, color="FF0000"
+        )
         sheet[f"O{self._current_row}"].alignment = Alignment(horizontal="right")
 
         self._current_row += 1
 
-        # Titre principal
+        # Row 2: Main title
         sheet[f"A{self._current_row}"] = (
-            "SITUATION FINANCIÈRE DES PROGRAMMES DE LOGEMENTS AIDÉS PAR PROGRAMME, DAIRA ET PAR COMMUNE"
+            "SITUATION   FINANCIERE   DES PROGRAMMES  DE  LOGEMENTS  AIDES  PAR  PROGRAMME, DAIRA ET PAR COMMUNE"
         )
-        sheet.merge_cells(f"A{self._current_row}:O{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=11, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
-        )
-
-        self._current_row += 1
-
-        # Programme
-        programme_name: str = (
-            self._report_context.programme
-            if hasattr(self._report_context, "programme")
-            else "PROGRAMME DE LOGEMENTS AIDÉS EN MILIEU RURAL"
-        )
-        sheet[f"A{self._current_row}"] = programme_name
-        sheet.merge_cells(f"A{self._current_row}:O{self._current_row}")
+        sheet.merge_cells(f"A{self._current_row}:P{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="center", vertical="center"
@@ -81,11 +135,11 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         self._current_row += 1
 
-        # Date d'arrêté
+        # Row 3: Programme name
         sheet[f"A{self._current_row}"] = (
-            f"ARRÊTÉ AU {self._report_context.report_date.strftime('%d/%m/%Y')}"
+            "PROGRAMME  DE  LOGEMENTS  AIDES EN  MILIEU  RURAL"
         )
-        sheet.merge_cells(f"A{self._current_row}:O{self._current_row}")
+        sheet.merge_cells(f"A{self._current_row}:P{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
         sheet[f"A{self._current_row}"].alignment = Alignment(
             horizontal="center", vertical="center"
@@ -93,104 +147,102 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         self._current_row += 1
 
-        # DL de wilaya
-        sheet[f"A{self._current_row}"] = (
-            f"DL DE {self._report_context.wilaya.value.upper()}"
-        )
+        # Row 4: Date
+        sheet[f"A{self._current_row}"] = f"ARRETEE   AU  20/03/2025"
+        sheet.merge_cells(f"A{self._current_row}:P{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
+        sheet[f"A{self._current_row}"].alignment = Alignment(
+            horizontal="center", vertical="center"
+        )
 
         self._current_row += 2
 
+        # Row 6: DL DE TIZI OUZOU
+        sheet[f"A{self._current_row}"] = "DL.DE TIZI OUZOU"
+        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
+        self._current_row += 1
+
     def _add_table_headers(self, sheet: Worksheet) -> None:
-        self._logger.debug("Ajout des en-têtes de colonnes")
+        self._logger.debug("Adding table headers")
 
-        # Structure des en-têtes multi-niveaux
-        start_row: int = self._current_row
+        start_row = self._current_row
 
-        # Première ligne d'en-têtes
+        # Move to actual header rows
+        start_row += 1
+
+        # First header row (main categories)
+        # Column A-B: DAIRA and COMMUNES (spanning 3 rows)
         sheet[f"A{start_row}"] = "DAIRA"
         sheet.merge_cells(f"A{start_row}:A{start_row + 2}")
 
         sheet[f"B{start_row}"] = "COMMUNES"
         sheet.merge_cells(f"B{start_row}:B{start_row + 2}")
 
-        sheet[f"C{start_row}"] = "NOMBRE TOTAL D'AIDES INSCRITS"
+        # Column C: Yellow column
+        sheet[f"C{start_row}"] = "NBRE D'AIDES INSCRITES (1)"
         sheet.merge_cells(f"C{start_row}:C{start_row + 2}")
 
-        sheet[f"D{start_row}"] = "ENGAGEMENT PAR BNH (EX CNL)"
-        sheet.merge_cells(f"D{start_row}:G{start_row}")
+        # Columns D-E: Yellow columns
+        sheet[f"D{start_row}"] = "MONTANTS INSCRITS"
+        sheet.merge_cells(f"D{start_row}:D{start_row + 2}")
 
-        sheet[f"H{start_row}"] = "ENGAGEMENT PAR MDV (DÉCISION D'INSCRIPTION)"
-        sheet.merge_cells(f"H{start_row}:I{start_row}")
+        sheet[f"E{start_row}"] = "NBRE D'AIDES INSCRITS"
+        sheet.merge_cells(f"E{start_row}:E{start_row + 2}")
 
-        sheet[f"J{start_row}"] = "CONSOMMATIONS"
-        sheet.merge_cells(f"J{start_row}:M{start_row}")
+        # Columns F-G: Yellow columns
+        sheet[f"F{start_row}"] = "MONTANTS INSCRITS"
+        sheet.merge_cells(f"F{start_row}:F{start_row + 2}")
 
-        sheet[f"N{start_row}"] = "% CONSOMMÉ"
-        sheet.merge_cells(f"N{start_row}:N{start_row + 2}")
+        sheet[f"G{start_row}"] = "NOMBRE D'AIDES INSCRITS (2)"
+        sheet.merge_cells(f"G{start_row}:G{start_row + 2}")
 
-        sheet[f"O{start_row}"] = "SOLDE MONTANT (Reste à payer)"
+        # Column H: Yellow
+        sheet[f"H{start_row}"] = "MONTANTS INSCRITS (3)"
+        sheet.merge_cells(f"H{start_row}:H{start_row + 2}")
+
+        # Column I: CONSOMMATIONS header
+        sheet[f"I{start_row}"] = "CONSOMMATIONS"
+        sheet.merge_cells(f"I{start_row}:N{start_row}")
+
+        # Column O: Yellow column
+        sheet[f"O{start_row}"] = "CUMULLEE (9)=(4)+(5)"
         sheet.merge_cells(f"O{start_row}:O{start_row + 2}")
 
-        sheet[f"P{start_row}"] = "RESTE NOMBRE (Fin de chantier)"
+        # Column P: Yellow column
+        sheet[f"P{start_row}"] = "SOLDE (10)=(3)-(9)"
         sheet.merge_cells(f"P{start_row}:P{start_row + 2}")
 
-        # Deuxième ligne d'en-têtes
-        second_row: int = start_row + 1
+        # Second header row (sub-categories under CONSOMMATIONS)
+        second_row = start_row + 1
 
-        sheet[f"D{second_row}"] = "NOMBRE D'AIDES INSCRITS"
-        sheet[f"E{second_row}"] = "MONTANTS INSCRITS"
-        sheet[f"F{second_row}"] = "NOMBRE D'AIDES LANCÉS (1ère tranche)"
-        sheet[f"G{second_row}"] = "MONTANTS DÉCRITS (5)"
+        # CUMULES AU 31/12/2024
+        sheet[f"I{second_row}"] = "CUMULES AU 31/12/2024"
+        sheet.merge_cells(f"I{second_row}:K{second_row}")
 
-        sheet[f"H{second_row}"] = "NOMBRE D'AIDES"
-        sheet[f"I{second_row}"] = "MONTANTS"
+        # DE JANVIER 2025 A MARS 2024
+        sheet[f"L{second_row}"] = "DE  JANVIER 2025 A MARS 2024"
+        sheet.merge_cells(f"L{second_row}:N{second_row}")
 
-        sheet[f"J{second_row}"] = "CUMULES AU 31/12/2024"
-        sheet.merge_cells(f"J{second_row}:K{second_row}")
+        # Third header row (detail columns)
+        third_row = start_row + 2
 
-        sheet[f"L{second_row}"] = (
-            f"DE JANVIER 2025 À {self._report_context.month.value.upper() if self._report_context.month else 'MARS'} 2025"
-        )
-        sheet.merge_cells(f"L{second_row}:M{second_row}")
-
-        # Troisième ligne d'en-têtes
-        third_row: int = start_row + 2
-
-        sheet[f"D{third_row}"] = ""
-        sheet[f"E{third_row}"] = ""
-        sheet[f"F{third_row}"] = ""
-        sheet[f"G{third_row}"] = ""
-        sheet[f"H{third_row}"] = ""
-        sheet[f"I{third_row}"] = ""
-
-        sheet[f"J{third_row}"] = "NOMBRE D'AIDES"
-        sheet[f"K{third_row}"] = "MONTANT (4)"
+        sheet[f"I{third_row}"] = "NOMBRE D'AIDES"
+        sheet[f"J{third_row}"] = "T1"
+        sheet[f"K{third_row}"] = "T2"
+        sheet[f"L{third_row}"] = "T3"
+        sheet[f"M{third_row}"] = "MONTANT (4)"
         sheet[f"L{third_row}"] = "NOMBRE D'AIDES"
-        sheet[f"M{third_row}"] = "MONTANT (5)"
+        sheet[f"M{third_row}"] = "T1"
+        sheet[f"N{third_row}"] = "T2"
+        sheet[f"O{third_row}"] = "T3"
+        sheet[f"P{third_row}"] = "MONTANT (5)"
 
-        # Appliquer le formatage aux en-têtes
+        # Apply formatting to all header cells
         for row in range(start_row, start_row + 3):
-            for col in [
-                "A",
-                "B",
-                "C",
-                "D",
-                "E",
-                "F",
-                "G",
-                "H",
-                "I",
-                "J",
-                "K",
-                "L",
-                "M",
-                "N",
-                "O",
-                "P",
-            ]:
-                cell = sheet[f"{col}{row}"]
-                cell.font = Font(name="Arial", size=9, bold=True)
+            for col_num in range(1, 17):  # A to P
+                col_letter = get_column_letter(col_num)
+                cell = sheet[f"{col_letter}{row}"]
+                cell.font = Font(name="Arial", size=8, bold=True)
                 cell.alignment = Alignment(
                     horizontal="center", vertical="center", wrap_text=True
                 )
@@ -201,115 +253,95 @@ class SituationFinanciereGenerator(ReportGenerator):
                     bottom=Side(style="thin"),
                 )
 
-        # Numérotation des colonnes
         self._current_row = start_row + 3
-        sheet[f"J{self._current_row}"] = "T1"
-        sheet[f"K{self._current_row}"] = "T2"
-        sheet[f"L{self._current_row}"] = "T3"
-        sheet[f"M{self._current_row}"] = ""
-
-        for col in ["J", "K", "L", "M"]:
-            cell = sheet[f"{col}{self._current_row}"]
-            cell.font = Font(name="Arial", size=8)
-            cell.alignment = Alignment(horizontal="center")
-
-        self._current_row += 1
 
     def _add_data_rows(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        self._logger.debug("Ajout des lignes de données")
+        self._logger.debug("Adding data rows")
 
-        # Récupérer les données de base
-        data_by_daira_commune = query_results.get(
-            "data_by_daira_commune", pd.DataFrame()
-        )
+        # Get all dairas in order
+        dairas_order = sorted(DAIRAS_TIZI_OUZOU)
 
-        if data_by_daira_commune.empty:
-            self._logger.warning("Aucune donnée trouvée pour daira/commune")
-            return
+        for daira in dairas_order:
+            # Get communes for this daira
+            communes = sorted(DAIRA_COMMUNE_MAPPING.get(daira, []))
 
-        # Grouper les données par daira
-        daira_groups = data_by_daira_commune.groupby("daira", sort=False)
+            if not communes:
+                continue
 
-        for daira, communes_data in daira_groups:
             daira_start_row = self._current_row
-            communes_count = len(communes_data)
 
-            # Ajouter le nom de la daira (fusionner les cellules si plusieurs communes)
+            # Add daira name (merge cells if multiple communes)
             sheet[f"A{daira_start_row}"] = daira
-            if communes_count > 1:
+            if len(communes) > 1:
                 sheet.merge_cells(
-                    f"A{daira_start_row}:A{daira_start_row + communes_count - 1}"
+                    f"A{daira_start_row}:A{daira_start_row + len(communes) - 1}"
                 )
 
-            # Ajouter les données pour chaque commune
-            for idx, (_, row) in enumerate(communes_data.iterrows()):
+            # Format daira cell
+            for i in range(len(communes)):
+                cell = sheet[f"A{daira_start_row + i}"]
+                cell.font = Font(name="Arial", size=8)
+                cell.alignment = Alignment(horizontal="left", vertical="center")
+                cell.border = Border(
+                    left=Side(style="thin"),
+                    right=Side(style="thin"),
+                    top=Side(style="thin"),
+                    bottom=Side(style="thin"),
+                )
+
+            # Add data for each commune
+            for idx, commune in enumerate(communes):
                 row_num = daira_start_row + idx
 
-                # Commune
-                sheet[f"B{row_num}"] = row.get("commune", "")
+                # Commune name
+                sheet[f"B{row_num}"] = commune
+                sheet[f"B{row_num}"].font = Font(name="Arial", size=8)
 
-                # Nombre total d'aides inscrits
-                sheet[f"C{row_num}"] = row.get("nb_aides_inscrits", 0)
+                # Yellow columns with sample data (these would be filled from queries)
+                # Column C: Number with yellow background
+                sheet[f"C{row_num}"] = 0
 
-                # Engagement par BNH
-                sheet[f"D{row_num}"] = row.get("nb_aides_bnh", 0)
-                sheet[f"E{row_num}"] = row.get("montants_inscrits", 0)
-                sheet[f"F{row_num}"] = row.get("nb_aides_lances", 0)
-                sheet[f"G{row_num}"] = row.get("montants_decrits", 0)
+                # Column D: Amount with yellow background
+                sheet[f"D{row_num}"] = 0
 
-                # Engagement par MDV
-                sheet[f"H{row_num}"] = row.get("nb_aides_mdv", 0)
-                sheet[f"I{row_num}"] = row.get("montants_mdv", 0)
+                # Column E: Number with yellow background
+                sheet[f"E{row_num}"] = 0
 
-                # Consommations
-                sheet[f"J{row_num}"] = row.get("nb_aides_cumul_2024", 0)
-                sheet[f"K{row_num}"] = f'{row.get("montant_cumul_2024", 0):,.0f}'
-                sheet[f"L{row_num}"] = row.get("nb_aides_2025", 0)
-                sheet[f"M{row_num}"] = f'{row.get("montant_2025", 0):,.0f}'
+                # Column F: Amount with yellow background
+                sheet[f"F{row_num}"] = 0
 
-                # % Consommé
-                total_montant = row.get("montants_inscrits", 0)
-                montant_consomme = row.get("montant_cumul_2024", 0) + row.get(
-                    "montant_2025", 0
-                )
-                pourcentage = (
-                    (montant_consomme / total_montant * 100) if total_montant > 0 else 0
-                )
-                sheet[f"N{row_num}"] = f"{pourcentage:.1f}%"
+                # Column G: Number with yellow background
+                sheet[f"G{row_num}"] = 0
 
-                # Solde
-                sheet[f"O{row_num}"] = f"{total_montant - montant_consomme:,.0f}"
+                # Column H: Amount with yellow background
+                sheet[f"H{row_num}"] = 0
 
-                # Reste nombre
-                sheet[f"P{row_num}"] = (
-                    row.get("nb_aides_inscrits", 0)
-                    - row.get("nb_aides_cumul_2024", 0)
-                    - row.get("nb_aides_2025", 0)
-                )
+                # White columns (empty, no data)
+                sheet[f"I{row_num}"] = 0  # Would be calculated
+                sheet[f"J{row_num}"] = 0  # T1 yellow
+                sheet[f"K{row_num}"] = 0  # T2 yellow
+                sheet[f"L{row_num}"] = 0  # T3 yellow
+                sheet[f"M{row_num}"] = 0  # Montant yellow
+                sheet[f"L{row_num}"] = 0  # Would be from query
+                sheet[f"M{row_num}"] = 0  # T1 yellow
+                sheet[f"N{row_num}"] = 0  # T2 yellow
+                sheet[f"O{row_num}"] = 0  # T3 yellow
+                sheet[f"P{row_num}"] = 0  # Montant yellow
 
-                # Appliquer le formatage
-                for col in [
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                    "G",
-                    "H",
-                    "I",
-                    "J",
-                    "K",
-                    "L",
-                    "M",
-                    "N",
-                    "O",
-                    "P",
-                ]:
-                    cell = sheet[f"{col}{row_num}"]
-                    cell.font = Font(name="Arial", size=9)
+                # Column O: Cumulated (yellow)
+                sheet[f"O{row_num}"] = 0
+
+                # Column P: Balance (yellow)
+                sheet[f"P{row_num}"] = 0
+
+                # Apply formatting to all cells in the row
+                for col_num in range(1, 17):  # A to P
+                    col_letter = get_column_letter(col_num)
+                    cell = sheet[f"{col_letter}{row_num}"]
+                    if not cell.font:
+                        cell.font = Font(name="Arial", size=8)
                     cell.alignment = Alignment(horizontal="center", vertical="center")
                     cell.border = Border(
                         left=Side(style="thin"),
@@ -318,86 +350,53 @@ class SituationFinanciereGenerator(ReportGenerator):
                         bottom=Side(style="thin"),
                     )
 
-            self._current_row += communes_count
+            self._current_row += len(communes)
 
     def _add_totals_row(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        self._logger.debug("Ajout de la ligne des totaux")
+        self._logger.debug("Adding totals row")
 
-        # Récupérer les totaux depuis les résultats de requêtes
-        totals = query_results.get("totals", pd.DataFrame())
-
-        if totals.empty:
-            self._logger.warning("Aucune donnée de totaux trouvée")
-            return
-
-        total_row = totals.iloc[0] if not totals.empty else {}
-
-        # Ajouter la ligne de totaux
+        # Total row
         sheet[f"A{self._current_row}"] = "TOTAL"
         sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
 
-        # Remplir les totaux
-        sheet[f"C{self._current_row}"] = total_row.get("total_aides_inscrits", 0)
-        sheet[f"D{self._current_row}"] = total_row.get("total_aides_bnh", 0)
-        sheet[f"E{self._current_row}"] = (
-            f'{total_row.get("total_montants_inscrits", 0):,.0f}'
-        )
-        sheet[f"F{self._current_row}"] = total_row.get("total_aides_lances", 0)
-        sheet[f"G{self._current_row}"] = (
-            f'{total_row.get("total_montants_decrits", 0):,.0f}'
-        )
-        sheet[f"H{self._current_row}"] = total_row.get("total_aides_mdv", 0)
-        sheet[f"I{self._current_row}"] = (
-            f'{total_row.get("total_montants_mdv", 0):,.0f}'
-        )
-        sheet[f"J{self._current_row}"] = total_row.get("total_aides_cumul_2024", 0)
-        sheet[f"K{self._current_row}"] = (
-            f'{total_row.get("total_montant_cumul_2024", 0):,.0f}'
-        )
-        sheet[f"L{self._current_row}"] = total_row.get("total_aides_2025", 0)
-        sheet[f"M{self._current_row}"] = (
-            f'{total_row.get("total_montant_2025", 0):,.0f}'
-        )
+        # Add calculated totals (would come from queries)
+        # All yellow columns get totals
+        sheet[f"C{self._current_row}"] = 0  # Total aides
 
-        # Calculer le pourcentage total
-        total_montants = total_row.get("total_montants_inscrits", 0)
-        total_consomme = total_row.get("total_montant_cumul_2024", 0) + total_row.get(
-            "total_montant_2025", 0
-        )
-        pourcentage_total = (
-            (total_consomme / total_montants * 100) if total_montants > 0 else 0
-        )
-        sheet[f"N{self._current_row}"] = f"{pourcentage_total:.1f}%"
+        sheet[f"D{self._current_row}"] = 0  # Total montants
 
-        sheet[f"O{self._current_row}"] = f"{total_montants - total_consomme:,.0f}"
-        sheet[f"P{self._current_row}"] = (
-            total_row.get("total_aides_inscrits", 0)
-            - total_row.get("total_aides_cumul_2024", 0)
-            - total_row.get("total_aides_2025", 0)
-        )
+        sheet[f"E{self._current_row}"] = 0
 
-        # Appliquer le formatage à la ligne des totaux
-        for col in [
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-            "K",
-            "L",
-            "M",
-            "N",
-            "O",
-            "P",
-        ]:
-            cell = sheet[f"{col}{self._current_row}"]
+        sheet[f"F{self._current_row}"] = 0
+
+        sheet[f"G{self._current_row}"] = 0
+
+        sheet[f"H{self._current_row}"] = 0
+
+        # White columns
+        sheet[f"I{self._current_row}"] = 0
+
+        # Yellow columns in consommations section
+        sheet[f"J{self._current_row}"] = 0  # T1
+        sheet[f"K{self._current_row}"] = 0  # T2
+        sheet[f"L{self._current_row}"] = 0  # T3
+        sheet[f"M{self._current_row}"] = 0  # Montant
+        sheet[f"L{self._current_row}"] = 0
+        sheet[f"M{self._current_row}"] = 0  # T1
+        sheet[f"N{self._current_row}"] = 0  # T2
+        sheet[f"O{self._current_row}"] = 0  # T3
+        sheet[f"P{self._current_row}"] = 0  # Montant
+
+        # Yellow final columns
+        sheet[f"O{self._current_row}"] = 0  # Cumulated
+        sheet[f"P{self._current_row}"] = 0  # Solde
+
+        # Apply formatting to total row
+        for col_num in range(1, 17):  # A to P
+            col_letter = get_column_letter(col_num)
+            cell = sheet[f"{col_letter}{self._current_row}"]
             cell.font = Font(name="Arial", size=9, bold=True)
             cell.alignment = Alignment(horizontal="center", vertical="center")
             cell.border = Border(
@@ -406,38 +405,38 @@ class SituationFinanciereGenerator(ReportGenerator):
                 top=Side(style="thin"),
                 bottom=Side(style="thin"),
             )
-            # Fond jaune pour la ligne de total
-            cell.fill = PatternFill(
-                start_color="FFFF00", end_color="FFFF00", fill_type="solid"
-            )
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        self._logger.debug("Application du formatage final")
+        self._logger.debug("Applying final formatting")
 
-        # Définir les largeurs de colonnes
-        column_widths: dict[str, int] = {
-            "A": 15,  # DAIRA
-            "B": 20,  # COMMUNES
-            "C": 12,  # NB TOTAL
-            "D": 12,  # NB AIDES BNH
-            "E": 15,  # MONTANTS INSCRITS
-            "F": 12,  # NB AIDES LANCÉS
-            "G": 15,  # MONTANTS DÉCRITS
-            "H": 12,  # NB AIDES MDV
-            "I": 15,  # MONTANTS MDV
-            "J": 12,  # NB CUMUL 2024
-            "K": 15,  # MONTANT CUMUL 2024
-            "L": 12,  # NB 2025
-            "M": 15,  # MONTANT 2025
-            "N": 10,  # % CONSOMMÉ
-            "O": 18,  # SOLDE MONTANT
-            "P": 12,  # RESTE NOMBRE
+        # Set column widths
+        column_widths = {
+            "A": 12,  # DAIRA
+            "B": 18,  # COMMUNES
+            "C": 10,  # NBRE
+            "D": 12,  # MONTANTS
+            "E": 10,  # NBRE
+            "F": 12,  # MONTANTS
+            "G": 10,  # NOMBRE
+            "H": 12,  # MONTANTS
+            "I": 10,  # NOMBRE
+            "J": 8,  # T1
+            "K": 8,  # T2
+            "L": 8,  # T3
+            "M": 12,  # MONTANT
+            "L": 10,  # NOMBRE
+            "M": 8,  # T1
+            "N": 8,  # T2
+            "O": 8,  # T3
+            "P": 12,  # MONTANT
+            "O": 12,  # CUMULLEE
+            "P": 12,  # SOLDE
         }
 
         for col, width in column_widths.items():
             sheet.column_dimensions[col].width = width
 
-        # Configuration de la page
+        # Page setup
         sheet.page_setup.orientation = "landscape"
         sheet.page_setup.fitToWidth = 1
         sheet.page_setup.fitToHeight = 0
@@ -446,4 +445,4 @@ class SituationFinanciereGenerator(ReportGenerator):
         sheet.page_margins.top = 0.5
         sheet.page_margins.bottom = 0.5
 
-        self._logger.info("Formatage final terminé avec succès")
+        self._logger.info("Final formatting completed successfully")

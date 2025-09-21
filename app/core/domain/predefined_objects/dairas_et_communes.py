@@ -218,7 +218,7 @@ DAIRA_COMMUNE_MAPPING: Final[dict[str, list[str]]] = {
 }
 
 
-def create_daira_commune_dataframe() -> pd.DataFrame:
+def get_dairas_communes_dataframe() -> pd.DataFrame:
     """Create a pandas DataFrame mapping each commune to its corresponding daira, sorted alphabetically."""
     data: list[dict[str, str]] = []
     for daira, communes in DAIRA_COMMUNE_MAPPING.items():
@@ -277,7 +277,7 @@ def test_all_mapped_dairas_exist():
 
 
 def test_dataframe_structure():
-    df: pd.DataFrame = create_daira_commune_dataframe()
+    df: pd.DataFrame = get_dairas_communes_dataframe()
 
     assert list(df.columns) == [
         "Daira",

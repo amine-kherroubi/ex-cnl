@@ -172,33 +172,8 @@ class ReportGenerator(ABC):
         self._logger.info(f"All {query_count} queries executed successfully")
         return results
 
-    def _format_query_with_context(self, query_template: str) -> str:
-        self._logger.debug("Formatting query template with report context")
-
-        formatted_query: str = query_template
-
-        if self._report_context.month:
-            month_number: int = self._report_context.month.number
-            year: int = self._report_context.year
-
-            formatted_query = formatted_query.replace(
-                "{month_number:02d}", f"{month_number:02d}"
-            )
-            formatted_query = formatted_query.replace(
-                "{month_number}", str(month_number)
-            )
-            formatted_query = formatted_query.replace("{year}", str(year))
-
-            self._logger.debug(
-                f"Placeholders replaced with: month_number={month_number:02d}, year={year}"
-            )
-
-        formatted_query = formatted_query.replace(
-            "{year}", str(self._report_context.year)
-        )
-
-        self._logger.debug("Query formatting completed")
-        return formatted_query
+    @abstractmethod
+    def _format_query_with_context(self, query_template: str) -> str: ...
 
     @abstractmethod
     def _add_content(

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Imports de la bibliothèque standard
-from typing import Any, Callable
+from typing import Any
 
 # Imports tiers
 import pandas as pd
@@ -34,29 +34,51 @@ class ActiviteMensuelleGenerator(ReportGenerator):
 
     def _create_predefined_tables(self) -> None:
         self._logger.debug("Creating reference tables")
+        try:
+            self._logger.debug(f"Creating reference table 'programmes'")
 
-        predefined_tables: dict[str, Callable[[], pd.DataFrame]] = {
-            "programmes": get_programmes_dataframe,
-        }
+            df: pd.DataFrame = get_programmes_dataframe()
+            self._data_repository.create_table_from_dataframe("programmes", df)
 
-        for table_name, dataframe_factory in predefined_tables.items():
-            try:
-                self._logger.debug(f"Creating reference table '{table_name}'")
+            rows, cols = df.shape
+            self._logger.info(
+                f"Reference table 'programmes' created: {rows} rows and {cols} columns"
+            )
+            self._logger.debug(f"Columns for 'programmes': {list(df.columns)}")
 
-                df: pd.DataFrame = dataframe_factory()
-                self._data_repository.create_table_from_dataframe(table_name, df)
+        except Exception as error:
+            self._logger.exception(
+                f"Failed to create reference table 'programmes': {error}"
+            )
+            raise
 
-                rows, cols = df.shape
-                self._logger.info(
-                    f"Reference table '{table_name}' created: {rows} rows and {cols} columns"
-                )
-                self._logger.debug(f"Columns for '{table_name}': {list(df.columns)}")
+    def _format_query_with_context(self, query_template: str) -> str:
+        self._logger.debug("Formatting query template with report context")
 
-            except Exception as error:
-                self._logger.exception(
-                    f"Failed to create reference table '{table_name}': {error}"
-                )
-                raise
+        formatted_query: str = query_template
+
+        if self._report_context.month:
+            month_number: int = self._report_context.month.number
+            year: int = self._report_context.year
+
+            formatted_query = formatted_query.replace(
+                "{month_number:02d}", f"{month_number:02d}"
+            )
+            formatted_query = formatted_query.replace(
+                "{month_number}", str(month_number)
+            )
+            formatted_query = formatted_query.replace("{year}", str(year))
+
+            self._logger.debug(
+                f"Placeholders replaced with: month_number={month_number:02d}, year={year}"
+            )
+
+        formatted_query = formatted_query.replace(
+            "{year}", str(self._report_context.year)
+        )
+
+        self._logger.debug("Query formatting completed")
+        return formatted_query
 
     def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
