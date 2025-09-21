@@ -46,6 +46,15 @@ class Programme(BaseModel):
         ),
     ]
 
+    financial_aid: Annotated[
+        int,
+        Field(
+            default=0,
+            description="Value of the financial aid provided (in dinars)",
+            ge=0,
+        ),
+    ]
+
     model_config = {
         "frozen": True,
         "str_strip_whitespace": True,

@@ -104,7 +104,7 @@ COMMUNES_TIZI_OUZOU: Final[set[str]] = {
     "67_AIT TOUDERT",
 }
 
-# Official mapping based on Wikipedia data
+# Daira-commune mapping
 DAIRA_COMMUNE_MAPPING: Final[dict[str, list[str]]] = {
     "AIN EL HAMMAM": [
         "31_ABI YOUCEF",
