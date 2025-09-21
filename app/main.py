@@ -6,7 +6,7 @@ from customtkinter import CTk  # type: ignore
 # Local application imports
 from app.core.config import AppConfig
 from app.core.utils.logging_setup import LoggingSetup
-from app.core.application_facade import ApplicationFacade
+from app.core.core_facade import CoreFacade
 from app.presentation.gui.main_window import MainWindow
 
 
@@ -16,7 +16,7 @@ def main() -> None:
     LoggingSetup.configure(config.logging_config)
 
     # Create facade
-    facade: ApplicationFacade = ApplicationFacade(config)
+    facade: CoreFacade = CoreFacade(config)
 
     # Run GUI
     app: CTk = MainWindow(facade)

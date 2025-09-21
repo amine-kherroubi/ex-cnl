@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 # Standard library imports
+from datetime import date
 import re
 from logging import Logger
 from pathlib import Path
 
 # Local application imports
-from app.core.application_facade import ApplicationFacade
-from app.core.domain.enums.space_time import Month
+from app.core.core_facade import CoreFacade
+from app.core.domain.enums.space_time import Month, Wilaya
+from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.utils.logging_setup import get_logger
 
@@ -15,11 +17,11 @@ from app.core.utils.logging_setup import get_logger
 class ReportController(object):
     __slots__ = ("_facade", "_logger")
 
-    def __init__(self, facade: ApplicationFacade) -> None:
+    def __init__(self, facade: CoreFacade) -> None:
         self._logger: Logger = get_logger(__name__)
         self._logger.debug("Initializing ReportController with injected facade")
 
-        self._facade: ApplicationFacade = facade
+        self._facade: CoreFacade = facade
         self._logger.info("ReportController initialized successfully")
 
     def get_available_reports(self) -> dict[str, ReportSpecification]:
@@ -39,9 +41,14 @@ class ReportController(object):
         report_name: str,
         source_files: list[Path],
         output_directory_path: Path,
-        month: Month,
+        month: Month | None,
         year: int,
     ) -> Path:
+        # Default to current month if not provided
+        if month is None:
+            month = Month.from_number(date.today().month)
+            self._logger.debug(f"Using default month: {month.value}")
+
         self._logger.info(f"Starting report generation: {report_name}")
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")
@@ -57,19 +64,31 @@ class ReportController(object):
                 f"File validation successful. Validated {len(validated_files)} files"
             )
 
-            # Generate the report (facade will handle filename generation)
             self._logger.debug("Delegating report generation to facade")
+
+            report_context: ReportContext = ReportContext(
+                wilaya=Wilaya.TIZI_OUZOU,
+                year=year,
+                month=month,
+            )
+
+            self._logger.debug(
+                f"Report context created: {report_context.wilaya.value}, "
+                f"Period: {month.value} {year}, Report date: {report_context.report_date}"
+            )
+
+            # Generate the report (facade will handle filename generation)
             output_file_path: Path = self._facade.generate_report(
                 report_name=report_name,
                 source_file_paths=validated_files,
                 output_directory_path=output_directory_path,
-                month=month,
-                year=year,
+                report_context=report_context,
             )
 
             self._logger.info(
                 f"Report generation completed successfully: {output_file_path}"
             )
+
             return output_file_path
 
         except (ValueError, FileNotFoundError) as e:

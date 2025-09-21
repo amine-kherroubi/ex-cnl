@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 # Standard library imports
-from datetime import date
 from logging import Logger
 from pathlib import Path
 
 # Local application imports
 from app.core.config import AppConfig
-from app.core.domain.enums.space_time import Month, Wilaya
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.registry.report_specification_registry import (
@@ -22,7 +20,7 @@ from app.core.services.report_generation.base.report_generator import ReportGene
 from app.core.utils.logging_setup import get_logger
 
 
-class ApplicationFacade(object):  # Facade pattern
+class CoreFacade(object):
     __slots__ = (
         "_config",
         "_data_repository",
@@ -34,7 +32,7 @@ class ApplicationFacade(object):  # Facade pattern
         self._logger: Logger = get_logger(__name__)
         self._logger.debug("Initializing ApplicationFacade")
 
-        # Dependency injection pattern
+        # Dependency injection
         self._config: AppConfig = config
         self._data_repository: DuckDBRepository = DuckDBRepository(
             self._config.database_config
@@ -50,15 +48,9 @@ class ApplicationFacade(object):  # Facade pattern
         report_name: str,
         source_file_paths: dict[str, Path],
         output_directory_path: Path,
-        month: Month | None = None,
-        year: int | None = None,
-        wilaya: Wilaya = Wilaya.TIZI_OUZOU,
+        report_context: ReportContext,
     ) -> Path:
         self._logger.info(f"Starting report generation: {report_name}")
-
-        # If month and year are provided, log them
-        if month and year:
-            self._logger.info(f"Report period: {month.value} {year}")
 
         try:
             report_specification: ReportSpecification = ReportSpecificationRegistry.get(
@@ -66,29 +58,6 @@ class ApplicationFacade(object):  # Facade pattern
             )
             self._logger.info(f"Generating report: {report_specification.display_name}")
             self._logger.debug(f"Report category: {report_specification.category}")
-
-            # Create report spatiotemporal context
-            # Use today's date as the report_date (as per user requirement)
-            today: date = date.today()
-
-            # If month and year are not provided, use defaults
-            if month is None:
-                month = Month.from_number(today.month)
-            if year is None:
-                # Default to current month and year if not provided
-                year = today.year
-                self._logger.debug(f"Using default period: {month.value} {year}")
-
-            report_context: ReportContext = ReportContext(
-                wilaya=wilaya,
-                year=year,
-                month=month,
-            )
-
-            self._logger.debug(
-                f"Report context created: {report_context.wilaya.value}, "
-                f"Period: {month.value} {year}, Report date: {report_context.report_date}"
-            )
 
             # Create generator and generate report
             generator: ReportGenerator = ReportGeneratorFactory.create_generator(

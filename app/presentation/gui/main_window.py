@@ -14,7 +14,7 @@ from app.presentation.gui.views.report_view import ReportView
 from app.presentation.gui.views.settings_view import SettingsView
 from app.presentation.gui.models.gui_state import GUIState
 from app.presentation.gui.controllers.report_controller import ReportController
-from app.core.application_facade import ApplicationFacade
+from app.core.core_facade import CoreFacade
 from app.core.utils.logging_setup import get_logger
 
 
@@ -29,7 +29,7 @@ class MainWindow(ctk.CTk):
         "_title_label",
     )
 
-    def __init__(self, facade: ApplicationFacade) -> None:
+    def __init__(self, facade: CoreFacade) -> None:
         super().__init__()  # type: ignore
 
         self._logger: Logger = get_logger(__name__)
