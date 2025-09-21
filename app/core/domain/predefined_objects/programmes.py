@@ -457,12 +457,13 @@ def get_programmes_dataframe() -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
-                "programme": prog.name,
-                "year_start": prog.year_start,
-                "year_end": prog.year_end,
-                "display_order": prog.display_order,
-                "consistance": prog.consistance,
+                "programme": programme.name,
+                "year_start": programme.year_start,
+                "year_end": programme.year_end,
+                "display_order": programme.display_order,
+                "consistance": programme.consistance,
+                "financial_aid": programme.financial_aid,
             }
-            for prog in RURAL_HOUSING_PROGRAMMES
+            for programme in RURAL_HOUSING_PROGRAMMES
         ]
     )
