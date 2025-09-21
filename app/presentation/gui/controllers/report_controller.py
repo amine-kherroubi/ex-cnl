@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # Standard library imports
-from datetime import date
 import re
 from logging import Logger
 from pathlib import Path
@@ -41,14 +40,9 @@ class ReportController(object):
         report_name: str,
         source_files: list[Path],
         output_directory_path: Path,
-        month: Month | None,
+        month: Month,
         year: int,
     ) -> Path:
-        # Default to current month if not provided
-        if month is None:
-            month = Month.from_number(date.today().month)
-            self._logger.debug(f"Using default month: {month.value}")
-
         self._logger.info(f"Starting report generation: {report_name}")
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")

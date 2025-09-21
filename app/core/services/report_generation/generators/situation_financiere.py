@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 
 # Imports tiers
 import pandas as pd
@@ -7,9 +8,13 @@ from openpyxl.styles import Alignment, Border, Font, Side
 from openpyxl.utils import get_column_letter
 
 # Imports de l'application locale
+from app.core.domain.models.programme import Programme
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.predefined_objects.programmes import get_programmes_dataframe
+from app.core.domain.predefined_objects.programmes import (
+    RURAL_HOUSING_PROGRAMMES,
+    get_programmes_dataframe,
+)
 from app.core.domain.predefined_objects.dairas_et_communes import (
     get_dairas_communes_dataframe,
 )
@@ -23,7 +28,7 @@ from app.core.services.report_generation.base.report_generator import ReportGene
 
 
 class SituationFinanciereGenerator(ReportGenerator):
-    __slots__ = ("_current_row",)
+    __slots__ = ("_current_row", "_target_programme")
 
     def __init__(
         self,
@@ -36,39 +41,76 @@ class SituationFinanciereGenerator(ReportGenerator):
             file_io_service, data_repository, report_specification, report_context
         )
         self._current_row: int = 1
+        self._target_programme: Programme | None = None
+
+    def set_target_programme(self, programme_name: str) -> None:
+        self._logger.debug(f"Setting target programme: {programme_name}")
+
+        # Find programme in the list
+        for programme in RURAL_HOUSING_PROGRAMMES:
+            if programme.name == programme_name:
+                self._target_programme = programme
+                self._logger.info(
+                    f"Target programme set: {programme.name} "
+                    f"(aid_value: {programme.aid_value}, consistance: {programme.consistance})"
+                )
+                return
+
+        # Programme not found
+        available_programmes = [p.name for p in RURAL_HOUSING_PROGRAMMES]
+        error_msg: str = (
+            f"Programme '{programme_name}' not found. "
+            f"Available programmes: {available_programmes}"
+        )
+        self._logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    def _verify_target_programme(self) -> None:
+        if self._target_programme is None:
+            error_msg: str = (
+                "No target programme set. Please call set_target_programme() "
+                "before generating the report."
+            )
+            self._logger.error(error_msg)
+            raise RuntimeError(error_msg)
+
+        self._logger.debug(f"Target programme verified: {self._target_programme.name}")
+
+    def generate(
+        self,
+        source_file_paths: dict[str, Path],
+        output_directory_path: Path,
+    ) -> Path:
+        self._verify_target_programme()
+        return super().generate(source_file_paths, output_directory_path)
 
     def _create_predefined_tables(self) -> None:
         self._logger.debug("Creating reference tables")
+
+        # Create programmes table
         try:
             self._logger.debug(f"Creating reference table 'programmes'")
-
             df: pd.DataFrame = get_programmes_dataframe()
             self._data_repository.create_table_from_dataframe("programmes", df)
-
             rows, cols = df.shape
             self._logger.info(
                 f"Reference table 'programmes' created: {rows} rows and {cols} columns"
             )
-            self._logger.debug(f"Columns for 'programmes': {list(df.columns)}")
-
         except Exception as error:
             self._logger.exception(
                 f"Failed to create reference table 'programmes': {error}"
             )
             raise
 
+        # Create dairas_communes table
         try:
             self._logger.debug(f"Creating reference table 'dairas_communes'")
-
             df: pd.DataFrame = get_dairas_communes_dataframe()
             self._data_repository.create_table_from_dataframe("dairas_communes", df)
-
             rows, cols = df.shape
             self._logger.info(
                 f"Reference table 'dairas_communes' created: {rows} rows and {cols} columns"
             )
-            self._logger.debug(f"Columns for 'dairas_communes': {list(df.columns)}")
-
         except Exception as error:
             self._logger.exception(
                 f"Failed to create reference table 'dairas_communes': {error}"
@@ -77,27 +119,34 @@ class SituationFinanciereGenerator(ReportGenerator):
 
     def _format_query_with_context(self, query_template: str) -> str:
         self._logger.debug("Formatting query template with report context")
+        assert self._target_programme is not None
 
         formatted_query: str = query_template
 
-        if self._report_context.month:
-            month_number: int = self._report_context.month.number
-            year: int = self._report_context.year
+        # Replace programme name
+        formatted_query = formatted_query.replace(
+            "{programme}", f"'{self._target_programme.name}'"
+        )
 
-            formatted_query = formatted_query.replace(
-                "{month_number:02d}", f"{month_number:02d}"
-            )
-            formatted_query = formatted_query.replace(
-                "{month_number}", str(month_number)
-            )
-            formatted_query = formatted_query.replace("{year}", str(year))
+        # Replace aid value
+        formatted_query = formatted_query.replace(
+            "{aid_value}", str(self._target_programme.aid_value)
+        )
 
-            self._logger.debug(
-                f"Placeholders replaced with: month_number={month_number:02d}, year={year}"
-            )
-
+        # Replace year
         formatted_query = formatted_query.replace(
             "{year}", str(self._report_context.year)
+        )
+
+        # Replace month if present
+        month_number: int = self._report_context.month.number
+        formatted_query = formatted_query.replace("{month}", str(month_number))
+
+        self._logger.debug(
+            f"Placeholders replaced with: month={month_number}, "
+            f"year={self._report_context.year}, "
+            f"programme={self._target_programme.name}, "
+            f"aid_value={self._target_programme.aid_value}"
         )
 
         self._logger.debug("Query formatting completed")
@@ -114,16 +163,7 @@ class SituationFinanciereGenerator(ReportGenerator):
     def _add_header(self, sheet: Worksheet) -> None:
         self._logger.debug("Adding report header")
 
-        # Tableau number in column O
-        sheet[f"O{self._current_row}"] = "TABLEAU    01"
-        sheet[f"O{self._current_row}"].font = Font(
-            name="Arial", size=10, bold=True, color="FF0000"
-        )
-        sheet[f"O{self._current_row}"].alignment = Alignment(horizontal="right")
-
-        self._current_row += 1
-
-        # Row 2: Main title
+        # Main title
         sheet[f"A{self._current_row}"] = (
             "SITUATION   FINANCIERE   DES PROGRAMMES  DE  LOGEMENTS  AIDES  PAR  PROGRAMME, DAIRA ET PAR COMMUNE"
         )
@@ -135,7 +175,7 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         self._current_row += 1
 
-        # Row 3: Programme name
+        # Programme name
         sheet[f"A{self._current_row}"] = (
             "PROGRAMME  DE  LOGEMENTS  AIDES EN  MILIEU  RURAL"
         )
@@ -147,7 +187,7 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         self._current_row += 1
 
-        # Row 4: Date
+        # Date
         sheet[f"A{self._current_row}"] = f"ARRETEE   AU  20/03/2025"
         sheet.merge_cells(f"A{self._current_row}:P{self._current_row}")
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
@@ -157,7 +197,7 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         self._current_row += 2
 
-        # Row 6: DL DE TIZI OUZOU
+        # DL DE TIZI OUZOU
         sheet[f"A{self._current_row}"] = "DL.DE TIZI OUZOU"
         sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
         self._current_row += 1

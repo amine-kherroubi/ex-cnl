@@ -26,8 +26,8 @@ class ReportContext(BaseModel):
         description="Specific date for report generation",
     )
 
-    month: Month | None = Field(
-        default=None,
+    month: Month = Field(
+        default_factory=lambda: Month.from_number(date.today().month),
         description="Month of the report period in French (for monthly reports)",
     )
 
