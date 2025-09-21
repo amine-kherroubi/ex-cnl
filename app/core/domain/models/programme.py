@@ -46,7 +46,7 @@ class Programme(BaseModel):
         ),
     ]
 
-    financial_aid: Annotated[
+    aid_value: Annotated[
         int,
         Field(
             default=0,

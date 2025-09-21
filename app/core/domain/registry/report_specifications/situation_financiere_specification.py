@@ -22,5 +22,61 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
     },
     output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,
-    queries={},
+    queries={
+        "nb_aides_et_montants_inscrits_par_daira_et_commune": """
+            SELECT
+                d."Daira du projet",
+                d."Commune du projet",
+                COUNT(*) AS nb_aides_inscrites,
+                COUNT(*) * {aid_value} AS montant_inscrits
+            FROM decisions d
+            WHERE d."Sous programme" = {programme}
+            GROUP BY
+                d."Daira du projet",
+                d."Commune du projet"
+        """,
+        "consommations_cumulees_fin_annee_precedente": """
+            SELECT
+                p.Daira,
+                p."Commune de projet",
+                SUM(CASE WHEN p.T1 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.C1 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.N1 > 0 THEN 1 ELSE 0 END) AS t_1,
+                SUM(CASE WHEN p.T2 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.C2 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.N2 > 0 THEN 1 ELSE 0 END) AS t_2,
+                SUM(CASE WHEN p.T3 > 0 THEN 1 ELSE 0 END) AS t_3,
+                (SUM(COALESCE(p.T1, 0)) + SUM(COALESCE(p.C1, 0)) + SUM(COALESCE(p.N1, 0)) +
+                SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
+                SUM(COALESCE(p.T3, 0))) * {aid_value} AS montant
+            FROM paiements p
+            WHERE p."Sous programme" = {programme}
+            AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
+            GROUP BY
+                p.Daira,
+                p."Commune de projet"
+        """,
+        "consommations_annee_actuelle_jusqua_mois_actuel": """
+            SELECT
+                p.Daira,
+                p."Commune de projet",
+                SUM(CASE WHEN p.T1 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.C1 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.N1 > 0 THEN 1 ELSE 0 END) AS t_1,
+                SUM(CASE WHEN p.T2 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.C2 > 0 THEN 1 ELSE 0 END) +
+                SUM(CASE WHEN p.N2 > 0 THEN 1 ELSE 0 END) AS t_2,
+                SUM(CASE WHEN p.T3 > 0 THEN 1 ELSE 0 END) AS t_3,
+                (SUM(COALESCE(p.T1, 0)) + SUM(COALESCE(p.C1, 0)) + SUM(COALESCE(p.N1, 0)) +
+                SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
+                SUM(COALESCE(p.T3, 0))) * {aid_value} AS montant
+            FROM paiements p
+            WHERE p."Sous programme" = {programme}
+            AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
+            AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month} 
+            GROUP BY
+                p.Daira,
+                p."Commune de projet"
+        """,
+    },
 )
