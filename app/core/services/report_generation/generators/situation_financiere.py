@@ -190,31 +190,49 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._current_row += 1
         span_end: int = self._current_row + 3
 
-        sheet[f"A{self._current_row}"] = "Programme"
+        sheet[f"A{self._current_row}"] = (
+            "Programme"  # Use self._target.program to populate data row (merge all cells)
+        )
         sheet.merge_cells(f"A{self._current_row}:A{span_end}")
 
-        sheet[f"B{self._current_row}"] = "Daira"
+        sheet[f"B{self._current_row}"] = (
+            "Daira"  # Use get_dairas_communes_dataframe() to populate data rows for this column
+        )
         sheet.merge_cells(f"B{self._current_row}:B{span_end}")
 
-        sheet[f"C{self._current_row}"] = "Commune"
+        sheet[f"C{self._current_row}"] = (
+            "Commune"  # Use get_dairas_communes_dataframe() to populate data rows for this column
+        )
         sheet.merge_cells(f"C{self._current_row}:C{span_end}")
 
-        sheet[f"D{self._current_row}"] = "Aides notifiées (1)"
+        sheet[f"D{self._current_row}"] = (
+            "Aides notifiées (1)"  # Data rows should be empty for this column
+        )
         sheet.merge_cells(f"D{self._current_row}:D{span_end}")
 
-        sheet[f"E{self._current_row}"] = "Montants notifiés"
+        sheet[f"E{self._current_row}"] = (
+            "Montants notifiés"  # Data rows should be empty for this column
+        )
         sheet.merge_cells(f"E{self._current_row}:E{span_end}")
 
-        sheet[f"F{self._current_row}"] = "Aides inscrites"
+        sheet[f"F{self._current_row}"] = (
+            "Aides inscrites"  # Use query_results to populate data rows for this column
+        )
         sheet.merge_cells(f"F{self._current_row}:F{span_end}")
 
-        sheet[f"G{self._current_row}"] = "Montants inscrits"
+        sheet[f"G{self._current_row}"] = (
+            "Montants inscrits"  # Use query_results to populate data rows for this column
+        )
         sheet.merge_cells(f"G{self._current_row}:G{span_end}")
 
-        sheet[f"H{self._current_row}"] = "Aides inscrites (2)"
+        sheet[f"H{self._current_row}"] = (
+            "Aides inscrites (2)"  # Data rows should be empty for this column
+        )
         sheet.merge_cells(f"H{self._current_row}:H{span_end}")
 
-        sheet[f"I{self._current_row}"] = "Montants inscrits (3)"
+        sheet[f"I{self._current_row}"] = (
+            "Montants inscrits (3)"  # Data rows should be empty for this column
+        )
         sheet.merge_cells(f"I{self._current_row}:I{span_end}")
 
         sheet[f"J{self._current_row}"] = "Consommations"
@@ -223,10 +241,14 @@ class SituationFinanciereGenerator(ReportGenerator):
         sheet[f"R{self._current_row}"] = "Cumul (6) = (4) + (5)"
         sheet.merge_cells(f"R{self._current_row}:R{span_end}")
 
-        sheet[f"S{self._current_row}"] = "Solde sur engagement (3) - (6)"
+        sheet[f"S{self._current_row}"] = (
+            "Solde sur engagement (3) - (6)"  # Data rows should be empty for this column
+        )
         sheet.merge_cells(f"S{self._current_row}:S{span_end}")
 
-        sheet[f"T{self._current_row}"] = "Reste à inscrire (1) - (2)"
+        sheet[f"T{self._current_row}"] = (
+            "Reste à inscrire (1) - (2)"  # Data rows should be empty for this column
+        )
         sheet.merge_cells(f"T{self._current_row}:T{span_end}")
 
         self._current_row += 1
@@ -252,22 +274,38 @@ class SituationFinanciereGenerator(ReportGenerator):
         sheet.merge_cells(f"J{self._current_row}:L{self._current_row}")
         sheet[f"J{self._current_row}"] = "Aides"
 
-        sheet[f"M{self._current_row}"] = "Montant (4)"
+        sheet[f"M{self._current_row}"] = (
+            "Montant (4)"  # Use query_results to populate data rows for this column
+        )
 
         sheet.merge_cells(f"N{self._current_row}:P{self._current_row}")
         sheet[f"N{self._current_row}"] = "Aides"
 
-        sheet[f"Q{self._current_row}"] = "Montant (5)"
+        sheet[f"Q{self._current_row}"] = (
+            "Montant (5)"  # Use query_results to populate data rows for this column
+        )
 
         self._current_row += 1
 
-        sheet[f"J{self._current_row}"] = "T1"
-        sheet[f"K{self._current_row}"] = "T2"
-        sheet[f"L{self._current_row}"] = "T3"
+        sheet[f"J{self._current_row}"] = (
+            "T1"  # Use query_results to populate data rows for this column
+        )
+        sheet[f"K{self._current_row}"] = (
+            "T2"  # Use query_results to populate data rows for this column
+        )
+        sheet[f"L{self._current_row}"] = (
+            "T3"  # Use query_results to populate data rows for this column
+        )
 
-        sheet[f"N{self._current_row}"] = "T1"
-        sheet[f"O{self._current_row}"] = "T2"
-        sheet[f"P{self._current_row}"] = "T3"
+        sheet[f"N{self._current_row}"] = (
+            "T1"  # Use query_results to populate data rows for this column
+        )
+        sheet[f"O{self._current_row}"] = (
+            "T2"  # Use query_results to populate data rows for this column
+        )
+        sheet[f"P{self._current_row}"] = (
+            "T3"  # Use query_results to populate data rows for this column
+        )
 
         # Apply formatting to all header cells
         for row in range(self._current_row - 3, self._current_row):
