@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Imports de la bibliothèque standard
-from typing import Any
+from typing import Any, Literal
 
 # Imports tiers
 import pandas as pd
@@ -9,6 +9,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Alignment, Border, Font, Side, PatternFill
 
 # Imports de l'application locale
+from app.core.domain.models.programme import Programme
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.infrastructure.data.data_repository import DataRepository
@@ -17,7 +18,7 @@ from app.core.services.report_generation.base.report_generator import ReportGene
 
 
 class SituationFinanciereGenerator(ReportGenerator):
-    __slots__ = ("_current_row",)
+    __slots__ = ("_current_row", "_target_program")
 
     def __init__(
         self,
@@ -30,6 +31,10 @@ class SituationFinanciereGenerator(ReportGenerator):
             file_io_service, data_repository, report_specification, report_context
         )
         self._current_row: int = 1
+        self._target_program: Programme | None = None
+
+    def set_target_program(self, programme: Programme) -> None:
+        self._target_program = programme
 
     def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]

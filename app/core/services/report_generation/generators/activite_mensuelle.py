@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Imports de la bibliothèque standard
-from typing import Any
+from typing import Any, Callable
 
 # Imports tiers
 import pandas as pd
@@ -11,6 +11,7 @@ from openpyxl.styles import Alignment, Border, Font, Side
 # Imports de l'application locale
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
+from app.core.domain.predefined_objects.programmes import get_programmes_dataframe
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
@@ -31,6 +32,32 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
         self._current_row: int = 1
 
+    def _create_predefined_tables(self) -> None:
+        self._logger.debug("Creating reference tables")
+
+        predefined_tables: dict[str, Callable[[], pd.DataFrame]] = {
+            "programmes": get_programmes_dataframe,
+        }
+
+        for table_name, dataframe_factory in predefined_tables.items():
+            try:
+                self._logger.debug(f"Creating reference table '{table_name}'")
+
+                df: pd.DataFrame = dataframe_factory()
+                self._data_repository.create_table_from_dataframe(table_name, df)
+
+                rows, cols = df.shape
+                self._logger.info(
+                    f"Reference table '{table_name}' created: {rows} rows and {cols} columns"
+                )
+                self._logger.debug(f"Columns for '{table_name}': {list(df.columns)}")
+
+            except Exception as error:
+                self._logger.exception(
+                    f"Failed to create reference table '{table_name}': {error}"
+                )
+                raise
+
     def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
@@ -41,7 +68,6 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._add_footer(sheet)
 
     def _add_first_table_header(self, sheet: Worksheet) -> None:
-        """Ajoute l'en-tête du report avec titre, wilaya, et période."""
         self._logger.debug("Ajout de l'en-tête du report")
 
         # HABITAT RURAL - Définir la valeur d'abord, puis fusionner
@@ -93,7 +119,6 @@ class ActiviteMensuelleGenerator(ReportGenerator):
     def _add_first_table(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        """Ajoute les deux tableaux principaux : activité mensuelle et situation des programmes."""
         self._logger.debug("Ajout du tableau principal de données")
         self._logger.debug(
             f"Résultats de requêtes disponibles : {list(query_results.keys())}"
@@ -340,7 +365,6 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._current_row += 2
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
-        """Ajoute l'en-tête du second tableau avec titre et date d'arrêté."""
         sheet[f"A{self._current_row}"] = (
             "Situation des programmes (à renseigner par la BNH, ex-CNL)"
         )
@@ -365,7 +389,6 @@ class ActiviteMensuelleGenerator(ReportGenerator):
     def _add_second_table(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        """Ajoute le second tableau affichant la situation des programmes."""
         self._logger.debug("Ajout du second tableau (SITUATION DES PROGRAMMES)")
 
         # En-têtes du second tableau
@@ -517,7 +540,6 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._current_row += 2
 
     def _add_footer(self, sheet: Worksheet) -> None:
-        """Ajoute le pied de page du report avec les emplacements de signatures."""
         self._logger.debug("Ajout du pied de page du report")
 
         # Texte de pied de page gauche (A-B)
@@ -539,7 +561,6 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._logger.debug("Pied de page ajouté avec succès")
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        """Applique le formatage final au report (largeurs de colonnes, orientation page)."""
         self._logger.debug("Application du formatage final")
 
         column_widths: dict[str, int] = {"A": 25, "B": 18, "C": 22, "D": 18, "E": 22}

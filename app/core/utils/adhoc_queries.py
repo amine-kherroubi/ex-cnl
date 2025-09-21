@@ -9,13 +9,21 @@ import pandas as pd
 
 
 connection: duckdb.DuckDBPyConnection = duckdb.connect()  # type: ignore
+# df: pd.DataFrame = pd.read_excel(  # type: ignore
+#     Path(
+#         "/mnt/c/Users/user/Documents/Stage/applic HR/Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx"
+#     ),
+#     skiprows=5,
+# )
+# connection.register("paiements", df)
+
 df: pd.DataFrame = pd.read_excel(  # type: ignore
     Path(
-        "/mnt/c/Users/user/Documents/Stage/applic HR/Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx"
+        "/mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx"
     ),
-    skiprows=5,
+    skiprows=6,
 )
-connection.register("paiements", df)
+connection.register("decisions", df)
 
 # query1_result: pd.DataFrame = connection.execute(
 #     """
@@ -30,18 +38,13 @@ connection.register("paiements", df)
 # ).fetch_df()
 # print(query1_result)
 
-# query2_result: pd.DataFrame = connection.execute(
-#     """
-#     SELECT DISTINCT "Sous programme",
-#             MIN(STRPTIME("Date OV", '%d/%m/%Y')) AS first_date,
-#             MAX(STRPTIME("Date OV", '%d/%m/%Y')) AS last_date,
-#             COUNT(*) AS OVs
-#     FROM paiements
-#     GROUP BY "Sous programme"
-#     ORDER BY first_date
-#     """
-# ).fetch_df()
-# print(query2_result)
+query2_result: pd.DataFrame = connection.execute(
+    """
+    SELECT DISTINCT "Sous programme"
+    FROM decisions
+    """
+).fetch_df()
+print(query2_result)
 
 # query3_result: pd.DataFrame = connection.execute(
 #     """
@@ -52,14 +55,14 @@ connection.register("paiements", df)
 # ).fetch_df()
 # print(query3_result)
 
-query4_result: pd.DataFrame = connection.execute(
-    """
-    SELECT DISTINCT Daira
-    FROM paiements
-    ORDER BY Daira
-    """
-).fetch_df()
-print(query4_result)
+# query4_result: pd.DataFrame = connection.execute(
+#     """
+#     SELECT DISTINCT Daira
+#     FROM paiements
+#     ORDER BY Daira
+#     """
+# ).fetch_df()
+# print(query4_result)
 
 # query5_result: pd.DataFrame = connection.execute(
 #     """

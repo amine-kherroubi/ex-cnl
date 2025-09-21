@@ -3,7 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 from logging import Logger
 
 # Third-party imports
@@ -13,7 +13,6 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 # Local application imports
 from app.core.domain.models.report_context import ReportContext
-from app.core.domain.predefined_objects.programmes import get_programmes_dataframe
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.utils.exceptions import QueryExecutionError
@@ -139,31 +138,8 @@ class ReportGenerator(ABC):
                 )
                 raise
 
-    def _create_predefined_tables(self) -> None:
-        self._logger.debug("Creating reference tables")
-
-        predefined_tables: dict[str, Callable[[], pd.DataFrame]] = {
-            "programmes": get_programmes_dataframe,
-        }
-
-        for table_name, dataframe_factory in predefined_tables.items():
-            try:
-                self._logger.debug(f"Creating reference table '{table_name}'")
-
-                df: pd.DataFrame = dataframe_factory()
-                self._data_repository.create_table_from_dataframe(table_name, df)
-
-                rows, cols = df.shape
-                self._logger.info(
-                    f"Reference table '{table_name}' created: {rows} rows and {cols} columns"
-                )
-                self._logger.debug(f"Columns for '{table_name}': {list(df.columns)}")
-
-            except Exception as error:
-                self._logger.exception(
-                    f"Failed to create reference table '{table_name}': {error}"
-                )
-                raise
+    @abstractmethod
+    def _create_predefined_tables(self) -> None: ...
 
     def _execute_queries(self) -> dict[str, pd.DataFrame]:
         self._logger.debug("Executing report queries")
