@@ -3,8 +3,8 @@
 ├── README.md
 ├── app
 │   ├── core
-│   │   ├── application_facade.py
 │   │   ├── config.py
+│   │   ├── core_facade.py
 │   │   ├── domain
 │   │   │   ├── enums
 │   │   │   │   ├── report_category.py
@@ -32,7 +32,6 @@
 │   │   │       ├── base
 │   │   │       │   └── report_generator.py
 │   │   │       ├── factories
-│   │   │       │   ├── report_context_factory.py
 │   │   │       │   └── report_generator_factory.py
 │   │   │       └── generators
 │   │   │           ├── activite_mensuelle.py
@@ -69,4 +68,4 @@
 ├── project_structure.txt
 └── requirements.txt
 
-26 directories, 44 files
+26 directories, 43 files
