@@ -9,6 +9,7 @@ from typing import Any
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
+from app.core.domain.models.report_specification import ReportSpecification
 from app.presentation.gui.views.menu_view import MenuView
 from app.presentation.gui.views.report_view import ReportView
 from app.presentation.gui.views.settings_view import SettingsView
@@ -112,12 +113,15 @@ class MainWindow(ctk.CTk):
 
     def _show_report_view(self, report_name: str) -> None:
         self._clear_current_view()
-        self._title_label.configure(text=f"Générer : {report_name}")  # type: ignore
+        report_spec: ReportSpecification | None = self._state.available_reports.get(
+            report_name
+        )
 
-        report_spec: Any = self._state.available_reports.get(report_name)
         if not report_spec:
             self._logger.error(f"Report specification not found: {report_name}")
             return
+
+        self._title_label.configure(text=f"Générer : {report_spec.display_name}")  # type: ignore
 
         self._current_view = ReportView(
             parent=self._container,

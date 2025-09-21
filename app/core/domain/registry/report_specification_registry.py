@@ -54,6 +54,6 @@ class ReportSpecificationRegistry:
         return specifications
 
     _REPORT_SPECIFICATIONS: Final[dict[str, ReportSpecification]] = {
-        "activite_mensuelle_par_programme": activite_mensuelle_specification,
-        "situation_financiere_des_programmes": situation_financiere_specification,
+        activite_mensuelle_specification.name: activite_mensuelle_specification,
+        situation_financiere_specification.name: situation_financiere_specification,
     }

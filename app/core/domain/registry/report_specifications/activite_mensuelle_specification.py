@@ -10,7 +10,7 @@ from app.core.services.report_generation.generators.activite_mensuelle import (
 
 activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     name="activite_mensuelle_par_programme",
-    display_name="Activité mensuelle",
+    display_name="Activité mensuelle par programme",
     category=ReportCategory.HABITAT_RURAL,
     description=(
         "Report de suivi mensuel des activités par programme, "

@@ -9,7 +9,7 @@ from app.core.services.report_generation.generators.situation_financiere import 
 
 situation_financiere_specification: ReportSpecification = ReportSpecification(
     name="situation_financiere_des_programmes",
-    display_name="Situation financière des programmes",
+    display_name="Situation financière des programmes par daira et commune",
     category=ReportCategory.HABITAT_RURAL,
     description=(
         "Situation financière détaillée des programmes de logements aidés "
