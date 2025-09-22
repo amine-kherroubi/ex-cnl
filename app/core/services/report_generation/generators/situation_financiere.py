@@ -1,13 +1,15 @@
 from __future__ import annotations
+
+# Standard library imports
 from datetime import date
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-# Imports tiers
+# Third-party imports
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
 
-# Imports de l'application locale
+# Local application imports
 from app.core.domain.models.programme import Programme
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
@@ -164,8 +166,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "T",
+            self._current_row,
             self._current_row,
             value=f"Situation financière du programme '{self._target_programme.name}' par daira et par commune",  # type: ignore
             font=ExcelStyling.FONT_TITLE,
@@ -178,8 +180,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "T",
+            self._current_row,
             self._current_row,
             value=f"Arrêté au {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
             font=ExcelStyling.FONT_HEADER,
@@ -210,23 +212,25 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "F",
-            self._current_row,
             "G",
+            self._current_row,
             self._current_row,
             value="Engagement par la BNH",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         ExcelStyling.merge_and_style_cells(
             sheet,
             "H",
-            self._current_row,
             "I",
             self._current_row,
-            value="Engagement par le MHUV (décision d'inscription)",
+            self._current_row,
+            value="Engagement par le MHUV",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         self._current_row += 1
@@ -253,8 +257,8 @@ class SituationFinanciereGenerator(ReportGenerator):
             ExcelStyling.merge_and_style_cells(
                 sheet,
                 col,
-                header_start_row,
                 col,
+                header_start_row,
                 header_end_row,
                 value=title,
                 font=ExcelStyling.FONT_BOLD,
@@ -266,8 +270,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "J",
-            self._current_row,
             "Q",
+            self._current_row,
             self._current_row,
             value="Consommations",
             font=ExcelStyling.FONT_BOLD,
@@ -281,8 +285,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "J",
-            self._current_row,
             "M",
+            self._current_row,
             self._current_row,
             value=f"Cumuls au 31/12/{self._report_context.year - 1}",
             font=ExcelStyling.FONT_BOLD,
@@ -299,8 +303,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "N",
-            self._current_row,
             "Q",
+            self._current_row,
             self._current_row,
             value=f"Du 1 janvier {self._report_context.year} au {end_day} {self._report_context.month.value}",
             font=ExcelStyling.FONT_BOLD,
@@ -314,8 +318,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "J",
-            self._current_row,
             "L",
+            self._current_row,
             self._current_row,
             value="Aides",
             font=ExcelStyling.FONT_BOLD,
@@ -336,8 +340,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         ExcelStyling.merge_and_style_cells(
             sheet,
             "N",
-            self._current_row,
             "P",
+            self._current_row,
             self._current_row,
             value="Aides",
             font=ExcelStyling.FONT_BOLD,
@@ -675,7 +679,6 @@ class SituationFinanciereGenerator(ReportGenerator):
         """Apply final formatting to the worksheet."""
         self._logger.debug("Applying final formatting")
 
-        # Set column widths for better readability
         column_widths: Dict[str, int] = {
             "A": 30,  # Programme
             "B": 20,  # Daira
@@ -701,7 +704,6 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         ExcelStyling.set_column_widths(sheet, column_widths)
 
-        # Page setup for landscape orientation
         ExcelStyling.setup_page_layout(
             sheet,
             orientation="landscape",
@@ -709,13 +711,12 @@ class SituationFinanciereGenerator(ReportGenerator):
             fit_to_height=False,
         )
 
-        # Set print margins
         ExcelStyling.setup_page_margins(
             sheet,
             left=0.25,
             right=0.25,
-            top=0.75,
-            bottom=0.75,
+            top=0.5,
+            bottom=0.5,
         )
 
         self._logger.info("Final formatting completed successfully")

@@ -94,14 +94,13 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._logger.debug("Ajout de l'en-tête du report")
 
         # Titre
-        sheet[f"A{self._current_row}"] = "Habitat rural"
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value="Habitat rural",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
@@ -118,16 +117,13 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._current_row += 1
 
         # Titre principal
-        sheet[f"A{self._current_row}"] = (
-            "Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)"
-        )
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value="Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
         )
@@ -137,16 +133,15 @@ class ActiviteMensuelleGenerator(ReportGenerator):
 
         # Mois
         month_text: str = (
-            f"Mois de {self._report_context.month} {self._report_context.year}"  # type: ignore
+            f"Mois de {self._report_context.month} {self._report_context.year}"
         )
-        sheet[f"A{self._current_row}"] = month_text
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value=month_text,
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
@@ -165,30 +160,28 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
 
         # La cellule Programme s'étend sur 3 lignes
-        sheet[f"A{self._current_row}"] = "Programme"
-        sheet.merge_cells(f"A{self._current_row}:A{self._current_row + 2}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "A",
+            self._current_row,
             self._current_row + 2,
+            value="Programme",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
         )
 
-        sheet[f"B{self._current_row}"] = (
-            f"État d'exécution des tranches financières durant le mois de "
-            f"{self._report_context.month} {self._report_context.year}"  # type: ignore
-        )
-        sheet.merge_cells(f"B{self._current_row}:E{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "B",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value=(
+                f"État d'exécution des tranches financières durant le mois de "
+                f"{self._report_context.month} {self._report_context.year}"
+            ),
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
@@ -202,31 +195,25 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._logger.debug(
             f"Ajout des en-têtes de colonnes à la ligne {self._current_row}"
         )
-        sheet[f"B{self._current_row}"] = (
-            "Livraisons (libération de la dernière tranche)"
-        )
-        sheet.merge_cells(f"B{self._current_row}:C{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "B",
-            self._current_row,
             "C",
             self._current_row,
+            self._current_row,
+            value="Livraisons (libération de la dernière tranche)",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
         )
 
-        sheet[f"D{self._current_row}"] = (
-            "Lancements (libération de la première tranche)"
-        )
-        sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "D",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value="Lancements (libération de la première tranche)",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
@@ -390,32 +377,26 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             cell.border = ExcelStyling.BORDER_THIN
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
-        sheet[f"A{self._current_row}"] = (
-            "Situation des programmes (à renseigner par la BNH, ex-CNL)"
-        )
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value="Situation des programmes (à renseigner par la BNH, ex-CNL)",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
 
-        sheet[f"A{self._current_row}"] = (
-            f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}"
-        )
-        sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value=f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
@@ -566,27 +547,25 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._logger.debug("Ajout du pied de page du report")
 
         # Texte de pied de page gauche (A-B)
-        sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
-        sheet[f"A{self._current_row}"] = "Visa du directeur régional de la BNH (ex-CNL)"
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
-            self._current_row,
             "B",
             self._current_row,
+            self._current_row,
+            value="Visa du directeur régional de la BNH (ex-CNL)",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_LEFT,
         )
 
         # Texte de pied de page droit (D-E)
-        sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
-        sheet[f"D{self._current_row}"] = "Visa du directeur du logement"
-        ExcelStyling.apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "D",
-            self._current_row,
             "E",
             self._current_row,
+            self._current_row,
+            value="Visa du directeur du logement",
             font=ExcelStyling.FONT_BOLD,
             alignment=Alignment(horizontal="right", vertical="center"),
         )
@@ -594,15 +573,32 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._logger.debug("Pied de page ajouté avec succès")
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        self._logger.debug("Application du formatage final")
+        """Apply final formatting to the worksheet."""
+        self._logger.debug("Applying final formatting")
 
-        column_widths: dict[str, int] = {"A": 25, "B": 18, "C": 22, "D": 18, "E": 22}
-        self._logger.debug(f"Définition des largeurs de colonnes : {column_widths}")
+        column_widths: dict[str, int] = {
+            "A": 25,
+            "B": 18,
+            "C": 22,
+            "D": 18,
+            "E": 22,
+        }
 
         ExcelStyling.set_column_widths(sheet, column_widths)
-        ExcelStyling.setup_page_layout(sheet, orientation="portrait", fit_to_width=True)
 
-        self._logger.debug(
-            "Orientation de page définie en portrait avec ajustement à la largeur"
+        ExcelStyling.setup_page_layout(
+            sheet,
+            orientation="portrait",
+            fit_to_width=True,
+            fit_to_height=False,
         )
-        self._logger.info("Formatage final terminé avec succès")
+
+        ExcelStyling.setup_page_margins(
+            sheet,
+            left=0.25,
+            right=0.25,
+            top=0.5,
+            bottom=0.5,
+        )
+
+        self._logger.info("Final formatting completed successfully")
