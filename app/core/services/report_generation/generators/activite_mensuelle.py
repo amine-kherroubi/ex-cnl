@@ -8,6 +8,7 @@ from typing import Any
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Alignment, Border, Font, Side
+from openpyxl.utils import get_column_letter
 
 # Imports de l'application locale
 from app.core.domain.models.report_context import ReportContext
@@ -16,6 +17,19 @@ from app.core.domain.predefined_objects.programmes import get_programmes_datafra
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
+
+
+# Font constants for consistency
+FONT_NORMAL = Font(name="Arial", size=9, bold=False)
+FONT_BOLD = Font(name="Arial", size=9, bold=True)
+BORDER_THIN = Border(
+    left=Side(style="thin"),
+    right=Side(style="thin"),
+    top=Side(style="thin"),
+    bottom=Side(style="thin"),
+)
+ALIGNMENT_CENTER = Alignment(horizontal="center", vertical="center")
+ALIGNMENT_CENTER_WRAP = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
 
 class ActiviteMensuelleGenerator(ReportGenerator):
@@ -80,6 +94,30 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._logger.debug("Query formatting completed")
         return formatted_query
 
+    def _apply_style_to_merged_cells(
+        self,
+        sheet: Worksheet,
+        start_col: str,
+        start_row: int,
+        end_col: str,
+        end_row: int,
+        font: Font = FONT_NORMAL,
+        alignment: Alignment = ALIGNMENT_CENTER,
+        border: Border | None = None,
+    ) -> None:
+        """Apply consistent styling to all cells in a merged range."""
+        start_col_idx: int = ord(start_col) - ord('A') + 1
+        end_col_idx: int = ord(end_col) - ord('A') + 1
+        
+        for row in range(start_row, end_row + 1):
+            for col_idx in range(start_col_idx, end_col_idx + 1):
+                col_letter: str = get_column_letter(col_idx)
+                cell = sheet[f"{col_letter}{row}"]
+                cell.font = font
+                cell.alignment = alignment
+                if border:
+                    cell.border = border
+
     def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
@@ -95,9 +133,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Titre
         sheet[f"A{self._current_row}"] = "Habitat rural"
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet, "A", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
         )
         self._logger.debug("Titre principal ajouté : Habitat rural")
 
@@ -106,7 +144,7 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Wilaya
         wilaya_text = f"Wilaya de {self._report_context.wilaya.value}"
         sheet[f"A{self._current_row}"] = wilaya_text
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
+        sheet[f"A{self._current_row}"].font = FONT_BOLD
         self._logger.debug(f"Wilaya ajoutée : {wilaya_text}")
 
         self._current_row += 1
@@ -116,9 +154,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             "Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center", wrap_text=True
+        self._apply_style_to_merged_cells(
+            sheet, "A", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP
         )
         self._logger.debug("Titre du report ajouté")
 
@@ -130,9 +168,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
         sheet[f"A{self._current_row}"] = month_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet, "A", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
         )
         self._logger.debug(f"Mois et année ajoutés : {month_text}")
 
@@ -151,36 +189,20 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # La cellule Programme s'étend sur 3 lignes
         sheet[f"A{self._current_row}"] = "Programme"
         sheet.merge_cells(f"A{self._current_row}:A{self._current_row + 2}")
-        for cell in [sheet[f"A{self._current_row + i}"] for i in range(3)]:
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(
-                horizontal="center", vertical="center", wrap_text=True
-            )
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
+        self._apply_style_to_merged_cells(
+            sheet, "A", self._current_row, "A", self._current_row + 2,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        )
 
         sheet[f"B{self._current_row}"] = (
             f"État d'exécution des tranches financières durant le mois de "
             f"{self._report_context.month} {self._report_context.year}"  # type: ignore
         )
         sheet.merge_cells(f"B{self._current_row}:E{self._current_row}")
-        for cell in [
-            sheet[f"{column}{self._current_row}"] for column in ("B", "C", "D", "E")
-        ]:
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(
-                horizontal="center", vertical="center", wrap_text=True
-            )
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
+        self._apply_style_to_merged_cells(
+            sheet, "B", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        )
 
         self._logger.debug("Légende du tableau ajoutée")
 
@@ -194,231 +216,190 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             "Livraisons (libération de la dernière tranche)"
         )
         sheet.merge_cells(f"B{self._current_row}:C{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet, "B", self._current_row, "C", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        )
+
         sheet[f"D{self._current_row}"] = (
             "Lancements (libération de la première tranche)"
         )
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
-
-        for cell in [
-            sheet[f"{column}{self._current_row}"] for column in ("B", "C", "D", "E")
-        ]:
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(
-                horizontal="center", vertical="center", wrap_text=True
-            )
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
+        self._apply_style_to_merged_cells(
+            sheet, "D", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        )
 
         self._current_row += 1
 
         # Sous-en-têtes
-        sheet[f"B{self._current_row}"] = (
-            f"{self._report_context.month.capitalize()} {self._report_context.year}"
-        )
+        sub_headers: list[tuple[str, str]] = [
+            ("B", f"{self._report_context.month.capitalize()} {self._report_context.year}"),
+            ("C", self._get_cumul_text()),
+            ("D", f"{self._report_context.month.capitalize()} {self._report_context.year}"),
+            ("E", self._get_cumul_text()),
+        ]
 
-        end_day: int = (
-            self._report_context.month.last_day(self._report_context.year)
-            if not self._report_context.month.is_current
-            else date.today().day
-        )
-
-        sheet[f"C{self._current_row}"] = (
-            f"Cumul du 1er janvier au {end_day}"
-            f"{self._report_context.month} {self._report_context.year}"
-        )
-        sheet[f"D{self._current_row}"] = (
-            f"{self._report_context.month.capitalize()} {self._report_context.year}"
-        )
-        sheet[f"E{self._current_row}"] = (
-            f"Cumul du 1er janvier au {end_day}"
-            f"{self._report_context.month} {self._report_context.year}"
-        )
-
-        for cell in [
-            sheet[f"{column}{self._current_row}"] for column in ("B", "C", "D", "E")
-        ]:
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(
-                horizontal="center", vertical="center", wrap_text=True
-            )
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
+        for col, text in sub_headers:
+            sheet[f"{col}{self._current_row}"] = text
+            sheet[f"{col}{self._current_row}"].font = FONT_BOLD
+            sheet[f"{col}{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
+            sheet[f"{col}{self._current_row}"].border = BORDER_THIN
 
         self._logger.debug("Sous-en-têtes ajoutés avec les plages de dates")
 
         self._current_row += 1
 
         # Ajouter les données des résultats de requêtes
+        self._add_first_table_data(sheet, query_results)
+
+    def _get_cumul_text(self) -> str:
+        """Generate the cumulative text based on the current month."""
+        end_day: int = (
+            self._report_context.month.last_day(self._report_context.year)
+            if not self._report_context.month.is_current
+            else date.today().day
+        )
+        return (
+            f"Cumul du 1er janvier au {end_day} "
+            f"{self._report_context.month} {self._report_context.year}"
+        )
+
+    def _add_first_table_data(
+        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+    ) -> None:
+        """Add data rows to the first table."""
         self._logger.debug(
             f"Début des lignes de données à la ligne {self._current_row}"
         )
 
-        # Obtenir tous les programmes avec l'ordre approprié
+        # Obtenir tous les programmes
         programmes: list[str] = []
         if "programmes" in query_results:
-            programmes: list[str] = query_results["programmes"]["programme"].tolist()
+            programmes = query_results["programmes"]["programme"].tolist()
             self._logger.info(
-                f"Trouvé {len(programmes)} programmes (pré-triés par année) : {programmes}"
+                f"Trouvé {len(programmes)} programmes : {programmes}"
             )
         else:
             self._logger.warning("Aucun résultat de requête 'programmes' trouvé")
 
-        # Créer des dictionnaires de recherche pour chaque métrique
-        self._logger.debug(
-            "Création des dictionnaires de recherche à partir des résultats de requêtes"
-        )
-
-        lancements_mois_dict: dict[str, int] = {}
-        if "lancements_mois" in query_results:
-            df_lm: pd.DataFrame = query_results["lancements_mois"]
-            lancements_mois_dict = dict(zip(df_lm["programme"], df_lm["count"]))
-            self._logger.debug(
-                f"Données lancements mois : {len(lancements_mois_dict)} programmes"
-            )
-
-        lancements_cumul_annee_dict: dict[str, int] = {}
-        if "lancements_cumul_annee" in query_results:
-            df_ly: pd.DataFrame = query_results["lancements_cumul_annee"]
-            lancements_cumul_annee_dict = dict(zip(df_ly["programme"], df_ly["count"]))
-            self._logger.debug(
-                f"Données lancements cumulé annuel : {len(lancements_cumul_annee_dict)} programmes"
-            )
-
-        livraisons_mois_dict: dict[str, int] = {}
-        if "livraisons_mois" in query_results:
-            df_livm: pd.DataFrame = query_results["livraisons_mois"]
-            livraisons_mois_dict = dict(zip(df_livm["programme"], df_livm["count"]))
-            self._logger.debug(
-                f"Données livraisons mois : {len(livraisons_mois_dict)} programmes"
-            )
-
-        livraisons_cumul_annee_dict: dict[str, int] = {}
-        if "livraisons_cumul_annee" in query_results:
-            df_livy: pd.DataFrame = query_results["livraisons_cumul_annee"]
-            livraisons_cumul_annee_dict = dict(
-                zip(df_livy["programme"], df_livy["count"])
-            )
-            self._logger.debug(
-                f"Données livraisons cumulé annuel : {len(livraisons_cumul_annee_dict)} programmes"
-            )
+        # Créer des dictionnaires de recherche
+        data_dicts: dict[str, dict[str, int]] = self._create_data_dictionaries(query_results)
 
         # Calculer les totaux
-        total_livraisons_mois: int = sum(livraisons_mois_dict.values())
-        total_livraisons_cumul_annee: int = sum(livraisons_cumul_annee_dict.values())
-        total_lancements_mois: int = sum(lancements_mois_dict.values())
-        total_lancements_cumul_annee: int = sum(lancements_cumul_annee_dict.values())
+        totals: dict[str, int] = {
+            "livraisons_mois": sum(data_dicts["livraisons_mois"].values()),
+            "livraisons_cumul": sum(data_dicts["livraisons_cumul"].values()),
+            "lancements_mois": sum(data_dicts["lancements_mois"].values()),
+            "lancements_cumul": sum(data_dicts["lancements_cumul"].values()),
+        }
 
-        self._logger.info(
-            f"Totaux calculés - Livraisons : {total_livraisons_mois} (mois), {total_livraisons_cumul_annee} (cumulé)"
-        )
-        self._logger.info(
-            f"Totaux calculés - Lancements : {total_lancements_mois} (mois), {total_lancements_cumul_annee} (cumulé)"
-        )
-
-        # Ajouter les lignes de données pour chaque programme
-        self._logger.debug(
-            f"Ajout des lignes de données pour {len(programmes)} programmes"
-        )
+        # Ajouter les lignes de données
         for i, programme in enumerate(programmes):
             row: int = self._current_row + i
-            self._logger.debug(
-                f"Traitement du programme '{programme}' à la ligne {row}"
-            )
+            self._add_programme_row(sheet, row, programme, data_dicts)
 
-            # Colonne A : Nom du programme
-            sheet[f"A{row}"] = programme
-            sheet[f"A{row}"].font = Font(name="Arial", size=9)
-
-            # Colonne B : Livraisons (Mois)
-            livraisons_mois: int = livraisons_mois_dict.get(programme, 0)
-            sheet[f"B{row}"] = livraisons_mois if livraisons_mois > 0 else "-"
-            sheet[f"B{row}"].font = Font(name="Arial", size=9)
-
-            # Colonne C : Livraisons (Cumulé)
-            livraisons_cumul_annee: int = livraisons_cumul_annee_dict.get(programme, 0)
-            sheet[f"C{row}"] = (
-                livraisons_cumul_annee if livraisons_cumul_annee > 0 else "-"
-            )
-            sheet[f"C{row}"].font = Font(name="Arial", size=9)
-
-            # Colonne D : Lancements (Mois)
-            lancements_mois: int = lancements_mois_dict.get(programme, 0)
-            sheet[f"D{row}"] = lancements_mois if lancements_mois > 0 else "-"
-            sheet[f"D{row}"].font = Font(name="Arial", size=9)
-
-            # Colonne E : Lancements (Cumulé)
-            lancements_cumul_annee: int = lancements_cumul_annee_dict.get(programme, 0)
-            sheet[f"E{row}"] = (
-                lancements_cumul_annee if lancements_cumul_annee > 0 else "-"
-            )
-            sheet[f"E{row}"].font = Font(name="Arial", size=9)
-
-            # Ajouter les bordures
-            for column in ["A", "B", "C", "D", "E"]:
-                cell = sheet[f"{column}{row}"]
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-                cell.border = Border(
-                    left=Side(style="thin"),
-                    right=Side(style="thin"),
-                    top=Side(style="thin"),
-                    bottom=Side(style="thin"),
-                )
-
-        # Ajouter la ligne Total pour le premier tableau
+        # Ajouter la ligne Total
         self._current_row += len(programmes)
-        self._logger.debug(f"Ajout de la ligne Total à la ligne {self._current_row}")
-
-        sheet[f"A{self._current_row}"] = "Total"
-        sheet[f"B{self._current_row}"] = total_livraisons_mois
-        sheet[f"C{self._current_row}"] = total_livraisons_cumul_annee
-        sheet[f"D{self._current_row}"] = total_lancements_mois
-        sheet[f"E{self._current_row}"] = total_lancements_cumul_annee
-
-        # Formater la ligne Total
-        for column in ["A", "B", "C", "D", "E"]:
-            cell: Any = sheet[f"{column}{self._current_row}"]
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
+        self._add_total_row(sheet, self._current_row, totals)
 
         self._logger.info(
-            f"Premier tableau terminé avec {len(programmes)} programmes plus les totaux"
+            f"Premier tableau terminé avec {len(programmes)} programmes"
         )
 
         self._current_row += 2
+
+    def _create_data_dictionaries(
+        self, query_results: dict[str, pd.DataFrame]
+    ) -> dict[str, dict[str, int]]:
+        """Create lookup dictionaries from query results."""
+        self._logger.debug("Création des dictionnaires de recherche")
+
+        data_dicts: dict[str, dict[str, int]] = {
+            "lancements_mois": {},
+            "lancements_cumul": {},
+            "livraisons_mois": {},
+            "livraisons_cumul": {},
+        }
+
+        mappings = [
+            ("lancements_mois", "lancements_mois", "programme", "count"),
+            ("lancements_cumul", "lancements_cumul_annee", "programme", "count"),
+            ("livraisons_mois", "livraisons_mois", "programme", "count"),
+            ("livraisons_cumul", "livraisons_cumul_annee", "programme", "count"),
+        ]
+
+        for dict_key, query_key, prog_col, count_col in mappings:
+            if query_key in query_results:
+                df = query_results[query_key]
+                data_dicts[dict_key] = dict(zip(df[prog_col], df[count_col]))
+                self._logger.debug(
+                    f"Données {dict_key} : {len(data_dicts[dict_key])} programmes"
+                )
+
+        return data_dicts
+
+    def _add_programme_row(
+        self, 
+        sheet: Worksheet, 
+        row: int, 
+        programme: str, 
+        data_dicts: dict[str, dict[str, int]]
+    ) -> None:
+        """Add a single programme row to the table."""
+        values: list[tuple[str, Any]] = [
+            ("A", programme),
+            ("B", data_dicts["livraisons_mois"].get(programme, 0) or "-"),
+            ("C", data_dicts["livraisons_cumul"].get(programme, 0) or "-"),
+            ("D", data_dicts["lancements_mois"].get(programme, 0) or "-"),
+            ("E", data_dicts["lancements_cumul"].get(programme, 0) or "-"),
+        ]
+
+        for col, value in values:
+            cell = sheet[f"{col}{row}"]
+            cell.value = value
+            cell.font = FONT_NORMAL
+            cell.alignment = ALIGNMENT_CENTER
+            cell.border = BORDER_THIN
+
+    def _add_total_row(
+        self, sheet: Worksheet, row: int, totals: dict[str, int]
+    ) -> None:
+        """Add a total row to the table."""
+        values: list[tuple[str, Any]] = [
+            ("A", "Total"),
+            ("B", totals["livraisons_mois"]),
+            ("C", totals["livraisons_cumul"]),
+            ("D", totals["lancements_mois"]),
+            ("E", totals["lancements_cumul"]),
+        ]
+
+        for col, value in values:
+            cell = sheet[f"{col}{row}"]
+            cell.value = value
+            cell.font = FONT_BOLD
+            cell.alignment = ALIGNMENT_CENTER
+            cell.border = BORDER_THIN
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
         sheet[f"A{self._current_row}"] = (
             "Situation des programmes (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet, "A", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
         )
 
         self._current_row += 1
 
         sheet[f"A{self._current_row}"] = (
-            f"Arrêté le {self._report_context.reporting_date.strftime("%d/%m/%Y")}"
+            f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet, "A", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
         )
 
         self._current_row += 2
@@ -434,32 +415,26 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             ("B", "Consistance"),
             ("C", "Achevés (dernières tranches payées)"),
             ("D", "En cours"),
-            (
-                "E",
-                "Non lancés (consistance - premières tranches payées)",
-            ),
+            ("E", "Non lancés (consistance - premières tranches payées)"),
         ]
 
-        self._logger.debug(
-            f"Ajout de {len(headers)} en-têtes de colonnes pour le second tableau à la ligne {self._current_row}"
-        )
         for col, title in headers:
             cell = sheet[f"{col}{self._current_row}"]
             cell.value = title
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(
-                horizontal="center", vertical="center", wrap_text=True
-            )
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
+            cell.font = FONT_BOLD
+            cell.alignment = ALIGNMENT_CENTER_WRAP
+            cell.border = BORDER_THIN
 
         self._current_row += 1
 
-        # Obtenir les données des résultats de requêtes
+        # Add second table data
+        self._add_second_table_data(sheet, query_results)
+
+    def _add_second_table_data(
+        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+    ) -> None:
+        """Add data rows to the second table."""
+        # Get programmes data
         programmes_situation: list[tuple[str, int]] = []
         if "programmes_situation" in query_results:
             df_prog = query_results["programmes_situation"]
@@ -469,112 +444,101 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             self._logger.info(
                 f"Trouvé {len(programmes_situation)} programmes pour le tableau de situation"
             )
-        else:
-            self._logger.warning(
-                "Aucun résultat de requête 'programmes_situation' trouvé"
-            )
 
-        # Créer des dictionnaires de recherche
-        acheves_dict: dict[str, int] = {}
-        if "acheves_derniere_tranche" in query_results:
-            df_acheves = query_results["acheves_derniere_tranche"]
-            acheves_dict = dict(zip(df_acheves["programme"], df_acheves["acheves"]))
-            self._logger.debug(f"Données achevés : {len(acheves_dict)} programmes")
+        # Create lookup dictionaries
+        data_dicts = self._create_situation_dictionaries(query_results)
 
-        en_cours_dict: dict[str, int] = {}
-        if "en_cours_calculation" in query_results:
-            df_en_cours = query_results["en_cours_calculation"]
-            en_cours_dict = dict(zip(df_en_cours["programme"], df_en_cours["en_cours"]))
-            self._logger.debug(f"Données en cours : {len(en_cours_dict)} programmes")
+        # Initialize totals
+        totals = {"consistance": 0, "acheves": 0, "en_cours": 0, "non_lances": 0}
 
-        non_lances_dict: dict[str, int] = {}
-        if "non_lances_premiere_tranche" in query_results:
-            df_non_lances = query_results["non_lances_premiere_tranche"]
-            non_lances_dict = dict(
-                zip(df_non_lances["programme"], df_non_lances["non_lances"])
-            )
-            self._logger.debug(
-                f"Données non lancés : {len(non_lances_dict)} programmes"
-            )
-
-        # Ajouter les lignes de données
-        total_consistance = 0
-        total_acheves = 0
-        total_en_cours = 0
-        total_non_lances = 0
-
+        # Add data rows
         for i, (programme, consistance) in enumerate(programmes_situation):
             row = self._current_row + i
-            self._logger.debug(
-                f"Traitement du programme '{programme}' à la ligne {row}"
-            )
+            self._add_situation_row(sheet, row, programme, consistance, data_dicts, totals)
 
-            # Colonne A : Nom du programme
-            sheet[f"A{row}"] = programme
-            sheet[f"A{row}"].font = Font(name="Arial", size=9)
-
-            # Colonne B : Consistance
-            sheet[f"B{row}"] = consistance
-            sheet[f"B{row}"].font = Font(name="Arial", size=9)
-            total_consistance += consistance
-
-            # Colonne C : Achevés
-            acheves = acheves_dict.get(programme, 0)
-            sheet[f"C{row}"] = acheves if acheves > 0 else "-"
-            sheet[f"C{row}"].font = Font(name="Arial", size=9)
-            total_acheves += acheves
-
-            # Colonne D : En cours
-            en_cours = en_cours_dict.get(programme, 0)
-            sheet[f"D{row}"] = en_cours if en_cours > 0 else "-"
-            sheet[f"D{row}"].font = Font(name="Arial", size=9)
-            total_en_cours += en_cours
-
-            # Colonne E : Non lancés
-            non_lances = non_lances_dict.get(programme, 0)
-            sheet[f"E{row}"] = non_lances if non_lances > 0 else "-"
-            sheet[f"E{row}"].font = Font(name="Arial", size=9)
-            total_non_lances += non_lances
-
-            # Ajouter les bordures
-            for col in ["A", "B", "C", "D", "E"]:
-                cell = sheet[f"{col}{row}"]
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-                cell.border = Border(
-                    left=Side(style="thin"),
-                    right=Side(style="thin"),
-                    top=Side(style="thin"),
-                    bottom=Side(style="thin"),
-                )
-
-        # Ajouter la ligne Total pour le second tableau
+        # Add total row
         self._current_row += len(programmes_situation)
-        self._logger.debug(
-            f"Ajout de la ligne Total pour le second tableau à la ligne {self._current_row}"
-        )
+        self._add_situation_total_row(sheet, self._current_row, totals)
 
-        sheet[f"A{self._current_row}"] = "Total général"
-        sheet[f"B{self._current_row}"] = total_consistance
-        sheet[f"C{self._current_row}"] = total_acheves
-        sheet[f"D{self._current_row}"] = total_en_cours
-        sheet[f"E{self._current_row}"] = total_non_lances
-
-        # Formater la ligne Total
-        for col in ["A", "B", "C", "D", "E"]:
-            cell = sheet[f"{col}{self._current_row}"]
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
-
-        self._logger.info(
-            f"Second tableau terminé avec {len(programmes_situation)} programmes plus les totaux"
-        )
+        self._logger.info(f"Second tableau terminé avec {len(programmes_situation)} programmes")
         self._current_row += 2
+
+    def _create_situation_dictionaries(
+        self, query_results: dict[str, pd.DataFrame]
+    ) -> dict[str, dict[str, int]]:
+        """Create lookup dictionaries for situation table."""
+        data_dicts: dict[str, dict[str, int]] = {
+            "acheves": {},
+            "en_cours": {},
+            "non_lances": {},
+        }
+
+        mappings = [
+            ("acheves", "acheves_derniere_tranche", "programme", "acheves"),
+            ("en_cours", "en_cours_calculation", "programme", "en_cours"),
+            ("non_lances", "non_lances_premiere_tranche", "programme", "non_lances"),
+        ]
+
+        for dict_key, query_key, prog_col, value_col in mappings:
+            if query_key in query_results:
+                df = query_results[query_key]
+                data_dicts[dict_key] = dict(zip(df[prog_col], df[value_col]))
+
+        return data_dicts
+
+    def _add_situation_row(
+        self,
+        sheet: Worksheet,
+        row: int,
+        programme: str,
+        consistance: int,
+        data_dicts: dict[str, dict[str, int]],
+        totals: dict[str, int],
+    ) -> None:
+        """Add a single situation row."""
+        acheves = data_dicts["acheves"].get(programme, 0)
+        en_cours = data_dicts["en_cours"].get(programme, 0)
+        non_lances = data_dicts["non_lances"].get(programme, 0)
+
+        values: list[tuple[str, Any]] = [
+            ("A", programme),
+            ("B", consistance),
+            ("C", acheves if acheves > 0 else "-"),
+            ("D", en_cours if en_cours > 0 else "-"),
+            ("E", non_lances if non_lances > 0 else "-"),
+        ]
+
+        for col, value in values:
+            cell = sheet[f"{col}{row}"]
+            cell.value = value
+            cell.font = FONT_NORMAL
+            cell.alignment = ALIGNMENT_CENTER
+            cell.border = BORDER_THIN
+
+        # Update totals
+        totals["consistance"] += consistance
+        totals["acheves"] += acheves
+        totals["en_cours"] += en_cours
+        totals["non_lances"] += non_lances
+
+    def _add_situation_total_row(
+        self, sheet: Worksheet, row: int, totals: dict[str, int]
+    ) -> None:
+        """Add total row for situation table."""
+        values: list[tuple[str, Any]] = [
+            ("A", "Total général"),
+            ("B", totals["consistance"]),
+            ("C", totals["acheves"]),
+            ("D", totals["en_cours"]),
+            ("E", totals["non_lances"]),
+        ]
+
+        for col, value in values:
+            cell = sheet[f"{col}{row}"]
+            cell.value = value
+            cell.font = FONT_BOLD
+            cell.alignment = ALIGNMENT_CENTER
+            cell.border = BORDER_THIN
 
     def _add_footer(self, sheet: Worksheet) -> None:
         self._logger.debug("Ajout du pied de page du report")
@@ -582,17 +546,17 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Texte de pied de page gauche (A-B)
         sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
         sheet[f"A{self._current_row}"] = "Visa du directeur régional de la BNH (ex-CNL)"
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="left", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet, "A", self._current_row, "B", self._current_row,
+            font=FONT_BOLD, alignment=Alignment(horizontal="left", vertical="center")
         )
 
         # Texte de pied de page droit (D-E)
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
         sheet[f"D{self._current_row}"] = "Visa du directeur du logement"
-        sheet[f"D{self._current_row}"].font = Font(name="Arial", size=9, bold=True)
-        sheet[f"D{self._current_row}"].alignment = Alignment(
-            horizontal="right", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet, "D", self._current_row, "E", self._current_row,
+            font=FONT_BOLD, alignment=Alignment(horizontal="right", vertical="center")
         )
 
         self._logger.debug("Pied de page ajouté avec succès")

@@ -25,6 +25,23 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
 
 
+# Font and style constants for consistency
+FONT_NORMAL = Font(name="Arial", size=9, bold=False)
+FONT_BOLD = Font(name="Arial", size=9, bold=True)
+FONT_HEADER = Font(name="Arial", size=10, bold=True)
+FONT_TITLE = Font(name="Arial", size=12, bold=True)
+BORDER_THIN = Border(
+    left=Side(style="thin"),
+    right=Side(style="thin"),
+    top=Side(style="thin"),
+    bottom=Side(style="thin"),
+)
+ALIGNMENT_CENTER = Alignment(horizontal="center", vertical="center")
+ALIGNMENT_CENTER_WRAP = Alignment(
+    horizontal="center", vertical="center", wrap_text=True
+)
+
+
 class SituationFinanciereGenerator(ReportGenerator):
     __slots__ = ("_current_row", "_target_programme", "_totals")
 
@@ -147,6 +164,30 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._logger.debug("Query formatting completed")
         return formatted_query
 
+    def _apply_style_to_merged_cells(
+        self,
+        sheet: Worksheet,
+        start_col: str,
+        start_row: int,
+        end_col: str,
+        end_row: int,
+        font: Font = FONT_NORMAL,
+        alignment: Alignment = ALIGNMENT_CENTER,
+        border: Border | None = None,
+    ) -> None:
+        """Apply consistent styling to all cells in a merged range."""
+        start_col_idx: int = ord(start_col) - ord("A") + 1
+        end_col_idx: int = ord(end_col) - ord("A") + 1
+
+        for row in range(start_row, end_row + 1):
+            for col_idx in range(start_col_idx, end_col_idx + 1):
+                col_letter: str = get_column_letter(col_idx)
+                cell = sheet[f"{col_letter}{row}"]
+                cell.font = font
+                cell.alignment = alignment
+                if border:
+                    cell.border = border
+
     def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
@@ -165,9 +206,14 @@ class SituationFinanciereGenerator(ReportGenerator):
             f"Situation financière du programme '{self._target_programme.name}' par daira et par commune"  # type: ignore
         )
         sheet.merge_cells(f"A{self._current_row}:T{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=12, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "T",
+            self._current_row,
+            font=FONT_TITLE,
+            alignment=ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
@@ -177,16 +223,22 @@ class SituationFinanciereGenerator(ReportGenerator):
             f"Arrêté au {self._report_context.reporting_date.strftime('%d/%m/%Y')}"
         )
         sheet.merge_cells(f"A{self._current_row}:T{self._current_row}")
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
-        sheet[f"A{self._current_row}"].alignment = Alignment(
-            horizontal="center", vertical="center"
+        self._apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "T",
+            self._current_row,
+            font=FONT_HEADER,
+            alignment=ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
 
         # Wilaya
         sheet[f"A{self._current_row}"] = f"DL de {self._report_context.wilaya.value}"
-        sheet[f"A{self._current_row}"].font = Font(name="Arial", size=10, bold=True)
+        sheet[f"A{self._current_row}"].font = FONT_HEADER
+        sheet[f"A{self._current_row}"].alignment = ALIGNMENT_CENTER
 
         self._current_row += 2
 
@@ -199,11 +251,29 @@ class SituationFinanciereGenerator(ReportGenerator):
         # First level headers (engagement types)
         sheet[f"F{self._current_row}"] = "Engagement par la BNH"
         sheet.merge_cells(f"F{self._current_row}:G{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet,
+            "F",
+            self._current_row,
+            "G",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+        )
 
         sheet[f"H{self._current_row}"] = (
             "Engagement par le MHUV (décision d'inscription)"
         )
         sheet.merge_cells(f"H{self._current_row}:I{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet,
+            "H",
+            self._current_row,
+            "I",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+        )
 
         self._current_row += 1
         header_start_row: int = self._current_row
@@ -228,10 +298,30 @@ class SituationFinanciereGenerator(ReportGenerator):
         for col, title in main_headers:
             sheet[f"{col}{self._current_row}"] = title
             sheet.merge_cells(f"{col}{header_start_row}:{col}{header_end_row}")
+            self._apply_style_to_merged_cells(
+                sheet,
+                col,
+                header_start_row,
+                col,
+                header_end_row,
+                font=FONT_BOLD,
+                alignment=ALIGNMENT_CENTER_WRAP,
+                border=BORDER_THIN,
+            )
 
         # Consommations header
         sheet[f"J{self._current_row}"] = "Consommations"
         sheet.merge_cells(f"J{self._current_row}:Q{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet,
+            "J",
+            self._current_row,
+            "Q",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
+        )
 
         self._current_row += 1
 
@@ -240,6 +330,16 @@ class SituationFinanciereGenerator(ReportGenerator):
             f"Cumuls au 31/12/{self._report_context.year - 1}"
         )
         sheet.merge_cells(f"J{self._current_row}:M{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet,
+            "J",
+            self._current_row,
+            "M",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
+        )
 
         end_day: int = (
             self._report_context.month.last_day(self._report_context.year)
@@ -251,17 +351,55 @@ class SituationFinanciereGenerator(ReportGenerator):
             f"Du 1 janvier {self._report_context.year} au {end_day} {self._report_context.month.value}"
         )
         sheet.merge_cells(f"N{self._current_row}:Q{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet,
+            "N",
+            self._current_row,
+            "Q",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
+        )
 
         self._current_row += 1
 
         # Third level headers (aid categories)
         sheet[f"J{self._current_row}"] = "Aides"
         sheet.merge_cells(f"J{self._current_row}:L{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet,
+            "J",
+            self._current_row,
+            "L",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
+        )
+
         sheet[f"M{self._current_row}"] = "Montant (4)"
+        sheet[f"M{self._current_row}"].font = FONT_BOLD
+        sheet[f"M{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
+        sheet[f"M{self._current_row}"].border = BORDER_THIN
 
         sheet[f"N{self._current_row}"] = "Aides"
         sheet.merge_cells(f"N{self._current_row}:P{self._current_row}")
+        self._apply_style_to_merged_cells(
+            sheet,
+            "N",
+            self._current_row,
+            "P",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
+        )
+
         sheet[f"Q{self._current_row}"] = "Montant (5)"
+        sheet[f"Q{self._current_row}"].font = FONT_BOLD
+        sheet[f"Q{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
+        sheet[f"Q{self._current_row}"].border = BORDER_THIN
 
         self._current_row += 1
 
@@ -277,23 +415,9 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         for col, title in tranche_headers:
             sheet[f"{col}{self._current_row}"] = title
-
-        # Apply formatting to all header cells
-        for row in range(header_start_row, self._current_row + 1):
-            for col_num in range(1, 21):  # A to T (columns 1-20)
-                col_letter: str = get_column_letter(col_num)
-                cell: Any = sheet[f"{col_letter}{row}"]
-                if cell.value:  # Only format cells that have content
-                    cell.font = Font(name="Arial", size=9, bold=True)
-                    cell.alignment = Alignment(
-                        horizontal="center", vertical="center", wrap_text=True
-                    )
-                    cell.border = Border(
-                        left=Side(style="thin"),
-                        right=Side(style="thin"),
-                        top=Side(style="thin"),
-                        bottom=Side(style="thin"),
-                    )
+            sheet[f"{col}{self._current_row}"].font = FONT_BOLD
+            sheet[f"{col}{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
+            sheet[f"{col}{self._current_row}"].border = BORDER_THIN
 
         self._current_row += 1
         self._logger.info("Table headers added successfully")
@@ -308,57 +432,7 @@ class SituationFinanciereGenerator(ReportGenerator):
         dairas_communes_df: pd.DataFrame = get_dairas_communes_dataframe()
 
         # Create lookup dictionaries from query results
-        aides_inscrites_dict: dict[tuple[str, str], tuple[int, int]] = {}
-        if "nb_aides_et_montants_inscrits_par_daira_et_commune" in query_results:
-            df_inscrites: pd.DataFrame = query_results[
-                "nb_aides_et_montants_inscrits_par_daira_et_commune"
-            ]
-            for _, row in df_inscrites.iterrows():
-                key: tuple[str, str] = (
-                    row["Daira du projet"],
-                    row["Commune du projet"],
-                )
-                aides_inscrites_dict[key] = (
-                    row["nb_aides_inscrites"],
-                    row["montant_inscrits"],
-                )
-            self._logger.debug(
-                f"Loaded {len(aides_inscrites_dict)} inscribed aids records"
-            )
-
-        cumul_precedent_dict: dict[tuple[str, str], tuple[int, int, int, int]] = {}
-        if "consommations_cumulees_fin_annee_precedente" in query_results:
-            df_cumul: pd.DataFrame = query_results[
-                "consommations_cumulees_fin_annee_precedente"
-            ]
-            for _, row in df_cumul.iterrows():
-                key: tuple[str, str] = (row["Daira"], row["Commune de projet"])
-                cumul_precedent_dict[key] = (
-                    row["t_1"],
-                    row["t_2"],
-                    row["t_3"],
-                    row["montant"],
-                )
-            self._logger.debug(
-                f"Loaded {len(cumul_precedent_dict)} previous year cumulative records"
-            )
-
-        annee_actuelle_dict: dict[tuple[str, str], tuple[int, int, int, int]] = {}
-        if "consommations_annee_actuelle_jusqua_mois_actuel" in query_results:
-            df_actuelle: pd.DataFrame = query_results[
-                "consommations_annee_actuelle_jusqua_mois_actuel"
-            ]
-            for _, row in df_actuelle.iterrows():
-                key: tuple[str, str] = (row["Daira"], row["Commune de projet"])
-                annee_actuelle_dict[key] = (
-                    row["t_1"],
-                    row["t_2"],
-                    row["t_3"],
-                    row["montant"],
-                )
-            self._logger.debug(
-                f"Loaded {len(annee_actuelle_dict)} current year records"
-            )
+        data_dicts: dict[str, dict] = self._create_lookup_dictionaries(query_results)
 
         # Track totals
         totals: dict[str, int] = {
@@ -381,120 +455,9 @@ class SituationFinanciereGenerator(ReportGenerator):
             commune: str = row["Commune"]
             current_row: int = self._current_row + i
 
-            self._logger.debug(f"Processing row {current_row}: {daira} - {commune}")
-
-            # Column A: Programme (use target programme name)
-            sheet[f"A{current_row}"] = self._target_programme.name  # type: ignore
-
-            # Column B: Daira
-            sheet[f"B{current_row}"] = daira
-
-            # Column C: Commune
-            sheet[f"C{current_row}"] = commune
-
-            # Column D: Aides notifiées (empty as indicated in comments)
-            sheet[f"D{current_row}"] = "-"
-
-            # Column E: Montants notifiés (empty as indicated in comments)
-            sheet[f"E{current_row}"] = "-"
-
-            # Columns F & G: Aides inscrites and Montants inscrits from query results
-            key: tuple[str, str] = (daira, commune)
-
-            # Initialize previous year values to ensure they're always defined
-            t1_prev = t2_prev = t3_prev = montant_prev = 0
-
-            if key in aides_inscrites_dict:
-                aides_inscrites, montants_inscrits = aides_inscrites_dict[key]
-                sheet[f"F{current_row}"] = (
-                    aides_inscrites if aides_inscrites > 0 else "-"
-                )
-                sheet[f"G{current_row}"] = (
-                    montants_inscrits if montants_inscrits > 0 else "-"
-                )
-                totals["aides_inscrites"] += aides_inscrites
-                totals["montants_inscrits"] += montants_inscrits
-            else:
-                sheet[f"F{current_row}"] = "-"
-                sheet[f"G{current_row}"] = "-"
-
-            # Column H: Aides inscrites (2) (empty as indicated in comments)
-            sheet[f"H{current_row}"] = "-"
-
-            # Column I: Montants inscrits (3) (empty as indicated in comments)
-            sheet[f"I{current_row}"] = "-"
-
-            # Columns J, K, L, M: Cumuls au 31/12/previous_year from query results
-            if key in cumul_precedent_dict:
-                t1_prev, t2_prev, t3_prev, montant_prev = cumul_precedent_dict[key]
-                sheet[f"J{current_row}"] = t1_prev if t1_prev > 0 else "-"
-                sheet[f"K{current_row}"] = t2_prev if t2_prev > 0 else "-"
-                sheet[f"L{current_row}"] = t3_prev if t3_prev > 0 else "-"
-                sheet[f"M{current_row}"] = montant_prev if montant_prev > 0 else "-"
-                totals["cumul_precedent_t1"] += t1_prev
-                totals["cumul_precedent_t2"] += t2_prev
-                totals["cumul_precedent_t3"] += t3_prev
-                totals["cumul_precedent_montant"] += montant_prev
-            else:
-                sheet[f"J{current_row}"] = "-"
-                sheet[f"K{current_row}"] = "-"
-                sheet[f"L{current_row}"] = "-"
-                sheet[f"M{current_row}"] = "-"
-
-            # Columns N, O, P, Q: Current year from query results
-            if key in annee_actuelle_dict:
-                t1_curr, t2_curr, t3_curr, montant_curr = annee_actuelle_dict[key]
-                sheet[f"N{current_row}"] = t1_curr if t1_curr > 0 else "-"
-                sheet[f"O{current_row}"] = t2_curr if t2_curr > 0 else "-"
-                sheet[f"P{current_row}"] = t3_curr if t3_curr > 0 else "-"
-                sheet[f"Q{current_row}"] = montant_curr if montant_curr > 0 else "-"
-                totals["annee_actuelle_t1"] += t1_curr
-                totals["annee_actuelle_t2"] += t2_curr
-                totals["annee_actuelle_t3"] += t3_curr
-                totals["annee_actuelle_montant"] += montant_curr
-
-                # Column R: Cumul (6) = (4) + (5)
-                cumul_total: int = (
-                    montant_prev + montant_curr
-                    if key in cumul_precedent_dict
-                    else montant_curr
-                )
-                sheet[f"R{current_row}"] = cumul_total if cumul_total > 0 else "-"
-                totals["cumul_total"] += cumul_total
-            else:
-                sheet[f"N{current_row}"] = "-"
-                sheet[f"O{current_row}"] = "-"
-                sheet[f"P{current_row}"] = "-"
-                sheet[f"Q{current_row}"] = "-"
-                # Column R: Only previous year if no current year data
-                if key in cumul_precedent_dict:
-                    sheet[f"R{current_row}"] = (
-                        cumul_precedent_dict[key][3]
-                        if cumul_precedent_dict[key][3] > 0
-                        else "-"
-                    )
-                    totals["cumul_total"] += cumul_precedent_dict[key][3]
-                else:
-                    sheet[f"R{current_row}"] = "-"
-
-            # Column S: Solde sur engagement (3) - (6) (empty as indicated in comments)
-            sheet[f"S{current_row}"] = "-"
-
-            # Column T: Reste à inscrire (1) - (2) (empty as indicated in comments)
-            sheet[f"T{current_row}"] = "-"
-
-            # Apply formatting to data cells
-            for col_num in range(1, 21):  # A to T
-                col_letter: str = get_column_letter(col_num)
-                cell: Any = sheet[f"{col_letter}{current_row}"]
-                cell.font = Font(name="Arial", size=9)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-                cell.border = Border(
-                    left=Side(style="thin"),
-                    right=Side(style="thin"),
-                    top=Side(style="thin"),
-                    bottom=Side(style="thin"),
-                )
+            self._add_single_data_row(
+                sheet, current_row, daira, commune, data_dicts, totals
+            )
 
         self._current_row += len(dairas_communes_df)
 
@@ -503,64 +466,226 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         self._logger.info(f"Added {len(dairas_communes_df)} data rows successfully")
 
+    def _create_lookup_dictionaries(
+        self, query_results: dict[str, pd.DataFrame]
+    ) -> dict[str, dict]:
+        """Create lookup dictionaries from query results."""
+        data_dicts: dict[str, dict] = {
+            "aides_inscrites": {},
+            "cumul_precedent": {},
+            "annee_actuelle": {},
+        }
+
+        # Aides inscrites
+        if "nb_aides_et_montants_inscrits_par_daira_et_commune" in query_results:
+            df = query_results["nb_aides_et_montants_inscrits_par_daira_et_commune"]
+            for _, row in df.iterrows():
+                key = (row["Daira du projet"], row["Commune du projet"])
+                data_dicts["aides_inscrites"][key] = (
+                    row["nb_aides_inscrites"],
+                    row["montant_inscrits"],
+                )
+
+        # Cumul précédent
+        if "consommations_cumulees_fin_annee_precedente" in query_results:
+            df = query_results["consommations_cumulees_fin_annee_precedente"]
+            for _, row in df.iterrows():
+                key = (row["Daira"], row["Commune de projet"])
+                data_dicts["cumul_precedent"][key] = (
+                    row["t_1"],
+                    row["t_2"],
+                    row["t_3"],
+                    row["montant"],
+                )
+
+        # Année actuelle
+        if "consommations_annee_actuelle_jusqua_mois_actuel" in query_results:
+            df = query_results["consommations_annee_actuelle_jusqua_mois_actuel"]
+            for _, row in df.iterrows():
+                key = (row["Daira"], row["Commune de projet"])
+                data_dicts["annee_actuelle"][key] = (
+                    row["t_1"],
+                    row["t_2"],
+                    row["t_3"],
+                    row["montant"],
+                )
+
+        return data_dicts
+
+    def _add_single_data_row(
+        self,
+        sheet: Worksheet,
+        row: int,
+        daira: str,
+        commune: str,
+        data_dicts: dict[str, dict],
+        totals: dict[str, int],
+    ) -> None:
+        """Add a single data row to the table."""
+        key: tuple[str, str] = (daira, commune)
+
+        # Basic columns
+        basic_values: list[tuple[str, Any]] = [
+            ("A", self._target_programme.name),  # type: ignore
+            ("B", daira),
+            ("C", commune),
+            ("D", "-"),
+            ("E", "-"),
+        ]
+
+        # Aides inscrites (F & G)
+        if key in data_dicts["aides_inscrites"]:
+            aides, montants = data_dicts["aides_inscrites"][key]
+            basic_values.extend(
+                [
+                    ("F", aides if aides > 0 else "-"),
+                    ("G", montants if montants > 0 else "-"),
+                ]
+            )
+            totals["aides_inscrites"] += aides
+            totals["montants_inscrits"] += montants
+        else:
+            basic_values.extend([("F", "-"), ("G", "-")])
+
+        basic_values.extend([("H", "-"), ("I", "-")])
+
+        # Apply basic values
+        for col, value in basic_values:
+            cell = sheet[f"{col}{row}"]
+            cell.value = value
+            cell.font = FONT_NORMAL
+            cell.alignment = ALIGNMENT_CENTER
+            cell.border = BORDER_THIN
+
+        # Previous year cumulative (J, K, L, M)
+        self._add_cumulative_data(
+            sheet,
+            row,
+            key,
+            data_dicts["cumul_precedent"],
+            ["J", "K", "L", "M"],
+            totals,
+            [
+                "cumul_precedent_t1",
+                "cumul_precedent_t2",
+                "cumul_precedent_t3",
+                "cumul_precedent_montant",
+            ],
+        )
+
+        # Current year (N, O, P, Q)
+        self._add_cumulative_data(
+            sheet,
+            row,
+            key,
+            data_dicts["annee_actuelle"],
+            ["N", "O", "P", "Q"],
+            totals,
+            [
+                "annee_actuelle_t1",
+                "annee_actuelle_t2",
+                "annee_actuelle_t3",
+                "annee_actuelle_montant",
+            ],
+        )
+
+        # Calculate and add cumul total (R)
+        cumul_total = self._calculate_cumul_total(key, data_dicts)
+        cell = sheet[f"R{row}"]
+        cell.value = cumul_total if cumul_total > 0 else "-"
+        cell.font = FONT_NORMAL
+        cell.alignment = ALIGNMENT_CENTER
+        cell.border = BORDER_THIN
+        totals["cumul_total"] += cumul_total
+
+        # Final columns (S, T)
+        for col in ["S", "T"]:
+            cell = sheet[f"{col}{row}"]
+            cell.value = "-"
+            cell.font = FONT_NORMAL
+            cell.alignment = ALIGNMENT_CENTER
+            cell.border = BORDER_THIN
+
+    def _add_cumulative_data(
+        self,
+        sheet: Worksheet,
+        row: int,
+        key: tuple[str, str],
+        data_dict: dict,
+        columns: list[str],
+        totals: dict[str, int],
+        total_keys: list[str],
+    ) -> None:
+        """Add cumulative data to specified columns."""
+        if key in data_dict:
+            values = data_dict[key]
+            for i, (col, value, total_key) in enumerate(
+                zip(columns, values, total_keys)
+            ):
+                cell = sheet[f"{col}{row}"]
+                cell.value = value if value > 0 else "-"
+                cell.font = FONT_NORMAL
+                cell.alignment = ALIGNMENT_CENTER
+                cell.border = BORDER_THIN
+                totals[total_key] += value
+        else:
+            for col in columns:
+                cell = sheet[f"{col}{row}"]
+                cell.value = "-"
+                cell.font = FONT_NORMAL
+                cell.alignment = ALIGNMENT_CENTER
+                cell.border = BORDER_THIN
+
+    def _calculate_cumul_total(
+        self, key: tuple[str, str], data_dicts: dict[str, dict]
+    ) -> int:
+        """Calculate the cumulative total for a given key."""
+        total: int = 0
+        if key in data_dicts["cumul_precedent"]:
+            total += data_dicts["cumul_precedent"][key][3]
+        if key in data_dicts["annee_actuelle"]:
+            total += data_dicts["annee_actuelle"][key][3]
+        return total
+
     def _add_totals_row(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
         """Add the totals row at the bottom of the table."""
         self._logger.debug("Adding totals row")
 
-        # Add "Total" label
-        sheet[f"A{self._current_row}"] = "Total général"
-
-        # Leave columns B, C empty for totals row
-        sheet[f"B{self._current_row}"] = ""
-        sheet[f"C{self._current_row}"] = ""
-
-        # Empty columns as per original design
-        sheet[f"D{self._current_row}"] = "-"
-        sheet[f"E{self._current_row}"] = "-"
-
-        # Totals from data processing
         totals: dict[str, int] = getattr(self, "_totals", {})
 
-        sheet[f"F{self._current_row}"] = totals.get("aides_inscrites", 0)
-        sheet[f"G{self._current_row}"] = totals.get("montants_inscrits", 0)
+        # Define all total values
+        total_values: list[tuple[str, Any]] = [
+            ("A", "Total général"),
+            ("B", ""),
+            ("C", ""),
+            ("D", "-"),
+            ("E", "-"),
+            ("F", totals.get("aides_inscrites", 0)),
+            ("G", totals.get("montants_inscrits", 0)),
+            ("H", "-"),
+            ("I", "-"),
+            ("J", totals.get("cumul_precedent_t1", 0)),
+            ("K", totals.get("cumul_precedent_t2", 0)),
+            ("L", totals.get("cumul_precedent_t3", 0)),
+            ("M", totals.get("cumul_precedent_montant", 0)),
+            ("N", totals.get("annee_actuelle_t1", 0)),
+            ("O", totals.get("annee_actuelle_t2", 0)),
+            ("P", totals.get("annee_actuelle_t3", 0)),
+            ("Q", totals.get("annee_actuelle_montant", 0)),
+            ("R", totals.get("cumul_total", 0)),
+            ("S", "-"),
+            ("T", "-"),
+        ]
 
-        # Empty columns as per original design
-        sheet[f"H{self._current_row}"] = "-"
-        sheet[f"I{self._current_row}"] = "-"
-
-        # Previous year cumulative totals
-        sheet[f"J{self._current_row}"] = totals.get("cumul_precedent_t1", 0)
-        sheet[f"K{self._current_row}"] = totals.get("cumul_precedent_t2", 0)
-        sheet[f"L{self._current_row}"] = totals.get("cumul_precedent_t3", 0)
-        sheet[f"M{self._current_row}"] = totals.get("cumul_precedent_montant", 0)
-
-        # Current year totals
-        sheet[f"N{self._current_row}"] = totals.get("annee_actuelle_t1", 0)
-        sheet[f"O{self._current_row}"] = totals.get("annee_actuelle_t2", 0)
-        sheet[f"P{self._current_row}"] = totals.get("annee_actuelle_t3", 0)
-        sheet[f"Q{self._current_row}"] = totals.get("annee_actuelle_montant", 0)
-
-        # Total cumul
-        sheet[f"R{self._current_row}"] = totals.get("cumul_total", 0)
-
-        # Empty columns as per original design
-        sheet[f"S{self._current_row}"] = "-"
-        sheet[f"T{self._current_row}"] = "-"
-
-        # Apply bold formatting to totals row
-        for col_num in range(1, 21):  # A to T
-            col_letter: str = get_column_letter(col_num)
-            cell: Any = sheet[f"{col_letter}{self._current_row}"]
-            cell.font = Font(name="Arial", size=9, bold=True)
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.border = Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin"),
-            )
+        # Apply values and formatting
+        for col, value in total_values:
+            cell = sheet[f"{col}{self._current_row}"]
+            cell.value = value
+            cell.font = FONT_BOLD
+            cell.alignment = ALIGNMENT_CENTER
+            cell.border = BORDER_THIN
 
         self._logger.info("Totals row added successfully")
         self._current_row += 1
