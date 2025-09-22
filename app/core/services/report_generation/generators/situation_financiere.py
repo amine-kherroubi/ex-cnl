@@ -6,7 +6,7 @@ from typing import Any
 # Imports tiers
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.styles import Alignment, Border, Font, Side
+from openpyxl.styles import Alignment, Border, Font
 from openpyxl.utils import get_column_letter
 
 # Imports de l'application locale
@@ -23,23 +23,7 @@ from app.core.domain.predefined_objects.dairas_et_communes import (
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
-
-
-# Font and style constants for consistency
-FONT_NORMAL = Font(name="Arial", size=9, bold=False)
-FONT_BOLD = Font(name="Arial", size=9, bold=True)
-FONT_HEADER = Font(name="Arial", size=10, bold=True)
-FONT_TITLE = Font(name="Arial", size=12, bold=True)
-BORDER_THIN = Border(
-    left=Side(style="thin"),
-    right=Side(style="thin"),
-    top=Side(style="thin"),
-    bottom=Side(style="thin"),
-)
-ALIGNMENT_CENTER = Alignment(horizontal="center", vertical="center")
-ALIGNMENT_CENTER_WRAP = Alignment(
-    horizontal="center", vertical="center", wrap_text=True
-)
+from app.core.utils.excel_styling import ExcelStyling
 
 
 class SituationFinanciereGenerator(ReportGenerator):
@@ -171,8 +155,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         start_row: int,
         end_col: str,
         end_row: int,
-        font: Font = FONT_NORMAL,
-        alignment: Alignment = ALIGNMENT_CENTER,
+        font: Font = ExcelStyling.FONT_NORMAL,
+        alignment: Alignment = ExcelStyling.ALIGNMENT_CENTER,
         border: Border | None = None,
     ) -> None:
         """Apply consistent styling to all cells in a merged range."""
@@ -212,8 +196,8 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "T",
             self._current_row,
-            font=FONT_TITLE,
-            alignment=ALIGNMENT_CENTER,
+            font=ExcelStyling.FONT_TITLE,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
@@ -229,16 +213,16 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "T",
             self._current_row,
-            font=FONT_HEADER,
-            alignment=ALIGNMENT_CENTER,
+            font=ExcelStyling.FONT_HEADER,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
 
         # Wilaya
         sheet[f"A{self._current_row}"] = f"DL de {self._report_context.wilaya.value}"
-        sheet[f"A{self._current_row}"].font = FONT_HEADER
-        sheet[f"A{self._current_row}"].alignment = ALIGNMENT_CENTER
+        sheet[f"A{self._current_row}"].font = ExcelStyling.FONT_HEADER
+        sheet[f"A{self._current_row}"].alignment = ExcelStyling.ALIGNMENT_CENTER
 
         self._current_row += 2
 
@@ -257,8 +241,8 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "G",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
         )
 
         sheet[f"H{self._current_row}"] = (
@@ -271,8 +255,8 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "I",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
         )
 
         self._current_row += 1
@@ -304,9 +288,9 @@ class SituationFinanciereGenerator(ReportGenerator):
                 header_start_row,
                 col,
                 header_end_row,
-                font=FONT_BOLD,
-                alignment=ALIGNMENT_CENTER_WRAP,
-                border=BORDER_THIN,
+                font=ExcelStyling.FONT_BOLD,
+                alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+                border=ExcelStyling.BORDER_THIN,
             )
 
         # Consommations header
@@ -318,9 +302,9 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "Q",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         self._current_row += 1
@@ -336,9 +320,9 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "M",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         end_day: int = (
@@ -357,9 +341,9 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "Q",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         self._current_row += 1
@@ -373,15 +357,15 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "L",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         sheet[f"M{self._current_row}"] = "Montant (4)"
-        sheet[f"M{self._current_row}"].font = FONT_BOLD
-        sheet[f"M{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
-        sheet[f"M{self._current_row}"].border = BORDER_THIN
+        sheet[f"M{self._current_row}"].font = ExcelStyling.FONT_BOLD
+        sheet[f"M{self._current_row}"].alignment = ExcelStyling.ALIGNMENT_CENTER_WRAP
+        sheet[f"M{self._current_row}"].border = ExcelStyling.BORDER_THIN
 
         sheet[f"N{self._current_row}"] = "Aides"
         sheet.merge_cells(f"N{self._current_row}:P{self._current_row}")
@@ -391,15 +375,15 @@ class SituationFinanciereGenerator(ReportGenerator):
             self._current_row,
             "P",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         sheet[f"Q{self._current_row}"] = "Montant (5)"
-        sheet[f"Q{self._current_row}"].font = FONT_BOLD
-        sheet[f"Q{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
-        sheet[f"Q{self._current_row}"].border = BORDER_THIN
+        sheet[f"Q{self._current_row}"].font = ExcelStyling.FONT_BOLD
+        sheet[f"Q{self._current_row}"].alignment = ExcelStyling.ALIGNMENT_CENTER_WRAP
+        sheet[f"Q{self._current_row}"].border = ExcelStyling.BORDER_THIN
 
         self._current_row += 1
 
@@ -415,9 +399,11 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         for col, title in tranche_headers:
             sheet[f"{col}{self._current_row}"] = title
-            sheet[f"{col}{self._current_row}"].font = FONT_BOLD
-            sheet[f"{col}{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
-            sheet[f"{col}{self._current_row}"].border = BORDER_THIN
+            sheet[f"{col}{self._current_row}"].font = ExcelStyling.FONT_BOLD
+            sheet[f"{col}{self._current_row}"].alignment = (
+                ExcelStyling.ALIGNMENT_CENTER_WRAP
+            )
+            sheet[f"{col}{self._current_row}"].border = ExcelStyling.BORDER_THIN
 
         self._current_row += 1
         self._logger.info("Table headers added successfully")
@@ -553,9 +539,9 @@ class SituationFinanciereGenerator(ReportGenerator):
         for col, value in basic_values:
             cell = sheet[f"{col}{row}"]
             cell.value = value
-            cell.font = FONT_NORMAL
-            cell.alignment = ALIGNMENT_CENTER
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_NORMAL
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+            cell.border = ExcelStyling.BORDER_THIN
 
         # Previous year cumulative (J, K, L, M)
         self._add_cumulative_data(
@@ -593,18 +579,18 @@ class SituationFinanciereGenerator(ReportGenerator):
         cumul_total = self._calculate_cumul_total(key, data_dicts)
         cell = sheet[f"R{row}"]
         cell.value = cumul_total if cumul_total > 0 else "-"
-        cell.font = FONT_NORMAL
-        cell.alignment = ALIGNMENT_CENTER
-        cell.border = BORDER_THIN
+        cell.font = ExcelStyling.FONT_NORMAL
+        cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+        cell.border = ExcelStyling.BORDER_THIN
         totals["cumul_total"] += cumul_total
 
         # Final columns (S, T)
         for col in ["S", "T"]:
             cell = sheet[f"{col}{row}"]
             cell.value = "-"
-            cell.font = FONT_NORMAL
-            cell.alignment = ALIGNMENT_CENTER
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_NORMAL
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+            cell.border = ExcelStyling.BORDER_THIN
 
     def _add_cumulative_data(
         self,
@@ -624,17 +610,17 @@ class SituationFinanciereGenerator(ReportGenerator):
             ):
                 cell = sheet[f"{col}{row}"]
                 cell.value = value if value > 0 else "-"
-                cell.font = FONT_NORMAL
-                cell.alignment = ALIGNMENT_CENTER
-                cell.border = BORDER_THIN
+                cell.font = ExcelStyling.FONT_NORMAL
+                cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+                cell.border = ExcelStyling.BORDER_THIN
                 totals[total_key] += value
         else:
             for col in columns:
                 cell = sheet[f"{col}{row}"]
                 cell.value = "-"
-                cell.font = FONT_NORMAL
-                cell.alignment = ALIGNMENT_CENTER
-                cell.border = BORDER_THIN
+                cell.font = ExcelStyling.FONT_NORMAL
+                cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+                cell.border = ExcelStyling.BORDER_THIN
 
     def _calculate_cumul_total(
         self, key: tuple[str, str], data_dicts: dict[str, dict]
@@ -683,9 +669,9 @@ class SituationFinanciereGenerator(ReportGenerator):
         for col, value in total_values:
             cell = sheet[f"{col}{self._current_row}"]
             cell.value = value
-            cell.font = FONT_BOLD
-            cell.alignment = ALIGNMENT_CENTER
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_BOLD
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+            cell.border = ExcelStyling.BORDER_THIN
 
         self._logger.info("Totals row added successfully")
         self._current_row += 1

@@ -8,7 +8,7 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.presentation.gui.components.report_card import ReportCard
-from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class MenuView(ctk.CTkFrame):
@@ -41,27 +41,27 @@ class MenuView(ctk.CTkFrame):
 
         # Header
         header_frame: ctk.CTkFrame = ctk.CTkFrame(master=self)
-        header_frame.grid(row=0, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.SM), sticky="ew")  # type: ignore
+        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=0, weight=1)
 
         header_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Sélectionner le type de rapport",
-            font=ctk.CTkFont(size=FontSize.H2, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H2, weight="bold"),
         )
-        header_label.grid(row=0, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="w")  # type: ignore
+        header_label.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="w")  # type: ignore
 
         description_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Choisissez un type de rapport à générer ou configurez ses paramètres",
-            font=ctk.CTkFont(size=FontSize.LABEL),
-            text_color=Color.GRAY,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
+            text_color=DesignSystem.Color.GRAY,
         )
-        description_label.grid(row=1, column=0, padx=Spacing.SM, pady=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
+        description_label.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
         # Scrollable frame for report cards
         scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(master=self)
-        scrollable_frame.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.LG), sticky="nsew")  # type: ignore
+        scrollable_frame.grid(row=1, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.LG), sticky="nsew")  # type: ignore
         scrollable_frame.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
@@ -77,5 +77,5 @@ class MenuView(ctk.CTkFrame):
                     name
                 ),
             )
-            card.grid(row=idx, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="ew")  # type: ignore
+            card.grid(row=idx, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
             self._report_cards.append(card)

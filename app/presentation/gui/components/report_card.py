@@ -8,7 +8,7 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
-from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class ReportCard(ctk.CTkFrame):
@@ -40,14 +40,14 @@ class ReportCard(ctk.CTkFrame):
 
         # Content frame
         content_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=Color.TRANSPARENT
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        content_frame.grid(row=0, column=0, padx=Spacing.LG, pady=Spacing.LG, sticky="ew")  # type: ignore
+        content_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
         content_frame.grid_columnconfigure(index=0, weight=1)
 
         # Report info
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=content_frame, fg_color=Color.TRANSPARENT
+            master=content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
         info_frame.grid(row=0, column=0, sticky="ew")  # type: ignore
         info_frame.grid_columnconfigure(index=0, weight=1)
@@ -56,7 +56,7 @@ class ReportCard(ctk.CTkFrame):
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.display_name,
-            font=ctk.CTkFont(size=FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
             anchor="w",
         )
         title.grid(row=0, column=0, sticky="w")  # type: ignore
@@ -65,26 +65,26 @@ class ReportCard(ctk.CTkFrame):
         details: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=f"Catégorie : {self._report_spec.category}",
-            font=ctk.CTkFont(size=FontSize.CAPTION),
-            text_color=Color.GRAY,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            text_color=DesignSystem.Color.GRAY,
             anchor="w",
         )
-        details.grid(row=1, column=0, pady=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
+        details.grid(row=1, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
         # Description
         description: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.description,
-            font=ctk.CTkFont(size=FontSize.BODY),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             anchor="w",
             wraplength=500,
             justify="left",
         )
-        description.grid(row=2, column=0, pady=(Spacing.NONE, Spacing.MD), sticky="w")  # type: ignore
+        description.grid(row=2, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
 
         # Buttons frame
         buttons_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=content_frame, fg_color=Color.TRANSPARENT
+            master=content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
         buttons_frame.grid(row=1, column=0, sticky="ew")  # type: ignore
         buttons_frame.grid_columnconfigure(index=0, weight=1)
@@ -95,9 +95,9 @@ class ReportCard(ctk.CTkFrame):
             text="Générer le rapport",
             command=self._on_generate_clicked,
             height=35,
-            font=ctk.CTkFont(size=FontSize.BUTTON, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
         )
-        self._generate_button.grid(row=0, column=0, padx=(Spacing.NONE, Spacing.SM), sticky="ew")  # type: ignore
+        self._generate_button.grid(row=0, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
 
         # Settings button - secondary style
         self._settings_button: ctk.CTkButton = ctk.CTkButton(
@@ -106,8 +106,8 @@ class ReportCard(ctk.CTkFrame):
             command=self._on_settings_clicked,
             width=120,
             height=35,
-            fg_color=Color.GRAY,
-            hover_color=Color.DARKER_GRAY,
-            font=ctk.CTkFont(size=FontSize.BUTTON),
+            fg_color=DesignSystem.Color.GRAY,
+            hover_color=DesignSystem.Color.DARKER_GRAY,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
         )
         self._settings_button.grid(row=0, column=1, sticky="e")  # type: ignore

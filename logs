@@ -325,3 +325,65 @@ app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/u
 2025-09-22 13:05:30 [    INFO] app.core.services.report_generation.base.report_generator: Report generation completed successfully
 2025-09-22 13:05:30 [    INFO] app.core.core_facade: Report generated successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
 2025-09-22 13:05:30 [    INFO] app.presentation.gui.controllers.report_controller: Report generation completed successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 16:10:33 [    INFO] app.core.utils.logging_setup: Logging configuration applied successfully
+2025-09-22 16:10:33 [    INFO] app.core.utils.logging_setup: File logging enabled: logs
+2025-09-22 16:10:33 [    INFO] app.core.utils.logging_setup: Console logging enabled
+2025-09-22 16:10:33 [    INFO] app.core.infrastructure.data.data_repository: Creating in-memory DuckDB connection
+2025-09-22 16:10:34 [    INFO] app.core.infrastructure.data.data_repository: DuckDB repository initialized successfully
+2025-09-22 16:10:34 [    INFO] app.core.infrastructure.file_io.file_io_service: File io service initialized
+2025-09-22 16:10:34 [    INFO] app.core.core_facade: CoreFacade initialized successfully
+2025-09-22 16:10:34 [    INFO] app.presentation.gui.main_window: Initializing main application window
+2025-09-22 16:10:34 [    INFO] app.presentation.gui.controllers.report_controller: ReportController initialized successfully
+2025-09-22 16:10:34 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 16:10:34 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 16:10:34 [    INFO] app.presentation.gui.controllers.report_controller: Retrieved 2 available report types
+2025-09-22 16:10:34 [    INFO] app.presentation.gui.main_window: Loaded 2 report types
+2025-09-22 16:10:34 [    INFO] app.presentation.gui.main_window: Main application window initialized successfully
+2025-09-22 16:11:21 [    INFO] app.presentation.gui.controllers.report_controller: Starting report generation: activite_mensuelle_par_programme
+2025-09-22 16:11:21 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 16:11:21 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 16:11:21 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful: 1 files matched to required patterns
+2025-09-22 16:11:21 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful. Validated 1 files
+2025-09-22 16:11:21 [    INFO] app.core.core_facade: Starting report generation: activite_mensuelle_par_programme
+2025-09-22 16:11:21 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'activite_mensuelle_par_programme': Activité mensuelle par programme
+2025-09-22 16:11:21 [    INFO] app.core.core_facade: Generating report: Activité mensuelle par programme
+2025-09-22 16:11:21 [    INFO] app.core.services.report_generation.factories.report_generator_factory: Creating generator for report: activite_mensuelle_par_programme
+2025-09-22 16:11:21 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'activite_mensuelle_par_programme': Activité mensuelle par programme
+2025-09-22 16:11:21 [    INFO] app.core.services.report_generation.base.report_generator: Generator initialized for report: Activité mensuelle par programme
+2025-09-22 16:11:21 [    INFO] app.core.services.report_generation.factories.report_generator_factory: ActiviteMensuelleGenerator created successfully for report 'activite_mensuelle_par_programme'
+2025-09-22 16:11:21 [    INFO] app.core.core_facade: Starting report generation process
+2025-09-22 16:11:21 [    INFO] app.core.services.report_generation.base.report_generator: Starting report generation process
+2025-09-22 16:11:21 [    INFO] app.core.infrastructure.file_io.file_io_service: Loading data from file: /mnt/c/Users/user/Documents/Stage/applic HR/Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx
+2025-09-22 16:11:24 [    INFO] app.core.infrastructure.file_io.file_io_service: Table header 'N° d'ordre' found at row 5
+2025-09-22 16:12:12 [    INFO] app.core.infrastructure.file_io.file_io_service: Successfully loaded: 235338 rows and 28 columns from Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx
+2025-09-22 16:12:12 [    INFO] app.core.infrastructure.data.data_repository: Table 'paiements' created successfully: 235338 rows and 28 columns
+2025-09-22 16:12:12 [    INFO] app.core.services.report_generation.base.report_generator: Table 'paiements' loaded successfully: 235338 rows
+2025-09-22 16:12:13 [    INFO] app.core.infrastructure.data.data_repository: Summary generated for table 'paiements' with 235338 records
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Data successfully loaded into database
+2025-09-22 16:12:13 [    INFO] app.core.infrastructure.data.data_repository: Table 'programmes' created successfully: 55 rows and 6 columns
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Reference table 'programmes' created: 55 rows and 6 columns
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Program reference table created successfully
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Query 'programmes' returned 55 rows
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Query 'lancements_mois' returned 55 rows
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Query 'lancements_cumul_annee' returned 55 rows
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Query 'livraisons_mois' returned 55 rows
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Query 'livraisons_cumul_annee' returned 55 rows
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Query 'programmes_situation' returned 55 rows
+2025-09-22 16:12:13 [    INFO] app.core.services.report_generation.base.report_generator: Query 'acheves_derniere_tranche' returned 55 rows
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Query 'en_cours_calculation' returned 55 rows
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Query 'non_lances_premiere_tranche' returned 55 rows
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: All 9 queries executed successfully
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Successfully executed 9 queries
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Workbook created with sheet: Activité mensuelle par programme
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: En-tête du report terminé avec succès
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Trouvé 55 programmes : ['PROGRAMME 2002', 'COMPLEMENTAIRE 2007', 'PQR 2007', 'PROGRAMME INITIAL', 'COMPLEMENTAIRE 2009', 'PROGRAMME 2004', 'PROGRAMME 2003', 'PROGRAMME 2003 CEE', 'COMPLEMENTAIRE 2008', 'PEC', 'PEC "31/12/2004"', 'COMPL QUINQU 1', 'QUINQU 1 (2005-2009)', 'QUINQU 2005-2009', 'H PLATEAUX', 'SUD', 'RATTRAPAGE', 'PRESIDENT', 'COMPLEMENT', 'COMPLEMENTAIRE 2008', 'PROG 2008', 'PROG 2009', 'SINISTRES', 'QUINQUINNAL 2010', 'QUINQU 2 (2010-2014)', 'QUINQU 2010-2014', 'COMPL 2010-2014', 'QUINQUENNAL 2011C', 'QUINQUENNAL 2011', 'COMPL QUINQU 2', 'PQ2013', 'QUINQUENNAL 2013 C', 'PROGRAMME Q 2014', 'Programme 2015', 'QUINQU 3 (2015-2019)', 'QUINQU 2015-2019', 'Complémentaire 2015', 'COMPL QUINQU 3', 'Programme 2016', 'TR 2016', 'QUINQU 2016', 'INCENDIES 2017', 'Programme  2018', 'QUINQU 2018', 'Programme 2019', 'QUINQU 2019', 'Programme 2020', 'QUINQU (2020-2024)', 'QUINQU 2020', 'Programme 2021', 'programme 2022', 'programme 2023', 'Programme 2024', 'Quinquennal (2020 - 2024)', 'PROGRAMME 2025']
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Premier tableau terminé avec 55 programmes
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Trouvé 55 programmes pour le tableau de situation
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Second tableau terminé avec 55 programmes
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Formatage final terminé avec succès
+2025-09-22 16:12:14 [    INFO] app.core.infrastructure.file_io.file_io_service: Saving data to file: /mnt/c/Users/user/Desktop/activite_mensuelle_par_programme_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 16:12:14 [    INFO] app.core.infrastructure.file_io.file_io_service: Workbook saved successfully to /mnt/c/Users/user/Desktop/activite_mensuelle_par_programme_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Report saved successfully: /mnt/c/Users/user/Desktop/activite_mensuelle_par_programme_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 16:12:14 [    INFO] app.core.services.report_generation.base.report_generator: Report generation completed successfully
+2025-09-22 16:12:14 [    INFO] app.core.core_facade: Report generated successfully: /mnt/c/Users/user/Desktop/activite_mensuelle_par_programme_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 16:12:14 [    INFO] app.presentation.gui.controllers.report_controller: Report generation completed successfully: /mnt/c/Users/user/Desktop/activite_mensuelle_par_programme_Tizi Ouzou_22_09_2025.xlsx

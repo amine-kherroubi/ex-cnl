@@ -7,7 +7,7 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class SettingsView(ctk.CTkFrame):
@@ -40,9 +40,9 @@ class SettingsView(ctk.CTkFrame):
 
         # Header with back button
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=Color.TRANSPARENT
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        header_frame.grid(row=0, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.SM), sticky="ew")  # type: ignore
+        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
         # Back button - secondary style
@@ -52,23 +52,23 @@ class SettingsView(ctk.CTkFrame):
             command=self._on_back,
             width=100,
             height=35,
-            fg_color=Color.TRANSPARENT,
+            fg_color=DesignSystem.Color.TRANSPARENT,
             border_width=1,
-            font=ctk.CTkFont(size=FontSize.BUTTON),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
         )
-        self._back_button.grid(row=0, column=0, padx=(Spacing.NONE, Spacing.LG), sticky="w")  # type: ignore
+        self._back_button.grid(row=0, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="w")  # type: ignore
 
         # Settings title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text=f"Configuration de {self._report_name}",
-            font=ctk.CTkFont(size=FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
         )
         title_label.grid(row=0, column=1, sticky="w")  # type: ignore
 
         # Main content scrollable frame
         content_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(master=self)
-        content_frame.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.LG), sticky="nsew")  # type: ignore
+        content_frame.grid(row=1, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.LG), sticky="nsew")  # type: ignore
         content_frame.grid_columnconfigure(index=0, weight=1)
 
         # Create settings based on report type
@@ -82,9 +82,9 @@ class SettingsView(ctk.CTkFrame):
 
         # Bottom buttons frame
         buttons_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=Color.TRANSPARENT
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        buttons_frame.grid(row=2, column=0, padx=Spacing.LG, pady=(Spacing.NONE, Spacing.LG), sticky="ew")  # type: ignore
+        buttons_frame.grid(row=2, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="ew")  # type: ignore
         buttons_frame.grid_columnconfigure(index=0, weight=1)
 
         # Save button
@@ -93,9 +93,9 @@ class SettingsView(ctk.CTkFrame):
             text="Sauvegarder la configuration",
             command=self._save_settings,
             height=40,
-            font=ctk.CTkFont(size=FontSize.BUTTON, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
         )
-        self._save_button.grid(row=0, column=1, padx=(Spacing.SM, Spacing.NONE), sticky="e")  # type: ignore
+        self._save_button.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="e")  # type: ignore
 
         # Cancel button - secondary style
         cancel_button: ctk.CTkButton = ctk.CTkButton(
@@ -103,9 +103,9 @@ class SettingsView(ctk.CTkFrame):
             text="Annuler",
             command=self._on_back,
             height=40,
-            fg_color=Color.TRANSPARENT,
+            fg_color=DesignSystem.Color.TRANSPARENT,
             border_width=1,
-            font=ctk.CTkFont(size=FontSize.BUTTON),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
         )
         cancel_button.grid(row=0, column=0, sticky="w")  # type: ignore
 
@@ -116,7 +116,7 @@ class SettingsView(ctk.CTkFrame):
             title="Configuration des programmes",
             description="Sélectionnez les programmes à inclure dans le rapport d'activité mensuelle",
         )
-        programs_section.grid(row=0, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="ew")  # type: ignore
+        programs_section.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
 
         # Create program checkboxes
         programs: list[str] = [
@@ -131,9 +131,9 @@ class SettingsView(ctk.CTkFrame):
             checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
                 master=programs_section.get_content_frame(),
                 text=program,
-                font=ctk.CTkFont(size=FontSize.BODY),
+                font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             )
-            checkbox.grid(row=idx, column=0, padx=Spacing.LG, pady=Spacing.XS, sticky="w")  # type: ignore
+            checkbox.grid(row=idx, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
             self._settings_widgets[f"program_{idx}"] = checkbox
 
     def _create_generic_settings(self, parent: Any) -> None:
@@ -143,7 +143,7 @@ class SettingsView(ctk.CTkFrame):
             title="Paramètres généraux",
             description="Configurez les options générales pour ce type de rapport",
         )
-        general_section.grid(row=0, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="ew")  # type: ignore
+        general_section.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
 
         general_frame: ctk.CTkFrame = general_section.get_content_frame()
         general_frame.grid_columnconfigure(index=1, weight=1)
@@ -152,16 +152,16 @@ class SettingsView(ctk.CTkFrame):
         format_label: ctk.CTkLabel = ctk.CTkLabel(
             master=general_frame,
             text="Format de sortie :",
-            font=ctk.CTkFont(size=FontSize.LABEL),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
         )
-        format_label.grid(row=0, column=0, padx=(Spacing.LG, Spacing.SM), pady=Spacing.SM, sticky="w")  # type: ignore
+        format_label.grid(row=0, column=0, padx=(DesignSystem.Spacing.LG, DesignSystem.Spacing.SM), pady=DesignSystem.Spacing.SM, sticky="w")  # type: ignore
 
         format_option: ctk.CTkOptionMenu = ctk.CTkOptionMenu(
             master=general_frame,
             values=["Excel (.xlsx)"],
-            font=ctk.CTkFont(size=FontSize.BODY),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        format_option.grid(row=0, column=1, padx=(Spacing.SM, Spacing.LG), pady=Spacing.SM, sticky="w")  # type: ignore
+        format_option.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.LG), pady=DesignSystem.Spacing.SM, sticky="w")  # type: ignore
         self._settings_widgets["output_format"] = format_option
 
         # Processing options section
@@ -170,7 +170,7 @@ class SettingsView(ctk.CTkFrame):
             title="Options de traitement",
             description="Configurez la manière dont les données doivent être traitées",
         )
-        processing_section.grid(row=1, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="ew")  # type: ignore
+        processing_section.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
 
         processing_frame: ctk.CTkFrame = processing_section.get_content_frame()
 
@@ -178,9 +178,9 @@ class SettingsView(ctk.CTkFrame):
         validation_checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
             master=processing_frame,
             text="Effectuer la validation des données avant le traitement",
-            font=ctk.CTkFont(size=FontSize.BODY),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        validation_checkbox.grid(row=0, column=0, padx=Spacing.LG, pady=Spacing.XS, sticky="w")  # type: ignore
+        validation_checkbox.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
         validation_checkbox.select()  # type: ignore
         self._settings_widgets["validate_data"] = validation_checkbox
 
@@ -188,9 +188,9 @@ class SettingsView(ctk.CTkFrame):
         duplicates_checkbox: ctk.CTkCheckBox = ctk.CTkCheckBox(
             master=processing_frame,
             text="Supprimer les entrées en double",
-            font=ctk.CTkFont(size=FontSize.BODY),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        duplicates_checkbox.grid(row=1, column=0, padx=Spacing.LG, pady=Spacing.XS, sticky="w")  # type: ignore
+        duplicates_checkbox.grid(row=1, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
         self._settings_widgets["remove_duplicates"] = duplicates_checkbox
 
     def _save_settings(self) -> None:
@@ -236,24 +236,24 @@ class SettingsSection(ctk.CTkFrame):
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text=self._title,
-            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
         )
-        title_label.grid(row=0, column=0, padx=Spacing.LG, pady=(Spacing.LG, Spacing.XS), sticky="w")  # type: ignore
+        title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.XS), sticky="w")  # type: ignore
 
         # Description
         desc_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text=self._description,
-            font=ctk.CTkFont(size=FontSize.CAPTION),
-            text_color=Color.GRAY,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            text_color=DesignSystem.Color.GRAY,
         )
-        desc_label.grid(row=1, column=0, padx=Spacing.LG, pady=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
+        desc_label.grid(row=1, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
         # Content frame
         self._content_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=Color.TRANSPARENT
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        self._content_frame.grid(row=2, column=0, padx=Spacing.XS, pady=(Spacing.NONE, Spacing.LG), sticky="ew")  # type: ignore
+        self._content_frame.grid(row=2, column=0, padx=DesignSystem.Spacing.XS, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="ew")  # type: ignore
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
     def get_content_frame(self) -> ctk.CTkFrame:

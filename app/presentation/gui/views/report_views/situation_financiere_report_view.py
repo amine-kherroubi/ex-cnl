@@ -9,7 +9,7 @@ import customtkinter as ctk  # type: ignore
 # Local application imports
 from app.core.domain.predefined_objects.programmes import RURAL_HOUSING_PROGRAMMES
 from app.presentation.gui.views.report_views.base_report_view import BaseReportView
-from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class SituationFinanciereReportView(BaseReportView):
@@ -27,9 +27,10 @@ class SituationFinanciereReportView(BaseReportView):
         """Add program selection component specific to Situation Financiere report."""
         # Program selection frame
         program_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self._scrollable_frame, fg_color=Color.TRANSPARENT
+            master=self._scrollable_frame,
+            fg_color=DesignSystem.Color.TRANSPARENT,
         )
-        program_frame.grid(row=self._next_row, column=0, padx=Spacing.LG, pady=(Spacing.SM, Spacing.SM), sticky="ew")  # type: ignore
+        program_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
         program_frame.grid_columnconfigure(index=0, weight=1)
         self._next_row += 1
 
@@ -37,9 +38,9 @@ class SituationFinanciereReportView(BaseReportView):
         program_title: ctk.CTkLabel = ctk.CTkLabel(
             master=program_frame,
             text="Programme cible",
-            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
         )
-        program_title.grid(row=0, column=0, pady=(Spacing.NONE, Spacing.SM), sticky="w")  # type: ignore
+        program_title.grid(row=0, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
         # Program selector
         program_names: list[str] = [
@@ -51,7 +52,7 @@ class SituationFinanciereReportView(BaseReportView):
             values=program_names,
             command=self._on_program_changed,
             height=36,
-            font=ctk.CTkFont(size=FontSize.BODY),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
         self._program_selector.grid(row=1, column=0, sticky="ew")  # type: ignore
 
@@ -66,16 +67,16 @@ class SituationFinanciereReportView(BaseReportView):
     def _create_program_info_section(self, parent: ctk.CTkFrame) -> None:
         """Create a section to display information about the selected program."""
         info_frame: ctk.CTkFrame = ctk.CTkFrame(master=parent)
-        info_frame.grid(row=2, column=0, pady=(Spacing.SM, Spacing.NONE), sticky="ew")  # type: ignore
+        info_frame.grid(row=2, column=0, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="ew")  # type: ignore
 
         self._program_info_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._get_program_info_text(),
-            font=ctk.CTkFont(size=FontSize.BODY),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             justify="left",
             anchor="w",
         )
-        self._program_info_label.grid(row=0, column=0, padx=Spacing.MD, pady=Spacing.MD, sticky="w")  # type: ignore
+        self._program_info_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD, pady=DesignSystem.Spacing.MD, sticky="w")  # type: ignore
 
     def _get_program_info_text(self) -> str:
         """Get information text for the currently selected program."""

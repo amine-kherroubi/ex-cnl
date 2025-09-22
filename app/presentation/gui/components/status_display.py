@@ -8,7 +8,7 @@ from typing import Any, Literal, TypeAlias
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
+from app.presentation.gui.styling.design_system import DesignSystem
 
 MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
 
@@ -30,15 +30,15 @@ class StatusDisplay(ctk.CTkFrame):
         label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Statut",
-            font=ctk.CTkFont(size=FontSize.LABEL, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
         )
-        label.grid(row=0, column=0, padx=Spacing.SM, pady=Spacing.XS, sticky="w")  # type: ignore
+        label.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
 
         # Status text area
         self._status_text: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self, state="disabled"
         )
-        self._status_text.grid(row=1, column=0, padx=Spacing.SM, pady=Spacing.SM, sticky="nsew")  # type: ignore
+        self._status_text.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="nsew")  # type: ignore
 
         # Initialize with welcome message
         self.add_message(
@@ -51,14 +51,18 @@ class StatusDisplay(ctk.CTkFrame):
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
         indications_map: dict[MessageType, tuple[str, str]] = {
-            "information": ("[INFO]", Color.INFO),
-            "succès": ("[SUCCÈS]", Color.SUCCESS),
-            "avertissement": ("[AVERTISSEMENT]", Color.WARNING),
-            "erreur": ("[ERREUR]", Color.ERROR),
+            "information": ("[INFO]", DesignSystem.Color.INFO),
+            "succès": ("[SUCCÈS]", DesignSystem.Color.SUCCESS),
+            "avertissement": ("[AVERTISSEMENT]", DesignSystem.Color.WARNING),
+            "erreur": ("[ERREUR]", DesignSystem.Color.ERROR),
         }
 
-        prefix: str = indications_map.get(message_type, ("[INFO]", Color.INFO))[0]
-        color: str = indications_map.get(message_type, ("[INFO]", Color.INFO))[1]
+        prefix: str = indications_map.get(
+            message_type, ("[INFO]", DesignSystem.Color.INFO)
+        )[0]
+        color: str = indications_map.get(
+            message_type, ("[INFO]", DesignSystem.Color.INFO)
+        )[1]
         formatted_message: str = f"[{timestamp}] {prefix} {message}\n"
 
         # Add message to text area

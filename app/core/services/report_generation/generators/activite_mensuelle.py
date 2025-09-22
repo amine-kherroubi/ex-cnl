@@ -16,17 +16,7 @@ from app.core.domain.predefined_objects.programmes import get_programmes_datafra
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
-from app.core.utils.excel_styling import (
-    FONT_NORMAL,
-    FONT_BOLD,
-    BORDER_THIN,
-    ALIGNMENT_CENTER,
-    ALIGNMENT_CENTER_WRAP,
-    ALIGNMENT_LEFT,
-    apply_style_to_merged_cells,
-    set_column_widths,
-    setup_page_layout,
-)
+from app.core.utils.excel_styling import ExcelStyling
 
 
 class ActiviteMensuelleGenerator(ReportGenerator):
@@ -106,14 +96,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Titre
         sheet[f"A{self._current_row}"] = "Habitat rural"
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "A",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
         self._logger.debug("Titre principal ajouté : Habitat rural")
 
@@ -122,7 +112,7 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Wilaya
         wilaya_text = f"Wilaya de {self._report_context.wilaya.value}"
         sheet[f"A{self._current_row}"] = wilaya_text
-        sheet[f"A{self._current_row}"].font = FONT_BOLD
+        sheet[f"A{self._current_row}"].font = ExcelStyling.FONT_BOLD
         self._logger.debug(f"Wilaya ajoutée : {wilaya_text}")
 
         self._current_row += 1
@@ -132,14 +122,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             "Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "A",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
         )
         self._logger.debug("Titre du report ajouté")
 
@@ -151,14 +141,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
         sheet[f"A{self._current_row}"] = month_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "A",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
         self._logger.debug(f"Mois et année ajoutés : {month_text}")
 
@@ -177,15 +167,15 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # La cellule Programme s'étend sur 3 lignes
         sheet[f"A{self._current_row}"] = "Programme"
         sheet.merge_cells(f"A{self._current_row}:A{self._current_row + 2}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "A",
             self._current_row,
             "A",
             self._current_row + 2,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         sheet[f"B{self._current_row}"] = (
@@ -193,15 +183,15 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             f"{self._report_context.month} {self._report_context.year}"  # type: ignore
         )
         sheet.merge_cells(f"B{self._current_row}:E{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "B",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         self._logger.debug("Légende du tableau ajoutée")
@@ -216,30 +206,30 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             "Livraisons (libération de la dernière tranche)"
         )
         sheet.merge_cells(f"B{self._current_row}:C{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "B",
             self._current_row,
             "C",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         sheet[f"D{self._current_row}"] = (
             "Lancements (libération de la première tranche)"
         )
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "D",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER_WRAP,
-            border=BORDER_THIN,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
         )
 
         self._current_row += 1
@@ -260,9 +250,11 @@ class ActiviteMensuelleGenerator(ReportGenerator):
 
         for col, text in sub_headers:
             sheet[f"{col}{self._current_row}"] = text
-            sheet[f"{col}{self._current_row}"].font = FONT_BOLD
-            sheet[f"{col}{self._current_row}"].alignment = ALIGNMENT_CENTER_WRAP
-            sheet[f"{col}{self._current_row}"].border = BORDER_THIN
+            sheet[f"{col}{self._current_row}"].font = ExcelStyling.FONT_BOLD
+            sheet[f"{col}{self._current_row}"].alignment = (
+                ExcelStyling.ALIGNMENT_CENTER_WRAP
+            )
+            sheet[f"{col}{self._current_row}"].border = ExcelStyling.BORDER_THIN
 
         self._logger.debug("Sous-en-têtes ajoutés avec les plages de dates")
 
@@ -374,9 +366,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         for col, value in values:
             cell = sheet[f"{col}{row}"]
             cell.value = value
-            cell.font = FONT_NORMAL
-            cell.alignment = ALIGNMENT_CENTER
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_NORMAL
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+            cell.border = ExcelStyling.BORDER_THIN
 
     def _add_total_row(
         self, sheet: Worksheet, row: int, totals: dict[str, int]
@@ -393,23 +385,23 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         for col, value in values:
             cell = sheet[f"{col}{row}"]
             cell.value = value
-            cell.font = FONT_BOLD
-            cell.alignment = ALIGNMENT_CENTER
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_BOLD
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+            cell.border = ExcelStyling.BORDER_THIN
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
         sheet[f"A{self._current_row}"] = (
             "Situation des programmes (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "A",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
@@ -418,14 +410,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "A",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_CENTER,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
 
         self._current_row += 2
@@ -447,9 +439,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         for col, title in headers:
             cell = sheet[f"{col}{self._current_row}"]
             cell.value = title
-            cell.font = FONT_BOLD
-            cell.alignment = ALIGNMENT_CENTER_WRAP
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_BOLD
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER_WRAP
+            cell.border = ExcelStyling.BORDER_THIN
 
         self._current_row += 1
 
@@ -541,9 +533,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         for col, value in values:
             cell = sheet[f"{col}{row}"]
             cell.value = value
-            cell.font = FONT_NORMAL
-            cell.alignment = ALIGNMENT_CENTER
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_NORMAL
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+            cell.border = ExcelStyling.BORDER_THIN
 
         # Update totals
         totals["consistance"] += consistance
@@ -566,9 +558,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         for col, value in values:
             cell = sheet[f"{col}{row}"]
             cell.value = value
-            cell.font = FONT_BOLD
-            cell.alignment = ALIGNMENT_CENTER
-            cell.border = BORDER_THIN
+            cell.font = ExcelStyling.FONT_BOLD
+            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
+            cell.border = ExcelStyling.BORDER_THIN
 
     def _add_footer(self, sheet: Worksheet) -> None:
         self._logger.debug("Ajout du pied de page du report")
@@ -576,26 +568,26 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Texte de pied de page gauche (A-B)
         sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
         sheet[f"A{self._current_row}"] = "Visa du directeur régional de la BNH (ex-CNL)"
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "A",
             self._current_row,
             "B",
             self._current_row,
-            font=FONT_BOLD,
-            alignment=ALIGNMENT_LEFT,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_LEFT,
         )
 
         # Texte de pied de page droit (D-E)
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
         sheet[f"D{self._current_row}"] = "Visa du directeur du logement"
-        apply_style_to_merged_cells(
+        ExcelStyling.apply_style_to_merged_cells(
             sheet,
             "D",
             self._current_row,
             "E",
             self._current_row,
-            font=FONT_BOLD,
+            font=ExcelStyling.FONT_BOLD,
             alignment=Alignment(horizontal="right", vertical="center"),
         )
 
@@ -607,8 +599,8 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         column_widths: dict[str, int] = {"A": 25, "B": 18, "C": 22, "D": 18, "E": 22}
         self._logger.debug(f"Définition des largeurs de colonnes : {column_widths}")
 
-        set_column_widths(sheet, column_widths)
-        setup_page_layout(sheet, orientation="portrait", fit_to_width=True)
+        ExcelStyling.set_column_widths(sheet, column_widths)
+        ExcelStyling.setup_page_layout(sheet, orientation="portrait", fit_to_width=True)
 
         self._logger.debug(
             "Orientation de page définie en portrait avec ajustement à la largeur"
