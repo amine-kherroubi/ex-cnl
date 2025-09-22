@@ -68,7 +68,7 @@ class DuckDBRepository:
                 self._logger.error(error_msg)
                 raise DatabaseError(error_msg)
             self._logger.debug("Enabling DuckDB query logging")
-            self._connection.execute("PRAGMA enable_logging;")
+            self._connection.execute("CALL enable_logging();")
 
         self._data_loaded: bool = False
         self._logger.info("DuckDB repository initialized successfully")
