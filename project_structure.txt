@@ -1,0 +1,76 @@
+.
+├── .gitignore
+├── README.md
+├── app
+│   ├── core
+│   │   ├── config.py
+│   │   ├── core_facade.py
+│   │   ├── domain
+│   │   │   ├── enums
+│   │   │   │   ├── report_category.py
+│   │   │   │   └── space_time.py
+│   │   │   ├── models
+│   │   │   │   ├── programme.py
+│   │   │   │   ├── report_context.py
+│   │   │   │   └── report_specification.py
+│   │   │   ├── predefined_objects
+│   │   │   │   ├── dairas_et_communes.py
+│   │   │   │   ├── programmes.py
+│   │   │   │   └── tranches.py
+│   │   │   └── registry
+│   │   │       ├── report_specification_registry.py
+│   │   │       └── report_specifications
+│   │   │           ├── activite_mensuelle_specification.py
+│   │   │           └── situation_financiere_specification.py
+│   │   ├── infrastructure
+│   │   │   ├── data
+│   │   │   │   └── data_repository.py
+│   │   │   └── file_io
+│   │   │       └── file_io_service.py
+│   │   ├── services
+│   │   │   └── report_generation
+│   │   │       ├── base
+│   │   │       │   └── report_generator.py
+│   │   │       ├── factories
+│   │   │       │   └── report_generator_factory.py
+│   │   │       └── generators
+│   │   │           ├── activite_mensuelle.py
+│   │   │           └── situation_financiere.py
+│   │   └── utils
+│   │       ├── adhoc_queries.py
+│   │       ├── date_formatting.py
+│   │       ├── excel_styling.py
+│   │       ├── exceptions.py
+│   │       └── logging_setup.py
+│   ├── main.py
+│   └── presentation
+│       ├── cli
+│       └── gui
+│           ├── components
+│           │   ├── date_selector.py
+│           │   ├── email_dialog.py
+│           │   ├── file_selector.py
+│           │   ├── output_selector.py
+│           │   ├── report_card.py
+│           │   ├── report_selector.py
+│           │   └── status_display.py
+│           ├── controllers
+│           │   └── report_controller.py
+│           ├── main_window.py
+│           ├── models
+│           │   └── gui_state.py
+│           ├── styling
+│           │   ├── design_system.py
+│           │   └── theme.json
+│           └── views
+│               ├── menu_view.py
+│               ├── report_views
+│               │   ├── activite_mensuelle_report_view.py
+│               │   ├── base_report_view.py
+│               │   ├── report_view_factory.py
+│               │   └── situation_financiere_report_view.py
+│               └── settings_view.py
+├── project_structure.txt
+└── requirements.txt
+
+27 directories, 47 files
