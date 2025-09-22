@@ -88,7 +88,7 @@ class ReportGeneratorFactory:
             )
 
             # Configure generator with additional parameters if supported
-            if kwargs:
+            if hasattr(generator, "configure") and kwargs:
                 cls._logger.debug("Configuring generator with additional parameters")
                 generator.configure(**kwargs)
             elif kwargs:

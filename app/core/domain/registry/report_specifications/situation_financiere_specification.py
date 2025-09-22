@@ -18,7 +18,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
     ),
     required_files={
         r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
-        r"^Journal_decisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "decisions",
+        r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "decisions",
     },
     output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,

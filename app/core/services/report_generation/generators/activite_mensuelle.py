@@ -34,7 +34,15 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._current_row: int = 1
 
     def configure(self, **kwargs: Any) -> None:
-        pass
+        """Configure the generator with additional parameters.
+
+        This generator doesn't need additional configuration,
+        but overrides the method to avoid NotImplementedError.
+        """
+        if kwargs:
+            self._logger.debug(
+                f"Ignoring unused configuration parameters: {list(kwargs.keys())}"
+            )
 
     def _create_predefined_tables(self) -> None:
         self._logger.debug("Creating reference tables")

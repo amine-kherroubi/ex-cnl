@@ -122,8 +122,15 @@ class ReportGenerator(ABC):
             self._logger.exception(f"Report generation failed: {error}")
             raise
 
-    @abstractmethod
-    def configure(self, **kwargs: Any) -> None: ...
+    def configure(self, **kwargs: Any) -> None:
+        """Configure the generator with additional parameters.
+
+        Default implementation raises NotImplementedError.
+        Override in subclasses that need additional configuration.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not support additional configuration"
+        )
 
     def _load_data_into_db(self, source_file_paths: dict[str, Path]) -> None:
         self._logger.debug("Loading files into database tables")
