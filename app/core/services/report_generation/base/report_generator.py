@@ -3,7 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from logging import Logger
 
 # Third-party imports
@@ -71,13 +71,19 @@ class ReportGenerator(ABC):
             self._load_data_into_db(source_file_paths)
             self._logger.info("Data successfully loaded into database")
 
+            step += 1
+
             self._logger.debug(f"Generation step {step}: Creating reference tables")
             self._create_predefined_tables()
             self._logger.info("Program reference table created successfully")
 
+            step += 1
+
             self._logger.debug(f"Generation step {step}: Executing queries")
             query_results: dict[str, pd.DataFrame] = self._execute_queries()
             self._logger.info(f"Successfully executed {len(query_results)} queries")
+
+            step += 1
 
             self._logger.debug(f"Generation step {step}: Creating Excel workbook")
             self._workbook = Workbook()
@@ -89,13 +95,19 @@ class ReportGenerator(ABC):
                 f"Workbook created with sheet: {self._report_specification.display_name}"
             )
 
+            step += 1
+
             self._logger.debug(f"Generation step {step}: Adding report content")
             self._add_content(sheet, query_results)
             self._logger.debug("Content added successfully")
 
+            step += 1
+
             self._logger.debug(f"Generation step {step}: Applying final formatting")
             self._finalize_formatting(sheet)
             self._logger.debug("Final formatting applied successfully")
+
+            step += 1
 
             self._logger.debug(f"Generation step {step}: Saving report")
             output_file_path: Path = (
@@ -109,6 +121,9 @@ class ReportGenerator(ABC):
         except Exception as error:
             self._logger.exception(f"Report generation failed: {error}")
             raise
+
+    @abstractmethod
+    def configure(self, **kwargs: Any) -> None: ...
 
     def _load_data_into_db(self, source_file_paths: dict[str, Path]) -> None:
         self._logger.debug("Loading files into database tables")

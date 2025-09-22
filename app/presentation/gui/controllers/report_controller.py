@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 from logging import Logger
 from pathlib import Path
+from typing import Any
 
 # Local application imports
 from app.core.core_facade import CoreFacade
@@ -13,7 +14,7 @@ from app.core.domain.models.report_specification import ReportSpecification
 from app.core.utils.logging_setup import get_logger
 
 
-class ReportController(object):
+class ReportController:
     __slots__ = ("_facade", "_logger")
 
     def __init__(self, facade: CoreFacade) -> None:
@@ -42,11 +43,26 @@ class ReportController(object):
         output_directory_path: Path,
         month: Month,
         year: int,
+        **kwargs: Any,
     ) -> Path:
+        """Generate a report with the given parameters.
+
+        Args:
+            report_name: Name of the report to generate
+            source_files: List of source file paths
+            output_directory_path: Directory to save the output file
+            month: Report month
+            year: Report year
+            **kwargs: Additional report-specific parameters (e.g., target_programme)
+
+        Returns:
+            Path to the generated report file
+        """
         self._logger.info(f"Starting report generation: {report_name}")
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")
         self._logger.debug(f"Period: {month} {year}")
+        self._logger.debug(f"Additional parameters: {kwargs}")
 
         try:
             # Validate input files against report requirements (fail fast)
@@ -77,6 +93,7 @@ class ReportController(object):
                 source_file_paths=validated_files,
                 output_directory_path=output_directory_path,
                 report_context=report_context,
+                **kwargs,
             )
 
             self._logger.info(
@@ -95,6 +112,7 @@ class ReportController(object):
     def _validate_source_files(
         self, report_name: str, input_files: list[Path]
     ) -> dict[str, Path]:
+        """Validate source files against report requirements."""
         self._logger.debug(
             f"Validating {len(input_files)} source files for report: {report_name}"
         )
@@ -166,7 +184,7 @@ class ReportController(object):
             error_msg = f"Missing files for required patterns:\n" + "\n".join(
                 missing_patterns
             )
-            self._logger.error(f"Validation failed: missing required patterns")
+            self._logger.error("Validation failed: missing required patterns")
             raise ValueError(error_msg)
 
         if unmatched_files:

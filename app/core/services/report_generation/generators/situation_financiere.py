@@ -41,8 +41,13 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._current_row: int = 1
         self._target_programme: Programme | None = None
 
-    def set_target_programme(self, programme_name: str) -> None:
+    def configure(self, **kwargs: Any) -> None:
         """Set the target programme for the financial situation report."""
+
+        programme_name: str | None = kwargs.get("target_program")
+        if programme_name is None:
+            raise Exception()
+
         self._logger.debug(f"Setting target programme: {programme_name}")
 
         # Find programme in the list

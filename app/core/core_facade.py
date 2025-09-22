@@ -3,6 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from logging import Logger
 from pathlib import Path
+from typing import Any
 
 # Local application imports
 from app.core.config import AppConfig
@@ -20,7 +21,7 @@ from app.core.services.report_generation.base.report_generator import ReportGene
 from app.core.utils.logging_setup import get_logger
 
 
-class CoreFacade(object):
+class CoreFacade:
     __slots__ = (
         "_config",
         "_data_repository",
@@ -30,7 +31,7 @@ class CoreFacade(object):
 
     def __init__(self, config: AppConfig) -> None:
         self._logger: Logger = get_logger(__name__)
-        self._logger.debug("Initializing ApplicationFacade")
+        self._logger.debug("Initializing CoreFacade")
 
         # Dependency injection
         self._config: AppConfig = config
@@ -41,7 +42,7 @@ class CoreFacade(object):
             self._config.file_io_config
         )
 
-        self._logger.info("ApplicationFacade initialized successfully")
+        self._logger.info("CoreFacade initialized successfully")
 
     def generate_report(
         self,
@@ -49,7 +50,20 @@ class CoreFacade(object):
         source_file_paths: dict[str, Path],
         output_directory_path: Path,
         report_context: ReportContext,
+        **kwargs: Any,
     ) -> Path:
+        """Generate a report with the given parameters.
+
+        Args:
+            report_name: Name of the report to generate
+            source_file_paths: Dictionary mapping table names to file paths
+            output_directory_path: Directory to save the output file
+            report_context: Report context with wilaya, date, etc.
+            **kwargs: Additional report-specific parameters
+
+        Returns:
+            Path to the generated report file
+        """
         self._logger.info(f"Starting report generation: {report_name}")
 
         try:
@@ -61,10 +75,11 @@ class CoreFacade(object):
 
             # Create generator and generate report
             generator: ReportGenerator = ReportGeneratorFactory.create_generator(
-                report_name,
-                self._file_io_service,
-                self._data_repository,
-                report_context,
+                report_name=report_name,
+                file_io_service=self._file_io_service,
+                data_repository=self._data_repository,
+                report_context=report_context,
+                **kwargs,
             )
             self._logger.debug(f"Generator created: {generator.__class__.__name__}")
 
@@ -87,6 +102,7 @@ class CoreFacade(object):
             raise
 
     def get_available_reports(self) -> dict[str, ReportSpecification]:
+        """Get all available report specifications."""
         self._logger.debug("Retrieving available reports")
         reports: dict[str, ReportSpecification] = ReportSpecificationRegistry.all()
         self._logger.info(f"Found {len(reports)} available report types")

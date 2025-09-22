@@ -33,6 +33,9 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
         self._current_row: int = 1
 
+    def configure(self, **kwargs: Any) -> None:
+        pass
+
     def _create_predefined_tables(self) -> None:
         self._logger.debug("Creating reference tables")
         try:
