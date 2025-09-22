@@ -74,7 +74,7 @@ class FileIOService(object):
 
     def _find_table_start_row(self, source_file_path: Path) -> int:
         self._logger.debug(
-            "Searching for table start row by looking for 'N° d'ordre' header"
+            "Searching for table start row by looking for 'N° d'ordre' or 'Code décision' header"
         )
 
         try:
@@ -97,6 +97,14 @@ class FileIOService(object):
                 self._logger.info(f"Table header 'N° d'ordre' found at row {row_idx}")
                 return row_idx
 
-        error_msg: str = "Unable to find 'N° d'ordre' header to determine table start"
+            if "Code décision" in first_cell:
+                self._logger.info(
+                    f"Table header 'Code décision' found at row {row_idx}"
+                )
+                return row_idx
+
+        error_msg: str = (
+            "Unable to find 'N° d'ordre' or 'Code décision' header to determine table start"
+        )
         self._logger.error(error_msg)
         raise DataLoadError(source_file_path, Exception(error_msg))

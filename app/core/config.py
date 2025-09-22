@@ -40,7 +40,7 @@ class FileIOConfig(BaseModel):
 
 class DatabaseConfig(BaseModel):
     path: Path | None = None
-    max_memory: str = "2GB"
+    max_memory: str = "1GB"
     enable_logging: bool = True
 
 
@@ -49,11 +49,11 @@ class LoggingConfig(BaseModel):
     enable_file_logging: bool = True
     enable_console_logging: bool = True
     log_file: Path = Field(
-        default_factory=lambda: get_app_data_dir() / "logs" / "app.log"
+        default_factory=lambda: Path("logs")  # get_app_data_dir() / "logs" / "app.log"
     )
     use_json_format: bool = False
     include_traceback: bool = True
-    console_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    console_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG"
     max_file_size_mb: int = 10
     backup_count: int = 5
     disable_existing_loggers: bool = False

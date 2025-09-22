@@ -1,0 +1,263 @@
+2025-09-22 12:19:27 [    INFO] app.core.utils.logging_setup: Logging configuration applied successfully
+2025-09-22 12:19:27 [    INFO] app.core.utils.logging_setup: File logging enabled: logs
+2025-09-22 12:19:27 [    INFO] app.core.utils.logging_setup: Console logging enabled
+2025-09-22 12:19:27 [    INFO] app.core.infrastructure.data.data_repository: Creating in-memory DuckDB connection
+2025-09-22 12:19:27 [    INFO] app.core.infrastructure.data.data_repository: DuckDB repository initialized successfully
+2025-09-22 12:19:27 [    INFO] app.core.infrastructure.file_io.file_io_service: File io service initialized
+2025-09-22 12:19:27 [    INFO] app.core.core_facade: CoreFacade initialized successfully
+2025-09-22 12:19:27 [    INFO] app.presentation.gui.main_window: Initializing main application window
+2025-09-22 12:19:27 [    INFO] app.presentation.gui.controllers.report_controller: ReportController initialized successfully
+2025-09-22 12:19:27 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 12:19:27 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 12:19:27 [    INFO] app.presentation.gui.controllers.report_controller: Retrieved 2 available report types
+2025-09-22 12:19:27 [    INFO] app.presentation.gui.main_window: Loaded 2 report types
+2025-09-22 12:19:27 [    INFO] app.presentation.gui.main_window: Main application window initialized successfully
+2025-09-22 12:20:07 [    INFO] app.presentation.gui.controllers.report_controller: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:20:07 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 12:20:07 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 12:20:07 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful: 2 files matched to required patterns
+2025-09-22 12:20:07 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful. Validated 2 files
+2025-09-22 12:20:07 [    INFO] app.core.core_facade: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:20:07 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:20:07 [    INFO] app.core.core_facade: Generating report: Situation financière des programmes par daira et commune
+2025-09-22 12:20:07 [    INFO] app.core.services.report_generation.factories.report_generator_factory: Creating generator for report: situation_financiere_des_programmes
+2025-09-22 12:20:07 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:20:07 [    INFO] app.core.services.report_generation.base.report_generator: Generator initialized for report: Situation financière des programmes par daira et commune
+2025-09-22 12:20:07 [   ERROR] app.core.services.report_generation.factories.report_generator_factory: Failed to create generator for report 'situation_financiere_des_programmes': target_program parameter is required
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/factories/report_generator_factory.py", line 93, in create_generator
+    generator.configure(**kwargs)
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/generators/situation_financiere.py", line 48, in configure
+    raise ValueError("target_program parameter is required")
+ValueError: target_program parameter is required
+2025-09-22 12:20:07 [   ERROR] app.core.core_facade: Configuration error: target_program parameter is required
+2025-09-22 12:20:07 [   ERROR] app.presentation.gui.controllers.report_controller: Report generation failed due to validation error: target_program parameter is required
+2025-09-22 12:23:48 [    INFO] app.core.utils.logging_setup: Logging configuration applied successfully
+2025-09-22 12:23:48 [    INFO] app.core.utils.logging_setup: File logging enabled: logs
+2025-09-22 12:23:48 [    INFO] app.core.utils.logging_setup: Console logging enabled
+2025-09-22 12:23:48 [    INFO] app.core.infrastructure.data.data_repository: Creating in-memory DuckDB connection
+2025-09-22 12:23:48 [    INFO] app.core.infrastructure.data.data_repository: DuckDB repository initialized successfully
+2025-09-22 12:23:48 [    INFO] app.core.infrastructure.file_io.file_io_service: File io service initialized
+2025-09-22 12:23:48 [    INFO] app.core.core_facade: CoreFacade initialized successfully
+2025-09-22 12:23:48 [    INFO] app.presentation.gui.main_window: Initializing main application window
+2025-09-22 12:23:48 [    INFO] app.presentation.gui.controllers.report_controller: ReportController initialized successfully
+2025-09-22 12:23:48 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 12:23:48 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 12:23:48 [    INFO] app.presentation.gui.controllers.report_controller: Retrieved 2 available report types
+2025-09-22 12:23:48 [    INFO] app.presentation.gui.main_window: Loaded 2 report types
+2025-09-22 12:23:48 [    INFO] app.presentation.gui.main_window: Main application window initialized successfully
+2025-09-22 12:24:35 [    INFO] app.presentation.gui.controllers.report_controller: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:24:35 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 12:24:35 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 12:24:35 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful: 2 files matched to required patterns
+2025-09-22 12:24:35 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful. Validated 2 files
+2025-09-22 12:24:35 [    INFO] app.core.core_facade: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:24:35 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:24:35 [    INFO] app.core.core_facade: Generating report: Situation financière des programmes par daira et commune
+2025-09-22 12:24:35 [    INFO] app.core.services.report_generation.factories.report_generator_factory: Creating generator for report: situation_financiere_des_programmes
+2025-09-22 12:24:35 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:24:35 [    INFO] app.core.services.report_generation.base.report_generator: Generator initialized for report: Situation financière des programmes par daira et commune
+2025-09-22 12:24:35 [    INFO] app.core.services.report_generation.base.report_generator: Target programme set: PROGRAMME 2002 (aid_value: 700000, consistance: 4000)
+2025-09-22 12:24:35 [    INFO] app.core.services.report_generation.factories.report_generator_factory: SituationFinanciereGenerator created successfully for report 'situation_financiere_des_programmes'
+2025-09-22 12:24:35 [    INFO] app.core.core_facade: Starting report generation process
+2025-09-22 12:24:35 [    INFO] app.core.services.report_generation.base.report_generator: Starting report generation process
+2025-09-22 12:24:35 [    INFO] app.core.infrastructure.file_io.file_io_service: Loading data from file: /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx
+2025-09-22 12:24:37 [   ERROR] app.core.infrastructure.file_io.file_io_service: Unable to find 'N° d'ordre' header to determine table start
+2025-09-22 12:24:37 [   ERROR] app.core.infrastructure.file_io.file_io_service: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 37, in load_data_from_file
+    skiprows: int = self._find_table_start_row(source_file_path)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 102, in _find_table_start_row
+    raise DataLoadError(source_file_path, Exception(error_msg))
+app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+2025-09-22 12:24:37 [   ERROR] app.core.services.report_generation.base.report_generator: Failed to load file '/mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx' into table 'decisions': Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+2025-09-22 12:24:37 [   ERROR] app.core.services.report_generation.base.report_generator: Report generation failed: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 37, in load_data_from_file
+    skiprows: int = self._find_table_start_row(source_file_path)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 102, in _find_table_start_row
+    raise DataLoadError(source_file_path, Exception(error_msg))
+app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/base/report_generator.py", line 71, in generate
+    self._load_data_into_db(source_file_paths)
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/base/report_generator.py", line 141, in _load_data_into_db
+    df: pd.DataFrame = self._file_io_service.load_data_from_file(file_path)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 56, in load_data_from_file
+    raise DataLoadError(source_file_path, error) from error
+app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+2025-09-22 12:24:37 [   ERROR] app.core.core_facade: Unexpected error during report generation: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 37, in load_data_from_file
+    skiprows: int = self._find_table_start_row(source_file_path)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 102, in _find_table_start_row
+    raise DataLoadError(source_file_path, Exception(error_msg))
+app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/core/core_facade.py", line 87, in generate_report
+    output_file_path: Path = generator.generate(
+                             ^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/generators/situation_financiere.py", line 90, in generate
+    return super().generate(source_file_paths, output_directory_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/base/report_generator.py", line 71, in generate
+    self._load_data_into_db(source_file_paths)
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/base/report_generator.py", line 141, in _load_data_into_db
+    df: pd.DataFrame = self._file_io_service.load_data_from_file(file_path)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 56, in load_data_from_file
+    raise DataLoadError(source_file_path, error) from error
+app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+2025-09-22 12:24:37 [   ERROR] app.presentation.gui.controllers.report_controller: Unexpected error during report generation: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 37, in load_data_from_file
+    skiprows: int = self._find_table_start_row(source_file_path)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 102, in _find_table_start_row
+    raise DataLoadError(source_file_path, Exception(error_msg))
+app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/amine/projects/ex-cnl/app/presentation/gui/controllers/report_controller.py", line 91, in generate_report
+    output_file_path: Path = self._facade.generate_report(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/core_facade.py", line 87, in generate_report
+    output_file_path: Path = generator.generate(
+                             ^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/generators/situation_financiere.py", line 90, in generate
+    return super().generate(source_file_paths, output_directory_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/base/report_generator.py", line 71, in generate
+    self._load_data_into_db(source_file_paths)
+  File "/home/amine/projects/ex-cnl/app/core/services/report_generation/base/report_generator.py", line 141, in _load_data_into_db
+    df: pd.DataFrame = self._file_io_service.load_data_from_file(file_path)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/amine/projects/ex-cnl/app/core/infrastructure/file_io/file_io_service.py", line 56, in load_data_from_file
+    raise DataLoadError(source_file_path, error) from error
+app.core.utils.exceptions.DataLoadError: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Failed to load data from /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx: Unable to find 'N° d'ordre' header to determine table start
+2025-09-22 12:38:01 [    INFO] app.core.utils.logging_setup: Logging configuration applied successfully
+2025-09-22 12:38:01 [    INFO] app.core.utils.logging_setup: File logging enabled: logs
+2025-09-22 12:38:01 [    INFO] app.core.utils.logging_setup: Console logging enabled
+2025-09-22 12:38:01 [    INFO] app.core.infrastructure.data.data_repository: Creating in-memory DuckDB connection
+2025-09-22 12:38:01 [    INFO] app.core.infrastructure.data.data_repository: DuckDB repository initialized successfully
+2025-09-22 12:38:01 [    INFO] app.core.infrastructure.file_io.file_io_service: File io service initialized
+2025-09-22 12:38:01 [    INFO] app.core.core_facade: CoreFacade initialized successfully
+2025-09-22 12:38:01 [    INFO] app.presentation.gui.main_window: Initializing main application window
+2025-09-22 12:38:01 [    INFO] app.presentation.gui.controllers.report_controller: ReportController initialized successfully
+2025-09-22 12:38:01 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 12:38:01 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 12:38:01 [    INFO] app.presentation.gui.controllers.report_controller: Retrieved 2 available report types
+2025-09-22 12:38:01 [    INFO] app.presentation.gui.main_window: Loaded 2 report types
+2025-09-22 12:38:02 [    INFO] app.presentation.gui.main_window: Main application window initialized successfully
+2025-09-22 12:38:54 [    INFO] app.presentation.gui.controllers.report_controller: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:38:54 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 12:38:54 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 12:38:54 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful: 2 files matched to required patterns
+2025-09-22 12:38:54 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful. Validated 2 files
+2025-09-22 12:38:54 [    INFO] app.core.core_facade: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:38:54 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:38:54 [    INFO] app.core.core_facade: Generating report: Situation financière des programmes par daira et commune
+2025-09-22 12:38:54 [    INFO] app.core.services.report_generation.factories.report_generator_factory: Creating generator for report: situation_financiere_des_programmes
+2025-09-22 12:38:54 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:38:54 [    INFO] app.core.services.report_generation.base.report_generator: Generator initialized for report: Situation financière des programmes par daira et commune
+2025-09-22 12:38:54 [    INFO] app.core.services.report_generation.base.report_generator: Target programme set: PROGRAMME 2002 (aid_value: 700000, consistance: 4000)
+2025-09-22 12:38:54 [    INFO] app.core.services.report_generation.factories.report_generator_factory: SituationFinanciereGenerator created successfully for report 'situation_financiere_des_programmes'
+2025-09-22 12:38:54 [    INFO] app.core.core_facade: Starting report generation process
+2025-09-22 12:38:54 [    INFO] app.core.services.report_generation.base.report_generator: Starting report generation process
+2025-09-22 12:38:54 [    INFO] app.core.infrastructure.file_io.file_io_service: Loading data from file: /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx
+2025-09-22 12:38:56 [    INFO] app.core.infrastructure.file_io.file_io_service: Table header 'Code décision' found at row 6
+2025-09-22 12:39:09 [    INFO] app.core.infrastructure.file_io.file_io_service: Successfully loaded: 128653 rows and 16 columns from Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx
+2025-09-22 12:39:09 [    INFO] app.core.infrastructure.data.data_repository: Table 'decisions' created successfully: 128653 rows and 16 columns
+2025-09-22 12:39:09 [    INFO] app.core.services.report_generation.base.report_generator: Table 'decisions' loaded successfully: 128653 rows
+2025-09-22 12:39:09 [    INFO] app.core.infrastructure.data.data_repository: Summary generated for table 'decisions' with 128653 records
+2025-09-22 12:39:09 [    INFO] app.core.infrastructure.file_io.file_io_service: Loading data from file: /mnt/c/Users/user/Documents/Stage/applic HR/Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx
+2025-09-22 12:39:12 [    INFO] app.core.infrastructure.file_io.file_io_service: Table header 'N° d'ordre' found at row 5
+2025-09-22 12:40:00 [    INFO] app.core.infrastructure.file_io.file_io_service: Successfully loaded: 235338 rows and 28 columns from Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx
+2025-09-22 12:40:00 [    INFO] app.core.infrastructure.data.data_repository: Table 'paiements' created successfully: 235338 rows and 28 columns
+2025-09-22 12:40:00 [    INFO] app.core.services.report_generation.base.report_generator: Table 'paiements' loaded successfully: 235338 rows
+2025-09-22 12:40:01 [    INFO] app.core.infrastructure.data.data_repository: Summary generated for table 'paiements' with 235338 records
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Data successfully loaded into database
+2025-09-22 12:40:01 [    INFO] app.core.infrastructure.data.data_repository: Table 'programmes' created successfully: 55 rows and 6 columns
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Reference table 'programmes' created: 55 rows and 6 columns
+2025-09-22 12:40:01 [    INFO] app.core.infrastructure.data.data_repository: Table 'dairas_communes' created successfully: 67 rows and 2 columns
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Reference table 'dairas_communes' created: 67 rows and 2 columns
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Program reference table created successfully
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Query 'nb_aides_et_montants_inscrits_par_daira_et_commune' returned 48 rows
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Query 'consommations_cumulees_fin_annee_precedente' returned 48 rows
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Query 'consommations_annee_actuelle_jusqua_mois_actuel' returned 0 rows
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: All 3 queries executed successfully
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Successfully executed 3 queries
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Workbook created with sheet: Situation financière des programmes par daira et commune
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Report header added successfully
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Table headers added successfully
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Added 67 data rows successfully
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Totals row added successfully
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Final formatting completed successfully
+2025-09-22 12:40:01 [    INFO] app.core.infrastructure.file_io.file_io_service: Saving data to file: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:40:01 [    INFO] app.core.infrastructure.file_io.file_io_service: Workbook saved successfully to /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Report saved successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:40:01 [    INFO] app.core.services.report_generation.base.report_generator: Report generation completed successfully
+2025-09-22 12:40:01 [    INFO] app.core.core_facade: Report generated successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:40:01 [    INFO] app.presentation.gui.controllers.report_controller: Report generation completed successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:47:01 [    INFO] app.presentation.gui.controllers.report_controller: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:47:01 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved 2 report specifications
+2025-09-22 12:47:01 [    INFO] app.core.core_facade: Found 2 available report types
+2025-09-22 12:47:01 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful: 2 files matched to required patterns
+2025-09-22 12:47:01 [    INFO] app.presentation.gui.controllers.report_controller: File validation successful. Validated 2 files
+2025-09-22 12:47:01 [    INFO] app.core.core_facade: Starting report generation: situation_financiere_des_programmes
+2025-09-22 12:47:01 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:47:01 [    INFO] app.core.core_facade: Generating report: Situation financière des programmes par daira et commune
+2025-09-22 12:47:01 [    INFO] app.core.services.report_generation.factories.report_generator_factory: Creating generator for report: situation_financiere_des_programmes
+2025-09-22 12:47:01 [    INFO] app.core.domain.registry.report_specification_registry: Retrieved specification for report 'situation_financiere_des_programmes': Situation financière des programmes par daira et commune
+2025-09-22 12:47:01 [    INFO] app.core.services.report_generation.base.report_generator: Generator initialized for report: Situation financière des programmes par daira et commune
+2025-09-22 12:47:01 [    INFO] app.core.services.report_generation.base.report_generator: Target programme set: programme 2023 (aid_value: 700000, consistance: 4000)
+2025-09-22 12:47:01 [    INFO] app.core.services.report_generation.factories.report_generator_factory: SituationFinanciereGenerator created successfully for report 'situation_financiere_des_programmes'
+2025-09-22 12:47:01 [    INFO] app.core.core_facade: Starting report generation process
+2025-09-22 12:47:01 [    INFO] app.core.services.report_generation.base.report_generator: Starting report generation process
+2025-09-22 12:47:01 [    INFO] app.core.infrastructure.file_io.file_io_service: Loading data from file: /mnt/c/Users/user/Documents/Stage/applic HR/Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx
+2025-09-22 12:47:02 [    INFO] app.core.infrastructure.file_io.file_io_service: Table header 'Code décision' found at row 6
+2025-09-22 12:47:17 [    INFO] app.core.infrastructure.file_io.file_io_service: Successfully loaded: 128653 rows and 16 columns from Journal_décisions__Agence_TIZI+OUZOU_04.09.2025_5676342332124433611.xlsx
+2025-09-22 12:47:17 [    INFO] app.core.infrastructure.data.data_repository: Table 'decisions' created successfully: 128653 rows and 16 columns
+2025-09-22 12:47:17 [    INFO] app.core.services.report_generation.base.report_generator: Table 'decisions' loaded successfully: 128653 rows
+2025-09-22 12:47:17 [    INFO] app.core.infrastructure.data.data_repository: Summary generated for table 'decisions' with 128653 records
+2025-09-22 12:47:17 [    INFO] app.core.infrastructure.file_io.file_io_service: Loading data from file: /mnt/c/Users/user/Documents/Stage/applic HR/Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx
+2025-09-22 12:47:19 [    INFO] app.core.infrastructure.file_io.file_io_service: Table header 'N° d'ordre' found at row 5
+2025-09-22 12:48:03 [    INFO] app.core.infrastructure.file_io.file_io_service: Successfully loaded: 235338 rows and 28 columns from Journal_paiements__Agence_TIZI+OUZOU_04.09.2025_8728206523967732398.xlsx
+2025-09-22 12:48:04 [    INFO] app.core.infrastructure.data.data_repository: Table 'paiements' created successfully: 235338 rows and 28 columns
+2025-09-22 12:48:04 [    INFO] app.core.services.report_generation.base.report_generator: Table 'paiements' loaded successfully: 235338 rows
+2025-09-22 12:48:04 [    INFO] app.core.infrastructure.data.data_repository: Summary generated for table 'paiements' with 235338 records
+2025-09-22 12:48:04 [    INFO] app.core.services.report_generation.base.report_generator: Data successfully loaded into database
+2025-09-22 12:48:04 [    INFO] app.core.infrastructure.data.data_repository: Table 'programmes' created successfully: 55 rows and 6 columns
+2025-09-22 12:48:04 [    INFO] app.core.services.report_generation.base.report_generator: Reference table 'programmes' created: 55 rows and 6 columns
+2025-09-22 12:48:04 [    INFO] app.core.infrastructure.data.data_repository: Table 'dairas_communes' created successfully: 67 rows and 2 columns
+2025-09-22 12:48:04 [    INFO] app.core.services.report_generation.base.report_generator: Reference table 'dairas_communes' created: 67 rows and 2 columns
+2025-09-22 12:48:04 [    INFO] app.core.services.report_generation.base.report_generator: Program reference table created successfully
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Query 'nb_aides_et_montants_inscrits_par_daira_et_commune' returned 55 rows
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Query 'consommations_cumulees_fin_annee_precedente' returned 55 rows
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Query 'consommations_annee_actuelle_jusqua_mois_actuel' returned 55 rows
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: All 3 queries executed successfully
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Successfully executed 3 queries
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Workbook created with sheet: Situation financière des programmes par daira et commune
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Report header added successfully
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Table headers added successfully
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Added 67 data rows successfully
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Totals row added successfully
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Final formatting completed successfully
+2025-09-22 12:48:05 [    INFO] app.core.infrastructure.file_io.file_io_service: Saving data to file: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:48:05 [    INFO] app.core.infrastructure.file_io.file_io_service: Workbook saved successfully to /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Report saved successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:48:05 [    INFO] app.core.services.report_generation.base.report_generator: Report generation completed successfully
+2025-09-22 12:48:05 [    INFO] app.core.core_facade: Report generated successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx
+2025-09-22 12:48:05 [    INFO] app.presentation.gui.controllers.report_controller: Report generation completed successfully: /mnt/c/Users/user/Desktop/situation_financiere_des_programmes_Tizi Ouzou_22_09_2025.xlsx

@@ -43,10 +43,9 @@ class SituationFinanciereGenerator(ReportGenerator):
 
     def configure(self, **kwargs: Any) -> None:
         """Set the target programme for the financial situation report."""
-
-        programme_name: str | None = kwargs.get("target_program")
+        programme_name: str | None = kwargs.get("target_programme")
         if programme_name is None:
-            raise Exception()
+            raise ValueError("additional parameter 'target_programme' is required")
 
         self._logger.debug(f"Setting target programme: {programme_name}")
 
