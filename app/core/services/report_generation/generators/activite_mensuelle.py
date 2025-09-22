@@ -7,8 +7,7 @@ from typing import Any
 # Imports tiers
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.styles import Alignment, Border, Font, Side
-from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment
 
 # Imports de l'application locale
 from app.core.domain.models.report_context import ReportContext
@@ -17,19 +16,17 @@ from app.core.domain.predefined_objects.programmes import get_programmes_datafra
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.base.report_generator import ReportGenerator
-
-
-# Font constants for consistency
-FONT_NORMAL = Font(name="Arial", size=9, bold=False)
-FONT_BOLD = Font(name="Arial", size=9, bold=True)
-BORDER_THIN = Border(
-    left=Side(style="thin"),
-    right=Side(style="thin"),
-    top=Side(style="thin"),
-    bottom=Side(style="thin"),
+from app.core.utils.excel_styling import (
+    FONT_NORMAL,
+    FONT_BOLD,
+    BORDER_THIN,
+    ALIGNMENT_CENTER,
+    ALIGNMENT_CENTER_WRAP,
+    ALIGNMENT_LEFT,
+    apply_style_to_merged_cells,
+    set_column_widths,
+    setup_page_layout,
 )
-ALIGNMENT_CENTER = Alignment(horizontal="center", vertical="center")
-ALIGNMENT_CENTER_WRAP = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
 
 class ActiviteMensuelleGenerator(ReportGenerator):
@@ -94,30 +91,6 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._logger.debug("Query formatting completed")
         return formatted_query
 
-    def _apply_style_to_merged_cells(
-        self,
-        sheet: Worksheet,
-        start_col: str,
-        start_row: int,
-        end_col: str,
-        end_row: int,
-        font: Font = FONT_NORMAL,
-        alignment: Alignment = ALIGNMENT_CENTER,
-        border: Border | None = None,
-    ) -> None:
-        """Apply consistent styling to all cells in a merged range."""
-        start_col_idx: int = ord(start_col) - ord('A') + 1
-        end_col_idx: int = ord(end_col) - ord('A') + 1
-        
-        for row in range(start_row, end_row + 1):
-            for col_idx in range(start_col_idx, end_col_idx + 1):
-                col_letter: str = get_column_letter(col_idx)
-                cell = sheet[f"{col_letter}{row}"]
-                cell.font = font
-                cell.alignment = alignment
-                if border:
-                    cell.border = border
-
     def _add_content(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
@@ -133,9 +106,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Titre
         sheet[f"A{self._current_row}"] = "Habitat rural"
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "A", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
+        apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER,
         )
         self._logger.debug("Titre principal ajouté : Habitat rural")
 
@@ -154,9 +132,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             "Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "A", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP
+        apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
         )
         self._logger.debug("Titre du report ajouté")
 
@@ -168,9 +151,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         )
         sheet[f"A{self._current_row}"] = month_text
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "A", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
+        apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER,
         )
         self._logger.debug(f"Mois et année ajoutés : {month_text}")
 
@@ -189,9 +177,15 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # La cellule Programme s'étend sur 3 lignes
         sheet[f"A{self._current_row}"] = "Programme"
         sheet.merge_cells(f"A{self._current_row}:A{self._current_row + 2}")
-        self._apply_style_to_merged_cells(
-            sheet, "A", self._current_row, "A", self._current_row + 2,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "A",
+            self._current_row + 2,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
         )
 
         sheet[f"B{self._current_row}"] = (
@@ -199,9 +193,15 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             f"{self._report_context.month} {self._report_context.year}"  # type: ignore
         )
         sheet.merge_cells(f"B{self._current_row}:E{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "B", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        apply_style_to_merged_cells(
+            sheet,
+            "B",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
         )
 
         self._logger.debug("Légende du tableau ajoutée")
@@ -216,27 +216,45 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             "Livraisons (libération de la dernière tranche)"
         )
         sheet.merge_cells(f"B{self._current_row}:C{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "B", self._current_row, "C", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        apply_style_to_merged_cells(
+            sheet,
+            "B",
+            self._current_row,
+            "C",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
         )
 
         sheet[f"D{self._current_row}"] = (
             "Lancements (libération de la première tranche)"
         )
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "D", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER_WRAP, border=BORDER_THIN
+        apply_style_to_merged_cells(
+            sheet,
+            "D",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER_WRAP,
+            border=BORDER_THIN,
         )
 
         self._current_row += 1
 
         # Sous-en-têtes
         sub_headers: list[tuple[str, str]] = [
-            ("B", f"{self._report_context.month.capitalize()} {self._report_context.year}"),
+            (
+                "B",
+                f"{self._report_context.month.capitalize()} {self._report_context.year}",
+            ),
             ("C", self._get_cumul_text()),
-            ("D", f"{self._report_context.month.capitalize()} {self._report_context.year}"),
+            (
+                "D",
+                f"{self._report_context.month.capitalize()} {self._report_context.year}",
+            ),
             ("E", self._get_cumul_text()),
         ]
 
@@ -277,14 +295,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         programmes: list[str] = []
         if "programmes" in query_results:
             programmes = query_results["programmes"]["programme"].tolist()
-            self._logger.info(
-                f"Trouvé {len(programmes)} programmes : {programmes}"
-            )
+            self._logger.info(f"Trouvé {len(programmes)} programmes : {programmes}")
         else:
             self._logger.warning("Aucun résultat de requête 'programmes' trouvé")
 
         # Créer des dictionnaires de recherche
-        data_dicts: dict[str, dict[str, int]] = self._create_data_dictionaries(query_results)
+        data_dicts: dict[str, dict[str, int]] = self._create_data_dictionaries(
+            query_results
+        )
 
         # Calculer les totaux
         totals: dict[str, int] = {
@@ -303,9 +321,7 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         self._current_row += len(programmes)
         self._add_total_row(sheet, self._current_row, totals)
 
-        self._logger.info(
-            f"Premier tableau terminé avec {len(programmes)} programmes"
-        )
+        self._logger.info(f"Premier tableau terminé avec {len(programmes)} programmes")
 
         self._current_row += 2
 
@@ -340,11 +356,11 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         return data_dicts
 
     def _add_programme_row(
-        self, 
-        sheet: Worksheet, 
-        row: int, 
-        programme: str, 
-        data_dicts: dict[str, dict[str, int]]
+        self,
+        sheet: Worksheet,
+        row: int,
+        programme: str,
+        data_dicts: dict[str, dict[str, int]],
     ) -> None:
         """Add a single programme row to the table."""
         values: list[tuple[str, Any]] = [
@@ -386,9 +402,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             "Situation des programmes (à renseigner par la BNH, ex-CNL)"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "A", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
+        apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
@@ -397,9 +418,14 @@ class ActiviteMensuelleGenerator(ReportGenerator):
             f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}"
         )
         sheet.merge_cells(f"A{self._current_row}:E{self._current_row}")
-        self._apply_style_to_merged_cells(
-            sheet, "A", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=ALIGNMENT_CENTER
+        apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_CENTER,
         )
 
         self._current_row += 2
@@ -454,13 +480,17 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Add data rows
         for i, (programme, consistance) in enumerate(programmes_situation):
             row = self._current_row + i
-            self._add_situation_row(sheet, row, programme, consistance, data_dicts, totals)
+            self._add_situation_row(
+                sheet, row, programme, consistance, data_dicts, totals
+            )
 
         # Add total row
         self._current_row += len(programmes_situation)
         self._add_situation_total_row(sheet, self._current_row, totals)
 
-        self._logger.info(f"Second tableau terminé avec {len(programmes_situation)} programmes")
+        self._logger.info(
+            f"Second tableau terminé avec {len(programmes_situation)} programmes"
+        )
         self._current_row += 2
 
     def _create_situation_dictionaries(
@@ -546,17 +576,27 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         # Texte de pied de page gauche (A-B)
         sheet.merge_cells(f"A{self._current_row}:B{self._current_row}")
         sheet[f"A{self._current_row}"] = "Visa du directeur régional de la BNH (ex-CNL)"
-        self._apply_style_to_merged_cells(
-            sheet, "A", self._current_row, "B", self._current_row,
-            font=FONT_BOLD, alignment=Alignment(horizontal="left", vertical="center")
+        apply_style_to_merged_cells(
+            sheet,
+            "A",
+            self._current_row,
+            "B",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=ALIGNMENT_LEFT,
         )
 
         # Texte de pied de page droit (D-E)
         sheet.merge_cells(f"D{self._current_row}:E{self._current_row}")
         sheet[f"D{self._current_row}"] = "Visa du directeur du logement"
-        self._apply_style_to_merged_cells(
-            sheet, "D", self._current_row, "E", self._current_row,
-            font=FONT_BOLD, alignment=Alignment(horizontal="right", vertical="center")
+        apply_style_to_merged_cells(
+            sheet,
+            "D",
+            self._current_row,
+            "E",
+            self._current_row,
+            font=FONT_BOLD,
+            alignment=Alignment(horizontal="right", vertical="center"),
         )
 
         self._logger.debug("Pied de page ajouté avec succès")
@@ -567,12 +607,8 @@ class ActiviteMensuelleGenerator(ReportGenerator):
         column_widths: dict[str, int] = {"A": 25, "B": 18, "C": 22, "D": 18, "E": 22}
         self._logger.debug(f"Définition des largeurs de colonnes : {column_widths}")
 
-        for col, width in column_widths.items():
-            sheet.column_dimensions[col].width = width
-
-        sheet.page_setup.orientation = "portrait"
-        sheet.page_setup.fitToWidth = 1
-        sheet.page_setup.fitToHeight = 0
+        set_column_widths(sheet, column_widths)
+        setup_page_layout(sheet, orientation="portrait", fit_to_width=True)
 
         self._logger.debug(
             "Orientation de page définie en portrait avec ajustement à la largeur"
