@@ -63,9 +63,13 @@
 │           │   └── theme.json
 │           └── views
 │               ├── menu_view.py
-│               ├── report_view.py
+│               ├── report_views
+│               │   ├── activite_mensuelle_report_view.py
+│               │   ├── base_report_view.py
+│               │   ├── report_view_factory.py
+│               │   └── situation_financiere_report_view.py
 │               └── settings_view.py
 ├── project_structure.txt
 └── requirements.txt
 
-26 directories, 43 files
+27 directories, 46 files
