@@ -49,7 +49,7 @@ class LoggingConfig(BaseModel):
     enable_file_logging: bool = True
     enable_console_logging: bool = True
     log_file: Path = Field(
-        default_factory=lambda: Path("logs")  # get_app_data_dir() / "logs" / "app.log"
+        default_factory=lambda: get_app_data_dir() / "logs" / "app.log"
     )
     use_json_format: bool = False
     include_traceback: bool = True

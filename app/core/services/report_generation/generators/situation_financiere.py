@@ -1,13 +1,11 @@
 from __future__ import annotations
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 # Imports tiers
 import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.styles import Alignment, Border, Font
-from openpyxl.utils import get_column_letter
 
 # Imports de l'application locale
 from app.core.domain.models.programme import Programme
@@ -41,6 +39,7 @@ class SituationFinanciereGenerator(ReportGenerator):
         )
         self._current_row: int = 1
         self._target_programme: Programme | None = None
+        self._totals: Dict[str, int] = {}
 
     def configure(self, **kwargs: Any) -> None:
         """Set the target programme for the financial situation report."""
@@ -61,7 +60,7 @@ class SituationFinanciereGenerator(ReportGenerator):
                 return
 
         # Programme not found
-        available_programmes: list[str] = [p.name for p in RURAL_HOUSING_PROGRAMMES]
+        available_programmes: List[str] = [p.name for p in RURAL_HOUSING_PROGRAMMES]
         error_msg: str = (
             f"Programme '{programme_name}' not found. "
             f"Available programmes: {available_programmes}"
@@ -83,7 +82,7 @@ class SituationFinanciereGenerator(ReportGenerator):
 
     def generate(
         self,
-        source_file_paths: dict[str, Path],
+        source_file_paths: Dict[str, Path],
         output_directory_path: Path,
     ) -> Path:
         """Generate the financial situation report."""
@@ -148,32 +147,8 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._logger.debug("Query formatting completed")
         return formatted_query
 
-    def _apply_style_to_merged_cells(
-        self,
-        sheet: Worksheet,
-        start_col: str,
-        start_row: int,
-        end_col: str,
-        end_row: int,
-        font: Font = ExcelStyling.FONT_NORMAL,
-        alignment: Alignment = ExcelStyling.ALIGNMENT_CENTER,
-        border: Border | None = None,
-    ) -> None:
-        """Apply consistent styling to all cells in a merged range."""
-        start_col_idx: int = ord(start_col) - ord("A") + 1
-        end_col_idx: int = ord(end_col) - ord("A") + 1
-
-        for row in range(start_row, end_row + 1):
-            for col_idx in range(start_col_idx, end_col_idx + 1):
-                col_letter: str = get_column_letter(col_idx)
-                cell = sheet[f"{col_letter}{row}"]
-                cell.font = font
-                cell.alignment = alignment
-                if border:
-                    cell.border = border
-
     def _add_content(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
         """Add all content to the worksheet."""
         self._add_header(sheet)
@@ -186,16 +161,13 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._logger.debug("Adding report header")
 
         # Main title
-        sheet[f"A{self._current_row}"] = (
-            f"Situation financière du programme '{self._target_programme.name}' par daira et par commune"  # type: ignore
-        )
-        sheet.merge_cells(f"A{self._current_row}:T{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
             self._current_row,
             "T",
             self._current_row,
+            value=f"Situation financière du programme '{self._target_programme.name}' par daira et par commune",  # type: ignore
             font=ExcelStyling.FONT_TITLE,
             alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
@@ -203,16 +175,13 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._current_row += 1
 
         # Report date
-        sheet[f"A{self._current_row}"] = (
-            f"Arrêté au {self._report_context.reporting_date.strftime('%d/%m/%Y')}"
-        )
-        sheet.merge_cells(f"A{self._current_row}:T{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "A",
             self._current_row,
             "T",
             self._current_row,
+            value=f"Arrêté au {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
             font=ExcelStyling.FONT_HEADER,
             alignment=ExcelStyling.ALIGNMENT_CENTER,
         )
@@ -220,9 +189,14 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._current_row += 1
 
         # Wilaya
-        sheet[f"A{self._current_row}"] = f"DL de {self._report_context.wilaya.value}"
-        sheet[f"A{self._current_row}"].font = ExcelStyling.FONT_HEADER
-        sheet[f"A{self._current_row}"].alignment = ExcelStyling.ALIGNMENT_CENTER
+        ExcelStyling.apply_style_to_cell(
+            sheet,
+            "A",
+            self._current_row,
+            font=ExcelStyling.FONT_HEADER,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
+            value=f"DL de {self._report_context.wilaya.value}",
+        )
 
         self._current_row += 2
 
@@ -233,28 +207,24 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._logger.debug("Adding table headers")
 
         # First level headers (engagement types)
-        sheet[f"F{self._current_row}"] = "Engagement par la BNH"
-        sheet.merge_cells(f"F{self._current_row}:G{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "F",
             self._current_row,
             "G",
             self._current_row,
+            value="Engagement par la BNH",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
         )
 
-        sheet[f"H{self._current_row}"] = (
-            "Engagement par le MHUV (décision d'inscription)"
-        )
-        sheet.merge_cells(f"H{self._current_row}:I{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "H",
             self._current_row,
             "I",
             self._current_row,
+            value="Engagement par le MHUV (décision d'inscription)",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
         )
@@ -264,7 +234,7 @@ class SituationFinanciereGenerator(ReportGenerator):
         header_end_row: int = self._current_row + 3
 
         # Main column headers with vertical spans
-        main_headers: list[tuple[str, str]] = [
+        main_headers: List[Tuple[str, str]] = [
             ("A", "Programme"),
             ("B", "Daira"),
             ("C", "Commune"),
@@ -280,28 +250,26 @@ class SituationFinanciereGenerator(ReportGenerator):
         ]
 
         for col, title in main_headers:
-            sheet[f"{col}{self._current_row}"] = title
-            sheet.merge_cells(f"{col}{header_start_row}:{col}{header_end_row}")
-            self._apply_style_to_merged_cells(
+            ExcelStyling.merge_and_style_cells(
                 sheet,
                 col,
                 header_start_row,
                 col,
                 header_end_row,
+                value=title,
                 font=ExcelStyling.FONT_BOLD,
                 alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
                 border=ExcelStyling.BORDER_THIN,
             )
 
         # Consommations header
-        sheet[f"J{self._current_row}"] = "Consommations"
-        sheet.merge_cells(f"J{self._current_row}:Q{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "J",
             self._current_row,
             "Q",
             self._current_row,
+            value="Consommations",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
@@ -310,16 +278,13 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._current_row += 1
 
         # Second level headers (time periods)
-        sheet[f"J{self._current_row}"] = (
-            f"Cumuls au 31/12/{self._report_context.year - 1}"
-        )
-        sheet.merge_cells(f"J{self._current_row}:M{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "J",
             self._current_row,
             "M",
             self._current_row,
+            value=f"Cumuls au 31/12/{self._report_context.year - 1}",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
@@ -331,16 +296,13 @@ class SituationFinanciereGenerator(ReportGenerator):
             else date.today().day
         )
 
-        sheet[f"N{self._current_row}"] = (
-            f"Du 1 janvier {self._report_context.year} au {end_day} {self._report_context.month.value}"
-        )
-        sheet.merge_cells(f"N{self._current_row}:Q{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "N",
             self._current_row,
             "Q",
             self._current_row,
+            value=f"Du 1 janvier {self._report_context.year} au {end_day} {self._report_context.month.value}",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
@@ -349,46 +311,54 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._current_row += 1
 
         # Third level headers (aid categories)
-        sheet[f"J{self._current_row}"] = "Aides"
-        sheet.merge_cells(f"J{self._current_row}:L{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "J",
             self._current_row,
             "L",
             self._current_row,
+            value="Aides",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
         )
 
-        sheet[f"M{self._current_row}"] = "Montant (4)"
-        sheet[f"M{self._current_row}"].font = ExcelStyling.FONT_BOLD
-        sheet[f"M{self._current_row}"].alignment = ExcelStyling.ALIGNMENT_CENTER_WRAP
-        sheet[f"M{self._current_row}"].border = ExcelStyling.BORDER_THIN
+        ExcelStyling.apply_style_to_cell(
+            sheet,
+            "M",
+            self._current_row,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
+            value="Montant (4)",
+        )
 
-        sheet[f"N{self._current_row}"] = "Aides"
-        sheet.merge_cells(f"N{self._current_row}:P{self._current_row}")
-        self._apply_style_to_merged_cells(
+        ExcelStyling.merge_and_style_cells(
             sheet,
             "N",
             self._current_row,
             "P",
             self._current_row,
+            value="Aides",
             font=ExcelStyling.FONT_BOLD,
             alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
             border=ExcelStyling.BORDER_THIN,
         )
 
-        sheet[f"Q{self._current_row}"] = "Montant (5)"
-        sheet[f"Q{self._current_row}"].font = ExcelStyling.FONT_BOLD
-        sheet[f"Q{self._current_row}"].alignment = ExcelStyling.ALIGNMENT_CENTER_WRAP
-        sheet[f"Q{self._current_row}"].border = ExcelStyling.BORDER_THIN
+        ExcelStyling.apply_style_to_cell(
+            sheet,
+            "Q",
+            self._current_row,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+            border=ExcelStyling.BORDER_THIN,
+            value="Montant (5)",
+        )
 
         self._current_row += 1
 
         # Fourth level headers (tranche types)
-        tranche_headers: list[tuple[str, str]] = [
+        tranche_headers: List[Tuple[str, str]] = [
             ("J", "T1"),
             ("K", "T2"),
             ("L", "T3"),
@@ -398,18 +368,21 @@ class SituationFinanciereGenerator(ReportGenerator):
         ]
 
         for col, title in tranche_headers:
-            sheet[f"{col}{self._current_row}"] = title
-            sheet[f"{col}{self._current_row}"].font = ExcelStyling.FONT_BOLD
-            sheet[f"{col}{self._current_row}"].alignment = (
-                ExcelStyling.ALIGNMENT_CENTER_WRAP
+            ExcelStyling.apply_style_to_cell(
+                sheet,
+                col,
+                self._current_row,
+                font=ExcelStyling.FONT_BOLD,
+                alignment=ExcelStyling.ALIGNMENT_CENTER_WRAP,
+                border=ExcelStyling.BORDER_THIN,
+                value=title,
             )
-            sheet[f"{col}{self._current_row}"].border = ExcelStyling.BORDER_THIN
 
         self._current_row += 1
         self._logger.info("Table headers added successfully")
 
     def _add_data_rows(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
         """Add data rows to the table."""
         self._logger.debug("Adding data rows")
@@ -418,10 +391,12 @@ class SituationFinanciereGenerator(ReportGenerator):
         dairas_communes_df: pd.DataFrame = get_dairas_communes_dataframe()
 
         # Create lookup dictionaries from query results
-        data_dicts: dict[str, dict] = self._create_lookup_dictionaries(query_results)
+        data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]] = (
+            self._create_lookup_dictionaries(query_results)
+        )
 
         # Track totals
-        totals: dict[str, int] = {
+        totals: Dict[str, int] = {
             "aides_inscrites": 0,
             "montants_inscrits": 0,
             "cumul_precedent_t1": 0,
@@ -453,10 +428,10 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._logger.info(f"Added {len(dairas_communes_df)} data rows successfully")
 
     def _create_lookup_dictionaries(
-        self, query_results: dict[str, pd.DataFrame]
-    ) -> dict[str, dict]:
+        self, query_results: Dict[str, pd.DataFrame]
+    ) -> Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]]:
         """Create lookup dictionaries from query results."""
-        data_dicts: dict[str, dict] = {
+        data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]] = {
             "aides_inscrites": {},
             "cumul_precedent": {},
             "annee_actuelle": {},
@@ -504,14 +479,14 @@ class SituationFinanciereGenerator(ReportGenerator):
         row: int,
         daira: str,
         commune: str,
-        data_dicts: dict[str, dict],
-        totals: dict[str, int],
+        data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
+        totals: Dict[str, int],
     ) -> None:
         """Add a single data row to the table."""
-        key: tuple[str, str] = (daira, commune)
+        key: Tuple[str, str] = (daira, commune)
 
         # Basic columns
-        basic_values: list[tuple[str, Any]] = [
+        basic_values: List[Tuple[str, Any]] = [
             ("A", self._target_programme.name),  # type: ignore
             ("B", daira),
             ("C", commune),
@@ -521,7 +496,8 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         # Aides inscrites (F & G)
         if key in data_dicts["aides_inscrites"]:
-            aides, montants = data_dicts["aides_inscrites"][key]
+            aides_data = data_dicts["aides_inscrites"][key]
+            aides, montants = aides_data[0], aides_data[1]
             basic_values.extend(
                 [
                     ("F", aides if aides > 0 else "-"),
@@ -535,13 +511,15 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         basic_values.extend([("H", "-"), ("I", "-")])
 
-        # Apply basic values
-        for col, value in basic_values:
-            cell = sheet[f"{col}{row}"]
-            cell.value = value
-            cell.font = ExcelStyling.FONT_NORMAL
-            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
-            cell.border = ExcelStyling.BORDER_THIN
+        # Apply basic values using ExcelStyling
+        ExcelStyling.apply_data_row_styling(
+            sheet,
+            row,
+            basic_values,
+            font=ExcelStyling.FONT_NORMAL,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
+            border=ExcelStyling.BORDER_THIN,
+        )
 
         # Previous year cumulative (J, K, L, M)
         self._add_cumulative_data(
@@ -577,101 +555,118 @@ class SituationFinanciereGenerator(ReportGenerator):
 
         # Calculate and add cumul total (R)
         cumul_total = self._calculate_cumul_total(key, data_dicts)
-        cell = sheet[f"R{row}"]
-        cell.value = cumul_total if cumul_total > 0 else "-"
-        cell.font = ExcelStyling.FONT_NORMAL
-        cell.alignment = ExcelStyling.ALIGNMENT_CENTER
-        cell.border = ExcelStyling.BORDER_THIN
+        ExcelStyling.apply_style_to_cell(
+            sheet,
+            "R",
+            row,
+            font=ExcelStyling.FONT_NORMAL,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
+            border=ExcelStyling.BORDER_THIN,
+            value=cumul_total if cumul_total > 0 else "-",
+        )
         totals["cumul_total"] += cumul_total
 
         # Final columns (S, T)
-        for col in ["S", "T"]:
-            cell = sheet[f"{col}{row}"]
-            cell.value = "-"
-            cell.font = ExcelStyling.FONT_NORMAL
-            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
-            cell.border = ExcelStyling.BORDER_THIN
+        final_columns: List[Tuple[str, str]] = [("S", "-"), ("T", "-")]
+        ExcelStyling.apply_data_row_styling(
+            sheet,
+            row,
+            final_columns,
+            font=ExcelStyling.FONT_NORMAL,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
+            border=ExcelStyling.BORDER_THIN,
+        )
 
     def _add_cumulative_data(
         self,
         sheet: Worksheet,
         row: int,
-        key: tuple[str, str],
-        data_dict: dict,
-        columns: list[str],
-        totals: dict[str, int],
-        total_keys: list[str],
+        key: Tuple[str, str],
+        data_dict: Dict[Tuple[str, str], Tuple[int, ...]],
+        columns: List[str],
+        totals: Dict[str, int],
+        total_keys: List[str],
     ) -> None:
         """Add cumulative data to specified columns."""
         if key in data_dict:
             values = data_dict[key]
-            for i, (col, value, total_key) in enumerate(
-                zip(columns, values, total_keys)
-            ):
-                cell = sheet[f"{col}{row}"]
-                cell.value = value if value > 0 else "-"
-                cell.font = ExcelStyling.FONT_NORMAL
-                cell.alignment = ExcelStyling.ALIGNMENT_CENTER
-                cell.border = ExcelStyling.BORDER_THIN
+            column_data: List[Tuple[str, Any]] = []
+            for i, (col, total_key) in enumerate(zip(columns, total_keys)):
+                value = values[i]
+                column_data.append((col, value if value > 0 else "-"))
                 totals[total_key] += value
+
+            ExcelStyling.apply_data_row_styling(
+                sheet,
+                row,
+                column_data,
+                font=ExcelStyling.FONT_NORMAL,
+                alignment=ExcelStyling.ALIGNMENT_CENTER,
+                border=ExcelStyling.BORDER_THIN,
+            )
         else:
-            for col in columns:
-                cell = sheet[f"{col}{row}"]
-                cell.value = "-"
-                cell.font = ExcelStyling.FONT_NORMAL
-                cell.alignment = ExcelStyling.ALIGNMENT_CENTER
-                cell.border = ExcelStyling.BORDER_THIN
+            column_data = [(col, "-") for col in columns]
+            ExcelStyling.apply_data_row_styling(
+                sheet,
+                row,
+                column_data,
+                font=ExcelStyling.FONT_NORMAL,
+                alignment=ExcelStyling.ALIGNMENT_CENTER,
+                border=ExcelStyling.BORDER_THIN,
+            )
 
     def _calculate_cumul_total(
-        self, key: tuple[str, str], data_dicts: dict[str, dict]
+        self,
+        key: Tuple[str, str],
+        data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
     ) -> int:
         """Calculate the cumulative total for a given key."""
         total: int = 0
         if key in data_dicts["cumul_precedent"]:
-            total += data_dicts["cumul_precedent"][key][3]
+            total += data_dicts["cumul_precedent"][key][3]  # montant column
         if key in data_dicts["annee_actuelle"]:
-            total += data_dicts["annee_actuelle"][key][3]
+            total += data_dicts["annee_actuelle"][key][3]  # montant column
         return total
 
     def _add_totals_row(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
         """Add the totals row at the bottom of the table."""
         self._logger.debug("Adding totals row")
 
-        totals: dict[str, int] = getattr(self, "_totals", {})
-
         # Define all total values
-        total_values: list[tuple[str, Any]] = [
+        total_values: List[Tuple[str, Any]] = [
             ("A", "Total général"),
             ("B", ""),
             ("C", ""),
             ("D", "-"),
             ("E", "-"),
-            ("F", totals.get("aides_inscrites", 0)),
-            ("G", totals.get("montants_inscrits", 0)),
+            ("F", self._totals.get("aides_inscrites", 0)),
+            ("G", self._totals.get("montants_inscrits", 0)),
             ("H", "-"),
             ("I", "-"),
-            ("J", totals.get("cumul_precedent_t1", 0)),
-            ("K", totals.get("cumul_precedent_t2", 0)),
-            ("L", totals.get("cumul_precedent_t3", 0)),
-            ("M", totals.get("cumul_precedent_montant", 0)),
-            ("N", totals.get("annee_actuelle_t1", 0)),
-            ("O", totals.get("annee_actuelle_t2", 0)),
-            ("P", totals.get("annee_actuelle_t3", 0)),
-            ("Q", totals.get("annee_actuelle_montant", 0)),
-            ("R", totals.get("cumul_total", 0)),
+            ("J", self._totals.get("cumul_precedent_t1", 0)),
+            ("K", self._totals.get("cumul_precedent_t2", 0)),
+            ("L", self._totals.get("cumul_precedent_t3", 0)),
+            ("M", self._totals.get("cumul_precedent_montant", 0)),
+            ("N", self._totals.get("annee_actuelle_t1", 0)),
+            ("O", self._totals.get("annee_actuelle_t2", 0)),
+            ("P", self._totals.get("annee_actuelle_t3", 0)),
+            ("Q", self._totals.get("annee_actuelle_montant", 0)),
+            ("R", self._totals.get("cumul_total", 0)),
             ("S", "-"),
             ("T", "-"),
         ]
 
-        # Apply values and formatting
-        for col, value in total_values:
-            cell = sheet[f"{col}{self._current_row}"]
-            cell.value = value
-            cell.font = ExcelStyling.FONT_BOLD
-            cell.alignment = ExcelStyling.ALIGNMENT_CENTER
-            cell.border = ExcelStyling.BORDER_THIN
+        # Apply values and formatting using ExcelStyling
+        ExcelStyling.apply_data_row_styling(
+            sheet,
+            self._current_row,
+            total_values,
+            font=ExcelStyling.FONT_BOLD,
+            alignment=ExcelStyling.ALIGNMENT_CENTER,
+            border=ExcelStyling.BORDER_THIN,
+        )
 
         self._logger.info("Totals row added successfully")
         self._current_row += 1
@@ -681,7 +676,7 @@ class SituationFinanciereGenerator(ReportGenerator):
         self._logger.debug("Applying final formatting")
 
         # Set column widths for better readability
-        column_widths: dict[str, int] = {
+        column_widths: Dict[str, int] = {
             "A": 30,  # Programme
             "B": 20,  # Daira
             "C": 25,  # Commune
@@ -704,18 +699,23 @@ class SituationFinanciereGenerator(ReportGenerator):
             "T": 20,  # Reste
         }
 
-        for col, width in column_widths.items():
-            sheet.column_dimensions[col].width = width
+        ExcelStyling.set_column_widths(sheet, column_widths)
 
         # Page setup for landscape orientation
-        sheet.page_setup.orientation = "landscape"
-        sheet.page_setup.fitToWidth = 1
-        sheet.page_setup.fitToHeight = 0
+        ExcelStyling.setup_page_layout(
+            sheet,
+            orientation="landscape",
+            fit_to_width=True,
+            fit_to_height=False,
+        )
 
-        # Set print area and margins
-        sheet.page_margins.left = 0.25
-        sheet.page_margins.right = 0.25
-        sheet.page_margins.top = 0.75
-        sheet.page_margins.bottom = 0.75
+        # Set print margins
+        ExcelStyling.setup_page_margins(
+            sheet,
+            left=0.25,
+            right=0.25,
+            top=0.75,
+            bottom=0.75,
+        )
 
         self._logger.info("Final formatting completed successfully")
