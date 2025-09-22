@@ -11,7 +11,9 @@ import customtkinter as ctk  # type: ignore
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
 from app.presentation.gui.views.menu_view import MenuView
-from app.presentation.gui.views.report_view import ReportView
+from app.presentation.gui.views.report_views.report_view_factory import (
+    ReportViewFactory,
+)
 from app.presentation.gui.views.settings_view import SettingsView
 from app.presentation.gui.models.gui_state import GUIState
 from app.presentation.gui.controllers.report_controller import ReportController
@@ -123,12 +125,13 @@ class MainWindow(ctk.CTk):
 
         self._title_label.configure(text=f"Générer : {report_spec.display_name}")  # type: ignore
 
-        self._current_view = ReportView(
+        self._current_view = ReportViewFactory.create_view(
             parent=self._container,
             report_spec=report_spec,
             controller=self._controller,
             on_back=self._show_menu,
         )
+
         self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
 
     def _show_settings_view(self, report_name: str) -> None:
