@@ -301,7 +301,7 @@ class BaseReportView(ctk.CTkFrame):
                 )
 
                 # Get additional parameters from subclass
-                additional_params = self._get_generation_parameters()
+                additional_params: dict[str, Any] = self._get_generation_parameters()
 
                 result_path: Path = self._controller.generate_report(
                     report_name=self._report_spec.name,

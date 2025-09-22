@@ -15,7 +15,7 @@ from app.presentation.gui.styling.design_system import Color, Spacing, FontSize
 class SituationFinanciereReportView(BaseReportView):
     """Specialized view for the Situation Financiere report with program selection."""
 
-    __slots__ = ("_program_selector", "_selected_program")
+    __slots__ = ("_program_selector", "_selected_program", "_program_info_label")
 
     def __init__(
         self, parent: Any, report_spec: Any, controller: Any, on_back: Any
@@ -116,12 +116,3 @@ class SituationFinanciereReportView(BaseReportView):
     def _get_generation_parameters(self) -> dict[str, Any]:
         """Provide the selected program as an additional parameter."""
         return {"target_programme": self._selected_program}
-
-    def _get_required_files_text(self) -> str:
-        """Override to provide specific requirements for this report."""
-        return (
-            "Ce rapport nécessite les fichiers suivants :\n"
-            "• Fichier des données d'inscription (BNH)\n"
-            "• Fichier des consommations\n\n"
-            "Veuillez sélectionner tous les fichiers requis pour générer le rapport."
-        )

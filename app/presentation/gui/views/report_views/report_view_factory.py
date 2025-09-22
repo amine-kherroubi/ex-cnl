@@ -6,11 +6,11 @@ from typing import Any, Callable, final
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
 from app.presentation.gui.controllers.report_controller import ReportController
-from app.presentation.gui.views.report_views.activite_mensuelle_view import (
+from app.presentation.gui.views.report_views.activite_mensuelle_report_view import (
     ActiviteMenuselleReportView,
 )
 from app.presentation.gui.views.report_views.base_report_view import BaseReportView
-from app.presentation.gui.views.report_views.situation_financiere_view import (
+from app.presentation.gui.views.report_views.situation_financiere_report_view import (
     SituationFinanciereReportView,
 )
 
@@ -32,8 +32,8 @@ class ReportViewFactory:
 
         # Map report names to their specific view classes
         view_mapping: dict[str, type[BaseReportView]] = {
-            "situation_financiere": SituationFinanciereReportView,
-            "activite_mensuelle": ActiviteMenuselleReportView,
+            "activite_mensuelle_par_programme": ActiviteMenuselleReportView,
+            "situation_financiere_des_programmes": SituationFinanciereReportView,
         }
 
         # Get the view class for this report type, default to DefaultReportView
