@@ -15,7 +15,7 @@ from app.presentation.gui.components.date_selector import DateSelector
 from app.presentation.gui.components.file_selector import FileSelector
 from app.presentation.gui.components.output_selector import OutputSelector
 from app.presentation.gui.components.status_display import StatusDisplay
-from app.presentation.gui.components.email_dialog import EmailDialog
+from app.presentation.gui.components.success import EmailDialog
 from app.presentation.gui.controllers.report_controller import ReportController
 from app.presentation.gui.styling.design_system import DesignSystem
 

@@ -155,7 +155,7 @@ class ReportController:
             file_matched: bool = False
             self._logger.debug(f"Checking file: {file_path.name}")
 
-            for key, rf in required_files.items():
+            for _, rf in required_files.items():
                 if re.match(rf.pattern, file_path.name, re.IGNORECASE):
                     matched_files[rf.table_name] = file_path
                     file_matched = True
@@ -174,7 +174,7 @@ class ReportController:
         # Check if we have files for all required entries (fail fast)
         self._logger.debug("Checking if all required files are satisfied")
         missing_files: list[str] = []
-        for key, rf in required_files.items():
+        for _, rf in required_files.items():
             if rf.table_name not in matched_files:
                 missing_files.append(
                     f"Pattern: '{rf.readable_pattern}' -> Table: '{rf.table_name}'"
