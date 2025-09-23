@@ -69,7 +69,7 @@ class BaseGenerator(ABC):
 
             self._logger.debug(f"Generation step {step}: Creating reference tables")
             self._create_predefined_tables()
-            self._logger.info("Program reference table created successfully")
+            self._logger.info("Programme reference table created successfully")
 
             step += 1
 

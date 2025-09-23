@@ -11,21 +11,21 @@ class Programme(BaseModel):
     name: Annotated[
         str,
         Field(
-            description="Official program name for housing projects",
+            description="Official programme name for housing projects",
             min_length=1,
         ),
     ]
 
     year_start: Annotated[
         int,
-        Field(description="Program starting year"),
+        Field(description="Programme starting year"),
     ]
 
     year_end: Annotated[
         int | None,
         Field(
             default=None,
-            description="Program ending year, None if program is ongoing",
+            description="Programme ending year, None if programme is ongoing",
         ),
     ]
 
@@ -33,7 +33,7 @@ class Programme(BaseModel):
         int,
         Field(
             default=0,
-            description="Display order of program in reports and tables",
+            description="Display order of programme in reports and tables",
         ),
     ]
 
@@ -41,7 +41,7 @@ class Programme(BaseModel):
         int,
         Field(
             default=0,
-            description="Total number of housing units planned in this program",
+            description="Total number of housing units planned in this programme",
             ge=0,
         ),
     ]
