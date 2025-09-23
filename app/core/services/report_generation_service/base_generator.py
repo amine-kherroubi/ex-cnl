@@ -89,7 +89,7 @@ class BaseGenerator(ABC):
             self._workbook = Workbook()
             self._workbook.remove(self._workbook.active)  # type: ignore
             sheet: Worksheet = self._workbook.create_sheet(
-                self._report_specification.display_name
+                self._report_specification.name
             )
             self._logger.info(
                 f"Workbook created with sheet: {self._report_specification.display_name}"
