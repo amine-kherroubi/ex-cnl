@@ -67,15 +67,15 @@ class BaseGenerator(ABC):
         try:
             step: int = 1
 
-            self._logger.debug(f"Generation step {step}: Loading data into database")
-            self._load_data_into_db(source_file_paths)
-            self._logger.info("Data successfully loaded into database")
-
-            step += 1
-
             self._logger.debug(f"Generation step {step}: Creating reference tables")
             self._create_predefined_tables()
             self._logger.info("Program reference table created successfully")
+
+            step += 1
+
+            self._logger.debug(f"Generation step {step}: Loading data into database")
+            self._load_data_into_db(source_file_paths)
+            self._logger.info("Data successfully loaded into database")
 
             step += 1
 

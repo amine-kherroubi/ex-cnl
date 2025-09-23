@@ -23,12 +23,12 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
         "Journal des paiements": RequiredFile(
             pattern=r"^Journal_paiements__Agence_[A-Z+_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
-            table="paiements",
+            table_name="paiements",
         ),
         "Journal des décisions": RequiredFile(
             pattern=r"^Journal_décisions__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             readable_pattern="Journal_décisions__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
-            table="decisions",
+            table_name="decisions",
         ),
     },
     output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",

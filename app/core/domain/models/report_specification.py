@@ -81,7 +81,7 @@ class RequiredFile(BaseModel):
         str,
         Field(description="Readable pattern of a valid filename"),
     ]
-    table: Annotated[
+    table_name: Annotated[
         str,
         Field(description="Associated SQL table name"),
     ]

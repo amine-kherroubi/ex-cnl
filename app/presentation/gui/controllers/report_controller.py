@@ -137,7 +137,7 @@ class ReportController:
             f"{[(key, rf.readable_pattern) for key, rf in required_files.items()]}"
         )
 
-        # Validate that all files exist (fail fast)
+        # Validate that all files exist
         self._logger.debug("Checking if all input files exist")
         for file_path in input_files:
             if not file_path.exists():
@@ -157,11 +157,11 @@ class ReportController:
 
             for key, rf in required_files.items():
                 if re.match(rf.pattern, file_path.name, re.IGNORECASE):
-                    matched_files[key] = file_path
+                    matched_files[rf.table_name] = file_path
                     file_matched = True
                     self._logger.debug(
                         f"File '{file_path.name}' matched pattern '{rf.readable_pattern}' "
-                        f"-> table '{rf.table}'"
+                        f"-> table '{rf.table_name}'"
                     )
                     break
 
@@ -175,12 +175,12 @@ class ReportController:
         self._logger.debug("Checking if all required files are satisfied")
         missing_files: list[str] = []
         for key, rf in required_files.items():
-            if key not in matched_files:
+            if rf.table_name not in matched_files:
                 missing_files.append(
-                    f"Pattern: '{rf.readable_pattern}' -> Table: '{rf.table}'"
+                    f"Pattern: '{rf.readable_pattern}' -> Table: '{rf.table_name}'"
                 )
                 self._logger.error(
-                    f"Missing file for required pattern: '{rf.readable_pattern}' -> '{rf.table}'"
+                    f"Missing file for required pattern: '{rf.readable_pattern}' -> '{rf.table_name}'"
                 )
 
         # Report validation results (fail fast)

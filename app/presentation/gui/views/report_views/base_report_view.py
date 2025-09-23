@@ -184,13 +184,13 @@ class BaseReportView(ctk.CTkFrame):
         button_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         button_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Generate button - styled to match design system
+        # Generate button - starts with disabled styling (same as clear button in FileSelector)
         self._generate_button = ctk.CTkButton(
             master=button_frame,
             text="Générer le rapport",
-            text_color=DesignSystem.Color.WHITE,
-            fg_color=DesignSystem.Color.PRIMARY,
-            hover_color=DesignSystem.Color.DARKER_PRIMARY,
+            text_color=DesignSystem.Color.GRAY,
+            fg_color=DesignSystem.Color.LESS_WHITE,
+            hover_color=DesignSystem.Color.LEAST_WHITE,
             corner_radius=DesignSystem.Roundness.SM,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
             command=self._generate_report,
@@ -299,9 +299,21 @@ class BaseReportView(ctk.CTkFrame):
             return
 
         if self._can_generate():
-            self._generate_button.configure(state="normal")  # type: ignore
+            # Enable button with primary styling (yellow)
+            self._generate_button.configure(  # type: ignore
+                state="normal",
+                text_color=DesignSystem.Color.WHITE,
+                fg_color=DesignSystem.Color.PRIMARY,
+                hover_color=DesignSystem.Color.DARKER_PRIMARY,
+            )
         else:
-            self._generate_button.configure(state="disabled")  # type: ignore
+            # Disable button with muted styling (same as clear button)
+            self._generate_button.configure(  # type: ignore
+                state="disabled",
+                text_color=DesignSystem.Color.GRAY,
+                fg_color=DesignSystem.Color.LESS_WHITE,
+                hover_color=DesignSystem.Color.LEAST_WHITE,
+            )
 
     def _get_generation_parameters(self) -> dict[str, Any]:
         """Override in subclasses to provide additional parameters."""
@@ -311,8 +323,14 @@ class BaseReportView(ctk.CTkFrame):
         if not self._can_generate():
             return
 
-        # Disable buttons during processing
-        self._generate_button.configure(state="disabled", text="Génération en cours...")  # type: ignore
+        # Disable buttons during processing - keep the disabled styling
+        self._generate_button.configure(  # type: ignore
+            state="disabled",
+            text="Génération en cours...",
+            text_color=DesignSystem.Color.GRAY,
+            fg_color=DesignSystem.Color.LESS_WHITE,
+            hover_color=DesignSystem.Color.LEAST_WHITE,
+        )
         self._back_button.configure(state="disabled")  # type: ignore
 
         # Clear previous status messages
@@ -377,7 +395,9 @@ class BaseReportView(ctk.CTkFrame):
             message="Veuillez vérifier que vos fichiers correspondent aux exigences du rapport",
             message_type="avertissement",
         )
-        self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
+        # Reset to original text and update styling based on current state
+        self._generate_button.configure(text="Générer le rapport")  # type: ignore
+        self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore
 
     def _on_generation_success(self, output_file: Path) -> None:
@@ -386,7 +406,9 @@ class BaseReportView(ctk.CTkFrame):
             message=f"Rapport généré avec succès : {output_file}",
             message_type="succès",
         )
-        self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
+        # Reset to original text and update styling based on current state
+        self._generate_button.configure(text="Générer le rapport")  # type: ignore
+        self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore
         self._show_email_dialog()
 
@@ -394,7 +416,9 @@ class BaseReportView(ctk.CTkFrame):
         self._status_display.add_message(
             message=f"Échec de la génération : {error_message}", message_type="erreur"
         )
-        self._generate_button.configure(state="normal", text="Générer le rapport")  # type: ignore
+        # Reset to original text and update styling based on current state
+        self._generate_button.configure(text="Générer le rapport")  # type: ignore
+        self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore
 
     def _show_email_dialog(self) -> None:
