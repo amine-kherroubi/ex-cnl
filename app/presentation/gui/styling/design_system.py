@@ -1,18 +1,20 @@
 from __future__ import annotations
 
+# Standard library imports
 from enum import IntEnum, StrEnum
 from typing import Final, final
+import colorsys
 
 _BASE: Final[int] = 6
 
 
 def adjust_color(hex_color: str, factor: float) -> str:
     hex_color = hex_color.lstrip("#")
-    r, g, b = tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
-    r = max(0, min(255, int(r * factor)))
-    g = max(0, min(255, int(g * factor)))
-    b = max(0, min(255, int(b * factor)))
-    return f"#{r:02x}{g:02x}{b:02x}"
+    r, g, b = [int(hex_color[i : i + 2], 16) / 255.0 for i in (0, 2, 4)]
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    l = max(0, min(1, l * factor))
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
 
 
 @final
@@ -20,11 +22,11 @@ class DesignSystem(object):
     class Color(StrEnum):
         PRIMARY = "#b3b30b"
         LIGHTER_PRIMARY = adjust_color(PRIMARY, 1.5)
-        DARKER_PRIMARY = adjust_color(PRIMARY, 0.8)
+        DARKER_PRIMARY = adjust_color(PRIMARY, 0.5)
 
         GRAY = "#757575"
-        LIGHTER_GRAY = adjust_color(GRAY, 1.2)
-        DARKER_GRAY = adjust_color(GRAY, 0.8)
+        LIGHTER_GRAY = adjust_color(GRAY, 1.5)
+        DARKER_GRAY = adjust_color(GRAY, 0.5)
 
         WHITE = "#ffffff"
         LESS_WHITE = adjust_color(WHITE, 0.98)
