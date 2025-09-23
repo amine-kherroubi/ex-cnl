@@ -15,9 +15,7 @@ class ReportCard(ctk.CTkFrame):
     __slots__ = (
         "_report_spec",
         "_on_generate_clicked",
-        "_on_settings_clicked",
         "_generate_button",
-        "_settings_button",
     )
 
     def __init__(
@@ -25,12 +23,10 @@ class ReportCard(ctk.CTkFrame):
         parent: Any,
         report_spec: ReportSpecification,
         on_generate_clicked: Callable[[], None],
-        on_settings_clicked: Callable[[], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
         self._report_spec: ReportSpecification = report_spec
         self._on_generate_clicked: Callable[[], None] = on_generate_clicked
-        self._on_settings_clicked: Callable[[], None] = on_settings_clicked
 
         self._setup_ui()
 
@@ -98,16 +94,3 @@ class ReportCard(ctk.CTkFrame):
             font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
         )
         self._generate_button.grid(row=0, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
-
-        # Settings button - secondary style
-        self._settings_button: ctk.CTkButton = ctk.CTkButton(
-            master=buttons_frame,
-            text="Configurer",
-            command=self._on_settings_clicked,
-            width=120,
-            height=35,
-            fg_color=DesignSystem.Color.GRAY,
-            hover_color=DesignSystem.Color.DARKER_GRAY,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
-        )
-        self._settings_button.grid(row=0, column=1, sticky="e")  # type: ignore

@@ -14,7 +14,6 @@ from app.presentation.gui.views.menu_view import MenuView
 from app.presentation.gui.views.report_views.report_view_factory import (
     ReportViewFactory,
 )
-from app.presentation.gui.views.settings_view import SettingsView
 from app.presentation.gui.models.gui_state import GUIState
 from app.presentation.gui.controllers.report_controller import ReportController
 from app.core.core_facade import CoreFacade
@@ -109,7 +108,6 @@ class MainWindow(ctk.CTk):
             parent=self._container,
             available_reports=self._state.available_reports,
             on_report_selected=self._show_report_view,
-            on_settings_selected=self._show_settings_view,
         )
         self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
 
@@ -132,17 +130,6 @@ class MainWindow(ctk.CTk):
             on_back=self._show_menu,
         )
 
-        self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
-
-    def _show_settings_view(self, report_name: str) -> None:
-        self._clear_current_view()
-        self._title_label.configure(text=f"Configuration : {report_name}")  # type: ignore
-
-        self._current_view = SettingsView(
-            parent=self._container,
-            report_name=report_name,
-            on_back=self._show_menu,
-        )
         self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
 
     def _clear_current_view(self) -> None:

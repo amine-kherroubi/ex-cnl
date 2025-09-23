@@ -15,7 +15,6 @@ class MenuView(ctk.CTkFrame):
     __slots__ = (
         "_available_reports",
         "_on_report_selected",
-        "_on_settings_selected",
         "_report_cards",
     )
 
@@ -24,13 +23,11 @@ class MenuView(ctk.CTkFrame):
         parent: Any,
         available_reports: dict[str, Any],
         on_report_selected: Callable[[str], None],
-        on_settings_selected: Callable[[str], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
 
         self._available_reports: dict[str, Any] = available_reports
         self._on_report_selected: Callable[[str], None] = on_report_selected
-        self._on_settings_selected: Callable[[str], None] = on_settings_selected
         self._report_cards: list[ReportCard] = []
 
         self._setup_ui()
@@ -71,9 +68,6 @@ class MenuView(ctk.CTkFrame):
                 parent=scrollable_frame,
                 report_spec=doc_spec,
                 on_generate_clicked=lambda name=doc_name: self._on_report_selected(
-                    name
-                ),
-                on_settings_clicked=lambda name=doc_name: self._on_settings_selected(
                     name
                 ),
             )
