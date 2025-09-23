@@ -34,10 +34,10 @@ class DesignSystem(object):
 
         BLACK = "#212121"
 
-        SUCCESS = "#4caf50"
-        WARNING = "#ff9800"
-        ERROR = "#f44336"
-        INFO = "#2196f3"
+        SUCCESS = "#009a05"
+        WARNING = "#939300"
+        ERROR = "#b50c00"
+        INFO = "#212121"
 
         TRANSPARENT = "transparent"
 

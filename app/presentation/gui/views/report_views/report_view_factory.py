@@ -16,7 +16,7 @@ from app.presentation.gui.views.report_views.situation_financiere_report_view im
 
 
 @final
-class ReportViewFactory:
+class ReportViewFactory(object):
     """Factory for creating appropriate report views based on report type."""
 
     __slots__ = ()

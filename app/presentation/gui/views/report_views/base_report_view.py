@@ -333,8 +333,6 @@ class BaseReportView(ctk.CTkFrame):
         )
         self._back_button.configure(state="disabled")  # type: ignore
 
-        # Clear previous status messages
-        self._status_display.clear_messages()
         self._status_display.add_message(
             message="Début de la génération...", message_type="information"
         )

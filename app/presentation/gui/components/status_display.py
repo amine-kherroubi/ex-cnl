@@ -72,7 +72,8 @@ class StatusDisplay(BaseComponent):
 
         # Initialize with welcome message
         self.add_message(
-            message="Prêt à générer le rapport", message_type="information"
+            message="Veuillez insérer les fichiers nécessaires",
+            message_type="information",
         )
 
     def add_message(
@@ -81,20 +82,15 @@ class StatusDisplay(BaseComponent):
         """Add a message to the status display with timestamp and type indicator."""
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
-        indications_map: dict[MessageType, tuple[str, str]] = {
-            "information": ("[INFO]", DesignSystem.Color.INFO),
-            "succès": ("[SUCCÈS]", DesignSystem.Color.SUCCESS),
-            "avertissement": ("[AVERTISSEMENT]", DesignSystem.Color.WARNING),
-            "erreur": ("[ERREUR]", DesignSystem.Color.ERROR),
+        indications_map: dict[MessageType, str] = {
+            "information": DesignSystem.Color.INFO,
+            "succès": DesignSystem.Color.SUCCESS,
+            "avertissement": DesignSystem.Color.WARNING,
+            "erreur": DesignSystem.Color.ERROR,
         }
 
-        prefix: str = indications_map.get(
-            message_type, ("[INFO]", DesignSystem.Color.INFO)
-        )[0]
-        color: str = indications_map.get(
-            message_type, ("[INFO]", DesignSystem.Color.INFO)
-        )[1]
-        formatted_message: str = f"[{timestamp}] {prefix} {message}\n"
+        color: str = indications_map.get(message_type, DesignSystem.Color.INFO)
+        formatted_message: str = f"[{timestamp}] {message}\n"
 
         # Add message to text area
         self._status_text.configure(state="normal")  # type: ignore
