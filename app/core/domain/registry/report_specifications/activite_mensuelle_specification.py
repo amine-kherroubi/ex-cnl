@@ -17,7 +17,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     category=ReportCategory.HABITAT_RURAL,
     description=(
         "Rapport de suivi mensuel des activités par programme. "
-        "Comprend : l’état d’exécution des tranches financières durant "
+        "Comprend l’état d’exécution des tranches financières durant "
         "le mois et l’année spécifiés en valeurs actuelles et cumulées "
         "depuis le début de l’année. Présente également la situation des programmes "
         "en aides achevées, en cours ou non encore lancées."
