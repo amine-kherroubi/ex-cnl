@@ -10,6 +10,7 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
+from app.presentation.gui.styling.design_system import DesignSystem
 from app.presentation.gui.views.menu_view import MenuView
 from app.presentation.gui.views.report_views.report_view_factory import (
     ReportViewFactory,
@@ -69,26 +70,36 @@ class MainWindow(ctk.CTk):
         self._logger.info("Main application window initialized successfully")
 
     def _setup_ui(self) -> None:
+        # Background color
+        self.configure(fg_color=DesignSystem.Color.WHITE)  # type: ignore
+
         # Configure grid weights
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
         # Header frame
-        header_frame: ctk.CTkFrame = ctk.CTkFrame(master=self, fg_color="transparent")
-        header_frame.grid(row=0, column=0, padx=30, pady=(30, 20), sticky="ew")  # type: ignore
+        header_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT
+        )
+        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.XXL, pady=(DesignSystem.Spacing.XXL, DesignSystem.Spacing.LG), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title - using modern typography
+        # Title
         self._title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Générateur de rapports",
-            font=ctk.CTkFont(size=24, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H1, weight="bold"),
+            text_color=DesignSystem.Color.BLACK,
         )
         self._title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
         # Main container for views
-        self._container: ctk.CTkFrame = ctk.CTkFrame(master=self)
-        self._container.grid(row=1, column=0, padx=30, pady=(0, 30), sticky="nsew")  # type: ignore
+        self._container: ctk.CTkFrame = ctk.CTkFrame(
+            master=self,
+            fg_color=DesignSystem.Color.LEAST_WHITE,
+            corner_radius=DesignSystem.Roundness.NORMAL,
+        )
+        self._container.grid(row=1, column=0, padx=DesignSystem.Spacing.XXL, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XXL), sticky="nsew")  # type: ignore
         self._container.grid_columnconfigure(index=0, weight=1)
         self._container.grid_rowconfigure(index=0, weight=1)
 

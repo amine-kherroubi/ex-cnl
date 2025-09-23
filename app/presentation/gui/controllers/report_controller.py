@@ -128,7 +128,7 @@ class ReportController:
             raise ValueError(error_msg)
 
         report_spec: ReportSpecification = available_reports[report_name]
-        required_patterns = report_spec.required_files
+        required_patterns = report_spec.required_patterns
         self._logger.debug(
             f"Report requires {len(required_patterns)} file patterns: {list(required_patterns.keys())}"
         )

@@ -10,7 +10,7 @@
         "border_width": 0,
         "fg_color": "#fafbfc",
         "top_fg_color": "#f5f7fa",
-        "border_color": "#e0e0e0"
+        "border_color": "#z"
     },
     "CTkButton": {
         "corner_radius": 6,

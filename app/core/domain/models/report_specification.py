@@ -40,11 +40,16 @@ class ReportSpecification(BaseModel):
         Field(description="Detailed description of report purpose"),
     ]
 
-    required_files: Annotated[
+    required_patterns: Annotated[
         dict[str, str],
         Field(
             description="Mapping of regex filename patterns to corresponding SQL table names"
         ),
+    ]
+
+    example_files: Annotated[
+        list[str],
+        Field(description="Example files matching required patterns"),
     ]
 
     output_filename: Annotated[

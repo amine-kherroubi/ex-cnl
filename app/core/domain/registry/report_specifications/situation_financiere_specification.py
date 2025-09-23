@@ -9,17 +9,21 @@ from app.core.services.report_generation.generators.situation_financiere import 
 
 situation_financiere_specification: ReportSpecification = ReportSpecification(
     name="situation_financiere_des_programmes",
-    display_name="Situation financière des programmes par daira et commune",
+    display_name="Situation financière d'un programme",
     category=ReportCategory.HABITAT_RURAL,
     description=(
-        "Situation financière détaillée des programmes de logements aidés "
-        "par programme, daira et commune. Comprend les engagements, "
-        "consommations et taux de réalisation."
+        "Situation financière détaillée d’un programme de logement, "
+        "présentée par daira puis par commune. Comprend les engagements, "
+        "les consommations et les restes."
     ),
-    required_files={
+    required_patterns={
         r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
         r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "decisions",
     },
+    example_files=[
+        "Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
+        "Journal_décisions__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
+    ],
     output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,
     queries={

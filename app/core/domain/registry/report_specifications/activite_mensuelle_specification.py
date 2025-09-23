@@ -13,13 +13,16 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     display_name="Activité mensuelle par programme",
     category=ReportCategory.HABITAT_RURAL,
     description=(
-        "Report de suivi mensuel des activités par programme, "
-        "renseigné par la BNH (ex-CNL). Comprend les lancements et livraisons "
-        "ainsi que la situation globale des programmes."
+        "Rapport de suivi mensuel des activités par programme. "
+        "Comprend : l’état d’exécution des tranches financières durant "
+        "le mois et l’année spécifiés en valeurs actuelles et cumulées "
+        "depuis le début de l’année. Présente également la situation des programmes "
+        "en aides achevées, en cours ou non encore lancées."
     ),
-    required_files={
+    required_patterns={
         r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
     },
+    example_files=["Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx"],
     output_filename="activite_mensuelle_par_programme_{wilaya}_{date}.xlsx",
     generator=ActiviteMensuelleGenerator,
     queries={
