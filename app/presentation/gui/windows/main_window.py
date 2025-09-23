@@ -2,7 +2,6 @@ from __future__ import annotations
 
 # Standard library imports
 from logging import Logger
-from pathlib import Path
 from typing import Any
 
 # Third-party imports
@@ -46,17 +45,6 @@ class MainWindow(ctk.CTk):
         self.title(string="Générateur de rapports")
         self.geometry(geometry_string="900x700")
         self.minsize(width=700, height=600)
-
-        # Set theme
-        ctk.set_appearance_mode(mode_string="light")
-        theme_path: Path = Path(__file__).parent / "styling/theme.json"
-        if theme_path.exists():
-            ctk.set_default_color_theme(str(theme_path))
-        else:
-            self._logger.warning(
-                f"Theme file not found at {theme_path}, using default theme"
-            )
-            ctk.set_default_color_theme("blue")
 
         # Scaling - modern and appropriate for high-DPI displays
         ctk.set_widget_scaling(1.0)

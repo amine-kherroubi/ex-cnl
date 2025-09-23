@@ -12,7 +12,8 @@
 │   │   │   ├── models
 │   │   │   │   ├── programme.py
 │   │   │   │   ├── report_context.py
-│   │   │   │   └── report_specification.py
+│   │   │   │   ├── report_specification.py
+│   │   │   │   └── required_file.py
 │   │   │   ├── predefined_objects
 │   │   │   │   ├── dairas_et_communes.py
 │   │   │   │   ├── programmes.py
@@ -50,14 +51,14 @@
 │           │   ├── file_selector.py
 │           │   ├── output_selector.py
 │           │   ├── report_card.py
+│           │   ├── required_files.py
 │           │   └── status_display.py
 │           ├── controllers
 │           │   └── report_controller.py
 │           ├── models
 │           │   └── gui_state.py
 │           ├── styling
-│           │   ├── design_system.py
-│           │   └── theme.json
+│           │   └── design_system.py
 │           ├── views
 │           │   ├── menu_view.py
 │           │   └── report_views
@@ -71,4 +72,4 @@
 ├── project_structure.txt
 └── requirements.txt
 
-26 directories, 46 files
+26 directories, 47 files
