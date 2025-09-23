@@ -34,8 +34,9 @@ class ReportCard(ctk.CTkFrame):
         # Self configuration
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.WHITE,
-            corner_radius=DesignSystem.Roundness.NORMAL,
+            corner_radius=DesignSystem.Roundness.MD,
         )
+        self.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
 
         # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
@@ -72,7 +73,7 @@ class ReportCard(ctk.CTkFrame):
             text_color=DesignSystem.Color.DARKER_GRAY,
             anchor="w",
         )
-        details.grid(row=1, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
+        details.grid(row=1, column=0, pady=(DesignSystem.Spacing.XS, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
 
         # Description
         description: ctk.CTkLabel = ctk.CTkLabel(
@@ -86,16 +87,16 @@ class ReportCard(ctk.CTkFrame):
         )
         description.grid(row=2, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
 
-        # Generate button - primary style
+        # Generate button
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
             master=content_frame,
             text="Générer le rapport",
             command=self._on_generate_clicked,
-            height=35,
+            height=DesignSystem.Height.SM,
             fg_color=DesignSystem.Color.PRIMARY,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
             text_color=DesignSystem.Color.WHITE,
             hover_color=DesignSystem.Color.DARKER_PRIMARY,
-            corner_radius=DesignSystem.Roundness.SMALL,
+            corner_radius=DesignSystem.Roundness.SM,
         )
         self._generate_button.grid(row=3, column=0, sticky="ew")  # type: ignore

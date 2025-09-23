@@ -63,6 +63,12 @@ class BaseReportView(ctk.CTkFrame):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
+        # Self configuration - match MenuView exactly
+        self.configure(  # type: ignore
+            fg_color=DesignSystem.Color.LEAST_WHITE,
+            corner_radius=DesignSystem.Roundness.MD,
+        )
+
         # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
@@ -70,9 +76,12 @@ class BaseReportView(ctk.CTkFrame):
         # Header with back button (stays fixed)
         self._setup_header()
 
-        # Scrollable content frame
-        self._scrollable_frame = ctk.CTkScrollableFrame(master=self)
-        self._scrollable_frame.grid(row=1, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.LG), sticky="nsew")  # type: ignore
+        # Scrollable content frame - match MenuView styling
+        self._scrollable_frame = ctk.CTkScrollableFrame(
+            master=self,
+            fg_color=DesignSystem.Color.TRANSPARENT,
+        )
+        self._scrollable_frame.grid(row=1, column=0, padx=DesignSystem.Spacing.XS, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="nsew")  # type: ignore
         self._scrollable_frame.grid_columnconfigure(index=0, weight=1)
 
         # Setup common components
@@ -91,61 +100,69 @@ class BaseReportView(ctk.CTkFrame):
 
     def _setup_header(self) -> None:
         """Setup the header section with back button and title."""
+        # Header frame - match MenuView structure and spacing
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
+        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.XS), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
-        # Back button - secondary style
+        # Back button - styled to match design system
         self._back_button = ctk.CTkButton(
             master=header_frame,
-            text="Retour",
+            text="←",
+            text_color=DesignSystem.Color.WHITE,
+            fg_color=DesignSystem.Color.GRAY,
+            hover_color=DesignSystem.Color.DARKER_GRAY,
+            corner_radius=DesignSystem.Roundness.XS,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
             command=self._on_back,
-            width=100,
-            height=32,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
+            width=DesignSystem.Width.XS,
+            height=DesignSystem.Height.SM,
         )
-        self._back_button.grid(row=0, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="w")  # type: ignore
+        self._back_button.grid(row=0, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
-        # Report info
+        # Report info frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=header_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
         info_frame.grid(row=0, column=1, sticky="ew")  # type: ignore
+        info_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Report title
+        # Report title - match MenuView header styling
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.display_name,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H2, weight="bold"),
+            text_color=DesignSystem.Color.BLACK,
         )
-        title_label.grid(row=0, column=0, sticky="w")  # type: ignore
+        title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
 
     def _setup_common_components(self) -> None:
         """Setup components common to all reports."""
-        # Required files section
-        self._create_required_files_section()
 
-        # Date selector
+        # Date selector - match MenuView card spacing
         self._date_selector = DateSelector(
             parent=self._scrollable_frame, on_date_changed=self._on_date_changed
         )
-        self._date_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
+        self._date_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # File selector
+        # Required files section
+        self._create_required_files_section()
+
+        # File selector - match MenuView card spacing
         self._file_selector = FileSelector(
             parent=self._scrollable_frame, on_files_changed=self._on_files_changed
         )
-        self._file_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
+        self._file_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # Output selector
+        # Output selector - match MenuView card spacing
         self._output_selector = OutputSelector(
             parent=self._scrollable_frame, on_output_changed=self._on_output_changed
         )
-        self._output_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.SM), sticky="ew")  # type: ignore
+        self._output_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
     def _setup_report_specific_components(self) -> None:
@@ -154,9 +171,9 @@ class BaseReportView(ctk.CTkFrame):
 
     def _setup_action_buttons(self) -> None:
         """Setup the status display and action buttons."""
-        # Status display
+        # Status display - match MenuView card spacing
         self._status_display = StatusDisplay(parent=self._scrollable_frame)
-        self._status_display.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.LG), sticky="ew")  # type: ignore
+        self._status_display.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
         # Button frame for Generate button
@@ -164,40 +181,49 @@ class BaseReportView(ctk.CTkFrame):
             master=self._scrollable_frame,
             fg_color=DesignSystem.Color.TRANSPARENT,
         )
-        button_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="ew")  # type: ignore
+        button_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         button_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Generate button
+        # Generate button - styled to match design system
         self._generate_button = ctk.CTkButton(
             master=button_frame,
             text="Générer le rapport",
+            text_color=DesignSystem.Color.WHITE,
+            fg_color=DesignSystem.Color.PRIMARY,
+            hover_color=DesignSystem.Color.DARKER_PRIMARY,
+            corner_radius=DesignSystem.Roundness.SM,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
             command=self._generate_report,
             height=40,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
         )
         self._generate_button.grid(row=0, column=0, sticky="ew")  # type: ignore
         self._generate_button.configure(state="disabled")  # type: ignore
 
     def _create_required_files_section(self) -> None:
-        # Required files frame
+        # Required files frame - match MenuView card spacing
         req_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._scrollable_frame,
             fg_color=DesignSystem.Color.TRANSPARENT,
         )
-        req_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.NONE), sticky="ew")  # type: ignore
+        req_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         req_frame.grid_columnconfigure(index=0, weight=1)
         self._next_row += 1
 
-        # Title
+        # Title - match MenuView styling
         req_title: ctk.CTkLabel = ctk.CTkLabel(
             master=req_frame,
             text="Fichiers requis",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY, weight="bold"),
+            text_color=DesignSystem.Color.BLACK,
         )
         req_title.grid(row=0, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
-        # Info box - uses theme defaults
-        info_box: ctk.CTkFrame = ctk.CTkFrame(master=req_frame)
+        # Info box - explicitly style to override theme
+        info_box: ctk.CTkFrame = ctk.CTkFrame(
+            master=req_frame,
+            fg_color=DesignSystem.Color.WHITE,
+            corner_radius=DesignSystem.Roundness.SM,
+        )
         info_box.grid(row=1, column=0, sticky="ew")  # type: ignore
 
         # Required files list
@@ -207,6 +233,7 @@ class BaseReportView(ctk.CTkFrame):
             master=info_box,
             text=req_text,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
+            text_color=DesignSystem.Color.BLACK,
             justify="left",
             anchor="w",
         )

@@ -20,13 +20,13 @@ def adjust_color(hex_color: str, factor: float) -> str:
 @final
 class DesignSystem(object):
     class Color(StrEnum):
-        PRIMARY = "#b3b30b"
+        PRIMARY = "#adad00"
         LIGHTER_PRIMARY = adjust_color(PRIMARY, 1.5)
-        DARKER_PRIMARY = adjust_color(PRIMARY, 0.5)
+        DARKER_PRIMARY = adjust_color(PRIMARY, 0.8)
 
         GRAY = "#757575"
         LIGHTER_GRAY = adjust_color(GRAY, 1.5)
-        DARKER_GRAY = adjust_color(GRAY, 0.5)
+        DARKER_GRAY = adjust_color(GRAY, 0.8)
 
         WHITE = "#ffffff"
         LESS_WHITE = adjust_color(WHITE, 0.98)
@@ -42,13 +42,13 @@ class DesignSystem(object):
         TRANSPARENT = "transparent"
 
     class FontSize(IntEnum):
-        H1 = 22
-        H2 = 20
-        H3 = 18
+        H1 = 24
+        H2 = 22
+        H3 = 20
+        H4 = 18
         BODY = 16
         BUTTON = 16
-        LABEL = 14
-        CAPTION = 12
+        CAPTION = 14
 
     class Spacing(IntEnum):
         NONE = _BASE * 0
@@ -60,5 +60,15 @@ class DesignSystem(object):
         XXL = _BASE * 6
 
     class Roundness(IntEnum):
-        NORMAL = 8
-        SMALL = 6
+        NONE = 0
+        XS = 4
+        SM = 6
+        MD = 8
+
+    class Width(IntEnum):
+        XS = 50
+        SM = 100
+        MD = 200
+
+    class Height(IntEnum):
+        SM = 36

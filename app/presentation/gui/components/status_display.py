@@ -22,6 +22,12 @@ class StatusDisplay(ctk.CTkFrame):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
+        # Self configuration
+        self.configure(  # type: ignore
+            fg_color=DesignSystem.Color.WHITE,
+            corner_radius=DesignSystem.Roundness.MD,
+        )
+
         # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
@@ -30,7 +36,7 @@ class StatusDisplay(ctk.CTkFrame):
         label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Statut",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
         )
         label.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
 

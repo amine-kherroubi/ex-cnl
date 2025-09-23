@@ -97,7 +97,7 @@ class MainWindow(ctk.CTk):
         self._container: ctk.CTkFrame = ctk.CTkFrame(
             master=self,
             fg_color=DesignSystem.Color.LEAST_WHITE,
-            corner_radius=DesignSystem.Roundness.NORMAL,
+            corner_radius=DesignSystem.Roundness.MD,
         )
         self._container.grid(row=1, column=0, padx=DesignSystem.Spacing.XXL, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XXL), sticky="nsew")  # type: ignore
         self._container.grid_columnconfigure(index=0, weight=1)
@@ -131,8 +131,6 @@ class MainWindow(ctk.CTk):
         if not report_spec:
             self._logger.error(f"Report specification not found: {report_name}")
             return
-
-        self._title_label.configure(text=f"Générer : {report_spec.display_name}")  # type: ignore
 
         self._current_view = ReportViewFactory.create_view(
             parent=self._container,

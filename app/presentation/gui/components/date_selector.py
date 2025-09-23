@@ -49,36 +49,50 @@ class DateSelector(ctk.CTkFrame):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
-        # Configure frame
-        self.configure(fg_color=DesignSystem.Color.TRANSPARENT)  # type: ignore
-        self.grid_columnconfigure(index=1, weight=1)
-        self.grid_columnconfigure(index=3, weight=1)
+        # Self configuration
+        self.configure(  # type: ignore
+            fg_color=DesignSystem.Color.WHITE,
+            corner_radius=DesignSystem.Roundness.MD,
+        )
+        self.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
+
+        # Configure grid
+        self.grid_columnconfigure(index=0, weight=1)
+
+        # Content frame
+        content_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT
+        )
+        content_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
 
         # Title
-        title_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
+        title: ctk.CTkLabel = ctk.CTkLabel(
+            master=content_frame,
             text="Période du rapport",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
+            text_color=DesignSystem.Color.BLACK,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            anchor="w",
         )
-        title_label.grid(row=0, column=0, columnspan=4, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
+        title.grid(row=0, column=0, columnspan=4, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
 
         # Month label
-        month_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
+        month: ctk.CTkLabel = ctk.CTkLabel(
+            master=content_frame,
             text="Mois :",
+            text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        month_label.grid(row=1, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
+        month.grid(row=1, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
         # Month dropdown
         month_values: list[str] = [month.capitalize() for month in Month]
         self._month_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
-            master=self,
+            master=content_frame,
             values=month_values,
             variable=self._month_var,
             command=lambda _: self._on_selection_changed(),
-            width=140,
-            height=32,
+            width=DesignSystem.Width.MD,
+            height=DesignSystem.Height.SM,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             dropdown_font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             state="readonly",
@@ -86,38 +100,39 @@ class DateSelector(ctk.CTkFrame):
         self._month_dropdown.grid(row=1, column=1, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="ew")  # type: ignore
 
         # Year label
-        year_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
+        year: ctk.CTkLabel = ctk.CTkLabel(
+            master=content_frame,
             text="Année :",
+            text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        year_label.grid(row=1, column=2, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
+        year.grid(row=1, column=2, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
         # Year dropdown - range from 2000 to current year
         year_values: list[str] = [
             str(year) for year in range(self._current_year, 1999, -1)
         ]
         self._year_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
-            master=self,
+            master=content_frame,
             values=year_values,
             variable=self._year_var,
             command=lambda _: self._on_selection_changed(),
-            width=100,
-            height=32,
+            width=DesignSystem.Width.MD,
+            height=DesignSystem.Height.SM,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             dropdown_font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             state="readonly",
         )
-        self._year_dropdown.grid(row=1, column=3, sticky="w")  # type: ignore
+        self._year_dropdown.grid(row=1, column=3, sticky="ew")  # type: ignore
 
-        # Info text
-        info_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
+        # Information text
+        information: ctk.CTkLabel = ctk.CTkLabel(
+            master=content_frame,
             text="Sélectionnez la période pour laquelle vous souhaitez générer le rapport",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
-            text_color="gray60",
+            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            text_color=DesignSystem.Color.GRAY,
         )
-        info_label.grid(row=2, column=0, columnspan=4, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="w")  # type: ignore
+        information.grid(row=2, columnspan=4, column=0, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="w")  # type: ignore
 
     def _on_selection_changed(self) -> None:
         """Handle month or year selection change."""

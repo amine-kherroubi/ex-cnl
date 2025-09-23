@@ -30,6 +30,12 @@ class ReportSelector(ctk.CTkFrame):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
+        # Self configuration
+        self.configure(  # type: ignore
+            fg_color=DesignSystem.Color.WHITE,
+            corner_radius=DesignSystem.Roundness.MD,
+        )
+
         # Configure grid
         self.grid_columnconfigure(index=1, weight=1)
 
@@ -37,7 +43,7 @@ class ReportSelector(ctk.CTkFrame):
         label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Rapport à générer :",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
         )
         label.grid(row=0, column=0, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.XS), pady=DesignSystem.Spacing.SM, sticky="w")  # type: ignore
 

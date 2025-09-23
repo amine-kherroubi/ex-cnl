@@ -36,7 +36,7 @@ class MenuView(ctk.CTkFrame):
         # Self configuration
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.LEAST_WHITE,
-            corner_radius=DesignSystem.Roundness.NORMAL,
+            corner_radius=DesignSystem.Roundness.MD,
         )
 
         # Configure grid
@@ -49,21 +49,21 @@ class MenuView(ctk.CTkFrame):
         header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.XS), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=0, weight=1)
 
-        header_label: ctk.CTkLabel = ctk.CTkLabel(
+        title: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Sélectionner le type de rapport",
             font=ctk.CTkFont(size=DesignSystem.FontSize.H2, weight="bold"),
             text_color=DesignSystem.Color.BLACK,
         )
-        header_label.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
+        title.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.XS, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
-        description_label: ctk.CTkLabel = ctk.CTkLabel(
+        description: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Choisissez un type de rapport à générer",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
             text_color=DesignSystem.Color.DARKER_GRAY,
         )
-        description_label.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
+        description.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
         # Scrollable frame for report cards
         scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(
