@@ -21,11 +21,11 @@ def adjust_color(hex_color: str, factor: float) -> str:
 class DesignSystem:
     class Color(StrEnum):
         PRIMARY = "#adad00"
-        LIGHTER_PRIMARY = adjust_color(PRIMARY, 1.5)
+        LIGHTER_PRIMARY = adjust_color(PRIMARY, 1.6)
         DARKER_PRIMARY = adjust_color(PRIMARY, 0.8)
 
         GRAY = "#757575"
-        LIGHTER_GRAY = adjust_color(GRAY, 1.5)
+        LIGHTER_GRAY = adjust_color(GRAY, 1.6)
         DARKER_GRAY = adjust_color(GRAY, 0.8)
 
         WHITE = "#ffffff"
@@ -79,12 +79,18 @@ class DesignSystem:
         NONE = 0
         XS = 1
 
-    FontFamily: Final[str] = (
-        "SF Pro Display"
-        if _SYSTEM == "Darwin"
-        else (
-            "Segoe UI"
-            if _SYSTEM == "Windows"
-            else "Ubuntu" if _SYSTEM == "Linux" else "Arial"
+    class FontFamily(StrEnum):
+        NORMAL = (
+            "SF Pro Display"
+            if _SYSTEM == "Darwin"
+            else (
+                "Segoe UI"
+                if _SYSTEM == "Windows"
+                else "Ubuntu" if _SYSTEM == "Linux" else "Arial"
+            )
         )
-    )
+        MONO = (
+            "Menlo"
+            if _SYSTEM == "Darwin"
+            else ("Consolas" if _SYSTEM == "Windows" else "Monospace")
+        )

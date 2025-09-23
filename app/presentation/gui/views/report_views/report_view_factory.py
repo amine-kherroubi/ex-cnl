@@ -32,8 +32,8 @@ class ReportViewFactory(object):
 
         # Map report names to their specific view classes
         view_mapping: dict[str, type[BaseReportView]] = {
-            "activite_mensuelle_par_programme": ActiviteMenuselleReportView,
-            "situation_financiere_des_programmes": SituationFinanciereReportView,
+            "activite_mensuelle": ActiviteMenuselleReportView,
+            "situation_financiere": SituationFinanciereReportView,
         }
 
         # Get the view class for this report type, default to DefaultReportView

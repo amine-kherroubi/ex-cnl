@@ -120,7 +120,7 @@ class BaseReportView(ctk.CTkFrame):
             hover_color=DesignSystem.Color.DARKER_GRAY,
             corner_radius=DesignSystem.Roundness.XS,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.BUTTON,
                 weight="bold",
             ),
@@ -142,7 +142,7 @@ class BaseReportView(ctk.CTkFrame):
             master=info_frame,
             text=self._report_spec.display_name,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H2,
                 weight="bold",
             ),
@@ -210,7 +210,7 @@ class BaseReportView(ctk.CTkFrame):
             hover_color=DesignSystem.Color.LEAST_WHITE,
             corner_radius=DesignSystem.Roundness.SM,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.BUTTON,
                 weight="bold",
             ),

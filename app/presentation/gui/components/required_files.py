@@ -39,7 +39,7 @@ class RequiredFilesComponent(BaseComponent):
             text="Fichiers requis",
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H3,
                 weight="bold",
             ),
@@ -59,7 +59,8 @@ class RequiredFilesComponent(BaseComponent):
             master=self._content_frame,
             text="La génération de ce rapport nécessite les fichiers Excel ci-dessus",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+                family=DesignSystem.FontFamily.NORMAL,
+                size=DesignSystem.FontSize.CAPTION,
             ),
             text_color=DesignSystem.Color.GRAY,
         )
@@ -114,7 +115,7 @@ class RequiredFilesComponent(BaseComponent):
             text=f"{required_file.name}",
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.BODY,
                 weight="bold",
             ),
@@ -134,7 +135,7 @@ class RequiredFilesComponent(BaseComponent):
             text=f"Doit respecter la forme : {required_file.readable_pattern}",
             text_color=DesignSystem.Color.DARKER_GRAY,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.CAPTION,
             ),
             anchor="w",

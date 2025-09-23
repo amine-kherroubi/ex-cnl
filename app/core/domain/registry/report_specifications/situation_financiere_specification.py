@@ -11,13 +11,13 @@ from app.core.services.report_generation.generators.situation_financiere import 
 )
 
 situation_financiere_specification: ReportSpecification = ReportSpecification(
-    name="situation_financiere_des_programmes",
+    name="situation_financiere",
     display_name="Situation financière d'un programme",
     category=ReportCategory.HABITAT_RURAL,
     description=(
-        "Situation financière détaillée d’un programme de logement, "
-        "présentée par daira puis par commune. Comprend les engagements, "
-        "les consommations et les restes."
+        "Présente la situation financière détaillée d’un programme de logement rural, "
+        "par daira et par commune. Inclut les engagements, les consommations, "
+        "les cumuls et les restes relatifs à ce programme."
     ),
     required_files=[
         RequiredFile(
@@ -33,7 +33,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
             table_name="decisions",
         ),
     ],
-    output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",
+    output_filename="situation_financiere_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,
     queries={
         "nb_aides_et_montants_inscrits_par_daira_et_commune": """

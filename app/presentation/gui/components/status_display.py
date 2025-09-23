@@ -34,7 +34,7 @@ class StatusDisplay(BaseComponent):
             text=self._title,
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H3,
                 weight="bold",
             ),
@@ -52,7 +52,8 @@ class StatusDisplay(BaseComponent):
             master=self._content_frame,
             text="Les messages de progression et d'erreur apparaîtront ici",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+                family=DesignSystem.FontFamily.NORMAL,
+                size=DesignSystem.FontSize.CAPTION,
             ),
             text_color=DesignSystem.Color.GRAY,
         )
@@ -70,7 +71,8 @@ class StatusDisplay(BaseComponent):
             border_width=DesignSystem.BorderWidth.XS,
             corner_radius=DesignSystem.Roundness.SM,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.MONO,
+                size=DesignSystem.FontSize.CAPTION,
             ),
         )
         self._status_text.grid(  # type: ignore

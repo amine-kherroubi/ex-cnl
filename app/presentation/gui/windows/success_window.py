@@ -53,7 +53,7 @@ class EmailDialog(ctk.CTkToplevel):
             master=self,
             text="Le rapport a été généré avec succès !",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H1,
                 weight="bold",
             ),
@@ -65,7 +65,7 @@ class EmailDialog(ctk.CTkToplevel):
             master=self,
             text="Envoyez le report généré par email",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.H2
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.H2
             ),
             text_color=DesignSystem.Color.SUCCESS,
         )
@@ -79,7 +79,7 @@ class EmailDialog(ctk.CTkToplevel):
             master=file_frame,
             text=f"Fichier : {self._file_path.split('/')[-1]}",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.H3
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.H3
             ),
             anchor="w",
         )
@@ -90,7 +90,7 @@ class EmailDialog(ctk.CTkToplevel):
             master=self,
             text="Veuillez saisir des adresses email (séparées par des virgules) :",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
         )
         instruction_label.grid(row=3, column=0, padx=DesignSystem.Spacing.XL, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
@@ -101,7 +101,7 @@ class EmailDialog(ctk.CTkToplevel):
             placeholder_text="example1@gmail.com, example2@gmail.com",
             height=40,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
         )
         self._email_entry.grid(row=4, column=0, padx=DesignSystem.Spacing.XL, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="ew")  # type: ignore
@@ -122,7 +122,7 @@ class EmailDialog(ctk.CTkToplevel):
             fg_color=DesignSystem.Color.TRANSPARENT,
             border_width=1,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BUTTON
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BUTTON
             ),
         )
         self._cancel_button.grid(row=0, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM))  # type: ignore
@@ -135,7 +135,7 @@ class EmailDialog(ctk.CTkToplevel):
             width=120,
             height=35,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.BUTTON,
                 weight="bold",
             ),

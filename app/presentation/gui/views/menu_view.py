@@ -55,7 +55,7 @@ class MenuView(ctk.CTkFrame):
             master=header_frame,
             text="Sélectionner le type de rapport",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H2,
                 weight="bold",
             ),
@@ -67,11 +67,11 @@ class MenuView(ctk.CTkFrame):
             master=header_frame,
             text="Choisissez un type de rapport à générer",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
             text_color=DesignSystem.Color.DARKER_GRAY,
         )
-        description.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
+        description.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XS), sticky="w")  # type: ignore
 
         # Scrollable frame for report cards
         scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(

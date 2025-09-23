@@ -55,7 +55,7 @@ class FileSelector(BaseComponent):
             text=self._title,
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H3,
                 weight="bold",
             ),
@@ -71,7 +71,7 @@ class FileSelector(BaseComponent):
             fg_color=DesignSystem.Color.LESS_WHITE,
             hover_color=DesignSystem.Color.LEAST_WHITE,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BUTTON
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BUTTON
             ),
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
@@ -88,7 +88,7 @@ class FileSelector(BaseComponent):
             fg_color=DesignSystem.Color.PRIMARY,
             hover_color=DesignSystem.Color.DARKER_PRIMARY,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BUTTON
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BUTTON
             ),
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
@@ -104,7 +104,8 @@ class FileSelector(BaseComponent):
             master=self._content_frame,
             text="Ajoutez les fichiers Excel nécessaires pour générer le rapport",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+                family=DesignSystem.FontFamily.NORMAL,
+                size=DesignSystem.FontSize.CAPTION,
             ),
             text_color=DesignSystem.Color.GRAY,
         )
@@ -124,7 +125,7 @@ class FileSelector(BaseComponent):
             border_width=DesignSystem.BorderWidth.XS,
             corner_radius=DesignSystem.Roundness.SM,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
         )
         self._files_listbox.grid(  # type: ignore

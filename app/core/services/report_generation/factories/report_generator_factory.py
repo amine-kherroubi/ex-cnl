@@ -29,8 +29,8 @@ class ReportGeneratorFactory:
     _logger: Logger = get_logger(__name__)
 
     _generators: dict[str, type[BaseGenerator]] = {
-        "activite_mensuelle_par_programme": ActiviteMensuelleGenerator,
-        "situation_financiere_des_programmes": SituationFinanciereGenerator,
+        "activite_mensuelle": ActiviteMensuelleGenerator,
+        "situation_financiere": SituationFinanciereGenerator,
     }
 
     def __new__(cls) -> None:

@@ -69,21 +69,42 @@ class MainWindow(ctk.CTk):
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.XXL, pady=(DesignSystem.Spacing.XXL, DesignSystem.Spacing.LG), sticky="ew")  # type: ignore
-        header_frame.grid_columnconfigure(index=0, weight=1)
+        header_frame.grid(  # type: ignore
+            row=0,
+            column=0,
+            padx=DesignSystem.Spacing.XXL,
+            pady=(DesignSystem.Spacing.XXL, DesignSystem.Spacing.LG),
+            sticky="ew",
+        )
+        header_frame.grid_columnconfigure(index=0, weight=0)
+        header_frame.grid_columnconfigure(index=1, weight=0)
 
         # Title
-        self._title_label: ctk.CTkLabel = ctk.CTkLabel(
+        self._title: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Générateur de rapports",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H1,
                 weight="bold",
             ),
             text_color=DesignSystem.Color.BLACK,
         )
-        self._title_label.grid(row=0, column=0, sticky="w")  # type: ignore
+        self._title.grid(row=0, column=0, sticky="w")  # type: ignore
+
+        # Organization
+        self._organization: ctk.CTkLabel = ctk.CTkLabel(
+            master=header_frame,
+            text="BNH (ex-CNL)",
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily.NORMAL,
+                size=DesignSystem.FontSize.H1,
+                weight="normal",
+                slant="italic",
+            ),
+            text_color=DesignSystem.Color.LIGHTER_GRAY,
+        )
+        self._organization.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="w")  # type: ignore
 
         # Main container for views
         self._container: ctk.CTkFrame = ctk.CTkFrame(
@@ -105,7 +126,7 @@ class MainWindow(ctk.CTk):
 
     def _show_menu(self) -> None:
         self._clear_current_view()
-        self._title_label.configure(text="Générateur de rapports")  # type: ignore
+        self._title.configure(text="Générateur de rapports")  # type: ignore
 
         self._current_view = MenuView(
             parent=self._container,

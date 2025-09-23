@@ -49,7 +49,7 @@ class OutputSelector(BaseComponent):
             text=self._title,
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H3,
                 weight="bold",
             ),
@@ -65,7 +65,7 @@ class OutputSelector(BaseComponent):
             fg_color=DesignSystem.Color.PRIMARY,
             hover_color=DesignSystem.Color.DARKER_PRIMARY,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BUTTON
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BUTTON
             ),
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
@@ -83,7 +83,8 @@ class OutputSelector(BaseComponent):
             master=self._content_frame,
             text="Choisissez le répertoire où sera enregistré le rapport généré",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+                family=DesignSystem.FontFamily.NORMAL,
+                size=DesignSystem.FontSize.CAPTION,
             ),
             text_color=DesignSystem.Color.GRAY,
         )
@@ -102,7 +103,7 @@ class OutputSelector(BaseComponent):
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
         )
         self._path_entry.grid(row=2, column=0, sticky="ew")  # type: ignore

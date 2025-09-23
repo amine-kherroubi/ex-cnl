@@ -60,7 +60,7 @@ class DateSelector(BaseComponent):
             text=self._title,
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H3,
                 weight="bold",
             ),
@@ -79,7 +79,8 @@ class DateSelector(BaseComponent):
             master=self._content_frame,
             text="Sélectionnez la période pour laquelle vous souhaitez générer le rapport",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+                family=DesignSystem.FontFamily.NORMAL,
+                size=DesignSystem.FontSize.CAPTION,
             ),
             text_color=DesignSystem.Color.GRAY,
         )
@@ -97,7 +98,7 @@ class DateSelector(BaseComponent):
             text="Mois :",
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
         )
         month_label.grid(  # type: ignore
@@ -117,10 +118,10 @@ class DateSelector(BaseComponent):
             width=DesignSystem.Width.MD,
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS,
@@ -139,7 +140,7 @@ class DateSelector(BaseComponent):
             text="Année :",
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
         )
         year_label.grid(  # type: ignore
@@ -161,10 +162,10 @@ class DateSelector(BaseComponent):
             width=DesignSystem.Width.MD,
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS,

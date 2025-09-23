@@ -12,15 +12,14 @@ from app.core.services.report_generation.generators.activite_mensuelle import (
 
 
 activite_mensuelle_specification: ReportSpecification = ReportSpecification(
-    name="activite_mensuelle_par_programme",
-    display_name="Activité mensuelle par programme",
+    name="activite_mensuelle",
+    display_name="Rapport d'activité mensuelle",
     category=ReportCategory.HABITAT_RURAL,
     description=(
-        "Rapport de suivi mensuel des activités par programme. "
         "Comprend l’état d’exécution des tranches financières durant "
-        "le mois et l’année spécifiés en valeurs actuelles et cumulées "
-        "depuis le début de l’année. Présente également la situation des programmes "
-        "en aides achevées, en cours ou non encore lancées."
+        "le mois et l’année spécifiés, en valeurs actuelles et cumulées, "
+        "ainsi que la situation des programmes "
+        "en aides achevées, en cours ou non encore lancés."
     ),
     required_files=[
         RequiredFile(
@@ -30,7 +29,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             table_name="paiements",
         )
     ],
-    output_filename="activite_mensuelle_par_programme_{wilaya}_{date}.xlsx",
+    output_filename="activite_mensuelle_{wilaya}_{date}.xlsx",
     generator=ActiviteMensuelleGenerator,
     queries={
         "programmes": """

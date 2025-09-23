@@ -39,7 +39,7 @@ class SituationFinanciereReportView(BaseReportView):
             master=program_frame,
             text="Programme cible",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily,
+                family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.H3,
                 weight="bold",
             ),
@@ -57,7 +57,7 @@ class SituationFinanciereReportView(BaseReportView):
             command=self._on_program_changed,
             height=36,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
         )
         self._program_selector.grid(row=1, column=0, sticky="ew")  # type: ignore
@@ -79,7 +79,7 @@ class SituationFinanciereReportView(BaseReportView):
             master=info_frame,
             text=self._get_program_info_text(),
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
             justify="left",
             anchor="w",
