@@ -52,7 +52,7 @@ class EmailDialog(ctk.CTkToplevel):
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Le rapport a été généré avec succès !",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H2, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H1, weight="bold"),
         )
         title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.XL, pady=(DesignSystem.Spacing.XL, DesignSystem.Spacing.SM))  # type: ignore
 
@@ -60,7 +60,7 @@ class EmailDialog(ctk.CTkToplevel):
         success_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Envoyez le report généré par email",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H2),
             text_color=DesignSystem.Color.SUCCESS,
         )
         success_label.grid(row=1, column=0, padx=DesignSystem.Spacing.XL, pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.LG))  # type: ignore
@@ -72,7 +72,7 @@ class EmailDialog(ctk.CTkToplevel):
         file_label: ctk.CTkLabel = ctk.CTkLabel(
             master=file_frame,
             text=f"Fichier : {self._file_path.split('/')[-1]}",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3),
             anchor="w",
         )
         file_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD, pady=DesignSystem.Spacing.SM, sticky="w")  # type: ignore
@@ -81,7 +81,7 @@ class EmailDialog(ctk.CTkToplevel):
         instruction_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self,
             text="Veuillez saisir des adresses email (séparées par des virgules) :",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
         instruction_label.grid(row=3, column=0, padx=DesignSystem.Spacing.XL, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
 
