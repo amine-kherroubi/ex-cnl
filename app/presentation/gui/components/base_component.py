@@ -28,6 +28,8 @@ class BaseComponent(ctk.CTkFrame, ABC):
         # Self configuration
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.WHITE,
+            border_width=DesignSystem.BorderWidth.XS,
+            border_color=DesignSystem.Color.LIGHTER_GRAY,
             corner_radius=DesignSystem.Roundness.MD,
         )
         self.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore

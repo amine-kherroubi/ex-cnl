@@ -37,6 +37,8 @@ class MenuView(ctk.CTkFrame):
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.LEAST_WHITE,
             corner_radius=DesignSystem.Roundness.MD,
+            border_color=DesignSystem.Color.LIGHTER_GRAY,
+            border_width=DesignSystem.BorderWidth.XS,
         )
 
         # Configure grid
@@ -52,7 +54,11 @@ class MenuView(ctk.CTkFrame):
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Sélectionner le type de rapport",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H2, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H2,
+                weight="bold",
+            ),
             text_color=DesignSystem.Color.BLACK,
         )
         title.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.XS, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
@@ -60,7 +66,9 @@ class MenuView(ctk.CTkFrame):
         description: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Choisissez un type de rapport à générer",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+            ),
             text_color=DesignSystem.Color.DARKER_GRAY,
         )
         description.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore

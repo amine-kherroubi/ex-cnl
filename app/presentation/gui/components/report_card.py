@@ -54,7 +54,11 @@ class ReportCard(BaseComponent):
             master=info_frame,
             text=self._report_spec.display_name,
             text_color=DesignSystem.Color.BLACK,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H3,
+                weight="bold",
+            ),
             anchor="w",
         )
         title.grid(  # type: ignore
@@ -68,7 +72,9 @@ class ReportCard(BaseComponent):
         details: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=f"Catégorie : {self._report_spec.category}",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+            ),
             text_color=DesignSystem.Color.DARKER_GRAY,
             anchor="w",
         )
@@ -84,7 +90,9 @@ class ReportCard(BaseComponent):
             master=info_frame,
             text=self._report_spec.description,
             text_color=DesignSystem.Color.BLACK,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+            ),
             anchor="w",
             wraplength=700,
             justify="left",
@@ -99,7 +107,11 @@ class ReportCard(BaseComponent):
             height=DesignSystem.Height.SM,
             fg_color=DesignSystem.Color.PRIMARY,
             hover_color=DesignSystem.Color.DARKER_PRIMARY,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.BUTTON,
+                weight="bold",
+            ),
             text_color=DesignSystem.Color.WHITE,
             corner_radius=DesignSystem.Roundness.SM,
         )

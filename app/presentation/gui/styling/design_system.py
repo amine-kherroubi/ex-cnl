@@ -1,11 +1,11 @@
 from __future__ import annotations
-
-# Standard library imports
 from enum import IntEnum, StrEnum
 from typing import Final, final
 import colorsys
+import platform
 
 _BASE: Final[int] = 6
+_SYSTEM: Final[str] = platform.system()
 
 
 def adjust_color(hex_color: str, factor: float) -> str:
@@ -14,11 +14,11 @@ def adjust_color(hex_color: str, factor: float) -> str:
     h, l, s = colorsys.rgb_to_hls(r, g, b)
     l = max(0, min(1, l * factor))
     r, g, b = colorsys.hls_to_rgb(h, l, s)
-    return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+    return f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}"
 
 
 @final
-class DesignSystem(object):
+class DesignSystem:
     class Color(StrEnum):
         PRIMARY = "#adad00"
         LIGHTER_PRIMARY = adjust_color(PRIMARY, 1.5)
@@ -66,9 +66,25 @@ class DesignSystem(object):
         MD = 8
 
     class Width(IntEnum):
+        NONE = 0
         XS = 36
         SM = 100
         MD = 200
 
     class Height(IntEnum):
+        NONE = 0
         SM = 36
+
+    class BorderWidth(IntEnum):
+        NONE = 0
+        XS = 1
+
+    FontFamily: Final[str] = (
+        "SF Pro Display"
+        if _SYSTEM == "Darwin"
+        else (
+            "Segoe UI"
+            if _SYSTEM == "Windows"
+            else "Ubuntu" if _SYSTEM == "Linux" else "Arial"
+        )
+    )

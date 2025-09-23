@@ -88,7 +88,11 @@ class MainWindow(ctk.CTk):
         self._title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Générateur de rapports",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H1, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H1,
+                weight="bold",
+            ),
             text_color=DesignSystem.Color.BLACK,
         )
         self._title_label.grid(row=0, column=0, sticky="w")  # type: ignore

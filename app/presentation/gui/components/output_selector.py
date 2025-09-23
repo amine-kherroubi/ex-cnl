@@ -48,7 +48,11 @@ class OutputSelector(BaseComponent):
             master=title_frame,
             text=self._title,
             text_color=DesignSystem.Color.BLACK,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H3,
+                weight="bold",
+            ),
             anchor="w",
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
@@ -60,7 +64,9 @@ class OutputSelector(BaseComponent):
             text_color=DesignSystem.Color.WHITE,
             fg_color=DesignSystem.Color.PRIMARY,
             hover_color=DesignSystem.Color.DARKER_PRIMARY,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BUTTON
+            ),
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
             command=self._select_folder,
@@ -72,29 +78,34 @@ class OutputSelector(BaseComponent):
             padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE),
         )
 
-        # Path display
-        self._path_entry: ctk.CTkEntry = ctk.CTkEntry(
-            master=self._content_frame,
-            placeholder_text="Aucun répertoire sélectionné",
-            corner_radius=DesignSystem.Roundness.SM,
-            height=DesignSystem.Height.SM,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
-        )
-        self._path_entry.grid(row=1, column=0, sticky="ew")  # type: ignore
-
         # Information text
         information: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Choisissez le répertoire où sera enregistré le rapport généré",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+            ),
             text_color=DesignSystem.Color.GRAY,
         )
         information.grid(  # type: ignore
-            row=2,
+            row=1,
             column=0,
-            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="w",
         )
+
+        # Path display
+        self._path_entry: ctk.CTkEntry = ctk.CTkEntry(
+            master=self._content_frame,
+            placeholder_text="Aucun répertoire sélectionné",
+            border_width=DesignSystem.BorderWidth.XS,
+            corner_radius=DesignSystem.Roundness.SM,
+            height=DesignSystem.Height.SM,
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+            ),
+        )
+        self._path_entry.grid(row=2, column=0, sticky="ew")  # type: ignore
 
     def _select_folder(self) -> None:
         """Open directory dialog to select output folder."""

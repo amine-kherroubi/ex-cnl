@@ -33,7 +33,11 @@ class StatusDisplay(BaseComponent):
             master=self._content_frame,
             text=self._title,
             text_color=DesignSystem.Color.BLACK,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H3,
+                weight="bold",
+            ),
             anchor="w",
         )
         title.grid(  # type: ignore
@@ -43,36 +47,41 @@ class StatusDisplay(BaseComponent):
             sticky="w",
         )
 
-        # Status text area
-        self._status_text: ctk.CTkTextbox = ctk.CTkTextbox(
-            master=self._content_frame,
-            state="disabled",
-            corner_radius=DesignSystem.Roundness.SM,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
-        )
-        self._status_text.grid(  # type: ignore
-            row=1,
-            column=0,
-            sticky="nsew",
-        )
-
         # Information text
         information: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Les messages de progression et d'erreur apparaîtront ici",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+            ),
             text_color=DesignSystem.Color.GRAY,
         )
         information.grid(  # type: ignore
+            row=1,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            sticky="w",
+        )
+
+        # Status text area
+        self._status_text: ctk.CTkTextbox = ctk.CTkTextbox(
+            master=self._content_frame,
+            state="disabled",
+            border_width=DesignSystem.BorderWidth.XS,
+            corner_radius=DesignSystem.Roundness.SM,
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+            ),
+        )
+        self._status_text.grid(  # type: ignore
             row=2,
             column=0,
-            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
-            sticky="w",
+            sticky="nsew",
         )
 
         # Initialize with welcome message
         self.add_message(
-            message="Veuillez insérer les fichiers nécessaires",
+            message="Veuillez insérer les fichiers nécessaires pour générer le rapport",
             message_type="information",
         )
 

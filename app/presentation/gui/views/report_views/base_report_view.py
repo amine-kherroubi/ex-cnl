@@ -15,6 +15,7 @@ from app.presentation.gui.components.date_selector import DateSelector
 from app.presentation.gui.components.file_selector import FileSelector
 from app.presentation.gui.components.output_selector import OutputSelector
 from app.presentation.gui.components.status_display import StatusDisplay
+from app.presentation.gui.components.required_files import RequiredFilesComponent
 from app.presentation.gui.windows.success_window import EmailDialog
 from app.presentation.gui.controllers.report_controller import ReportController
 from app.presentation.gui.styling.design_system import DesignSystem
@@ -31,6 +32,7 @@ class BaseReportView(ctk.CTkFrame):
         "_file_selector",
         "_output_selector",
         "_status_display",
+        "_required_files_component",
         "_generate_button",
         "_back_button",
         "_selected_month",
@@ -66,7 +68,9 @@ class BaseReportView(ctk.CTkFrame):
         # Self configuration - match MenuView exactly
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.LEAST_WHITE,
+            border_color=DesignSystem.Color.LIGHTER_GRAY,
             corner_radius=DesignSystem.Roundness.MD,
+            border_width=DesignSystem.BorderWidth.XS,
         )
 
         # Configure grid
@@ -115,7 +119,11 @@ class BaseReportView(ctk.CTkFrame):
             fg_color=DesignSystem.Color.GRAY,
             hover_color=DesignSystem.Color.DARKER_GRAY,
             corner_radius=DesignSystem.Roundness.XS,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.BUTTON,
+                weight="bold",
+            ),
             command=self._on_back,
             width=DesignSystem.Width.XS,
             height=DesignSystem.Height.SM,
@@ -133,7 +141,11 @@ class BaseReportView(ctk.CTkFrame):
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.display_name,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H2, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H2,
+                weight="bold",
+            ),
             text_color=DesignSystem.Color.BLACK,
         )
         title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
@@ -141,24 +153,29 @@ class BaseReportView(ctk.CTkFrame):
     def _setup_common_components(self) -> None:
         """Setup components common to all reports."""
 
-        # Date selector - match MenuView card spacing
+        # Date selector
         self._date_selector = DateSelector(
             parent=self._scrollable_frame, on_date_changed=self._on_date_changed
         )
         self._date_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # Required files section
-        self._create_required_files_section()
+        # Required files component
+        self._required_files_component = RequiredFilesComponent(
+            parent=self._scrollable_frame,
+            report_spec=self._report_spec,
+        )
+        self._required_files_component.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        self._next_row += 1
 
-        # File selector - match MenuView card spacing
+        # File selector
         self._file_selector = FileSelector(
             parent=self._scrollable_frame, on_files_changed=self._on_files_changed
         )
         self._file_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # Output selector - match MenuView card spacing
+        # Output selector
         self._output_selector = OutputSelector(
             parent=self._scrollable_frame, on_output_changed=self._on_output_changed
         )
@@ -192,58 +209,16 @@ class BaseReportView(ctk.CTkFrame):
             fg_color=DesignSystem.Color.LESS_WHITE,
             hover_color=DesignSystem.Color.LEAST_WHITE,
             corner_radius=DesignSystem.Roundness.SM,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.BUTTON,
+                weight="bold",
+            ),
             command=self._generate_report,
             height=40,
         )
         self._generate_button.grid(row=0, column=0, sticky="ew")  # type: ignore
         self._generate_button.configure(state="disabled")  # type: ignore
-
-    def _create_required_files_section(self) -> None:
-        # Required files frame - match MenuView card spacing
-        req_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self._scrollable_frame,
-            fg_color=DesignSystem.Color.TRANSPARENT,
-        )
-        req_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
-        req_frame.grid_columnconfigure(index=0, weight=1)
-        self._next_row += 1
-
-        # Title - match MenuView styling
-        req_title: ctk.CTkLabel = ctk.CTkLabel(
-            master=req_frame,
-            text="Fichiers requis",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY, weight="bold"),
-            text_color=DesignSystem.Color.BLACK,
-        )
-        req_title.grid(row=0, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
-
-        # Info box - explicitly style to override theme
-        info_box: ctk.CTkFrame = ctk.CTkFrame(
-            master=req_frame,
-            fg_color=DesignSystem.Color.WHITE,
-            corner_radius=DesignSystem.Roundness.SM,
-        )
-        info_box.grid(row=1, column=0, sticky="ew")  # type: ignore
-
-        # Required files list
-        req_text: str = self._get_required_files_text()
-
-        req_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=info_box,
-            text=req_text,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
-            text_color=DesignSystem.Color.BLACK,
-            justify="left",
-            anchor="w",
-        )
-        req_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD, pady=DesignSystem.Spacing.MD, sticky="w")  # type: ignore
-
-    def _get_required_files_text(self) -> str:
-        return (
-            "Veuillez sélectionner les fichiers Excel requis pour ce rapport.\n"
-            "Le système validera les fichiers sélectionnés avant la génération."
-        )
 
     def _on_date_changed(self, month: Month | None, year: int | None) -> None:
         self._selected_month = month

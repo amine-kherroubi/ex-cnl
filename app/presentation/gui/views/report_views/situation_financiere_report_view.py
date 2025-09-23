@@ -38,7 +38,11 @@ class SituationFinanciereReportView(BaseReportView):
         program_title: ctk.CTkLabel = ctk.CTkLabel(
             master=program_frame,
             text="Programme cible",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H3,
+                weight="bold",
+            ),
         )
         program_title.grid(row=0, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 
@@ -52,7 +56,9 @@ class SituationFinanciereReportView(BaseReportView):
             values=program_names,
             command=self._on_program_changed,
             height=36,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+            ),
         )
         self._program_selector.grid(row=1, column=0, sticky="ew")  # type: ignore
 
@@ -72,7 +78,9 @@ class SituationFinanciereReportView(BaseReportView):
         self._program_info_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._get_program_info_text(),
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+            ),
             justify="left",
             anchor="w",
         )

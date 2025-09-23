@@ -54,7 +54,11 @@ class FileSelector(BaseComponent):
             master=title_frame,
             text=self._title,
             text_color=DesignSystem.Color.BLACK,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily,
+                size=DesignSystem.FontSize.H3,
+                weight="bold",
+            ),
             anchor="w",
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
@@ -66,7 +70,9 @@ class FileSelector(BaseComponent):
             text_color=DesignSystem.Color.GRAY,
             fg_color=DesignSystem.Color.LESS_WHITE,
             hover_color=DesignSystem.Color.LEAST_WHITE,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BUTTON
+            ),
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
             command=self._clear_files,
@@ -81,7 +87,9 @@ class FileSelector(BaseComponent):
             text_color=DesignSystem.Color.WHITE,
             fg_color=DesignSystem.Color.PRIMARY,
             hover_color=DesignSystem.Color.DARKER_PRIMARY,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BUTTON
+            ),
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
             command=self._select_files,
@@ -91,34 +99,39 @@ class FileSelector(BaseComponent):
             row=0, column=2, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE)
         )
 
+        # Information text
+        information: ctk.CTkLabel = ctk.CTkLabel(
+            master=self._content_frame,
+            text="Ajoutez les fichiers Excel nécessaires pour générer le rapport",
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.CAPTION
+            ),
+            text_color=DesignSystem.Color.GRAY,
+        )
+        information.grid(  # type: ignore
+            row=1,
+            columnspan=3,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            sticky="w",
+        )
+
         # Files listbox
         self._files_listbox: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self._content_frame,
             height=100,
             state="disabled",
+            border_width=DesignSystem.BorderWidth.XS,
             corner_radius=DesignSystem.Roundness.SM,
-            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily, size=DesignSystem.FontSize.BODY
+            ),
         )
         self._files_listbox.grid(  # type: ignore
-            row=1,
+            row=2,
             column=0,
             columnspan=3,
             sticky="ew",
-        )
-
-        # Information text
-        information: ctk.CTkLabel = ctk.CTkLabel(
-            master=self._content_frame,
-            text="Ajoutez vos fichiers Excel pour générer le rapport",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
-            text_color=DesignSystem.Color.GRAY,
-        )
-        information.grid(  # type: ignore
-            row=2,
-            columnspan=3,
-            column=0,
-            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
-            sticky="w",
         )
 
         self._update_display()
