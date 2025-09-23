@@ -2,7 +2,10 @@ from __future__ import annotations
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
-from app.core.domain.models.report_specification import ReportSpecification
+from app.core.domain.models.report_specification import (
+    ReportSpecification,
+    RequiredFile,
+)
 from app.core.services.report_generation.generators.activite_mensuelle import (
     ActiviteMensuelleGenerator,
 )
@@ -19,10 +22,13 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
         "depuis le début de l’année. Présente également la situation des programmes "
         "en aides achevées, en cours ou non encore lancées."
     ),
-    required_patterns={
-        r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
+    required_files={
+        "Journal des paiements": RequiredFile(
+            pattern=r"^Journal_paiements__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+            readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
+            table="paiements",
+        )
     },
-    example_files=["Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx"],
     output_filename="activite_mensuelle_par_programme_{wilaya}_{date}.xlsx",
     generator=ActiviteMensuelleGenerator,
     queries={

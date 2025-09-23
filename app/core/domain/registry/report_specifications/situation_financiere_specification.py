@@ -2,7 +2,10 @@ from __future__ import annotations
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
-from app.core.domain.models.report_specification import ReportSpecification
+from app.core.domain.models.report_specification import (
+    ReportSpecification,
+    RequiredFile,
+)
 from app.core.services.report_generation.generators.situation_financiere import (
     SituationFinanciereGenerator,
 )
@@ -16,14 +19,18 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
         "présentée par daira puis par commune. Comprend les engagements, "
         "les consommations et les restes."
     ),
-    required_patterns={
-        r"^Journal_paiements__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "paiements",
-        r"^Journal_décisions__Agence_[A-Z+]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$": "decisions",
+    required_files={
+        "Journal des paiements": RequiredFile(
+            pattern=r"^Journal_paiements__Agence_[A-Z+_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+            readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
+            table="paiements",
+        ),
+        "Journal des décisions": RequiredFile(
+            pattern=r"^Journal_décisions__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+            readable_pattern="Journal_décisions__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
+            table="decisions",
+        ),
     },
-    example_files=[
-        "Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
-        "Journal_décisions__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
-    ],
     output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,
     queries={

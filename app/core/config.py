@@ -45,7 +45,7 @@ class DatabaseConfig(BaseModel):
 
 
 class LoggingConfig(BaseModel):
-    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG"
     enable_file_logging: bool = True
     enable_console_logging: bool = True
     log_file: Path = Field(

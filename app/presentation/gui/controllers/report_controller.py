@@ -10,7 +10,10 @@ from typing import Any
 from app.core.core_facade import CoreFacade
 from app.core.domain.enums.space_time import Month, Wilaya
 from app.core.domain.models.report_context import ReportContext
-from app.core.domain.models.report_specification import ReportSpecification
+from app.core.domain.models.report_specification import (
+    ReportSpecification,
+    RequiredFile,
+)
 from app.core.utils.logging_setup import get_logger
 
 
@@ -128,9 +131,10 @@ class ReportController:
             raise ValueError(error_msg)
 
         report_spec: ReportSpecification = available_reports[report_name]
-        required_patterns = report_spec.required_patterns
+        required_files: dict[str, RequiredFile] = report_spec.required_files
         self._logger.debug(
-            f"Report requires {len(required_patterns)} file patterns: {list(required_patterns.keys())}"
+            f"Report requires {len(required_files)} files: "
+            f"{[(key, rf.readable_pattern) for key, rf in required_files.items()]}"
         )
 
         # Validate that all files exist (fail fast)
@@ -140,7 +144,6 @@ class ReportController:
                 error_msg = f"File does not exist: {file_path}"
                 self._logger.error(error_msg)
                 raise FileNotFoundError(error_msg)
-
         self._logger.debug("All input files exist")
 
         # Match files to required patterns
@@ -149,15 +152,16 @@ class ReportController:
         unmatched_files: list[Path] = []
 
         for file_path in input_files:
-            file_matched = False
+            file_matched: bool = False
             self._logger.debug(f"Checking file: {file_path.name}")
 
-            for pattern, table_name in required_patterns.items():
-                if re.match(pattern, file_path.name, re.IGNORECASE):
-                    matched_files[table_name] = file_path
+            for key, rf in required_files.items():
+                if re.match(rf.pattern, file_path.name, re.IGNORECASE):
+                    matched_files[key] = file_path
                     file_matched = True
                     self._logger.debug(
-                        f"File '{file_path.name}' matched pattern '{pattern}' -> table '{table_name}'"
+                        f"File '{file_path.name}' matched pattern '{rf.readable_pattern}' "
+                        f"-> table '{rf.table}'"
                     )
                     break
 
@@ -167,29 +171,29 @@ class ReportController:
                     f"File '{file_path.name}' did not match any required pattern"
                 )
 
-        # Check if we have files for all required patterns (fail fast)
-        self._logger.debug("Checking if all required patterns are satisfied")
-        missing_patterns: list[str] = []
-        for pattern, table_name in required_patterns.items():
-            if table_name not in matched_files:
-                missing_patterns.append(
-                    f"Pattern: '{pattern}' -> Table: '{table_name}'"
+        # Check if we have files for all required entries (fail fast)
+        self._logger.debug("Checking if all required files are satisfied")
+        missing_files: list[str] = []
+        for key, rf in required_files.items():
+            if key not in matched_files:
+                missing_files.append(
+                    f"Pattern: '{rf.readable_pattern}' -> Table: '{rf.table}'"
                 )
                 self._logger.error(
-                    f"Missing file for required pattern: '{pattern}' -> '{table_name}'"
+                    f"Missing file for required pattern: '{rf.readable_pattern}' -> '{rf.table}'"
                 )
 
         # Report validation results (fail fast)
-        if missing_patterns:
-            error_msg = f"Missing files for required patterns:\n" + "\n".join(
-                missing_patterns
+        if missing_files:
+            error_msg = "Missing files for required patterns:\n" + "\n".join(
+                missing_files
             )
             self._logger.error("Validation failed: missing required patterns")
             raise ValueError(error_msg)
 
         if unmatched_files:
             error_msg = (
-                f"The following files don't match any required pattern:\n"
+                "The following files don't match any required pattern:\n"
                 + "\n".join(str(f) for f in unmatched_files)
             )
             self._logger.error(

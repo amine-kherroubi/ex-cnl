@@ -40,16 +40,12 @@ class ReportSpecification(BaseModel):
         Field(description="Detailed description of report purpose"),
     ]
 
-    required_patterns: Annotated[
-        dict[str, str],
+    required_files: Annotated[
+        dict[str, RequiredFile],
         Field(
-            description="Mapping of regex filename patterns to corresponding SQL table names"
+            description="Mapping of file names keys to required file specifications "
+            "(pattern, readable pattern, associated database table)"
         ),
-    ]
-
-    example_files: Annotated[
-        list[str],
-        Field(description="Example files matching required patterns"),
     ]
 
     output_filename: Annotated[
@@ -65,6 +61,29 @@ class ReportSpecification(BaseModel):
     queries: Annotated[
         dict[str, str],
         Field(description="Mapping of query names to corresponding SQL templates"),
+    ]
+
+    model_config = {
+        "frozen": True,
+        "str_strip_whitespace": True,
+        "validate_assignment": True,
+    }
+
+
+class RequiredFile(BaseModel):
+    pattern: Annotated[
+        str,
+        Field(
+            description="Regex pattern that filenames must match",
+        ),
+    ]
+    readable_pattern: Annotated[
+        str,
+        Field(description="Readable pattern of a valid filename"),
+    ]
+    table: Annotated[
+        str,
+        Field(description="Associated SQL table name"),
     ]
 
     model_config = {
