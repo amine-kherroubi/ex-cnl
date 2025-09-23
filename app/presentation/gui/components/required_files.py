@@ -84,8 +84,8 @@ class RequiredFilesComponent(BaseComponent):
         files_frame.grid_columnconfigure(index=0, weight=1)
 
         row_index = 0
-        for _, required_file in self._report_spec.required_files.items():
-            self._create_file_entry(files_frame, required_file, row_index)
+        for rf in self._report_spec.required_files:
+            self._create_file_entry(files_frame, rf, row_index)
             row_index += 1
 
     def _create_file_entry(
@@ -109,9 +109,9 @@ class RequiredFilesComponent(BaseComponent):
         entry_frame.grid_columnconfigure(index=0, weight=1)
 
         # File pattern (main identifier)
-        pattern_label: ctk.CTkLabel = ctk.CTkLabel(
+        name: ctk.CTkLabel = ctk.CTkLabel(
             master=entry_frame,
-            text=f"{required_file.readable_pattern}",
+            text=f"{required_file.name}",
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily,
@@ -120,7 +120,7 @@ class RequiredFilesComponent(BaseComponent):
             ),
             anchor="w",
         )
-        pattern_label.grid(  # type: ignore
+        name.grid(  # type: ignore
             row=0,
             column=0,
             padx=DesignSystem.Spacing.SM,
@@ -129,9 +129,9 @@ class RequiredFilesComponent(BaseComponent):
         )  # type: ignore
 
         # Table name (what it maps to)
-        table_label: ctk.CTkLabel = ctk.CTkLabel(
+        pattern: ctk.CTkLabel = ctk.CTkLabel(
             master=entry_frame,
-            text=f"Table de destination : {required_file.table_name}",
+            text=f"Doit respecter la forme : {required_file.readable_pattern}",
             text_color=DesignSystem.Color.DARKER_GRAY,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily,
@@ -139,7 +139,7 @@ class RequiredFilesComponent(BaseComponent):
             ),
             anchor="w",
         )
-        table_label.grid(  # type: ignore
+        pattern.grid(  # type: ignore
             row=1,
             column=0,
             padx=DesignSystem.Spacing.SM,

@@ -131,10 +131,10 @@ class ReportController:
             raise ValueError(error_msg)
 
         report_spec: ReportSpecification = available_reports[report_name]
-        required_files: dict[str, RequiredFile] = report_spec.required_files
+        required_files: list[RequiredFile] = report_spec.required_files
         self._logger.debug(
             f"Report requires {len(required_files)} files: "
-            f"{[(key, rf.readable_pattern) for key, rf in required_files.items()]}"
+            f"{[(rf.name, rf.readable_pattern) for rf in required_files]}"
         )
 
         # Validate that all files exist
@@ -155,7 +155,7 @@ class ReportController:
             file_matched: bool = False
             self._logger.debug(f"Checking file: {file_path.name}")
 
-            for _, rf in required_files.items():
+            for rf in required_files:
                 if re.match(rf.pattern, file_path.name, re.IGNORECASE):
                     matched_files[rf.table_name] = file_path
                     file_matched = True
@@ -174,7 +174,7 @@ class ReportController:
         # Check if we have files for all required entries (fail fast)
         self._logger.debug("Checking if all required files are satisfied")
         missing_files: list[str] = []
-        for _, rf in required_files.items():
+        for rf in required_files:
             if rf.table_name not in matched_files:
                 missing_files.append(
                     f"Pattern: '{rf.readable_pattern}' -> Table: '{rf.table_name}'"

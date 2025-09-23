@@ -22,13 +22,14 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
         "depuis le début de l’année. Présente également la situation des programmes "
         "en aides achevées, en cours ou non encore lancées."
     ),
-    required_files={
-        "Journal des paiements": RequiredFile(
+    required_files=[
+        RequiredFile(
+            name="Journal des paiements",
             pattern=r"^Journal_paiements__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
             table_name="paiements",
         )
-    },
+    ],
     output_filename="activite_mensuelle_par_programme_{wilaya}_{date}.xlsx",
     generator=ActiviteMensuelleGenerator,
     queries={

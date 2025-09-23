@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
+from app.core.domain.models.required_file import RequiredFile
 from app.core.services.report_generation.base_generator import (
     BaseGenerator,
 )
@@ -41,7 +42,7 @@ class ReportSpecification(BaseModel):
     ]
 
     required_files: Annotated[
-        dict[str, RequiredFile],
+        list[RequiredFile],
         Field(
             description="Mapping of file names keys to required file specifications "
             "(pattern, readable pattern, associated database table)"
@@ -61,29 +62,6 @@ class ReportSpecification(BaseModel):
     queries: Annotated[
         dict[str, str],
         Field(description="Mapping of query names to corresponding SQL templates"),
-    ]
-
-    model_config = {
-        "frozen": True,
-        "str_strip_whitespace": True,
-        "validate_assignment": True,
-    }
-
-
-class RequiredFile(BaseModel):
-    pattern: Annotated[
-        str,
-        Field(
-            description="Regex pattern that filenames must match",
-        ),
-    ]
-    readable_pattern: Annotated[
-        str,
-        Field(description="Readable pattern of a valid filename"),
-    ]
-    table_name: Annotated[
-        str,
-        Field(description="Associated SQL table name"),
     ]
 
     model_config = {

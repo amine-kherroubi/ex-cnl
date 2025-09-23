@@ -19,18 +19,20 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
         "présentée par daira puis par commune. Comprend les engagements, "
         "les consommations et les restes."
     ),
-    required_files={
-        "Journal des paiements": RequiredFile(
+    required_files=[
+        RequiredFile(
+            name="Journal des paiements",
             pattern=r"^Journal_paiements__Agence_[A-Z+_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
             table_name="paiements",
         ),
-        "Journal des décisions": RequiredFile(
+        RequiredFile(
+            name="Journal des décisions",
             pattern=r"^Journal_décisions__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             readable_pattern="Journal_décisions__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
             table_name="decisions",
         ),
-    },
+    ],
     output_filename="situation_financiere_des_programmes_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,
     queries={
