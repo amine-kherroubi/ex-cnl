@@ -365,23 +365,28 @@ class BaseReportView(ctk.CTkFrame):
                 )
 
             except ValueError as validation_error:
+                error_msg = str(validation_error)
                 self.after(
                     ms=0,
-                    func=lambda: self._on_validation_error(
-                        error_message=str(validation_error)
+                    func=lambda msg=error_msg: self._on_validation_error(
+                        error_message=msg
                     ),
                 )
             except FileNotFoundError as file_error:
+                error_msg = f"Fichier manquant : {file_error}"
                 self.after(
                     ms=0,
-                    func=lambda: self._on_validation_error(
-                        error_message=f"Fichier manquant : {file_error}"
+                    func=lambda msg=error_msg: self._on_validation_error(
+                        error_message=msg
                     ),
                 )
             except Exception as error:
+                error_msg = str(error)
                 self.after(
                     ms=0,
-                    func=lambda: self._on_generation_error(error_message=str(error)),
+                    func=lambda msg=error_msg: self._on_generation_error(
+                        error_message=msg
+                    ),
                 )
 
         thread: threading.Thread = threading.Thread(target=generate_thread, daemon=True)
