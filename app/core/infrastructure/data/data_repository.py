@@ -9,9 +9,9 @@ import duckdb
 import pandas as pd
 
 # Local application imports
-from app.core.utils.exceptions import DatabaseError, QueryExecutionError
-from app.core.config import DatabaseConfig
-from app.core.utils.logging_setup import get_logger
+from app.common.exceptions import DatabaseError, QueryExecutionError
+from app.config import DatabaseConfig
+from app.common.logging_setup import get_logger
 
 
 class DataRepository(Protocol):

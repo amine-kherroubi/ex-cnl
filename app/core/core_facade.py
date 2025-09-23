@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 # Local application imports
-from app.core.config import AppConfig
+from app.config import AppConfig
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.registry.report_specification_registry import (
@@ -14,11 +14,11 @@ from app.core.domain.registry.report_specification_registry import (
 )
 from app.core.infrastructure.data.data_repository import DuckDBRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation.factories.report_generator_factory import (
+from app.core.services.report_generation_service.factories.report_generator_factory import (
     ReportGeneratorFactory,
 )
-from app.core.services.report_generation.base_generator import BaseGenerator
-from app.core.utils.logging_setup import get_logger
+from app.core.services.report_generation_service.base_generator import BaseGenerator
+from app.common.logging_setup import get_logger
 
 
 class CoreFacade:

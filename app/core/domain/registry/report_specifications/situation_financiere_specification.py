@@ -6,7 +6,7 @@ from app.core.domain.models.report_specification import (
     ReportSpecification,
     RequiredFile,
 )
-from app.core.services.report_generation.generators.situation_financiere import (
+from app.core.services.report_generation_service.concrete_generators.situation_financiere import (
     SituationFinanciereGenerator,
 )
 

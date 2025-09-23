@@ -4,10 +4,10 @@ from __future__ import annotations
 from customtkinter import CTk  # type: ignore
 
 # Local application imports
-from app.core.config import AppConfig
-from app.core.utils.logging_setup import LoggingSetup
+from app.config import AppConfig
+from app.common.logging_setup import LoggingSetup
 from app.core.core_facade import CoreFacade
-from app.presentation.gui.windows.main_window import MainWindow
+from app.presentation.windows.main_window import MainWindow
 
 
 def main() -> None:

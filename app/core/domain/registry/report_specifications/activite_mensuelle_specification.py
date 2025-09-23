@@ -6,7 +6,7 @@ from app.core.domain.models.report_specification import (
     ReportSpecification,
     RequiredFile,
 )
-from app.core.services.report_generation.generators.activite_mensuelle import (
+from app.core.services.report_generation_service.concrete_generators.activite_mensuelle import (
     ActiviteMensuelleGenerator,
 )
 
