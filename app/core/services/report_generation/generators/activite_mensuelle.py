@@ -15,11 +15,11 @@ from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.predefined_objects.programmes import get_programmes_dataframe
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation.base.report_generator import ReportGenerator
+from app.core.services.report_generation.base_generator import BaseGenerator
 from app.core.utils.excel_styling import ExcelStyling
 
 
-class ActiviteMensuelleGenerator(ReportGenerator):
+class ActiviteMensuelleGenerator(BaseGenerator):
     __slots__ = ("_current_row",)
 
     def __init__(

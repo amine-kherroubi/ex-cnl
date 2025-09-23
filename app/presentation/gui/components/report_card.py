@@ -8,10 +8,13 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
+from app.presentation.gui.components.base_component import BaseComponent
 from app.presentation.gui.styling.design_system import DesignSystem
 
 
-class ReportCard(ctk.CTkFrame):
+class ReportCard(BaseComponent):
+    """Component displaying a report card with generation option."""
+
     __slots__ = (
         "_report_spec",
         "_on_generate_clicked",
@@ -24,35 +27,26 @@ class ReportCard(ctk.CTkFrame):
         report_spec: ReportSpecification,
         on_generate_clicked: Callable[[], None],
     ) -> None:
-        super().__init__(master=parent)  # type: ignore
         self._report_spec: ReportSpecification = report_spec
         self._on_generate_clicked: Callable[[], None] = on_generate_clicked
 
-        self._setup_ui()
+        super().__init__(parent, report_spec.display_name)
 
-    def _setup_ui(self) -> None:
-        # Self configuration
-        self.configure(  # type: ignore
-            fg_color=DesignSystem.Color.WHITE,
-            corner_radius=DesignSystem.Roundness.MD,
-        )
-        self.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
-
+    def _setup_content(self) -> None:
+        """Set up the report card content."""
         # Configure grid
-        self.grid_columnconfigure(index=0, weight=1)
+        self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Content frame
-        content_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=DesignSystem.Color.TRANSPARENT
-        )
-        content_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
-        content_frame.grid_columnconfigure(index=0, weight=1)
-
-        # Report info
+        # Report info frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=content_frame, fg_color=DesignSystem.Color.TRANSPARENT
+            master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        info_frame.grid(row=0, column=0, sticky="ew")  # type: ignore
+        info_frame.grid(  # type: ignore
+            row=0,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
+            sticky="ew",
+        )
         info_frame.grid_columnconfigure(index=0, weight=1)
 
         # Title
@@ -63,9 +57,14 @@ class ReportCard(ctk.CTkFrame):
             font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
             anchor="w",
         )
-        title.grid(row=0, column=0, pady=DesignSystem.Spacing.NONE, sticky="w")  # type: ignore
+        title.grid(  # type: ignore
+            row=0,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XS),
+            sticky="w",
+        )
 
-        # Details
+        # Category details
         details: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=f"Catégorie : {self._report_spec.category}",
@@ -73,7 +72,12 @@ class ReportCard(ctk.CTkFrame):
             text_color=DesignSystem.Color.DARKER_GRAY,
             anchor="w",
         )
-        details.grid(row=1, column=0, pady=(DesignSystem.Spacing.XS, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
+        details.grid(  # type: ignore
+            row=1,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            sticky="w",
+        )
 
         # Description
         description: ctk.CTkLabel = ctk.CTkLabel(
@@ -85,18 +89,18 @@ class ReportCard(ctk.CTkFrame):
             wraplength=700,
             justify="left",
         )
-        description.grid(row=2, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD), sticky="w")  # type: ignore
+        description.grid(row=2, column=0, sticky="w")  # type: ignore
 
         # Generate button
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
-            master=content_frame,
+            master=self._content_frame,
             text="Générer le rapport",
             command=self._on_generate_clicked,
             height=DesignSystem.Height.SM,
             fg_color=DesignSystem.Color.PRIMARY,
+            hover_color=DesignSystem.Color.DARKER_PRIMARY,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON, weight="bold"),
             text_color=DesignSystem.Color.WHITE,
-            hover_color=DesignSystem.Color.DARKER_PRIMARY,
             corner_radius=DesignSystem.Roundness.SM,
         )
-        self._generate_button.grid(row=3, column=0, sticky="ew")  # type: ignore
+        self._generate_button.grid(row=1, column=0, sticky="ew")  # type: ignore

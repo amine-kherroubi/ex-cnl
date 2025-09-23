@@ -15,7 +15,7 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.generators.activite_mensuelle import (
     ActiviteMensuelleGenerator,
 )
-from app.core.services.report_generation.base.report_generator import ReportGenerator
+from app.core.services.report_generation.base_generator import BaseGenerator
 from app.core.services.report_generation.generators.situation_financiere import (
     SituationFinanciereGenerator,
 )
@@ -28,7 +28,7 @@ class ReportGeneratorFactory:
 
     _logger: Logger = get_logger(__name__)
 
-    _generators: dict[str, type[ReportGenerator]] = {
+    _generators: dict[str, type[BaseGenerator]] = {
         "activite_mensuelle_par_programme": ActiviteMensuelleGenerator,
         "situation_financiere_des_programmes": SituationFinanciereGenerator,
     }
@@ -46,7 +46,7 @@ class ReportGeneratorFactory:
         data_repository: DataRepository,
         report_context: ReportContext,
         **kwargs: Any,
-    ) -> ReportGenerator:
+    ) -> BaseGenerator:
         """Create a report generator for the specified report.
 
         Args:
@@ -76,11 +76,11 @@ class ReportGeneratorFactory:
                 f"Retrieved report specification: {report_specification.display_name}"
             )
 
-            generator_class: type[ReportGenerator] = cls._generators[report_name]
+            generator_class: type[BaseGenerator] = cls._generators[report_name]
             cls._logger.debug(f"Using generator class: {generator_class.__name__}")
 
             # Create generator with base dependencies
-            generator: ReportGenerator = generator_class(
+            generator: BaseGenerator = generator_class(
                 file_io_service=file_io_service,
                 data_repository=data_repository,
                 report_specification=report_specification,

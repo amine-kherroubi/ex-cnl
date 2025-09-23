@@ -8,8 +8,8 @@ from pydantic import BaseModel, Field
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
-from app.core.services.report_generation.base.report_generator import (
-    ReportGenerator,
+from app.core.services.report_generation.base_generator import (
+    BaseGenerator,
 )
 
 
@@ -54,7 +54,7 @@ class ReportSpecification(BaseModel):
     ]
 
     generator: Annotated[
-        type[ReportGenerator],
+        type[BaseGenerator],
         Field(description="Concrete generator class responsible for report production"),
     ]
 

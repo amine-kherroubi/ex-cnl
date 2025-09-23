@@ -9,58 +9,80 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
+from app.presentation.gui.components.base_component import BaseComponent
 from app.presentation.gui.styling.design_system import DesignSystem
 
 
-class OutputSelector(ctk.CTkFrame):
+class OutputSelector(BaseComponent):
+    """Component for selecting output directory."""
+
     __slots__ = ("_on_output_changed", "_output_path", "_select_button", "_path_entry")
 
     def __init__(
         self, parent: Any, on_output_changed: Callable[[Path | None], None]
     ) -> None:
-        super().__init__(master=parent)  # type: ignore
-
         self._on_output_changed: Callable[[Path | None], None] = on_output_changed
         self._output_path: Path | None = None
 
-        self._setup_ui()
+        super().__init__(parent, "Répertoire de destination")
 
-    def _setup_ui(self) -> None:
-        # Self configuration
-        self.configure(  # type: ignore
-            fg_color=DesignSystem.Color.WHITE,
-            corner_radius=DesignSystem.Roundness.MD,
-        )
-
+    def _setup_content(self) -> None:
+        """Set up the output selector content."""
         # Configure grid
-        self.grid_columnconfigure(index=1, weight=1)
+        self._content_frame.grid_columnconfigure(index=1, weight=1)
 
-        # Label
-        label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
-            text="Répertoire de destination",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+        # Title with select button row
+        title_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        label.grid(row=0, column=0, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.XS), pady=DesignSystem.Spacing.SM, sticky="w")  # type: ignore
+        title_frame.grid(  # type: ignore
+            row=0,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            sticky="ew",
+        )
+        title_frame.grid_columnconfigure(index=0, weight=1)
+
+        # Title
+        title_label: ctk.CTkLabel = ctk.CTkLabel(
+            master=title_frame,
+            text=self._title,
+            text_color=DesignSystem.Color.BLACK,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            anchor="w",
+        )
+        title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
         # Select folder button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
-            master=self,
+            master=title_frame,
             text="Sélectionner un répertoire",
+            text_color=DesignSystem.Color.WHITE,
+            fg_color=DesignSystem.Color.PRIMARY,
+            hover_color=DesignSystem.Color.DARKER_PRIMARY,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
+            corner_radius=DesignSystem.Roundness.SM,
+            height=DesignSystem.Height.SM,
             command=self._select_folder,
-            width=120,
+            width=DesignSystem.Width.MD,
         )
-        self._select_button.grid(row=0, column=2, padx=(DesignSystem.Spacing.XS, DesignSystem.Spacing.SM), pady=DesignSystem.Spacing.SM)  # type: ignore
+        self._select_button.grid(  # type: ignore
+            row=0, column=1, padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE)
+        )
 
         # Path display
         self._path_entry: ctk.CTkEntry = ctk.CTkEntry(
-            master=self,
+            master=self._content_frame,
             placeholder_text="Aucun répertoire sélectionné",
             state="readonly",
+            corner_radius=DesignSystem.Roundness.SM,
+            height=DesignSystem.Height.SM,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        self._path_entry.grid(row=0, column=1, padx=(DesignSystem.Spacing.XS, DesignSystem.Spacing.XS), pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        self._path_entry.grid(row=1, column=0, sticky="ew")  # type: ignore
 
     def _select_folder(self) -> None:
+        """Open directory dialog to select output folder."""
         folder: str = filedialog.askdirectory(
             title="Sélectionner le répertoire de destination"
         )
@@ -71,6 +93,7 @@ class OutputSelector(ctk.CTkFrame):
             self._on_output_changed(self._output_path)
 
     def _update_display(self) -> None:
+        """Update the display of selected path."""
         self._path_entry.configure(state="normal")  # type: ignore
         self._path_entry.delete(first_index=0, last_index="end")  # type: ignore
 

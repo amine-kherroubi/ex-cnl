@@ -9,10 +9,13 @@ from typing import Any, Callable, Literal
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
+from app.presentation.gui.components.base_component import BaseComponent
 from app.presentation.gui.styling.design_system import DesignSystem
 
 
-class FileSelector(ctk.CTkFrame):
+class FileSelector(BaseComponent):
+    """Component for selecting source files."""
+
     __slots__ = (
         "_on_files_changed",
         "_selected_files",
@@ -24,79 +27,90 @@ class FileSelector(ctk.CTkFrame):
     def __init__(
         self, parent: Any, on_files_changed: Callable[[list[Path]], None]
     ) -> None:
-        super().__init__(master=parent)  # type: ignore
-
         self._on_files_changed: Callable[[list[Path]], None] = on_files_changed
         self._selected_files: list[Path] = []
 
-        self._setup_ui()
+        super().__init__(parent, "Fichiers source")
 
-    def _setup_ui(self) -> None:
-        # Self configuration
-        self.configure(  # type: ignore
-            fg_color=DesignSystem.Color.WHITE,
-            corner_radius=DesignSystem.Roundness.MD,
-        )
-        self.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
-
+    def _setup_content(self) -> None:
+        """Set up the file selector content."""
         # Configure grid
-        self.grid_columnconfigure(index=0, weight=1)
+        self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Content frame
-        content_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=DesignSystem.Color.TRANSPARENT
+        # Title with select button row
+        title_frame: ctk.CTkFrame = ctk.CTkFrame(
+            master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
-        content_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
-        content_frame.grid_columnconfigure(index=0, weight=1)
+        title_frame.grid(  # type: ignore
+            row=0,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            sticky="ew",
+        )
+        title_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Label
-        source_files_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=content_frame,
-            text="Fichiers source",
+        # Title
+        title_label: ctk.CTkLabel = ctk.CTkLabel(
+            master=title_frame,
+            text=self._title,
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            anchor="w",
         )
-        source_files_label.grid(row=0, column=0, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.XS), pady=DesignSystem.Spacing.SM, sticky="w")  # type: ignore
+        title_label.grid(row=0, column=0, sticky="w")  # type: ignore
+
+        # Clear button
+        self._clear_button: ctk.CTkButton = ctk.CTkButton(
+            master=title_frame,
+            text="Réinitialiser",
+            text_color=DesignSystem.Color.GRAY,
+            fg_color=DesignSystem.Color.LESS_WHITE,
+            hover_color=DesignSystem.Color.LEAST_WHITE,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
+            corner_radius=DesignSystem.Roundness.SM,
+            height=DesignSystem.Height.SM,
+            command=self._clear_files,
+            width=DesignSystem.Width.SM,
+        )
+        self._clear_button.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE))  # type: ignore
 
         # Select files button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
-            master=content_frame,
+            master=title_frame,
             text="Sélectionner des fichiers",
             text_color=DesignSystem.Color.WHITE,
+            fg_color=DesignSystem.Color.PRIMARY,
+            hover_color=DesignSystem.Color.DARKER_PRIMARY,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BUTTON),
+            corner_radius=DesignSystem.Roundness.SM,
+            height=DesignSystem.Height.SM,
             command=self._select_files,
             width=DesignSystem.Width.MD,
         )
-        self._select_button.grid(row=0, column=2, padx=(DesignSystem.Spacing.XS, DesignSystem.Spacing.SM), pady=DesignSystem.Spacing.SM)  # type: ignore
+        self._select_button.grid(  # type: ignore
+            row=0, column=2, padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE)
+        )
 
         # Files listbox
         self._files_listbox: ctk.CTkTextbox = ctk.CTkTextbox(
-            master=content_frame, height=100, state="disabled"
+            master=self._content_frame,
+            height=100,
+            state="disabled",
+            corner_radius=DesignSystem.Roundness.SM,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
         self._files_listbox.grid(  # type: ignore
             row=1,
             column=0,
             columnspan=3,
-            padx=DesignSystem.Spacing.SM,
-            pady=(
-                DesignSystem.Spacing.NONE,
-                DesignSystem.Spacing.SM,
-            ),
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="ew",
         )
-
-        # Clear button - secondary style
-        self._clear_button: ctk.CTkButton = ctk.CTkButton(
-            master=content_frame,
-            text="Réinitialiser",
-            command=self._clear_files,
-            width=80,
-        )
-        self._clear_button.grid(row=2, column=2, padx=(DesignSystem.Spacing.XS, DesignSystem.Spacing.SM), pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="e")  # type: ignore
 
         self._update_display()
 
     def _select_files(self) -> None:
+        """Open file dialog to select files."""
         files: tuple[str, ...] | Literal[""] = filedialog.askopenfilenames(
             title="Sélectionner les fichiers source",
             filetypes=[
@@ -111,18 +125,24 @@ class FileSelector(ctk.CTkFrame):
             self._on_files_changed(self._selected_files)
 
     def _clear_files(self) -> None:
+        """Clear selected files."""
         self._selected_files = []
         self._update_display()
         self._on_files_changed(self._selected_files)
 
     def _update_display(self) -> None:
+        """Update the display of selected files."""
         self._files_listbox.configure(state="normal")  # type: ignore
         self._files_listbox.delete(index1="1.0", index2="end")  # type: ignore
 
         if self._selected_files:
             for file_path in self._selected_files:
-                self._files_listbox.insert(index="end", text=f"Fichier : {file_path.name}\n")  # type: ignore
-                self._files_listbox.insert(index="end", text=f"   {file_path.parent}\n\n")  # type: ignore
+                self._files_listbox.insert(  # type: ignore
+                    index="end", text=f"Fichier : {file_path.name}\n"
+                )
+                self._files_listbox.insert(  # type: ignore
+                    index="end", text=f"   {file_path.parent}\n\n"
+                )
         else:
             self._files_listbox.insert(index="end", text="Aucun fichier sélectionné")  # type: ignore
 

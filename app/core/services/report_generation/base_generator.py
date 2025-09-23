@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     )
 
 
-class ReportGenerator(ABC):
+class BaseGenerator(ABC):
     __slots__ = (
         "_file_io_service",
         "_data_repository",

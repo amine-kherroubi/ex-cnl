@@ -17,7 +17,7 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation.factories.report_generator_factory import (
     ReportGeneratorFactory,
 )
-from app.core.services.report_generation.base.report_generator import ReportGenerator
+from app.core.services.report_generation.base_generator import BaseGenerator
 from app.core.utils.logging_setup import get_logger
 
 
@@ -74,7 +74,7 @@ class CoreFacade:
             self._logger.debug(f"Report category: {report_specification.category}")
 
             # Create generator and generate report
-            generator: ReportGenerator = ReportGeneratorFactory.create_generator(
+            generator: BaseGenerator = ReportGeneratorFactory.create_generator(
                 report_name=report_name,
                 file_io_service=self._file_io_service,
                 data_repository=self._data_repository,
