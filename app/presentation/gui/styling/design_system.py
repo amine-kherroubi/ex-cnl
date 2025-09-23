@@ -66,7 +66,7 @@ class DesignSystem(object):
         MD = 8
 
     class Width(IntEnum):
-        XS = 50
+        XS = 36
         SM = 100
         MD = 200
 

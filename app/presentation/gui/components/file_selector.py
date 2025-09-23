@@ -103,8 +103,22 @@ class FileSelector(BaseComponent):
             row=1,
             column=0,
             columnspan=3,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="ew",
+        )
+
+        # Information text
+        information: ctk.CTkLabel = ctk.CTkLabel(
+            master=self._content_frame,
+            text="Ajoutez vos fichiers Excel pour générer le rapport",
+            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            text_color=DesignSystem.Color.GRAY,
+        )
+        information.grid(  # type: ignore
+            row=2,
+            columnspan=3,
+            column=0,
+            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
+            sticky="w",
         )
 
         self._update_display()

@@ -38,7 +38,7 @@ class SituationFinanciereReportView(BaseReportView):
         program_title: ctk.CTkLabel = ctk.CTkLabel(
             master=program_frame,
             text="Programme cible",
-            font=ctk.CTkFont(size=DesignSystem.FontSize.LABEL, weight="bold"),
+            font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
         )
         program_title.grid(row=0, column=0, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
 

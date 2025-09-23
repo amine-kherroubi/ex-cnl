@@ -67,19 +67,36 @@ class OutputSelector(BaseComponent):
             width=DesignSystem.Width.MD,
         )
         self._select_button.grid(  # type: ignore
-            row=0, column=1, padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE)
+            row=0,
+            column=1,
+            padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE),
+            sticky="ew",
         )
 
         # Path display
         self._path_entry: ctk.CTkEntry = ctk.CTkEntry(
             master=self._content_frame,
             placeholder_text="Aucun répertoire sélectionné",
-            state="readonly",
             corner_radius=DesignSystem.Roundness.SM,
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        self._path_entry.grid(row=1, column=0, sticky="ew")  # type: ignore
+        self._path_entry.grid(row=1, column=0, columnspan=2, sticky="ew")  # type: ignore
+
+        # Information text
+        information: ctk.CTkLabel = ctk.CTkLabel(
+            master=self._content_frame,
+            text="Choisissez le répertoire où sera enregistré le rapport généré",
+            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            text_color=DesignSystem.Color.GRAY,
+        )
+        information.grid(  # type: ignore
+            row=2,
+            columnspan=2,
+            column=0,
+            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
+            sticky="w",
+        )
 
     def _select_folder(self) -> None:
         """Open directory dialog to select output folder."""
@@ -101,5 +118,3 @@ class OutputSelector(BaseComponent):
             self._path_entry.insert(index=0, string=str(self._output_path))  # type: ignore
         else:
             self._path_entry.insert(index=0, string="")  # type: ignore
-
-        self._path_entry.configure(state="readonly")  # type: ignore

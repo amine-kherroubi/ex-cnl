@@ -110,7 +110,7 @@ class BaseReportView(ctk.CTkFrame):
         # Back button - styled to match design system
         self._back_button = ctk.CTkButton(
             master=header_frame,
-            text="←",
+            text="<",
             text_color=DesignSystem.Color.WHITE,
             fg_color=DesignSystem.Color.GRAY,
             hover_color=DesignSystem.Color.DARKER_GRAY,
@@ -120,7 +120,7 @@ class BaseReportView(ctk.CTkFrame):
             width=DesignSystem.Width.XS,
             height=DesignSystem.Height.SM,
         )
-        self._back_button.grid(row=0, column=0, padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM), sticky="w")  # type: ignore
+        self._back_button.grid(row=0, column=0, padx=DesignSystem.Spacing.NONE, sticky="w")  # type: ignore
 
         # Report info frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
@@ -136,7 +136,7 @@ class BaseReportView(ctk.CTkFrame):
             font=ctk.CTkFont(size=DesignSystem.FontSize.H2, weight="bold"),
             text_color=DesignSystem.Color.BLACK,
         )
-        title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
+        title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
 
     def _setup_common_components(self) -> None:
         """Setup components common to all reports."""

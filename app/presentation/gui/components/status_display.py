@@ -46,6 +46,21 @@ class StatusDisplay(ctk.CTkFrame):
         )
         self._status_text.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="nsew")  # type: ignore
 
+        # Information text
+        information: ctk.CTkLabel = ctk.CTkLabel(
+            master=self,
+            text="Les messages de progression et d’erreur apparaîtront ici",
+            font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
+            text_color=DesignSystem.Color.GRAY,
+        )
+        information.grid(  # type: ignore
+            row=2,
+            columnspan=2,
+            column=0,
+            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
+            sticky="w",
+        )
+
         # Initialize with welcome message
         self.add_message(
             message="Prêt à générer le rapport", message_type="information"
