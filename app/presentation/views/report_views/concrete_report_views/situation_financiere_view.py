@@ -8,6 +8,7 @@ from app.core.domain.models.report_specification import ReportSpecification
 from app.presentation.controllers.report_controller import ReportController
 from app.presentation.views.report_views.base_report_view import BaseReportView
 from app.presentation.components.programme_selector import ProgrammeSelector
+from app.presentation.styling.design_system import DesignSystem
 
 
 class SituationFinanciereView(BaseReportView):
@@ -32,7 +33,7 @@ class SituationFinanciereView(BaseReportView):
             parent=self._scrollable_frame,
             on_programme_changed=self._on_programme_changed,
         )
-        self._programme_selector.grid(row=self._next_row, column=0, sticky="ew")  # type: ignore
+        self._programme_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
     def _on_programme_changed(self, selected_program: str | None) -> None:

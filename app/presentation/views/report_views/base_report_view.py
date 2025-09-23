@@ -114,7 +114,7 @@ class BaseReportView(ctk.CTkFrame):
         # Back button - styled to match design system
         self._back_button = ctk.CTkButton(
             master=header_frame,
-            text="<",
+            text="Retour",
             text_color=DesignSystem.Color.WHITE,
             fg_color=DesignSystem.Color.GRAY,
             hover_color=DesignSystem.Color.DARKER_GRAY,
@@ -125,7 +125,7 @@ class BaseReportView(ctk.CTkFrame):
                 weight="bold",
             ),
             command=self._on_back,
-            width=DesignSystem.Width.XS,
+            width=DesignSystem.Width.SM,
             height=DesignSystem.Height.SM,
         )
         self._back_button.grid(row=0, column=0, padx=DesignSystem.Spacing.NONE, sticky="w")  # type: ignore

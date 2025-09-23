@@ -18,6 +18,7 @@ class ProgrammeSelector(BaseComponent):
         "_programme_selector",
         "_selected_program",
         "_programme_info_label",
+        "_programme_var",
     )
 
     def __init__(
@@ -27,6 +28,14 @@ class ProgrammeSelector(BaseComponent):
     ) -> None:
         self._on_programme_changed: Callable[[str | None], None] = on_programme_changed
         self._selected_program: str | None = None
+
+        # Initialize variable for ComboBox
+        programme_names: list[str] = [
+            programme.name for programme in RURAL_HOUSING_PROGRAMMES
+        ]
+        default_value = programme_names[0] if programme_names else ""
+        self._programme_var: ctk.StringVar = ctk.StringVar(value=default_value)
+        self._selected_program = default_value if programme_names else None
 
         super().__init__(parent, "Programme cible")
 
@@ -71,15 +80,17 @@ class ProgrammeSelector(BaseComponent):
             sticky="w",
         )
 
-        # Programme selector
+        # Programme selector - Changed from CTkOptionMenu to CTkComboBox
         programme_names: list[str] = [
             programme.name for programme in RURAL_HOUSING_PROGRAMMES
         ]
 
-        self._programme_selector: ctk.CTkOptionMenu = ctk.CTkOptionMenu(
+        self._programme_selector: ctk.CTkComboBox = ctk.CTkComboBox(
             master=self._content_frame,
             values=programme_names,
-            command=self._handle_programme_selection,
+            variable=self._programme_var,
+            command=lambda _: self._handle_programme_selection(),
+            width=DesignSystem.Width.MD,  # Same as DateSelector
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
@@ -87,7 +98,9 @@ class ProgrammeSelector(BaseComponent):
             dropdown_font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
             ),
-            corner_radius=DesignSystem.Roundness.SM,
+            state="readonly",  # Same as DateSelector
+            border_width=DesignSystem.BorderWidth.XS,  # Same as DateSelector
+            corner_radius=DesignSystem.Roundness.SM,  # Same as DateSelector
         )
         self._programme_selector.grid(  # type: ignore
             row=2,
@@ -95,11 +108,6 @@ class ProgrammeSelector(BaseComponent):
             pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
             sticky="ew",
         )
-
-        # Set default selection if programs are available
-        if programme_names:
-            self._programme_selector.set(programme_names[0])
-            self._selected_program = programme_names[0]
 
         # Programme info display frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
@@ -135,15 +143,15 @@ class ProgrammeSelector(BaseComponent):
         if programme_names:
             self._on_programme_changed(self._selected_program)
 
-    def _handle_programme_selection(self, selected_program: str) -> None:
+    def _handle_programme_selection(self) -> None:
         """Handle programme selection change."""
-        self._selected_program = selected_program
+        self._selected_program = self._programme_var.get()
 
         # Update programme info display
         self._programme_info_label.configure(text=self._get_programme_info_text())  # type: ignore
 
         # Notify parent of change
-        self._on_programme_changed(selected_program)
+        self._on_programme_changed(self._selected_program)
 
     def _get_programme_info_text(self) -> str:
         """Get information text for the currently selected programme."""
@@ -172,5 +180,5 @@ class ProgrammeSelector(BaseComponent):
         ]
 
         if programme_names:
-            self._programme_selector.set(programme_names[0])
-            self._handle_programme_selection(programme_names[0])
+            self._programme_var.set(programme_names[0])
+            self._handle_programme_selection()
