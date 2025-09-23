@@ -103,7 +103,7 @@ class RequiredFilesComponent(BaseComponent):
         entry_frame.grid(  # type: ignore
             row=row,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XS),
             sticky="ew",
         )  # type: ignore
         entry_frame.grid_columnconfigure(index=0, weight=1)
@@ -123,8 +123,8 @@ class RequiredFilesComponent(BaseComponent):
         pattern_label.grid(  # type: ignore
             row=0,
             column=0,
-            padx=DesignSystem.Spacing.MD,
-            pady=(DesignSystem.Spacing.MD, DesignSystem.Spacing.XS),
+            padx=DesignSystem.Spacing.SM,
+            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
             sticky="w",
         )  # type: ignore
 
@@ -142,7 +142,7 @@ class RequiredFilesComponent(BaseComponent):
         table_label.grid(  # type: ignore
             row=1,
             column=0,
-            padx=DesignSystem.Spacing.MD,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
+            padx=DesignSystem.Spacing.SM,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="w",
         )  # type: ignore
