@@ -57,7 +57,7 @@ class RequiredFilesComponent(BaseComponent):
 
         information: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
-            text="La génération de ce rapport nécessite les fichiers Excel ci-dessus",
+            text="La génération de ce rapport nécessite les fichiers Excel ci-dessous",
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.CAPTION,
