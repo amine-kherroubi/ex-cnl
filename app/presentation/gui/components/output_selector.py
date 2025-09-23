@@ -28,8 +28,8 @@ class OutputSelector(BaseComponent):
 
     def _setup_content(self) -> None:
         """Set up the output selector content."""
-        # Configure grid
-        self._content_frame.grid_columnconfigure(index=1, weight=1)
+        # Configure grid - column 0 will expand to fill space
+        self._content_frame.grid_columnconfigure(index=0, weight=1)
 
         # Title with select button row
         title_frame: ctk.CTkFrame = ctk.CTkFrame(
@@ -53,7 +53,7 @@ class OutputSelector(BaseComponent):
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Select folder button
+        # Select folder button - now in column 1 (fixed width)
         self._select_button: ctk.CTkButton = ctk.CTkButton(
             master=title_frame,
             text="Sélectionner un répertoire",
@@ -70,7 +70,6 @@ class OutputSelector(BaseComponent):
             row=0,
             column=1,
             padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE),
-            sticky="ew",
         )
 
         # Path display
@@ -81,7 +80,7 @@ class OutputSelector(BaseComponent):
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        self._path_entry.grid(row=1, column=0, columnspan=2, sticky="ew")  # type: ignore
+        self._path_entry.grid(row=1, column=0, sticky="ew")  # type: ignore
 
         # Information text
         information: ctk.CTkLabel = ctk.CTkLabel(
@@ -92,7 +91,6 @@ class OutputSelector(BaseComponent):
         )
         information.grid(  # type: ignore
             row=2,
-            columnspan=2,
             column=0,
             pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
             sticky="w",

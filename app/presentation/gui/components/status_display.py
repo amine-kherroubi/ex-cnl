@@ -8,54 +8,63 @@ from typing import Any, Literal, TypeAlias
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
+from app.presentation.gui.components.base_component import BaseComponent
 from app.presentation.gui.styling.design_system import DesignSystem
 
 MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
 
 
-class StatusDisplay(ctk.CTkFrame):
+class StatusDisplay(BaseComponent):
+    """Component for displaying status messages and progress information."""
+
     __slots__ = ("_status_text",)
 
     def __init__(self, parent: Any) -> None:
-        super().__init__(master=parent)  # type: ignore
+        super().__init__(parent, "Statut")
 
-        self._setup_ui()
-
-    def _setup_ui(self) -> None:
-        # Self configuration
-        self.configure(  # type: ignore
-            fg_color=DesignSystem.Color.WHITE,
-            corner_radius=DesignSystem.Roundness.MD,
-        )
-
+    def _setup_content(self) -> None:
+        """Set up the status display content."""
         # Configure grid
-        self.grid_columnconfigure(index=0, weight=1)
-        self.grid_rowconfigure(index=1, weight=1)
+        self._content_frame.grid_columnconfigure(index=0, weight=1)
+        self._content_frame.grid_rowconfigure(index=1, weight=1)
 
-        # Label
-        label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
-            text="Statut",
+        # Title
+        title: ctk.CTkLabel = ctk.CTkLabel(
+            master=self._content_frame,
+            text=self._title,
+            text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(size=DesignSystem.FontSize.H3, weight="bold"),
+            anchor="w",
         )
-        label.grid(row=0, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
+        title.grid(  # type: ignore
+            row=0,
+            column=0,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            sticky="w",
+        )
 
         # Status text area
         self._status_text: ctk.CTkTextbox = ctk.CTkTextbox(
-            master=self, state="disabled"
+            master=self._content_frame,
+            state="disabled",
+            corner_radius=DesignSystem.Roundness.SM,
+            font=ctk.CTkFont(size=DesignSystem.FontSize.BODY),
         )
-        self._status_text.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="nsew")  # type: ignore
+        self._status_text.grid(  # type: ignore
+            row=1,
+            column=0,
+            sticky="nsew",
+        )
 
         # Information text
         information: ctk.CTkLabel = ctk.CTkLabel(
-            master=self,
-            text="Les messages de progression et d’erreur apparaîtront ici",
+            master=self._content_frame,
+            text="Les messages de progression et d'erreur apparaîtront ici",
             font=ctk.CTkFont(size=DesignSystem.FontSize.CAPTION),
             text_color=DesignSystem.Color.GRAY,
         )
         information.grid(  # type: ignore
             row=2,
-            columnspan=2,
             column=0,
             pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
             sticky="w",
@@ -69,6 +78,7 @@ class StatusDisplay(ctk.CTkFrame):
     def add_message(
         self, message: str, message_type: MessageType = "information"
     ) -> None:
+        """Add a message to the status display with timestamp and type indicator."""
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
         indications_map: dict[MessageType, tuple[str, str]] = {
@@ -94,6 +104,7 @@ class StatusDisplay(ctk.CTkFrame):
         self._status_text.configure(state="disabled")  # type: ignore
 
     def clear_messages(self) -> None:
+        """Clear all messages from the status display."""
         self._status_text.configure(state="normal")  # type: ignore
         self._status_text.delete(index1="1.0", index2="end")  # type: ignore
         self._status_text.configure(state="disabled")  # type: ignore

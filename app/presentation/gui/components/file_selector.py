@@ -59,7 +59,7 @@ class FileSelector(BaseComponent):
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Clear button
+        # Clear button - starts with disabled styling
         self._clear_button: ctk.CTkButton = ctk.CTkButton(
             master=title_frame,
             text="Réinitialiser",
@@ -72,7 +72,7 @@ class FileSelector(BaseComponent):
             command=self._clear_files,
             width=DesignSystem.Width.SM,
         )
-        self._clear_button.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE))  # type: ignore
+        self._clear_button.grid(row=0, column=1)  # type: ignore
 
         # Select files button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
@@ -88,7 +88,7 @@ class FileSelector(BaseComponent):
             width=DesignSystem.Width.MD,
         )
         self._select_button.grid(  # type: ignore
-            row=0, column=2, padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE)
+            row=0, column=2, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE)
         )
 
         # Files listbox
@@ -162,8 +162,20 @@ class FileSelector(BaseComponent):
 
         self._files_listbox.configure(state="disabled")  # type: ignore
 
-        # Update clear button state
+        # Update clear button state and styling
         if self._selected_files:
-            self._clear_button.configure(state="normal")  # type: ignore
+            # Enable button with primary styling (yellow)
+            self._clear_button.configure(  # type: ignore
+                state="normal",
+                text_color=DesignSystem.Color.WHITE,
+                fg_color=DesignSystem.Color.GRAY,
+                hover_color=DesignSystem.Color.DARKER_GRAY,
+            )
         else:
-            self._clear_button.configure(state="disabled")  # type: ignore
+            # Disable button with muted styling (gray)
+            self._clear_button.configure(  # type: ignore
+                state="disabled",
+                text_color=DesignSystem.Color.GRAY,
+                fg_color=DesignSystem.Color.LESS_WHITE,
+                hover_color=DesignSystem.Color.LEAST_WHITE,
+            )
