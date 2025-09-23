@@ -29,8 +29,7 @@
 │   │   │       └── file_io_service.py
 │   │   ├── services
 │   │   │   └── report_generation
-│   │   │       ├── base
-│   │   │       │   └── report_generator.py
+│   │   │       ├── base_generator.py
 │   │   │       ├── factories
 │   │   │       │   └── report_generator_factory.py
 │   │   │       └── generators
@@ -46,28 +45,29 @@
 │   └── presentation
 │       └── gui
 │           ├── components
+│           │   ├── base_component.py
 │           │   ├── date_selector.py
-│           │   ├── email_dialog.py
 │           │   ├── file_selector.py
 │           │   ├── output_selector.py
 │           │   ├── report_card.py
-│           │   ├── report_selector.py
 │           │   └── status_display.py
 │           ├── controllers
 │           │   └── report_controller.py
-│           ├── main_window.py
 │           ├── models
 │           │   └── gui_state.py
 │           ├── styling
 │           │   ├── design_system.py
 │           │   └── theme.json
-│           └── views
-│               ├── menu_view.py
-│               └── report_views
-│                   ├── activite_mensuelle_report_view.py
-│                   ├── base_report_view.py
-│                   ├── report_view_factory.py
-│                   └── situation_financiere_report_view.py
+│           ├── views
+│           │   ├── menu_view.py
+│           │   └── report_views
+│           │       ├── activite_mensuelle_report_view.py
+│           │       ├── base_report_view.py
+│           │       ├── report_view_factory.py
+│           │       └── situation_financiere_report_view.py
+│           └── windows
+│               ├── main_window.py
+│               └── success_window.py
 ├── project_structure.txt
 └── requirements.txt
 

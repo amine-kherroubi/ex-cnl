@@ -7,7 +7,7 @@ from customtkinter import CTk  # type: ignore
 from app.core.config import AppConfig
 from app.core.utils.logging_setup import LoggingSetup
 from app.core.core_facade import CoreFacade
-from app.presentation.gui.main_window import MainWindow
+from app.presentation.gui.windows.main_window import MainWindow
 
 
 def main() -> None:
