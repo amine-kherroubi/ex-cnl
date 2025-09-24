@@ -704,6 +704,9 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.set_column_widths(sheet, column_widths)
 
+        # Apply number formatting to monetary amount columns
+        self._apply_number_formatting(sheet)
+
         ExcelStylingService.setup_page_layout(
             sheet,
             orientation="landscape",
@@ -720,3 +723,23 @@ class SituationFinanciereGenerator(BaseGenerator):
         )
 
         self._logger.info("Final formatting completed successfully")
+
+    def _apply_number_formatting(self, sheet: Worksheet) -> None:
+        """Apply number formatting to monetary amount columns to prevent scientific notation."""
+        self._logger.debug("Applying number formatting to monetary columns")
+
+        # Define the monetary columns that need special formatting
+        monetary_columns = ["G", "M", "Q", "R"]  # Montants columns and cumul
+
+        # Get the data range (from first data row to last data row including totals)
+        data_start_row = 6  # Adjust based on your header structure
+        data_end_row = self._current_row  # Current row after all data has been added
+
+        for col in monetary_columns:
+            # Apply number format to the entire column range
+            for row in range(data_start_row, data_end_row):
+                cell = sheet[f"{col}{row}"]
+                # Set number format to display as integer (no decimals, no scientific notation)
+                cell.number_format = "#,##0"
+
+        self._logger.info("Number formatting applied to monetary columns")

@@ -35,14 +35,13 @@ class SuccessWindow(ctk.CTkToplevel):
         self.geometry(geometry_string="500x350")
         self.resizable(width=False, height=False)
 
-        # Make modal
+        # Set as child window
         self.transient(master=parent)  # type: ignore
-        self.grab_set()
 
         self._setup_ui()
 
-        # Focus on email entry
-        self._email_entry.focus()
+        # Focus on email entry after UI is set up
+        self.after(ms=10, func=lambda: self._email_entry.focus())
 
     def _setup_ui(self) -> None:
         # Configure grid
@@ -182,5 +181,4 @@ class SuccessWindow(ctk.CTkToplevel):
         )  # Reset to theme default
 
     def _close(self) -> None:
-        self.grab_release()
         self.destroy()
