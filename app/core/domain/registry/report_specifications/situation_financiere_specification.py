@@ -61,7 +61,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(CASE WHEN p.T3 > 0 THEN 1 ELSE 0 END) AS t_3,
                 (SUM(COALESCE(p.T1, 0)) + SUM(COALESCE(p.C1, 0)) + SUM(COALESCE(p.N1, 0)) +
                 SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
-                SUM(COALESCE(p.T3, 0))) * {aid_value} AS montant
+                SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
             WHERE p."Sous programme" = {programme}
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
@@ -82,7 +82,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(CASE WHEN p.T3 > 0 THEN 1 ELSE 0 END) AS t_3,
                 (SUM(COALESCE(p.T1, 0)) + SUM(COALESCE(p.C1, 0)) + SUM(COALESCE(p.N1, 0)) +
                 SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
-                SUM(COALESCE(p.T3, 0))) * {aid_value} AS montant
+                SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
             WHERE p."Sous programme" = {programme}
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
