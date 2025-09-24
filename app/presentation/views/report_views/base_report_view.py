@@ -388,7 +388,7 @@ class BaseReportView(ctk.CTkFrame):
         self._generate_button.configure(text="Générer le rapport")  # type: ignore
         self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore
-        self._show_email_dialog()
+        self._show_success_window()
 
     def _on_generation_error(self, error_message: str) -> None:
         self._status_display.add_message(
@@ -399,19 +399,11 @@ class BaseReportView(ctk.CTkFrame):
         self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore
 
-    def _show_email_dialog(self) -> None:
+    def _show_success_window(self) -> None:
         if not self._last_generated_file:
             return
 
         dialog: SuccessWindow = SuccessWindow(  # type: ignore
             parent=self,
-            file_path=str(self._last_generated_file),
-            on_send=self._send_email,
+            output_file_path=self._last_generated_file,
         )
-
-    def _send_email(self, recipients: list[str], file_path: str) -> None:
-        self._status_display.add_message(
-            message=f"L'email sera envoyé à : {', '.join(recipients)}",
-            message_type="succès",
-        )
-        print(f"Envoi de {file_path} à : {recipients}")
