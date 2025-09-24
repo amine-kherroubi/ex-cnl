@@ -32,20 +32,13 @@ class SuccessWindow(ctk.CTkToplevel):
 
         self._setup_window()
         self._setup_ui()
-        self._auto_size_window()  # Add this line
+        self._auto_size_window()
 
     def _setup_window(self) -> None:
         """Configure the window properties."""
         self.title("Rapport généré avec succès")
-        # Remove fixed geometry - will be set after UI creation
         self.resizable(False, False)
-
-        # Center the window on parent
         self.transient(self.master)  # type: ignore
-
-        self.grab_set()
-
-        # Style the window
         self.configure(fg_color=DesignSystem.Color.WHITE)  # type: ignore
 
         # Configure grid
@@ -54,7 +47,7 @@ class SuccessWindow(ctk.CTkToplevel):
 
     def _setup_ui(self) -> None:
         """Set up the user interface."""
-        # Main content frame (similar to BaseComponent styling)
+        # Main content frame
         self._content_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self,
             fg_color=DesignSystem.Color.WHITE,
@@ -69,11 +62,9 @@ class SuccessWindow(ctk.CTkToplevel):
             pady=DesignSystem.Spacing.XXL,
             sticky="nsew",
         )
-
-        # Configure content frame grid
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Inner content frame for consistent spacing
+        # Inner content frame
         inner_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -86,14 +77,14 @@ class SuccessWindow(ctk.CTkToplevel):
         )
         inner_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Success icon/title
+        # Success title
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=inner_frame,
             text="Rapport généré avec succès !",
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H3,
+                size=DesignSystem.FontSize.H1,
                 weight="bold",
             ),
         )
@@ -107,7 +98,7 @@ class SuccessWindow(ctk.CTkToplevel):
         # Success message
         message: ctk.CTkLabel = ctk.CTkLabel(
             master=inner_frame,
-            text="Le rapport a été généré et sauvegardé avec succès.",
+            text="Le rapport a été généré et sauvegardé dans le répertoire spécifié",
             text_color=DesignSystem.Color.BLACK,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL,
@@ -121,7 +112,7 @@ class SuccessWindow(ctk.CTkToplevel):
             sticky="ew",
         )
 
-        # File path info
+        # File path info frame
         file_info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=inner_frame,
             fg_color=DesignSystem.Color.LEAST_WHITE,
@@ -186,7 +177,7 @@ class SuccessWindow(ctk.CTkToplevel):
         button_frame.grid_columnconfigure(index=0, weight=1)
         button_frame.grid_columnconfigure(index=1, weight=1)
 
-        # Open file button
+        # Open file location button
         open_button: ctk.CTkButton = ctk.CTkButton(
             master=button_frame,
             text="Ouvrir l'emplacement du fichier",
@@ -215,13 +206,13 @@ class SuccessWindow(ctk.CTkToplevel):
             text="Fermer",
             command=self._close,
             height=DesignSystem.Height.SM,
-            fg_color=DesignSystem.Color.LIGHTER_GRAY,
-            hover_color=DesignSystem.Color.GRAY,
+            fg_color=DesignSystem.Color.GRAY,
+            hover_color=DesignSystem.Color.DARKER_GRAY,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.BUTTON,
             ),
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.WHITE,
             corner_radius=DesignSystem.Roundness.SM,
         )
         close_button.grid(  # type: ignore
@@ -233,59 +224,50 @@ class SuccessWindow(ctk.CTkToplevel):
 
     def _auto_size_window(self) -> None:
         """Automatically size the window based on its content."""
-        # Force the window to update and calculate its required size
         self.update_idletasks()
 
-        # Get the required size for all content
-        required_width = self.winfo_reqwidth()
-        required_height = self.winfo_reqheight()
+        required_width: int = self.winfo_reqwidth()
+        required_height: int = self.winfo_reqheight()
 
-        # Add some padding to ensure everything fits comfortably
-        padding = 20
-        final_width = required_width + padding
-        final_height = required_height + padding
+        padding: int = 20
+        final_width: int = required_width + padding
+        final_height: int = required_height + padding
 
-        # Set minimum size to prevent window from being too small
-        min_width = 450
-        min_height = 250
+        min_width: int = 450
+        min_height: int = 250
 
-        window_width = max(final_width, min_width)
-        window_height = max(final_height, min_height)
+        window_width: int = max(final_width, min_width)
+        window_height: int = max(final_height, min_height)
 
-        # Get parent window position for centering
+        # Calculate position for centering
         if self.master and hasattr(self.master, "winfo_x"):
-            parent_x = self.master.winfo_x()
-            parent_y = self.master.winfo_y()
-            parent_width = self.master.winfo_width()
-            parent_height = self.master.winfo_height()
+            parent_x: int = self.master.winfo_x()
+            parent_y: int = self.master.winfo_y()
+            parent_width: int = self.master.winfo_width()
+            parent_height: int = self.master.winfo_height()
 
-            # Center the dialog on the parent window
-            x = parent_x + (parent_width - window_width) // 2
-            y = parent_y + (parent_height - window_height) // 2
+            x: int = parent_x + (parent_width - window_width) // 2
+            y: int = parent_y + (parent_height - window_height) // 2
         else:
-            # Center on screen if no parent
-            screen_width = self.winfo_screenwidth()
-            screen_height = self.winfo_screenheight()
+            screen_width: int = self.winfo_screenwidth()
+            screen_height: int = self.winfo_screenheight()
             x = (screen_width - window_width) // 2
             y = (screen_height - window_height) // 2
 
-        # Set the window geometry
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
     def _open_output_file_location(self) -> None:
         """Open the directory containing the generated file."""
         try:
-            system = platform.system()
+            system: str = platform.system()
+            parent_dir: str = str(self._output_file_path.parent)
+
             if system == "Windows":
-                subprocess.run(
-                    ["explorer", str(self._output_file_path.parent)], check=True
-                )
+                subprocess.run(["explorer", parent_dir], check=True)
             elif system == "Darwin":  # macOS
-                subprocess.run(["open", str(self._output_file_path.parent)], check=True)
+                subprocess.run(["open", parent_dir], check=True)
             else:  # Linux and other Unix-like systems
-                subprocess.run(
-                    ["xdg-open", str(self._output_file_path.parent)], check=True
-                )
+                subprocess.run(["xdg-open", parent_dir], check=True)
         except Exception:
             # If directory opening fails, fail silently
             pass

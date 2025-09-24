@@ -99,15 +99,19 @@ class FileSelector(BaseComponent):
             row=0, column=2, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE)
         )
 
-        # Information text
+        # Information text - updated to reflect additive behavior
+        info_text: str = (
+            "Ajoutez les fichiers Excel nécessaires pour générer le rapport. "
+        )
         information: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
-            text="Ajoutez les fichiers Excel nécessaires pour générer le rapport",
+            text=info_text,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL,
                 size=DesignSystem.FontSize.CAPTION,
             ),
             text_color=DesignSystem.Color.GRAY,
+            wraplength=400,  # Allow text wrapping for longer description
         )
         information.grid(  # type: ignore
             row=1,
@@ -138,7 +142,7 @@ class FileSelector(BaseComponent):
         self._update_display()
 
     def _select_files(self) -> None:
-        """Open file dialog to select files."""
+        """Open file dialog to select files. New files are added to existing selection."""
         files: tuple[str, ...] | Literal[""] = filedialog.askopenfilenames(
             title="Sélectionner les fichiers source",
             filetypes=[
@@ -148,9 +152,25 @@ class FileSelector(BaseComponent):
         )
 
         if files:
-            self._selected_files = [Path(file) for file in files]
-            self._update_display()
-            self._on_files_changed(self._selected_files)
+            # Convert to Path objects
+            new_files: list[Path] = [Path(file) for file in files]
+
+            # Create a set of existing file paths for efficient duplicate checking
+            existing_paths: set[Path] = set(self._selected_files)
+
+            # Add only new files that aren't already selected
+            added_files: list[Path] = []
+            for file_path in new_files:
+                if file_path not in existing_paths:
+                    self._selected_files.append(file_path)
+                    added_files.append(file_path)
+
+            # Update display and notify callback if any new files were added
+            if (
+                added_files or not self._selected_files
+            ):  # Update even if no new files to refresh display
+                self._update_display()
+                self._on_files_changed(self._selected_files)
 
     def _clear_files(self) -> None:
         """Clear selected files."""
@@ -164,6 +184,12 @@ class FileSelector(BaseComponent):
         self._files_listbox.delete(index1="1.0", index2="end")  # type: ignore
 
         if self._selected_files:
+            # Show count of selected files
+            count_text: str = (
+                f"Fichiers sélectionnés ({len(self._selected_files)}):\n\n"
+            )
+            self._files_listbox.insert(index="end", text=count_text)  # type: ignore
+
             for file_path in self._selected_files:
                 self._files_listbox.insert(  # type: ignore
                     index="end", text=f"Fichier : {file_path.name}\n"
@@ -178,7 +204,7 @@ class FileSelector(BaseComponent):
 
         # Update clear button state and styling
         if self._selected_files:
-            # Enable button with primary styling (yellow)
+            # Enable button with primary styling
             self._clear_button.configure(  # type: ignore
                 state="normal",
                 text_color=DesignSystem.Color.WHITE,
@@ -186,7 +212,7 @@ class FileSelector(BaseComponent):
                 hover_color=DesignSystem.Color.DARKER_GRAY,
             )
         else:
-            # Disable button with muted styling (gray)
+            # Disable button with muted styling
             self._clear_button.configure(  # type: ignore
                 state="disabled",
                 text_color=DesignSystem.Color.GRAY,
