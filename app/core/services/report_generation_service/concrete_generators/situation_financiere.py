@@ -173,7 +173,6 @@ class SituationFinanciereGenerator(BaseGenerator):
                 "{subprogram}", f"'{self._target_subprogram.database_alias}'"  # type: ignore
             )
             .replace("{notification}", notification_value)
-            .replace("{aid_amount}", str(self._target_notification.aid_amount))  # type: ignore
             .replace("{year}", str(self._report_context.year))
             .replace("{month}", str(self._report_context.month.number))
         )
@@ -217,7 +216,7 @@ class SituationFinanciereGenerator(BaseGenerator):
                 f"Situation financière de la notification {notification_display} "  # type: ignore
                 f"du sous-programme {subprogram_display} par daira et par commune"  # type: ignore
             ),
-            font=ExcelStylingService.FONT_TITLE,
+            font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )
 
@@ -230,7 +229,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             self._current_row,
             self._current_row,
             value=f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
-            font=ExcelStylingService.FONT_HEADER,
+            font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )
 
@@ -240,9 +239,9 @@ class SituationFinanciereGenerator(BaseGenerator):
             sheet,
             "A",
             self._current_row,
-            font=ExcelStylingService.FONT_HEADER,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
             value=f"DL de {self._report_context.wilaya.value}",
+            font=ExcelStylingService.FONT_BOLD,
+            alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )
 
         self._current_row += 2
@@ -283,15 +282,15 @@ class SituationFinanciereGenerator(BaseGenerator):
         main_headers: List[Tuple[str, str]] = [
             ("A", "Daira"),
             ("B", "Commune"),
-            ("C", "Aides notifiées (1)"),
+            ("C", "Aides notifiées\n(1)"),
             ("D", "Montants notifiés"),
             ("E", "Aides inscrites"),
             ("F", "Montants inscrits"),
-            ("G", "Aides inscrites (2)"),
-            ("H", "Montants inscrits (3)"),
-            ("Q", "Cumul (6) = (4) + (5)"),
-            ("R", "Solde sur engagement (3) - (6)"),
-            ("S", "Reste à inscrire (1) - (2)"),
+            ("G", "Aides inscrites\n(2)"),
+            ("H", "Montants inscrits\n(3)"),
+            ("Q", "Cumul\n(6) = (4) + (5)"),
+            ("R", "Solde sur engagement\n(3) - (6)"),
+            ("S", "Reste à inscrire\n(1) - (2)"),
         ]
 
         for col, title in main_headers:
@@ -691,7 +690,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             self._current_row,
             self._current_row,
             value="Total général",
-            font=ExcelStylingService.FONT_NORMAL,
+            font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
             border=ExcelStylingService.BORDER_THIN,
         )
@@ -704,24 +703,24 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         column_widths: Dict[str, int] = {
             "A": 20,  # Daira
-            "B": 25,  # Commune
-            "C": 12,  # Aides notifiées
-            "D": 15,  # Montants notifiés
-            "E": 12,  # Aides inscrites
-            "F": 15,  # Montants inscrits
-            "G": 12,  # Aides inscrites (2)
-            "H": 15,  # Montants inscrits (3)
-            "I": 8,  # T1 (prev)
-            "J": 8,  # T2 (prev)
-            "K": 8,  # T3 (prev)
-            "L": 15,  # Montant (4)
-            "M": 8,  # T1 (curr)
-            "N": 8,  # T2 (curr)
-            "O": 8,  # T3 (curr)
-            "P": 15,  # Montant (5)
-            "Q": 15,  # Cumul
-            "R": 20,  # Solde
-            "S": 20,  # Reste
+            "B": 20,  # Commune
+            "C": 8,  # Aides notifiées
+            "D": 12,  # Montants notifiés
+            "E": 8,  # Aides inscrites
+            "F": 12,  # Montants inscrits
+            "G": 8,  # Aides inscrites (2)
+            "H": 12,  # Montants inscrits (3)
+            "I": 6,  # T1 (prev)
+            "J": 6,  # T2 (prev)
+            "K": 6,  # T3 (prev)
+            "L": 12,  # Montant (4)
+            "M": 6,  # T1 (curr)
+            "N": 6,  # T2 (curr)
+            "O": 6,  # T3 (curr)
+            "P": 12,  # Montant (5)
+            "Q": 12,  # Cumul
+            "R": 12,  # Solde
+            "S": 12,  # Reste
         }
 
         ExcelStylingService.set_column_widths(sheet, column_widths)
@@ -748,15 +747,17 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _apply_number_formatting(self, sheet: Worksheet) -> None:
         self._logger.debug("Applying French number formatting to monetary columns")
 
-        monetary_columns = ["F", "L", "P", "Q"]  # Montants columns and cumul
+        monetary_columns = ["F", "L", "P", "Q", "R"]
 
-        data_start_row = 6  # Adjust based on your header structure
-        data_end_row = self._current_row  # Current row after all data has been added
+        data_start_row: int = 6
+        data_end_row: int = (
+            self._current_row
+        )  # Current row after all data has been added
 
         for col in monetary_columns:
             for row in range(data_start_row, data_end_row):
-                cell = sheet[f"{col}{row}"]
+                cell: Any = sheet[f"{col}{row}"]
                 # French number format with space as thousands separator
-                cell.number_format = "# ##0"
+                cell.number_format = "#,##0"
 
         self._logger.info("French number formatting applied to monetary columns")

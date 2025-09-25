@@ -62,6 +62,11 @@ class FileIOService(object):
             if isinstance(data, Workbook):
                 self._logger.debug("Saving Excel workbook")
                 output_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+                if output_file_path.exists():
+                    self._logger.debug("File already exists, deleting before saving")
+                    output_file_path.unlink()
+
                 data.save(output_file_path)
                 self._logger.info(f"Workbook saved successfully to {output_file_path}")
             else:

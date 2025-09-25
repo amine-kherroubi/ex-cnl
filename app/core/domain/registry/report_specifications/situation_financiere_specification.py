@@ -15,14 +15,14 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
     display_name="Situation financière d'un sous-programme",
     category=ReportCategory.HABITAT_RURAL,
     description=(
-        "Présente la situation financière détaillée d’un sous-programme de logement rural, "
+        "Présente la situation financière détaillée d'un sous-programme de logement rural, "
         "par daira et par commune. Inclut les engagements, les consommations, "
         "les cumuls et les restes relatifs à ce sous-programme."
     ),
     required_files=[
         RequiredFile(
             name="Journal des paiements",
-            pattern=r"^Journal_paiements__Agence_[A-Z+_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+            pattern=r"^Journal_paiements__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
             readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
             table_name="paiements",
         ),
@@ -37,62 +37,104 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
     generator=SituationFinanciereGenerator,
     queries={
         "nb_aides_et_montants_inscrits_par_daira_et_commune": """
+            WITH decision_summary AS (
+                SELECT
+                    d."Daira du projet",
+                    d."Commune du projet",
+                    d."Code décision",
+                    SUM(d."Financier") AS net_amount,
+                    SUM(d."Physique") AS decision_value
+                FROM decisions d
+                WHERE d."Sous programme" = {subprogram}
+                AND d."Notification" IN ({notification})
+                GROUP BY
+                    d."Daira du projet",
+                    d."Commune du projet",
+                    d."Code décision"
+                HAVING SUM(d."Physique") > 0
+            )
             SELECT
-                d."Daira du projet",
-                d."Commune du projet",
+                ds."Daira du projet",
+                ds."Commune du projet",
                 COUNT(*) AS nb_aides_inscrites,
-                COUNT(*) * {aid_amount} AS montant_inscrits
-            FROM decisions d
-            WHERE d."Sous programme" = {subprogram}
-            AND d."Notification" IN ({notification})
+                SUM(ds.net_amount) AS montant_inscrits
+            FROM decision_summary ds
             GROUP BY
-                d."Daira du projet",
-                d."Commune du projet"
+                ds."Daira du projet",
+                ds."Commune du projet"
         """,
         "consommations_cumulees_fin_annee_precedente": """
+            WITH payment_summary AS (
+                SELECT
+                    p."Daira",
+                    p."Commune de projet",
+                    p."Code OV",
+                    SUM(COALESCE(p.T1, 0)) AS net_t1,
+                    SUM(COALESCE(p.C1, 0)) AS net_c1,
+                    SUM(COALESCE(p.N1, 0)) AS net_n1,
+                    SUM(COALESCE(p.T2, 0)) AS net_t2,
+                    SUM(COALESCE(p.C2, 0)) AS net_c2,
+                    SUM(COALESCE(p.N2, 0)) AS net_n2,
+                    SUM(COALESCE(p.T3, 0)) AS net_t3,
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Sous programme" = {subprogram}
+                AND p."Notification" IN ({notification})
+                AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
+                GROUP BY
+                    p."Daira",
+                    p."Commune de projet",
+                    p."Code OV",
+                HAVING decision_value > 0
+            )
             SELECT
-                p.Daira,
-                p."Commune de projet",
-                SUM(CASE WHEN p.T1 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.C1 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.N1 > 0 THEN 1 ELSE 0 END) AS t_1,
-                SUM(CASE WHEN p.T2 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.C2 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.N2 > 0 THEN 1 ELSE 0 END) AS t_2,
-                SUM(CASE WHEN p.T3 > 0 THEN 1 ELSE 0 END) AS t_3,
-                (SUM(COALESCE(p.T1, 0)) + SUM(COALESCE(p.C1, 0)) + SUM(COALESCE(p.N1, 0)) +
-                SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
-                SUM(COALESCE(p.T3, 0))) AS montant
-            FROM paiements p
-            WHERE p."Sous programme" = {subprogram}
-            AND p."Notification" IN ({notification})
-            AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
+                ps."Daira",
+                ps."Commune de projet",
+                SUM(CASE WHEN (ps.net_t1 + ps.net_c1 + ps.net_n1) > 0 THEN 1 ELSE 0 END) AS t_1,
+                SUM(CASE WHEN (ps.net_t2 + ps.net_c2 + ps.net_n2) > 0 THEN 1 ELSE 0 END) AS t_2,
+                SUM(CASE WHEN ps.net_t3 > 0 THEN 1 ELSE 0 END) AS t_3,
+                SUM(ps.net_t1 + ps.net_c1 + ps.net_n1 + ps.net_t2 + ps.net_c2 + ps.net_n2 + ps.net_t3) AS montant
+            FROM payment_summary ps
             GROUP BY
-                p.Daira,
-                p."Commune de projet"
+                ps."Daira",
+                ps."Commune de projet"
         """,
         "consommations_annee_actuelle_jusqua_mois_actuel": """
+            WITH payment_summary AS (
+                SELECT
+                    p."Daira",
+                    p."Commune de projet",
+                    p."Code OV",
+                    SUM(COALESCE(p.T1, 0)) AS net_t1,
+                    SUM(COALESCE(p.C1, 0)) AS net_c1,
+                    SUM(COALESCE(p.N1, 0)) AS net_n1,
+                    SUM(COALESCE(p.T2, 0)) AS net_t2,
+                    SUM(COALESCE(p.C2, 0)) AS net_c2,
+                    SUM(COALESCE(p.N2, 0)) AS net_n2,
+                    SUM(COALESCE(p.T3, 0)) AS net_t3,
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Sous programme" = {subprogram}
+                AND p."Notification" IN ({notification})
+                AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
+                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
+                GROUP BY
+                    p."Daira",
+                    p."Commune de projet",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT
-                p.Daira,
-                p."Commune de projet",
-                SUM(CASE WHEN p.T1 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.C1 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.N1 > 0 THEN 1 ELSE 0 END) AS t_1,
-                SUM(CASE WHEN p.T2 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.C2 > 0 THEN 1 ELSE 0 END) +
-                SUM(CASE WHEN p.N2 > 0 THEN 1 ELSE 0 END) AS t_2,
-                SUM(CASE WHEN p.T3 > 0 THEN 1 ELSE 0 END) AS t_3,
-                (SUM(COALESCE(p.T1, 0)) + SUM(COALESCE(p.C1, 0)) + SUM(COALESCE(p.N1, 0)) +
-                SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
-                SUM(COALESCE(p.T3, 0))) AS montant
-            FROM paiements p
-            WHERE p."Sous programme" = {subprogram}
-            AND p."Notification" IN ({notification})
-            AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
-            AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
+                ps."Daira",
+                ps."Commune de projet",
+                SUM(CASE WHEN (ps.net_t1 + ps.net_c1 + ps.net_n1) > 0 THEN 1 ELSE 0 END) AS t_1,
+                SUM(CASE WHEN (ps.net_t2 + ps.net_c2 + ps.net_n2) > 0 THEN 1 ELSE 0 END) AS t_2,
+                SUM(CASE WHEN ps.net_t3 > 0 THEN 1 ELSE 0 END) AS t_3,
+                SUM(ps.net_t1 + ps.net_c1 + ps.net_n1 + ps.net_t2 + ps.net_c2 + ps.net_n2 + ps.net_t3) AS montant
+            FROM payment_summary ps
             GROUP BY
-                p.Daira,
-                p."Commune de projet"
+                ps."Daira",
+                ps."Commune de projet"
         """,
     },
 )

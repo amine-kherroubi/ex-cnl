@@ -11,11 +11,10 @@ from openpyxl.utils import get_column_letter
 
 @final
 class ExcelStylingService(object):
+    __slots__ = ()
 
-    FONT_NORMAL = Font(name="Arial", size=9, bold=False)
-    FONT_BOLD = Font(name="Arial", size=9, bold=False)
-    FONT_HEADER = Font(name="Arial", size=9, bold=False)
-    FONT_TITLE = Font(name="Arial", size=9, bold=False)
+    FONT_NORMAL = Font(name="Arial", size=8, bold=False)
+    FONT_BOLD = Font(name="Arial", size=8, bold=True)
 
     BORDER_THIN = Border(
         left=Side(style="thin"),

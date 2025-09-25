@@ -34,7 +34,7 @@ DAIRAS_TIZI_OUZOU: Final[set[str]] = {
 }
 
 COMMUNES_TIZI_OUZOU: Final[set[str]] = {
-    "01_TIZI_OUZOU",
+    "01_TIZI OUZOU",
     "02_AIN EL HAMMAM",
     "03_AKBIL",
     "04_FREHA",
@@ -55,7 +55,7 @@ COMMUNES_TIZI_OUZOU: Final[set[str]] = {
     "19_ILOULA OUMALOU",
     "20_YAKOUREN",
     "21_LARBA NAIT IRATHEN",
-    "22_TIZI_RACHED",
+    "22_TIZI RACHED",
     "23_ZEKRI",
     "24_OUAGUENOUN",
     "25_AIN ZAOUIA",
@@ -89,7 +89,7 @@ COMMUNES_TIZI_OUZOU: Final[set[str]] = {
     "53_AGHRIB",
     "54_IFLISSEN",
     "55_BOUDJIMA",
-    "56_AIT YAHIA MOU",
+    "56_AIT YAHIA MOU,",
     "57_SOUK EL TENINE",
     "58_AIT KHELILI",
     "59_SIDI NAAMANE",
@@ -155,7 +155,7 @@ DAIRA_COMMUNE_MAPPING: Final[dict[str, list[str]]] = {
     ],
     "DRAA EL MIZAN": [
         "25_AIN ZAOUIA",
-        "56_AIT YAHIA MOU",
+        "56_AIT YAHIA MOU,",
         "10_DRAA EL MIZAN",
         "14_FRIKAT",
     ],
@@ -208,11 +208,11 @@ DAIRA_COMMUNE_MAPPING: Final[dict[str, list[str]]] = {
         "11_TIZI GHENIF",
     ],
     "TIZI OUZOU": [
-        "01_TIZI_OUZOU",
+        "01_TIZI OUZOU",
     ],
     "TIZI RACHED": [
         "42_AIT OUMALOU",
-        "22_TIZI_RACHED",
+        "22_TIZI RACHED",
     ],
 }
 
