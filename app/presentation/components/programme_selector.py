@@ -164,7 +164,7 @@ class ProgrammeSelector(BaseComponent):
                 return (
                     f"Programme : {programme.name}\n"
                     f"Valeur de l'aide : {programme.aid_value:,} DA\n"
-                    f"Consistance : {programme.consistance}"
+                    f"Consistance : {programme.aid_count}"
                 )
 
         return "Information du programme non disponible"

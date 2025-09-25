@@ -15,7 +15,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2002,
         year_end=2002,
         display_order=1,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -23,7 +23,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2007,
         year_end=2007,
         display_order=2,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -31,7 +31,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2007,
         year_end=2007,
         display_order=3,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -39,7 +39,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2002,
         year_end=2002,
         display_order=4,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -47,7 +47,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2009,
         year_end=2009,
         display_order=5,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -55,7 +55,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2004,
         year_end=2004,
         display_order=6,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -63,7 +63,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2003,
         year_end=2003,
         display_order=7,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -71,7 +71,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2003,
         year_end=2003,
         display_order=8,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -79,7 +79,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2008,
         year_end=2008,
         display_order=9,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -87,7 +87,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2010,
         year_end=2010,
         display_order=24,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -95,7 +95,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2011,
         year_end=2011,
         display_order=28,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -103,7 +103,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2011,
         year_end=2011,
         display_order=29,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -111,7 +111,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2013,
         year_end=2013,
         display_order=31,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -119,7 +119,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2013,
         year_end=2013,
         display_order=32,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -127,7 +127,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2014,
         year_end=2014,
         display_order=33,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -135,7 +135,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2015,
         year_end=2015,
         display_order=34,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -143,7 +143,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2015,
         year_end=2015,
         display_order=37,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -151,7 +151,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2016,
         year_end=2016,
         display_order=39,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -159,7 +159,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2018,
         year_end=2018,
         display_order=43,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -167,7 +167,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2019,
         year_end=2019,
         display_order=45,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -175,7 +175,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2020,
         year_end=2020,
         display_order=47,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -183,7 +183,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2021,
         year_end=2021,
         display_order=50,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -191,7 +191,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2022,
         year_end=2022,
         display_order=51,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -199,7 +199,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2023,
         year_end=2023,
         display_order=52,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -207,7 +207,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2024,
         year_end=2024,
         display_order=53,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
     Programme(
@@ -215,7 +215,7 @@ RURAL_HOUSING_PROGRAMMES: Final[list[Programme]] = [
         year_start=2025,
         year_end=2025,
         display_order=55,
-        consistance=4000,
+        aid_count=4000,
         aid_value=700000,
     ),
 ]
@@ -229,7 +229,7 @@ def get_programmes_dataframe() -> pd.DataFrame:
                 "year_start": programme.year_start,
                 "year_end": programme.year_end,
                 "display_order": programme.display_order,
-                "consistance": programme.consistance,
+                "aid_count": programme.aid_count,
                 "aid_value": programme.aid_value,
             }
             for programme in RURAL_HOUSING_PROGRAMMES

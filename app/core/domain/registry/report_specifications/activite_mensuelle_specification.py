@@ -139,7 +139,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
         "programmes_situation": """
             SELECT 
                 programme,
-                consistance,
+                aid_count,
                 display_order
             FROM programmes
             ORDER BY display_order
@@ -148,7 +148,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
         "acheves_derniere_tranche": """
             SELECT 
                 p.programme,
-                p.consistance,
+                p.aid_count,
                 COALESCE(data.count, 0) as acheves
             FROM programmes p
             LEFT JOIN (
@@ -162,14 +162,14 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     OR T3 > 0
                 GROUP BY "Sous programme"
             ) data ON p.programme = data."Sous programme"
-            WHERE p.consistance > 0
+            WHERE p.aid_count > 0
             ORDER BY p.display_order
         """,
         # Projets en cours (lancés mais non achevés)
         "en_cours_calculation": """
             SELECT 
                 p.programme,
-                p.consistance,
+                p.aid_count,
                 COALESCE(lances.count, 0) as lances_count,
                 COALESCE(acheves.count, 0) as acheves_count,
                 GREATEST(0, COALESCE(lances.count, 0) - COALESCE(acheves.count, 0)) as en_cours
@@ -196,15 +196,15 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     OR T3 > 0
                 GROUP BY "Sous programme"
             ) acheves ON p.programme = acheves."Sous programme"
-            WHERE p.consistance > 0
+            WHERE p.aid_count > 0
             ORDER BY p.display_order
         """,
         # Non encore lancés (consistance - premières tranches payées)
         "non_lances_premiere_tranche": """
             SELECT 
                 p.programme,
-                p.consistance,
-                COALESCE(p.consistance - data.count, p.consistance) as non_lances
+                p.aid_count,
+                COALESCE(p.aid_count - data.count, p.aid_count) as non_lances
             FROM programmes p
             LEFT JOIN (
                 SELECT
@@ -217,7 +217,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     OR T1 > 0
                 GROUP BY "Sous programme"
             ) data ON p.programme = data."Sous programme"
-            WHERE p.consistance > 0
+            WHERE p.aid_count > 0
             ORDER BY p.display_order
         """,
     },

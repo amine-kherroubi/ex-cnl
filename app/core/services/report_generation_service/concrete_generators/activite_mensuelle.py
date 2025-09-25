@@ -437,9 +437,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         programmes_situation: list[tuple[str, int]] = []
         if "programmes_situation" in query_results:
             df_prog = query_results["programmes_situation"]
-            programmes_situation = list(
-                zip(df_prog["programme"], df_prog["consistance"])
-            )
+            programmes_situation = list(zip(df_prog["programme"], df_prog["aid_count"]))
             self._logger.info(
                 f"Trouvé {len(programmes_situation)} programmes pour le tableau de situation"
             )
@@ -448,13 +446,13 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         data_dicts = self._create_situation_dictionaries(query_results)
 
         # Initialize totals
-        totals = {"consistance": 0, "acheves": 0, "en_cours": 0, "non_lances": 0}
+        totals = {"aid_count": 0, "finished": 0, "current": 0, "not_started": 0}
 
         # Add data rows
-        for i, (programme, consistance) in enumerate(programmes_situation):
+        for i, (programme, aid_count) in enumerate(programmes_situation):
             row = self._current_row + i
             self._add_situation_row(
-                sheet, row, programme, consistance, data_dicts, totals
+                sheet, row, programme, aid_count, data_dicts, totals
             )
 
         # Add total row
@@ -494,21 +492,21 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         sheet: Worksheet,
         row: int,
         programme: str,
-        consistance: int,
+        aid_count: int,
         data_dicts: dict[str, dict[str, int]],
         totals: dict[str, int],
     ) -> None:
         """Add a single situation row."""
-        acheves = data_dicts["acheves"].get(programme, 0)
-        en_cours = data_dicts["en_cours"].get(programme, 0)
-        non_lances = data_dicts["non_lances"].get(programme, 0)
+        finished: int = data_dicts["acheves"].get(programme, 0)
+        current: int = data_dicts["en_cours"].get(programme, 0)
+        not_started: int = data_dicts["non_lances"].get(programme, 0)
 
         values: list[tuple[str, Any]] = [
             ("A", programme),
-            ("B", consistance),
-            ("C", acheves if acheves > 0 else "-"),
-            ("D", en_cours if en_cours > 0 else "-"),
-            ("E", non_lances if non_lances > 0 else "-"),
+            ("B", aid_count),
+            ("C", finished if finished > 0 else "-"),
+            ("D", current if current > 0 else "-"),
+            ("E", not_started if not_started > 0 else "-"),
         ]
 
         for col, value in values:
@@ -519,10 +517,10 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             cell.border = ExcelStylingService.BORDER_THIN
 
         # Update totals
-        totals["consistance"] += consistance
-        totals["acheves"] += acheves
-        totals["en_cours"] += en_cours
-        totals["non_lances"] += non_lances
+        totals["aid_count"] += aid_count
+        totals["finished"] += finished
+        totals["current"] += current
+        totals["not_started"] += not_started
 
     def _add_situation_total_row(
         self, sheet: Worksheet, row: int, totals: dict[str, int]
@@ -530,10 +528,10 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         """Add total row for situation table."""
         values: list[tuple[str, Any]] = [
             ("A", "Total général"),
-            ("B", totals["consistance"]),
-            ("C", totals["acheves"]),
-            ("D", totals["en_cours"]),
-            ("E", totals["non_lances"]),
+            ("B", totals["aid_count"]),
+            ("C", totals["finished"]),
+            ("D", totals["current"]),
+            ("E", totals["not_started"]),
         ]
 
         for col, value in values:

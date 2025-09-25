@@ -37,7 +37,7 @@ class Programme(BaseModel):
         ),
     ]
 
-    consistance: Annotated[
+    aid_count: Annotated[
         int,
         Field(
             default=0,

@@ -57,7 +57,7 @@ class SituationFinanciereGenerator(BaseGenerator):
                 self._target_programme = programme
                 self._logger.info(
                     f"Target programme set: {programme.name} "
-                    f"(aid_value: {programme.aid_value}, consistance: {programme.consistance})"
+                    f"(aid_value: {programme.aid_value}, aid_count: {programme.aid_count})"
                 )
                 return
 

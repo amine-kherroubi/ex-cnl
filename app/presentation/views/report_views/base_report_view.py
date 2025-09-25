@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
+from abc import abstractmethod
 import threading
 from pathlib import Path
 from typing import Any, Callable
@@ -88,11 +89,11 @@ class BaseReportView(ctk.CTkFrame):
         self._scrollable_frame.grid(row=1, column=0, padx=DesignSystem.Spacing.XS, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="nsew")  # type: ignore
         self._scrollable_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Setup common components
-        self._setup_common_components()
-
         # Setup report-specific components (override in subclasses)
         self._setup_report_specific_components()
+
+        # Setup common components
+        self._setup_common_components()
 
         # Setup action buttons
         self._setup_action_buttons()
@@ -182,9 +183,10 @@ class BaseReportView(ctk.CTkFrame):
         self._output_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
+    @abstractmethod
     def _setup_report_specific_components(self) -> None:
         """Override this method in subclasses to add report-specific components."""
-        pass
+        ...
 
     def _setup_action_buttons(self) -> None:
         """Setup the status display and action buttons."""
