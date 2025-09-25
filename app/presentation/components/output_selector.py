@@ -14,7 +14,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class OutputSelector(BaseComponent):
-    """Component for selecting output directory."""
 
     __slots__ = ("_on_output_changed", "_output_path", "_select_button", "_path_entry")
 
@@ -27,11 +26,9 @@ class OutputSelector(BaseComponent):
         super().__init__(parent, "Répertoire de destination")
 
     def _setup_content(self) -> None:
-        """Set up the output selector content."""
-        # Configure grid - column 0 will expand to fill space
+
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title with select button row
         title_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -43,7 +40,6 @@ class OutputSelector(BaseComponent):
         )
         title_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=title_frame,
             text=self._title,
@@ -57,7 +53,6 @@ class OutputSelector(BaseComponent):
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Select folder button - now in column 1 (fixed width)
         self._select_button: ctk.CTkButton = ctk.CTkButton(
             master=title_frame,
             text="Sélectionner un répertoire",
@@ -78,7 +73,6 @@ class OutputSelector(BaseComponent):
             padx=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE),
         )
 
-        # Information text
         information: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Choisissez le répertoire où sera enregistré le rapport généré",
@@ -95,7 +89,6 @@ class OutputSelector(BaseComponent):
             sticky="w",
         )
 
-        # Path display
         self._path_entry: ctk.CTkEntry = ctk.CTkEntry(
             master=self._content_frame,
             placeholder_text="Aucun répertoire sélectionné",
@@ -109,7 +102,7 @@ class OutputSelector(BaseComponent):
         self._path_entry.grid(row=2, column=0, sticky="ew")  # type: ignore
 
     def _select_folder(self) -> None:
-        """Open directory dialog to select output folder."""
+
         folder: str = filedialog.askdirectory(
             title="Sélectionner le répertoire de destination"
         )
@@ -120,7 +113,7 @@ class OutputSelector(BaseComponent):
             self._on_output_changed(self._output_path)
 
     def _update_display(self) -> None:
-        """Update the display of selected path."""
+
         self._path_entry.configure(state="normal")  # type: ignore
         self._path_entry.delete(first_index=0, last_index="end")  # type: ignore
 

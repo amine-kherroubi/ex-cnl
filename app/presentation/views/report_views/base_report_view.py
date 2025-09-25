@@ -23,8 +23,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class BaseReportView(ctk.CTkFrame):
-    """Base class for all report views with common functionality."""
-
     __slots__ = (
         "_report_spec",
         "_controller",
@@ -66,7 +64,6 @@ class BaseReportView(ctk.CTkFrame):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
-        # Self configuration - match MenuView exactly
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.LEAST_WHITE,
             border_color=DesignSystem.Color.LIGHTER_GRAY,
@@ -74,14 +71,11 @@ class BaseReportView(ctk.CTkFrame):
             border_width=DesignSystem.BorderWidth.XS,
         )
 
-        # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
-        # Header with back button (stays fixed)
         self._setup_header()
 
-        # Scrollable content frame - match MenuView styling
         self._scrollable_frame = ctk.CTkScrollableFrame(
             master=self,
             fg_color=DesignSystem.Color.TRANSPARENT,
@@ -89,30 +83,23 @@ class BaseReportView(ctk.CTkFrame):
         self._scrollable_frame.grid(row=1, column=0, padx=DesignSystem.Spacing.XS, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="nsew")  # type: ignore
         self._scrollable_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Setup report-specific components (override in subclasses)
         self._setup_report_specific_components()
 
-        # Setup common components
         self._setup_common_components()
 
-        # Setup action buttons
         self._setup_action_buttons()
 
-        # Initialize the date selector values after UI is fully set up
         self._selected_month = self._date_selector.get_selected_month()
         self._selected_year = self._date_selector.get_selected_year()
         self._update_generate_button_state()
 
     def _setup_header(self) -> None:
-        """Setup the header section with back button and title."""
-        # Header frame - match MenuView structure and spacing
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
         header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.XS), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
-        # Back button - styled to match design system
         self._back_button = ctk.CTkButton(
             master=header_frame,
             text="Retour",
@@ -131,14 +118,12 @@ class BaseReportView(ctk.CTkFrame):
         )
         self._back_button.grid(row=0, column=0, padx=DesignSystem.Spacing.NONE, sticky="w")  # type: ignore
 
-        # Report info frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=header_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
         info_frame.grid(row=0, column=1, sticky="ew")  # type: ignore
         info_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Report title - match MenuView header styling
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.display_name,
@@ -152,16 +137,12 @@ class BaseReportView(ctk.CTkFrame):
         title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
 
     def _setup_common_components(self) -> None:
-        """Setup components common to all reports."""
-
-        # Date selector
         self._date_selector = DateSelector(
             parent=self._scrollable_frame, on_date_changed=self._on_date_changed
         )
         self._date_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # Required files component
         self._required_files_component = RequiredFilesComponent(
             parent=self._scrollable_frame,
             report_spec=self._report_spec,
@@ -169,14 +150,12 @@ class BaseReportView(ctk.CTkFrame):
         self._required_files_component.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # File selector
         self._file_selector = FileSelector(
             parent=self._scrollable_frame, on_files_changed=self._on_files_changed
         )
         self._file_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # Output selector
         self._output_selector = OutputSelector(
             parent=self._scrollable_frame, on_output_changed=self._on_output_changed
         )
@@ -184,18 +163,13 @@ class BaseReportView(ctk.CTkFrame):
         self._next_row += 1
 
     @abstractmethod
-    def _setup_report_specific_components(self) -> None:
-        """Override this method in subclasses to add report-specific components."""
-        ...
+    def _setup_report_specific_components(self) -> None: ...
 
     def _setup_action_buttons(self) -> None:
-        """Setup the status display and action buttons."""
-        # Status display - match MenuView card spacing
         self._status_display = StatusDisplay(parent=self._scrollable_frame)
         self._status_display.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         self._next_row += 1
 
-        # Button frame for Generate button
         button_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._scrollable_frame,
             fg_color=DesignSystem.Color.TRANSPARENT,
@@ -203,7 +177,6 @@ class BaseReportView(ctk.CTkFrame):
         button_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
         button_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Generate button - starts with disabled styling (same as clear button in FileSelector)
         self._generate_button = ctk.CTkButton(
             master=button_frame,
             text="Générer le rapport",
@@ -263,7 +236,7 @@ class BaseReportView(ctk.CTkFrame):
             )
 
     def _can_generate(self) -> bool:
-        """Override in subclasses to add additional validation."""
+
         return (
             len(self._selected_files) > 0
             and self._output_path is not None
@@ -276,7 +249,7 @@ class BaseReportView(ctk.CTkFrame):
             return
 
         if self._can_generate():
-            # Enable button with primary styling (yellow)
+
             self._generate_button.configure(  # type: ignore
                 state="normal",
                 text_color=DesignSystem.Color.WHITE,
@@ -284,7 +257,7 @@ class BaseReportView(ctk.CTkFrame):
                 hover_color=DesignSystem.Color.DARKER_PRIMARY,
             )
         else:
-            # Disable button with muted styling (same as clear button)
+
             self._generate_button.configure(  # type: ignore
                 state="disabled",
                 text_color=DesignSystem.Color.GRAY,
@@ -293,14 +266,13 @@ class BaseReportView(ctk.CTkFrame):
             )
 
     def _get_generation_parameters(self) -> dict[str, Any]:
-        """Override in subclasses to provide additional parameters."""
+
         return {}
 
     def _generate_report(self) -> None:
         if not self._can_generate():
             return
 
-        # Disable buttons during processing - keep the disabled styling
         self._generate_button.configure(  # type: ignore
             state="disabled",
             text="Génération en cours...",
@@ -314,7 +286,6 @@ class BaseReportView(ctk.CTkFrame):
             message="Début de la génération...", message_type="information"
         )
 
-        # Run generation in background thread
         def generate_thread() -> None:
             try:
                 self._status_display.add_message(
@@ -322,7 +293,6 @@ class BaseReportView(ctk.CTkFrame):
                     message_type="information",
                 )
 
-                # Get additional parameters from subclass
                 additional_params: dict[str, Any] = self._get_generation_parameters()
 
                 result_path: Path = self._controller.generate_report(
@@ -375,7 +345,7 @@ class BaseReportView(ctk.CTkFrame):
             message="Veuillez vérifier que vos fichiers correspondent aux exigences du rapport",
             message_type="avertissement",
         )
-        # Reset to original text and update styling based on current state
+
         self._generate_button.configure(text="Générer le rapport")  # type: ignore
         self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore
@@ -386,7 +356,7 @@ class BaseReportView(ctk.CTkFrame):
             message=f"Rapport généré avec succès : {output_file}",
             message_type="succès",
         )
-        # Reset to original text and update styling based on current state
+
         self._generate_button.configure(text="Générer le rapport")  # type: ignore
         self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore
@@ -396,7 +366,7 @@ class BaseReportView(ctk.CTkFrame):
         self._status_display.add_message(
             message=f"Échec de la génération : {error_message}", message_type="erreur"
         )
-        # Reset to original text and update styling based on current state
+
         self._generate_button.configure(text="Générer le rapport")  # type: ignore
         self._update_generate_button_state()
         self._back_button.configure(state="normal")  # type: ignore

@@ -14,7 +14,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class DateSelector(BaseComponent):
-    """Component for selecting month and year for report generation."""
 
     __slots__ = (
         "_on_date_changed",
@@ -35,12 +34,10 @@ class DateSelector(BaseComponent):
             on_date_changed
         )
 
-        # Get current date
         today: date = date.today()
         self._current_month: Month = Month.from_number(today.month)
         self._current_year: int = today.year
 
-        # Initialize variables
         self._month_var: ctk.StringVar = ctk.StringVar(
             value=self._current_month.capitalize()
         )
@@ -49,12 +46,10 @@ class DateSelector(BaseComponent):
         super().__init__(parent, "Période du rapport")
 
     def _setup_content(self) -> None:
-        """Set up the date selector content."""
-        # Configure grid
+
         self._content_frame.grid_columnconfigure(index=1, weight=1)
         self._content_frame.grid_columnconfigure(index=3, weight=1)
 
-        # Title
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text=self._title,
@@ -74,7 +69,6 @@ class DateSelector(BaseComponent):
             sticky="w",
         )
 
-        # Information text
         information: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Sélectionnez la période pour laquelle vous souhaitez générer le rapport",
@@ -92,7 +86,6 @@ class DateSelector(BaseComponent):
             sticky="w",
         )
 
-        # Month label
         month_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Mois :",
@@ -108,7 +101,6 @@ class DateSelector(BaseComponent):
             sticky="w",
         )
 
-        # Month dropdown
         month_values: list[str] = [month.capitalize() for month in Month]
         self._month_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
             master=self._content_frame,
@@ -134,7 +126,6 @@ class DateSelector(BaseComponent):
             sticky="ew",
         )
 
-        # Year label
         year_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Année :",
@@ -150,7 +141,6 @@ class DateSelector(BaseComponent):
             sticky="w",
         )
 
-        # Year dropdown - range from current year to 2000
         year_values: list[str] = [
             str(year) for year in range(self._current_year, 1999, -1)
         ]
@@ -174,8 +164,7 @@ class DateSelector(BaseComponent):
         self._year_dropdown.grid(row=2, column=3, sticky="ew")  # type: ignore
 
     def _on_selection_changed(self) -> None:
-        """Handle month or year selection change."""
-        # Get selected month
+
         month_str: str = self._month_var.get()
         selected_month: Month | None = None
 
@@ -184,29 +173,26 @@ class DateSelector(BaseComponent):
                 selected_month = month
                 break
 
-        # Get selected year
         try:
             selected_year: int = int(self._year_var.get())
         except ValueError:
             selected_year = self._current_year
 
-        # Validate that selected date is not in the future
         if selected_month and selected_year:
             selected_date: date = date(selected_year, selected_month.number, 1)
             today: date = date.today()
 
             if selected_date > today:
-                # Reset to current month/year if future date selected
+
                 self._month_var.set(self._current_month.capitalize())
                 self._year_var.set(str(self._current_year))
                 selected_month = self._current_month
                 selected_year = self._current_year
 
-        # Notify parent of change
         self._on_date_changed(selected_month, selected_year)
 
     def get_selected_month(self) -> Month | None:
-        """Get the currently selected month."""
+
         month_str: str = self._month_var.get()
         for month in Month:
             if month.capitalize() == month_str:
@@ -214,14 +200,14 @@ class DateSelector(BaseComponent):
         return None
 
     def get_selected_year(self) -> int | None:
-        """Get the currently selected year."""
+
         try:
             return int(self._year_var.get())
         except ValueError:
             return None
 
     def reset_to_current(self) -> None:
-        """Reset selection to current month and year."""
+
         self._month_var.set(self._current_month.capitalize())
         self._year_var.set(str(self._current_year))
         self._on_selection_changed()

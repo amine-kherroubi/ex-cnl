@@ -10,12 +10,12 @@ import pandas as pd
 from openpyxl.worksheet.worksheet import Worksheet
 
 # Local application imports
-from app.core.domain.models.programme import Programme
+from app.core.domain.models.subprogram import Subprogram
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.predefined_objects.programmes import (
-    RURAL_HOUSING_PROGRAMMES,
-    get_programmes_dataframe,
+from app.core.domain.predefined_objects.subprograms import (
+    SUBPROGRAMS,
+    get_subprograms_dataframe,
 )
 from app.core.domain.predefined_objects.dairas_et_communes import (
     get_dairas_communes_dataframe,
@@ -27,7 +27,7 @@ from app.core.services.excel_styling_service import ExcelStylingService
 
 
 class SituationFinanciereGenerator(BaseGenerator):
-    __slots__ = ("_current_row", "_target_programme", "_totals")
+    __slots__ = ("_current_row", "_target_subprogram", "_totals")
 
     def __init__(
         self,
@@ -40,77 +40,75 @@ class SituationFinanciereGenerator(BaseGenerator):
             file_io_service, data_repository, report_specification, report_context
         )
         self._current_row: int = 1
-        self._target_programme: Programme | None = None
+        self._target_subprogram: Subprogram | None = None
         self._totals: Dict[str, int] = {}
 
     def configure(self, **kwargs: Any) -> None:
-        """Set the target programme for the financial situation report."""
-        programme_name: str | None = kwargs.get("target_programme")
-        if programme_name is None:
-            raise ValueError("additional parameter 'target_programme' is required")
 
-        self._logger.debug(f"Setting target programme: {programme_name}")
+        subprogram_name: str | None = kwargs.get("target_subprogram")
+        if subprogram_name is None:
+            raise ValueError("additional parameter 'target_subprogram' is required")
 
-        # Find programme in the list
-        for programme in RURAL_HOUSING_PROGRAMMES:
-            if programme.name == programme_name:
-                self._target_programme = programme
+        self._logger.debug(f"Setting target subprogram: {subprogram_name}")
+
+        for subprogram in SUBPROGRAMS:
+            if subprogram.name == subprogram_name:
+                self._target_subprogram = subprogram
                 self._logger.info(
-                    f"Target programme set: {programme.name} "
-                    f"(aid_value: {programme.aid_value}, aid_count: {programme.aid_count})"
+                    f"Target subprogram set: {subprogram.name} "
+                    f"(aid_amount: {subprogram.aid_amount}, aid_count: {subprogram.aid_count})"
                 )
                 return
 
-        # Programme not found
-        available_programmes: List[str] = [p.name for p in RURAL_HOUSING_PROGRAMMES]
+        available_subprograms: List[str] = [p.name for p in SUBPROGRAMS]
         error_msg: str = (
-            f"Programme '{programme_name}' not found. "
-            f"Available programmes: {available_programmes}"
+            f"Subprogram '{subprogram_name}' not found. "
+            f"Available subprograms: {available_subprograms}"
         )
         self._logger.error(error_msg)
         raise ValueError(error_msg)
 
-    def _verify_target_programme(self) -> None:
-        """Verify that a target programme has been set."""
-        if self._target_programme is None:
+    def _verify_target_subprogram(self) -> None:
+
+        if self._target_subprogram is None:
             error_msg: str = (
-                "No target programme set. Please call set_target_programme() "
+                "No target subprogram set. Please call set_target_subprogram() "
                 "before generating the report."
             )
             self._logger.error(error_msg)
             raise RuntimeError(error_msg)
 
-        self._logger.debug(f"Target programme verified: {self._target_programme.name}")
+        self._logger.debug(
+            f"Target subprogram verified: {self._target_subprogram.name}"
+        )
 
     def generate(
         self,
         source_file_paths: Dict[str, Path],
         output_directory_path: Path,
     ) -> Path:
-        """Generate the financial situation report."""
-        self._verify_target_programme()
+
+        self._verify_target_subprogram()
         return super().generate(source_file_paths, output_directory_path)
 
     def _create_predefined_tables(self) -> None:
-        """Create reference tables needed for the report."""
+
         self._logger.debug("Creating reference tables")
 
-        # Create programmes table
         try:
-            self._logger.debug("Creating reference table 'programmes'")
-            df: pd.DataFrame = get_programmes_dataframe()
-            self._data_repository.create_table_from_dataframe("programmes", df)
+            self._logger.debug("Creating reference table 'subprograms'")
+            df: pd.DataFrame = get_subprograms_dataframe()
+            self._data_repository.create_table_from_dataframe("subprograms", df)
             rows, cols = df.shape
             self._logger.info(
-                f"Reference table 'programmes' created: {rows} rows and {cols} columns"
+                f"Reference table 'subprograms' created: {rows} rows and {cols} columns"
             )
         except Exception as error:
             self._logger.exception(
-                f"Failed to create reference table 'programmes': {error}"
+                f"Failed to create reference table 'subprograms': {error}"
             )
             raise
 
-        # Create dairas_communes table
         try:
             self._logger.debug("Creating reference table 'dairas_communes'")
             df: pd.DataFrame = get_dairas_communes_dataframe()
@@ -126,15 +124,14 @@ class SituationFinanciereGenerator(BaseGenerator):
             raise
 
     def _format_query_with_context(self, query_template: str) -> str:
-        """Format query template with current report context and target programme."""
+
         self._logger.debug("Formatting query template with report context")
-        assert self._target_programme is not None
 
         formatted_query: str = query_template
 
         formatted_query = (
-            formatted_query.replace("{programme}", f"'{self._target_programme.name}'")
-            .replace("{aid_value}", str(self._target_programme.aid_value))
+            formatted_query.replace("{subprogram}", f"'{self._target_subprogram.name}'")
+            .replace("{aid_amount}", str(self._target_subprogram.aid_amount))
             .replace("{year}", str(self._report_context.year))
             .replace("{month}", str(self._report_context.month.number))
         )
@@ -142,8 +139,8 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.debug(
             f"Placeholders replaced with: month={self._report_context.month.number}, "
             f"year={self._report_context.year}, "
-            f"programme={self._target_programme.name}, "
-            f"aid_value={self._target_programme.aid_value}"
+            f"subprogram={self._target_subprogram.name}, "
+            f"aid_amount={self._target_subprogram.aid_amount}"
         )
 
         self._logger.debug("Query formatting completed")
@@ -152,31 +149,29 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _add_content(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
-        """Add all content to the worksheet."""
+
         self._add_header(sheet)
         self._add_table_headers(sheet)
         self._add_data_rows(sheet, query_results)
         self._add_totals_row(sheet, query_results)
 
     def _add_header(self, sheet: Worksheet) -> None:
-        """Add the report header section."""
+
         self._logger.debug("Adding report header")
 
-        # Main title
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
             "T",
             self._current_row,
             self._current_row,
-            value=f"Situation financière du programme '{self._target_programme.name}' par daira et par commune",  # type: ignore
+            value=f"Situation financière du sous-programme '{self._target_subprogram.name}' par daira et par commune",  # type: ignore
             font=ExcelStylingService.FONT_TITLE,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )
 
         self._current_row += 1
 
-        # Report date
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
@@ -190,7 +185,6 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Wilaya
         ExcelStylingService.apply_style_to_cell(
             sheet,
             "A",
@@ -205,10 +199,9 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.info("Report header added successfully")
 
     def _add_table_headers(self, sheet: Worksheet) -> None:
-        """Add the complex table headers with merged cells."""
+
         self._logger.debug("Adding table headers")
 
-        # First level headers (engagement types)
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "F",
@@ -237,9 +230,8 @@ class SituationFinanciereGenerator(BaseGenerator):
         header_start_row: int = self._current_row
         header_end_row: int = self._current_row + 3
 
-        # Main column headers with vertical spans
         main_headers: List[Tuple[str, str]] = [
-            ("A", "Programme"),
+            ("A", "Sous-programme"),
             ("B", "Daira"),
             ("C", "Commune"),
             ("D", "Aides notifiées (1)"),
@@ -266,7 +258,6 @@ class SituationFinanciereGenerator(BaseGenerator):
                 border=ExcelStylingService.BORDER_THIN,
             )
 
-        # Consommations header
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "J",
@@ -281,7 +272,6 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Second level headers (time periods)
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "J",
@@ -314,7 +304,6 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Third level headers (aid categories)
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "J",
@@ -361,7 +350,6 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Fourth level headers (tranche types)
         tranche_headers: List[Tuple[str, str]] = [
             ("J", "T1"),
             ("K", "T2"),
@@ -388,18 +376,15 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _add_data_rows(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
-        """Add data rows to the table."""
+
         self._logger.debug("Adding data rows")
 
-        # Get dairas and communes data
         dairas_communes_df: pd.DataFrame = get_dairas_communes_dataframe()
 
-        # Create lookup dictionaries from query results
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]] = (
             self._create_lookup_dictionaries(query_results)
         )
 
-        # Track totals
         totals: Dict[str, int] = {
             "aides_inscrites": 0,
             "montants_inscrits": 0,
@@ -414,7 +399,6 @@ class SituationFinanciereGenerator(BaseGenerator):
             "cumul_total": 0,
         }
 
-        # Add data rows for each daira/commune combination
         for i, (_, row) in enumerate(dairas_communes_df.iterrows()):
             daira: str = row["Daira"]
             commune: str = row["Commune"]
@@ -426,7 +410,6 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         self._current_row += len(dairas_communes_df)
 
-        # Store totals for use in totals row
         self._totals = totals
 
         self._logger.info(f"Added {len(dairas_communes_df)} data rows successfully")
@@ -434,14 +417,13 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _create_lookup_dictionaries(
         self, query_results: Dict[str, pd.DataFrame]
     ) -> Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]]:
-        """Create lookup dictionaries from query results."""
+
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]] = {
             "aides_inscrites": {},
             "cumul_precedent": {},
             "annee_actuelle": {},
         }
 
-        # Aides inscrites
         if "nb_aides_et_montants_inscrits_par_daira_et_commune" in query_results:
             df = query_results["nb_aides_et_montants_inscrits_par_daira_et_commune"]
             for _, row in df.iterrows():
@@ -451,7 +433,6 @@ class SituationFinanciereGenerator(BaseGenerator):
                     row["montant_inscrits"],
                 )
 
-        # Cumul précédent
         if "consommations_cumulees_fin_annee_precedente" in query_results:
             df = query_results["consommations_cumulees_fin_annee_precedente"]
             for _, row in df.iterrows():
@@ -463,7 +444,6 @@ class SituationFinanciereGenerator(BaseGenerator):
                     row["montant"],
                 )
 
-        # Année actuelle
         if "consommations_annee_actuelle_jusqua_mois_actuel" in query_results:
             df = query_results["consommations_annee_actuelle_jusqua_mois_actuel"]
             for _, row in df.iterrows():
@@ -486,19 +466,17 @@ class SituationFinanciereGenerator(BaseGenerator):
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
         totals: Dict[str, int],
     ) -> None:
-        """Add a single data row to the table."""
+
         key: Tuple[str, str] = (daira, commune)
 
-        # Basic columns
         basic_values: List[Tuple[str, Any]] = [
-            ("A", self._target_programme.name),  # type: ignore
+            ("A", self._target_subprogram.name),  # type: ignore
             ("B", daira),
             ("C", commune),
             ("D", "-"),
             ("E", "-"),
         ]
 
-        # Aides inscrites (F & G)
         if key in data_dicts["aides_inscrites"]:
             aides_data = data_dicts["aides_inscrites"][key]
             aides, montants = aides_data[0], aides_data[1]
@@ -515,7 +493,6 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         basic_values.extend([("H", "-"), ("I", "-")])
 
-        # Apply basic values using ExcelStyling
         ExcelStylingService.apply_data_row_styling(
             sheet,
             row,
@@ -525,7 +502,6 @@ class SituationFinanciereGenerator(BaseGenerator):
             border=ExcelStylingService.BORDER_THIN,
         )
 
-        # Previous year cumulative (J, K, L, M)
         self._add_cumulative_data(
             sheet,
             row,
@@ -541,7 +517,6 @@ class SituationFinanciereGenerator(BaseGenerator):
             ],
         )
 
-        # Current year (N, O, P, Q)
         self._add_cumulative_data(
             sheet,
             row,
@@ -557,7 +532,6 @@ class SituationFinanciereGenerator(BaseGenerator):
             ],
         )
 
-        # Calculate and add cumul total (R)
         cumul_total = self._calculate_cumul_total(key, data_dicts)
         ExcelStylingService.apply_style_to_cell(
             sheet,
@@ -570,7 +544,6 @@ class SituationFinanciereGenerator(BaseGenerator):
         )
         totals["cumul_total"] += cumul_total
 
-        # Final columns (S, T)
         final_columns: List[Tuple[str, str]] = [("S", "-"), ("T", "-")]
         ExcelStylingService.apply_data_row_styling(
             sheet,
@@ -591,7 +564,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         totals: Dict[str, int],
         total_keys: List[str],
     ) -> None:
-        """Add cumulative data to specified columns."""
+
         if key in data_dict:
             values = data_dict[key]
             column_data: List[Tuple[str, Any]] = []
@@ -624,7 +597,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         key: Tuple[str, str],
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
     ) -> int:
-        """Calculate the cumulative total for a given key."""
+
         total: int = 0
         if key in data_dicts["cumul_precedent"]:
             total += data_dicts["cumul_precedent"][key][3]  # montant column
@@ -635,10 +608,9 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _add_totals_row(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
-        """Add the totals row at the bottom of the table."""
+
         self._logger.debug("Adding totals row")
 
-        # Define all total values
         total_values: List[Tuple[str, Any]] = [
             ("A", "Total général"),
             ("B", ""),
@@ -662,7 +634,6 @@ class SituationFinanciereGenerator(BaseGenerator):
             ("T", "-"),
         ]
 
-        # Apply values and formatting using ExcelStyling
         ExcelStylingService.apply_data_row_styling(
             sheet,
             self._current_row,
@@ -676,11 +647,11 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._current_row += 1
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        """Apply final formatting to the worksheet."""
+
         self._logger.debug("Applying final formatting")
 
         column_widths: Dict[str, int] = {
-            "A": 30,  # Programme
+            "A": 30,  # Sous-programme
             "B": 20,  # Daira
             "C": 25,  # Commune
             "D": 12,  # Aides notifiées
@@ -704,7 +675,6 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.set_column_widths(sheet, column_widths)
 
-        # Apply number formatting to monetary amount columns
         self._apply_number_formatting(sheet)
 
         ExcelStylingService.setup_page_layout(
@@ -725,21 +695,19 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.info("Final formatting completed successfully")
 
     def _apply_number_formatting(self, sheet: Worksheet) -> None:
-        """Apply number formatting to monetary amount columns to prevent scientific notation."""
+
         self._logger.debug("Applying number formatting to monetary columns")
 
-        # Define the monetary columns that need special formatting
         monetary_columns = ["G", "M", "Q", "R"]  # Montants columns and cumul
 
-        # Get the data range (from first data row to last data row including totals)
         data_start_row = 6  # Adjust based on your header structure
         data_end_row = self._current_row  # Current row after all data has been added
 
         for col in monetary_columns:
-            # Apply number format to the entire column range
+
             for row in range(data_start_row, data_end_row):
                 cell = sheet[f"{col}{row}"]
-                # Set number format to display as integer (no decimals, no scientific notation)
+
                 cell.number_format = "#,##0"
 
         self._logger.info("Number formatting applied to monetary columns")

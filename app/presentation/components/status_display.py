@@ -15,7 +15,6 @@ MessageType: TypeAlias = Literal["information", "succès", "avertissement", "err
 
 
 class StatusDisplay(BaseComponent):
-    """Component for displaying status messages and progress information."""
 
     __slots__ = ("_status_text",)
 
@@ -23,12 +22,10 @@ class StatusDisplay(BaseComponent):
         super().__init__(parent, "Statut")
 
     def _setup_content(self) -> None:
-        """Set up the status display content."""
-        # Configure grid
+
         self._content_frame.grid_columnconfigure(index=0, weight=1)
         self._content_frame.grid_rowconfigure(index=1, weight=1)
 
-        # Title
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text=self._title,
@@ -47,7 +44,6 @@ class StatusDisplay(BaseComponent):
             sticky="w",
         )
 
-        # Information text
         information: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Les messages de progression et d'erreur apparaîtront ici",
@@ -64,7 +60,6 @@ class StatusDisplay(BaseComponent):
             sticky="w",
         )
 
-        # Status text area
         self._status_text: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self._content_frame,
             state="disabled",
@@ -81,7 +76,6 @@ class StatusDisplay(BaseComponent):
             sticky="nsew",
         )
 
-        # Initialize with welcome message
         self.add_message(
             message="Veuillez insérer les fichiers nécessaires pour générer le rapport",
             message_type="information",
@@ -90,7 +84,7 @@ class StatusDisplay(BaseComponent):
     def add_message(
         self, message: str, message_type: MessageType = "information"
     ) -> None:
-        """Add a message to the status display with timestamp and type indicator."""
+
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
         indications_map: dict[MessageType, str] = {
@@ -103,7 +97,6 @@ class StatusDisplay(BaseComponent):
         color: str = indications_map.get(message_type, DesignSystem.Color.INFO)
         formatted_message: str = f"[{timestamp}] {message}\n"
 
-        # Add message to text area
         self._status_text.configure(state="normal")  # type: ignore
         self._status_text.insert("end", formatted_message, message_type)  # type: ignore
         self._status_text.tag_config(message_type, foreground=color)  # type: ignore
@@ -111,7 +104,7 @@ class StatusDisplay(BaseComponent):
         self._status_text.configure(state="disabled")  # type: ignore
 
     def clear_messages(self) -> None:
-        """Clear all messages from the status display."""
+
         self._status_text.configure(state="normal")  # type: ignore
         self._status_text.delete(index1="1.0", index2="end")  # type: ignore
         self._status_text.configure(state="disabled")  # type: ignore

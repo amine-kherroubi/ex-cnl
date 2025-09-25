@@ -16,18 +16,18 @@ def get_app_data_dir() -> Path:
     app_name: str = "GenerateurReports"
 
     if sys.platform == "win32":
-        # Windows: %LOCALAPPDATA% (preferred) or %APPDATA%
+
         base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
         if base:
             return Path(base) / app_name
         return Path.home() / "AppData" / "Local" / app_name
 
     elif sys.platform == "darwin":
-        # macOS: ~/Library/Application Support
+
         return Path.home() / "Library" / "Application Support" / app_name
 
     else:
-        # Linux: ~/.local/share (XDG standard)
+
         xdg_data = os.environ.get("XDG_DATA_HOME")
         if xdg_data:
             return Path(xdg_data) / app_name.lower()
@@ -61,12 +61,11 @@ class LoggingConfig(BaseModel):
     @field_validator("log_file")
     @classmethod
     def ensure_log_directory(cls, log_file: Path) -> Path:
-        """Ensure log directory exists with proper fallback."""
+
         try:
-            # Try to create the intended log directory
+
             log_file.parent.mkdir(parents=True, exist_ok=True)
 
-            # Test write permissions
             test_file = log_file.parent / ".write_test"
             test_file.write_text("test")
             test_file.unlink()
@@ -74,7 +73,7 @@ class LoggingConfig(BaseModel):
             return log_file
 
         except (OSError, PermissionError):
-            # Fallback to temp directory
+
             temp_dir = Path(tempfile.gettempdir()) / "GenerateurReports"
             temp_log_file = temp_dir / "app.log"
 
@@ -86,7 +85,7 @@ class LoggingConfig(BaseModel):
                 )
                 return temp_log_file
             except Exception:
-                # Ultimate fallback - no file logging
+
                 warnings.warn(
                     "Cannot create log file anywhere, file logging will be disabled",
                     UserWarning,

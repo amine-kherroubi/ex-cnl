@@ -14,7 +14,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class FileSelector(BaseComponent):
-    """Component for selecting source files."""
 
     __slots__ = (
         "_on_files_changed",
@@ -33,11 +32,9 @@ class FileSelector(BaseComponent):
         super().__init__(parent, "Fichiers source")
 
     def _setup_content(self) -> None:
-        """Set up the file selector content."""
-        # Configure grid
+
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title with select button row
         title_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -49,7 +46,6 @@ class FileSelector(BaseComponent):
         )
         title_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=title_frame,
             text=self._title,
@@ -63,7 +59,6 @@ class FileSelector(BaseComponent):
         )
         title_label.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Clear button - starts with disabled styling
         self._clear_button: ctk.CTkButton = ctk.CTkButton(
             master=title_frame,
             text="Réinitialiser",
@@ -80,7 +75,6 @@ class FileSelector(BaseComponent):
         )
         self._clear_button.grid(row=0, column=1)  # type: ignore
 
-        # Select files button
         self._select_button: ctk.CTkButton = ctk.CTkButton(
             master=title_frame,
             text="Sélectionner des fichiers",
@@ -99,7 +93,6 @@ class FileSelector(BaseComponent):
             row=0, column=2, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE)
         )
 
-        # Information text - updated to reflect additive behavior
         info_text: str = (
             "Ajoutez les fichiers Excel nécessaires pour générer le rapport. "
         )
@@ -121,7 +114,6 @@ class FileSelector(BaseComponent):
             sticky="w",
         )
 
-        # Files listbox
         self._files_listbox: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self._content_frame,
             height=100,
@@ -142,7 +134,7 @@ class FileSelector(BaseComponent):
         self._update_display()
 
     def _select_files(self) -> None:
-        """Open file dialog to select files. New files are added to existing selection."""
+
         files: tuple[str, ...] | Literal[""] = filedialog.askopenfilenames(
             title="Sélectionner les fichiers source",
             filetypes=[
@@ -152,20 +144,17 @@ class FileSelector(BaseComponent):
         )
 
         if files:
-            # Convert to Path objects
+
             new_files: list[Path] = [Path(file) for file in files]
 
-            # Create a set of existing file paths for efficient duplicate checking
             existing_paths: set[Path] = set(self._selected_files)
 
-            # Add only new files that aren't already selected
             added_files: list[Path] = []
             for file_path in new_files:
                 if file_path not in existing_paths:
                     self._selected_files.append(file_path)
                     added_files.append(file_path)
 
-            # Update display and notify callback if any new files were added
             if (
                 added_files or not self._selected_files
             ):  # Update even if no new files to refresh display
@@ -173,18 +162,18 @@ class FileSelector(BaseComponent):
                 self._on_files_changed(self._selected_files)
 
     def _clear_files(self) -> None:
-        """Clear selected files."""
+
         self._selected_files = []
         self._update_display()
         self._on_files_changed(self._selected_files)
 
     def _update_display(self) -> None:
-        """Update the display of selected files."""
+
         self._files_listbox.configure(state="normal")  # type: ignore
         self._files_listbox.delete(index1="1.0", index2="end")  # type: ignore
 
         if self._selected_files:
-            # Show count of selected files
+
             count_text: str = (
                 f"Fichiers sélectionnés ({len(self._selected_files)}):\n\n"
             )
@@ -202,9 +191,8 @@ class FileSelector(BaseComponent):
 
         self._files_listbox.configure(state="disabled")  # type: ignore
 
-        # Update clear button state and styling
         if self._selected_files:
-            # Enable button with primary styling
+
             self._clear_button.configure(  # type: ignore
                 state="normal",
                 text_color=DesignSystem.Color.WHITE,
@@ -212,7 +200,7 @@ class FileSelector(BaseComponent):
                 hover_color=DesignSystem.Color.DARKER_GRAY,
             )
         else:
-            # Disable button with muted styling
+
             self._clear_button.configure(  # type: ignore
                 state="disabled",
                 text_color=DesignSystem.Color.GRAY,

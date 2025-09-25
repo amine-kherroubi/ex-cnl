@@ -11,15 +11,12 @@ from openpyxl.utils import get_column_letter
 
 @final
 class ExcelStylingService(object):
-    """Class to handle Excel worksheet styling with consistent formatting."""
 
-    # Font class attributes
     FONT_NORMAL = Font(name="Arial", size=9, bold=False)
     FONT_BOLD = Font(name="Arial", size=9, bold=False)
     FONT_HEADER = Font(name="Arial", size=9, bold=False)
     FONT_TITLE = Font(name="Arial", size=9, bold=False)
 
-    # Border class attributes
     BORDER_THIN = Border(
         left=Side(style="thin"),
         right=Side(style="thin"),
@@ -27,7 +24,6 @@ class ExcelStylingService(object):
         bottom=Side(style="thin"),
     )
 
-    # Alignment class attributes
     ALIGNMENT_CENTER = Alignment(horizontal="center", vertical="center")
     ALIGNMENT_CENTER_WRAP = Alignment(
         horizontal="center", vertical="center", wrap_text=True
@@ -70,14 +66,12 @@ class ExcelStylingService(object):
         alignment: Alignment | None = None,
         border: Border | None = None,
     ) -> None:
-        # Set the value in the top-left cell before merging
+
         if value is not None:
             sheet[f"{start_col}{start_row}"] = value
 
-        # Merge the cells
         sheet.merge_cells(f"{start_col}{start_row}:{end_col}{end_row}")
 
-        # Apply styling to all cells in the merged range
         font = font or cls.FONT_NORMAL
         alignment = alignment or cls.ALIGNMENT_CENTER
 

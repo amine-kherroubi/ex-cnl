@@ -54,7 +54,7 @@ class ReportGeneratorFactory:
             file_io_service: File I/O service instance
             data_repository: Data repository instance
             report_context: Report context with wilaya, date, etc.
-            **kwargs: Additional report-specific parameters (e.g., target_programme)
+            **kwargs: Additional report-specific parameters (e.g., target_program)
 
         Returns:
             Configured report generator instance
@@ -79,7 +79,6 @@ class ReportGeneratorFactory:
             generator_class: type[BaseGenerator] = cls._generators[report_name]
             cls._logger.debug(f"Using generator class: {generator_class.__name__}")
 
-            # Create generator with base dependencies
             generator: BaseGenerator = generator_class(
                 file_io_service=file_io_service,
                 data_repository=data_repository,
@@ -87,7 +86,6 @@ class ReportGeneratorFactory:
                 report_context=report_context,
             )
 
-            # Configure generator with additional parameters if supported
             if hasattr(generator, "configure") and kwargs:
                 cls._logger.debug("Configuring generator with additional parameters")
                 generator.configure(**kwargs)

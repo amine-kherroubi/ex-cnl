@@ -41,16 +41,13 @@ class MainWindow(ctk.CTk):
         self._controller: ReportController = ReportController(facade)
         self._current_view: ctk.CTkFrame | None = None
 
-        # Window configuration
         self.title(string="Générateur de rapports")
         self.geometry(geometry_string="900x700")
         self.minsize(width=700, height=600)
 
-        # Scaling - modern and appropriate for high-DPI displays
         ctk.set_widget_scaling(1.0)
         ctk.set_window_scaling(1.0)
 
-        # Setup UI
         self._setup_ui()
         self._load_available_reports()
         self._show_menu()
@@ -58,14 +55,12 @@ class MainWindow(ctk.CTk):
         self._logger.info("Main application window initialized successfully")
 
     def _setup_ui(self) -> None:
-        # Background color
+
         self.configure(fg_color=DesignSystem.Color.WHITE)  # type: ignore
 
-        # Configure grid weights
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
-        # Header frame
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -79,7 +74,6 @@ class MainWindow(ctk.CTk):
         header_frame.grid_columnconfigure(index=0, weight=0)
         header_frame.grid_columnconfigure(index=1, weight=0)
 
-        # Title
         self._title: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Générateur de rapports",
@@ -92,7 +86,6 @@ class MainWindow(ctk.CTk):
         )
         self._title.grid(row=0, column=0, sticky="w")  # type: ignore
 
-        # Organization
         self._organization: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="BNH (ex-CNL)",
@@ -106,7 +99,6 @@ class MainWindow(ctk.CTk):
         )
         self._organization.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="w")  # type: ignore
 
-        # Main container for views
         self._container: ctk.CTkFrame = ctk.CTkFrame(
             master=self,
             fg_color=DesignSystem.Color.LEAST_WHITE,

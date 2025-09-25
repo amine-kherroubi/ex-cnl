@@ -12,7 +12,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class BaseComponent(ctk.CTkFrame, ABC):
-    """Abstract base class for GUI components with consistent styling and structure."""
 
     __slots__ = ("_content_frame", "_title")
 
@@ -24,8 +23,7 @@ class BaseComponent(ctk.CTkFrame, ABC):
         self._setup_content()
 
     def _setup_base_ui(self) -> None:
-        """Set up the base UI structure common to all components."""
-        # Self configuration
+
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.WHITE,
             border_width=DesignSystem.BorderWidth.XS,
@@ -34,10 +32,8 @@ class BaseComponent(ctk.CTkFrame, ABC):
         )
         self.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=DesignSystem.Spacing.LG, sticky="ew")  # type: ignore
 
-        # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
 
-        # Content frame
         self._content_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )

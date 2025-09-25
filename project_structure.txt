@@ -13,13 +13,13 @@
 │   │   │   │   ├── report_category.py
 │   │   │   │   └── space_time.py
 │   │   │   ├── models
-│   │   │   │   ├── programme.py
+│   │   │   │   ├── subprogram.py
 │   │   │   │   ├── report_context.py
 │   │   │   │   ├── report_specification.py
 │   │   │   │   └── required_file.py
 │   │   │   ├── predefined_objects
 │   │   │   │   ├── dairas_et_communes.py
-│   │   │   │   ├── programmes.py
+│   │   │   │   ├── programs.py
 │   │   │   │   └── tranches.py
 │   │   │   └── registry
 │   │   │       ├── report_specification_registry.py

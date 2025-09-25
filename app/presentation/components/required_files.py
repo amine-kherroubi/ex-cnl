@@ -16,7 +16,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class RequiredFilesComponent(BaseComponent):
-    """Component displaying required files and their patterns for a report."""
 
     __slots__ = ("_report_spec",)
 
@@ -29,11 +28,9 @@ class RequiredFilesComponent(BaseComponent):
         super().__init__(parent, "Fichiers requis")
 
     def _setup_content(self) -> None:
-        """Set up the required files content."""
-        # Configure grid
+
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Fichiers requis",
@@ -52,7 +49,6 @@ class RequiredFilesComponent(BaseComponent):
             sticky="w",
         )  # type: ignore
 
-        # Required files list
         self._create_required_files_list()
 
         information: ctk.CTkLabel = ctk.CTkLabel(
@@ -72,7 +68,7 @@ class RequiredFilesComponent(BaseComponent):
         )
 
     def _create_required_files_list(self) -> None:
-        """Create the list of required files with their patterns."""
+
         files_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame,
             fg_color=DesignSystem.Color.TRANSPARENT,
@@ -92,8 +88,7 @@ class RequiredFilesComponent(BaseComponent):
     def _create_file_entry(
         self, parent: ctk.CTkFrame, required_file: RequiredFile, row: int
     ) -> None:
-        """Create a single file entry showing the pattern and table name."""
-        # Entry frame with subtle background
+
         entry_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=parent,
             fg_color=DesignSystem.Color.LEAST_WHITE,
@@ -109,7 +104,6 @@ class RequiredFilesComponent(BaseComponent):
         )  # type: ignore
         entry_frame.grid_columnconfigure(index=0, weight=1)
 
-        # File pattern (main identifier)
         name: ctk.CTkLabel = ctk.CTkLabel(
             master=entry_frame,
             text=f"{required_file.name}",
@@ -129,7 +123,6 @@ class RequiredFilesComponent(BaseComponent):
             sticky="w",
         )  # type: ignore
 
-        # Table name (what it maps to)
         pattern: ctk.CTkLabel = ctk.CTkLabel(
             master=entry_frame,
             text=f"Doit respecter la forme : {required_file.readable_pattern}",

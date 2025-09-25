@@ -12,12 +12,12 @@ from app.core.services.report_generation_service.concrete_generators.situation_f
 
 situation_financiere_specification: ReportSpecification = ReportSpecification(
     name="situation_financiere",
-    display_name="Situation financière d'un programme",
+    display_name="Situation financière d'un sous-programme",
     category=ReportCategory.HABITAT_RURAL,
     description=(
-        "Présente la situation financière détaillée d’un programme de logement rural, "
+        "Présente la situation financière détaillée d’un sous-programme de logement rural, "
         "par daira et par commune. Inclut les engagements, les consommations, "
-        "les cumuls et les restes relatifs à ce programme."
+        "les cumuls et les restes relatifs à ce sous-programme."
     ),
     required_files=[
         RequiredFile(
@@ -41,9 +41,9 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 d."Daira du projet",
                 d."Commune du projet",
                 COUNT(*) AS nb_aides_inscrites,
-                COUNT(*) * {aid_value} AS montant_inscrits
+                COUNT(*) * {aid_amount} AS montant_inscrits
             FROM decisions d
-            WHERE d."Sous programme" = {programme}
+            WHERE d."Sous program" = {subprogram}
             GROUP BY
                 d."Daira du projet",
                 d."Commune du projet"
@@ -63,7 +63,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
                 SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
-            WHERE p."Sous programme" = {programme}
+            WHERE p."Sous program" = {subprogram}
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
             GROUP BY
                 p.Daira,
@@ -84,7 +84,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
                 SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
-            WHERE p."Sous programme" = {programme}
+            WHERE p."Sous program" = {subprogram}
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
             AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month} 
             GROUP BY

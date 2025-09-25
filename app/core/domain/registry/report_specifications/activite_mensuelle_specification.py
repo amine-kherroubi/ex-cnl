@@ -10,7 +10,6 @@ from app.core.services.report_generation_service.concrete_generators.activite_me
     ActiviteMensuelleGenerator,
 )
 
-
 activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     name="activite_mensuelle",
     display_name="Rapport d'activité mensuelle",
@@ -18,7 +17,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     description=(
         "Comprend l’état d’exécution des tranches financières durant "
         "le mois et l’année spécifiés, en valeurs actuelles et cumulées, "
-        "ainsi que la situation des programmes "
+        "ainsi que la situation des sous-programmes "
         "en aides achevées, en cours ou non encore lancés."
     ),
     required_files=[
@@ -32,20 +31,19 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
     output_filename="activite_mensuelle_{wilaya}_{date}.xlsx",
     generator=ActiviteMensuelleGenerator,
     queries={
-        "programmes": """
-            SELECT programme
-            FROM programmes
-            ORDER BY display_order
+        "subprograms": """
+            SELECT s.subprogram
+            FROM subprograms s
+            ORDER BY s.display_order
         """,
-        # Lancements du mois - projets ayant reçu leur première tranche
         "lancements_mois": """
             SELECT 
-                p.programme,
+                s.subprogram,
                 COALESCE(data.count, 0) as count
-            FROM programmes p
+            FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -57,19 +55,18 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     '100%  1+2+3 EME TRANCHE'
                 )
                 AND "Date OV" LIKE '%/{month}/{year}'
-                GROUP BY "Sous programme"
-            ) data ON p.programme = data."Sous programme"
-            ORDER BY p.display_order
+                GROUP BY "Sous program"
+            ) data ON s.subprogram = data."Sous program"
+            ORDER BY s.display_order
         """,
-        # Cumul des lancements depuis le début de l'année
         "lancements_cumul_annee": """
             SELECT 
-                p.programme,
+                s.subprogram,
                 COALESCE(data.count, 0) as count
-            FROM programmes p
+            FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -82,19 +79,18 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 )
                 AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
-                GROUP BY "Sous programme"
-            ) data ON p.programme = data."Sous programme"
-            ORDER BY p.display_order
+                GROUP BY "Sous program"
+            ) data ON s.subprogram = data."Sous program"
+            ORDER BY s.display_order
         """,
-        # Livraisons du mois - projets ayant reçu leur dernière tranche
         "livraisons_mois": """
             SELECT
-                p.programme,
+                s.subprogram,
                 COALESCE(data.count, 0) as count
-            FROM programmes p
+            FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -106,19 +102,18 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     'Tranche complémentaire 2'
                 )
                 AND "Date OV" LIKE '%/{month}/{year}'
-                GROUP BY "Sous programme"
-            ) data ON p.programme = data."Sous programme"
-            ORDER BY p.display_order
+                GROUP BY "Sous program"
+            ) data ON s.subprogram = data."Sous program"
+            ORDER BY s.display_order
         """,
-        # Cumul des livraisons depuis le début de l'année
         "livraisons_cumul_annee": """
             SELECT 
-                p.programme,
+                s.subprogram,
                 COALESCE(data.count, 0) as count
-            FROM programmes p
+            FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -131,94 +126,90 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 )
                 AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
-                GROUP BY "Sous programme"
-            ) data ON p.programme = data."Sous programme"
-            ORDER BY p.display_order
+                GROUP BY "Sous program"
+            ) data ON s.subprogram = data."Sous program"
+            ORDER BY s.display_order
         """,
-        # Programmes avec leur consistance (nombre d'aides planifiéss)
-        "programmes_situation": """
+        "subprograms_situation": """
             SELECT 
-                programme,
-                aid_count,
-                display_order
-            FROM programmes
-            ORDER BY display_order
+                s.subprogram,
+                s.aid_count,
+                s.display_order
+            FROM subprograms s
+            ORDER BY s.display_order
         """,
-        # Projets achevés - ayant reçu la dernière tranche de paiement
         "acheves_derniere_tranche": """
             SELECT 
-                p.programme,
-                p.aid_count,
+                s.subprogram,
+                s.aid_count,
                 COALESCE(data.count, 0) as acheves
-            FROM programmes p
+            FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N2 > 0
                     OR C2 > 0
                     OR T3 > 0
-                GROUP BY "Sous programme"
-            ) data ON p.programme = data."Sous programme"
-            WHERE p.aid_count > 0
-            ORDER BY p.display_order
+                GROUP BY "Sous program"
+            ) data ON s.subprogram = data."Sous program"
+            WHERE s.aid_count > 0
+            ORDER BY s.display_order
         """,
-        # Projets en cours (lancés mais non achevés)
         "en_cours_calculation": """
             SELECT 
-                p.programme,
-                p.aid_count,
+                s.subprogram,
+                s.aid_count,
                 COALESCE(lances.count, 0) as lances_count,
                 COALESCE(acheves.count, 0) as acheves_count,
                 GREATEST(0, COALESCE(lances.count, 0) - COALESCE(acheves.count, 0)) as en_cours
-            FROM programmes p
+            FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N1 > 0
                     OR C1 > 0
                     OR T1 > 0
-                GROUP BY "Sous programme"
-            ) lances ON p.programme = lances."Sous programme"
+                GROUP BY "Sous program"
+            ) lances ON s.subprogram = lances."Sous program"
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N2 > 0
                     OR C2 > 0
                     OR T3 > 0
-                GROUP BY "Sous programme"
-            ) acheves ON p.programme = acheves."Sous programme"
-            WHERE p.aid_count > 0
-            ORDER BY p.display_order
+                GROUP BY "Sous program"
+            ) acheves ON s.subprogram = acheves."Sous program"
+            WHERE s.aid_count > 0
+            ORDER BY s.display_order
         """,
-        # Non encore lancés (consistance - premières tranches payées)
         "non_lances_premiere_tranche": """
             SELECT 
-                p.programme,
-                p.aid_count,
-                COALESCE(p.aid_count - data.count, p.aid_count) as non_lances
-            FROM programmes p
+                s.subprogram,
+                s.aid_count,
+                COALESCE(s.aid_count - data.count, s.aid_count) as non_lances
+            FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    "Sous program",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N1 > 0
                     OR C1 > 0
                     OR T1 > 0
-                GROUP BY "Sous programme"
-            ) data ON p.programme = data."Sous programme"
-            WHERE p.aid_count > 0
-            ORDER BY p.display_order
+                GROUP BY "Sous program"
+            ) data ON s.subprogram = data."Sous program"
+            WHERE s.aid_count > 0
+            ORDER BY s.display_order
         """,
     },
 )

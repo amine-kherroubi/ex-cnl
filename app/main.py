@@ -11,14 +11,12 @@ from app.presentation.windows.main_window import MainWindow
 
 
 def main() -> None:
-    # Setup config and logging
+
     config: AppConfig = AppConfig()
     LoggingSetup.configure(config.logging_config)
 
-    # Create facade
     facade: CoreFacade = CoreFacade(config)
 
-    # Run GUI
     app: CTk = MainWindow(facade)
     app.mainloop()  # type: ignore
 

@@ -13,7 +13,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class ReportCard(BaseComponent):
-    """Component displaying a report card with generation option."""
 
     __slots__ = (
         "_report_spec",
@@ -33,11 +32,9 @@ class ReportCard(BaseComponent):
         super().__init__(parent, report_spec.display_name)
 
     def _setup_content(self) -> None:
-        """Set up the report card content."""
-        # Configure grid
+
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Report info frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -49,7 +46,6 @@ class ReportCard(BaseComponent):
         )
         info_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Title
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.display_name,
@@ -68,7 +64,6 @@ class ReportCard(BaseComponent):
             sticky="w",
         )
 
-        # Details
         details: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=f"{self._report_spec.category}",
@@ -86,7 +81,6 @@ class ReportCard(BaseComponent):
             sticky="w",
         )
 
-        # Description
         description: ctk.CTkLabel = ctk.CTkLabel(
             master=info_frame,
             text=self._report_spec.description,
@@ -100,7 +94,6 @@ class ReportCard(BaseComponent):
         )
         description.grid(row=2, column=0, sticky="w")  # type: ignore
 
-        # Generate button
         self._generate_button: ctk.CTkButton = ctk.CTkButton(
             master=self._content_frame,
             text="Générer le rapport",

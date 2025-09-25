@@ -36,9 +36,7 @@ class QueryExecutionError(DatabaseError):
 
 
 class DataLoadError(DatabaseError):
-    __slots__ = (
-        "file_path",
-    )
+    __slots__ = ("file_path",)
 
     def __init__(self, file_path: Path, original_error: Exception) -> None:
         self.file_path: Final[Path] = file_path

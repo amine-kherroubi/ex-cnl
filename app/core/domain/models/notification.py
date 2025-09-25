@@ -8,10 +8,35 @@ from pydantic import BaseModel, Field
 
 
 class Notification(BaseModel):
-    names: Annotated[
+    name: Annotated[
+        str,
+        Field(
+            description="Notification name",
+        ),
+    ]
+
+    aliases: Annotated[
         list[str],
         Field(
-            description="Official programme name for housing projects",
+            description="All the possible names of the same notification inside the database",
+        ),
+    ]
+
+    aid_count: Annotated[
+        int,
+        Field(
+            default=0,
+            description="Total number of housing units planned in this notification",
+            ge=0,
+        ),
+    ]
+
+    aid_amount: Annotated[
+        int,
+        Field(
+            default=0,
+            description="Value of the financial aid provided (in dinars)",
+            ge=0,
         ),
     ]
 

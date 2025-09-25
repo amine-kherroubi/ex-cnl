@@ -28,7 +28,6 @@ class ReportController:
         self._logger.info("ReportController initialized successfully")
 
     def get_available_reports(self) -> dict[str, ReportSpecification]:
-        """Get all available report types from the facade."""
         self._logger.debug("Retrieving available reports from facade")
 
         try:
@@ -48,27 +47,19 @@ class ReportController:
         year: int,
         **kwargs: Any,
     ) -> Path:
-        """Generate a report with the given parameters.
-
-        Args:
-            report_name: Name of the report to generate
-            source_files: List of source file paths
-            output_directory_path: Directory to save the output file
-            month: Report month
-            year: Report year
-            **kwargs: Additional report-specific parameters (e.g., target_programme)
-
-        Returns:
-            Path to the generated report file
-        """
         self._logger.info(f"Starting report generation: {report_name}")
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")
         self._logger.debug(f"Period: {month} {year}")
         self._logger.debug(f"Additional parameters: {kwargs}")
 
+        # Log subprogram and notification selection if provided
+        if "target_subprogram" in kwargs:
+            self._logger.info(f"Target subprogram: {kwargs['target_subprogram']}")
+        if "target_notification" in kwargs:
+            self._logger.info(f"Target notification: {kwargs['target_notification']}")
+
         try:
-            # Validate input files against report requirements (fail fast)
             self._logger.debug("Validating source files against report requirements")
             validated_files: dict[str, Path] = self._validate_source_files(
                 report_name, source_files
@@ -90,7 +81,6 @@ class ReportController:
                 f"Period: {month} {year}, Report date: {report_context.reporting_date}"
             )
 
-            # Generate the report (facade will handle filename generation)
             output_file_path: Path = self._facade.generate_report(
                 report_name=report_name,
                 source_file_paths=validated_files,
@@ -115,12 +105,10 @@ class ReportController:
     def _validate_source_files(
         self, report_name: str, input_files: list[Path]
     ) -> dict[str, Path]:
-        """Validate source files against report requirements."""
         self._logger.debug(
             f"Validating {len(input_files)} source files for report: {report_name}"
         )
 
-        # Get report specification
         available_reports: dict[str, ReportSpecification] = (
             self._facade.get_available_reports()
         )
@@ -137,7 +125,6 @@ class ReportController:
             f"{[(rf.name, rf.readable_pattern) for rf in required_files]}"
         )
 
-        # Validate that all files exist
         self._logger.debug("Checking if all input files exist")
         for file_path in input_files:
             if not file_path.exists():
@@ -146,7 +133,6 @@ class ReportController:
                 raise FileNotFoundError(error_msg)
         self._logger.debug("All input files exist")
 
-        # Match files to required patterns
         self._logger.debug("Matching files to required patterns")
         matched_files: dict[str, Path] = {}
         unmatched_files: list[Path] = []
@@ -171,7 +157,6 @@ class ReportController:
                     f"File '{file_path.name}' did not match any required pattern"
                 )
 
-        # Check if we have files for all required entries (fail fast)
         self._logger.debug("Checking if all required files are satisfied")
         missing_files: list[str] = []
         for rf in required_files:
@@ -183,7 +168,6 @@ class ReportController:
                     f"Missing file for required pattern: '{rf.readable_pattern}' -> '{rf.table_name}'"
                 )
 
-        # Report validation results (fail fast)
         if missing_files:
             error_msg = "Missing files for required patterns:\n" + "\n".join(
                 missing_files

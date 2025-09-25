@@ -12,7 +12,7 @@ from openpyxl.styles import Alignment
 # Imports de l'application locale
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.predefined_objects.programmes import get_programmes_dataframe
+from app.core.domain.predefined_objects.subprograms import get_subprograms_dataframe
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation_service.base_generator import BaseGenerator
@@ -48,20 +48,20 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     def _create_predefined_tables(self) -> None:
         self._logger.debug("Creating reference tables")
         try:
-            self._logger.debug(f"Creating reference table 'programmes'")
+            self._logger.debug(f"Creating reference table 'programs'")
 
-            df: pd.DataFrame = get_programmes_dataframe()
-            self._data_repository.create_table_from_dataframe("programmes", df)
+            df: pd.DataFrame = get_subprograms_dataframe()
+            self._data_repository.create_table_from_dataframe("programs", df)
 
             rows, cols = df.shape
             self._logger.info(
-                f"Reference table 'programmes' created: {rows} rows and {cols} columns"
+                f"Reference table 'programs' created: {rows} rows and {cols} columns"
             )
-            self._logger.debug(f"Columns for 'programmes': {list(df.columns)}")
+            self._logger.debug(f"Columns for 'programs': {list(df.columns)}")
 
         except Exception as error:
             self._logger.exception(
-                f"Failed to create reference table 'programmes': {error}"
+                f"Failed to create reference table 'programs': {error}"
             )
             raise
 
@@ -93,7 +93,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     def _add_first_table_header(self, sheet: Worksheet) -> None:
         self._logger.debug("Ajout de l'en-tête du report")
 
-        # Titre
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
@@ -108,7 +107,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Wilaya
         wilaya_text = f"Wilaya de {self._report_context.wilaya.value}"
         sheet[f"A{self._current_row}"] = wilaya_text
         sheet[f"A{self._current_row}"].font = ExcelStylingService.FONT_BOLD
@@ -116,14 +114,13 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Titre principal
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
             "E",
             self._current_row,
             self._current_row,
-            value="Activité mensuelle par programme (à renseigner par la BNH, ex-CNL)",
+            value="Activité mensuelle par sous-programme (à renseigner par la BNH, ex-CNL)",
             font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
         )
@@ -131,7 +128,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Mois
         month_text: str = (
             f"Mois de {self._report_context.month} {self._report_context.year}"
         )
@@ -159,7 +155,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             f"Résultats de requêtes disponibles : {list(query_results.keys())}"
         )
 
-        # La cellule Programme s'étend sur 3 lignes
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
@@ -191,7 +186,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # En-têtes
         self._logger.debug(
             f"Ajout des en-têtes de colonnes à la ligne {self._current_row}"
         )
@@ -221,7 +215,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Sous-en-têtes
         sub_headers: list[tuple[str, str]] = [
             (
                 "B",
@@ -247,11 +240,10 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Ajouter les données des résultats de requêtes
         self._add_first_table_data(sheet, query_results)
 
     def _get_cumul_text(self) -> str:
-        """Generate the cumulative text based on the current month."""
+
         end_day: int = (
             self._report_context.month.last_day(self._report_context.year)
             if not self._report_context.month.is_current
@@ -265,25 +257,24 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     def _add_first_table_data(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        """Add data rows to the first table."""
+
         self._logger.debug(
             f"Début des lignes de données à la ligne {self._current_row}"
         )
 
-        # Obtenir tous les programmes
-        programmes: list[str] = []
-        if "programmes" in query_results:
-            programmes = query_results["programmes"]["programme"].tolist()
-            self._logger.info(f"Trouvé {len(programmes)} programmes : {programmes}")
+        subprograms: list[str] = []
+        if "subprograms" in query_results:
+            subprograms = query_results["subprograms"]["subprogram"].tolist()
+            self._logger.info(
+                f"Trouvé {len(subprograms)} sous-programmes : {subprograms}"
+            )
         else:
-            self._logger.warning("Aucun résultat de requête 'programmes' trouvé")
+            self._logger.warning("Aucun résultat de requête 'subprograms' trouvé")
 
-        # Créer des dictionnaires de recherche
         data_dicts: dict[str, dict[str, int]] = self._create_data_dictionaries(
             query_results
         )
 
-        # Calculer les totaux
         totals: dict[str, int] = {
             "livraisons_mois": sum(data_dicts["livraisons_mois"].values()),
             "livraisons_cumul": sum(data_dicts["livraisons_cumul"].values()),
@@ -291,23 +282,21 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             "lancements_cumul": sum(data_dicts["lancements_cumul"].values()),
         }
 
-        # Ajouter les lignes de données
-        for i, programme in enumerate(programmes):
+        for i, subprogram in enumerate(subprograms):
             row: int = self._current_row + i
-            self._add_programme_row(sheet, row, programme, data_dicts)
+            self._add_program_row(sheet, row, subprogram, data_dicts)
 
-        # Ajouter la ligne Total
-        self._current_row += len(programmes)
+        self._current_row += len(subprograms)
         self._add_total_row(sheet, self._current_row, totals)
 
-        self._logger.info(f"Premier tableau terminé avec {len(programmes)} programmes")
+        self._logger.info(f"Premier tableau terminé avec {len(subprograms)} programs")
 
         self._current_row += 2
 
     def _create_data_dictionaries(
         self, query_results: dict[str, pd.DataFrame]
     ) -> dict[str, dict[str, int]]:
-        """Create lookup dictionaries from query results."""
+
         self._logger.debug("Création des dictionnaires de recherche")
 
         data_dicts: dict[str, dict[str, int]] = {
@@ -317,11 +306,11 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             "livraisons_cumul": {},
         }
 
-        mappings = [
-            ("lancements_mois", "lancements_mois", "programme", "count"),
-            ("lancements_cumul", "lancements_cumul_annee", "programme", "count"),
-            ("livraisons_mois", "livraisons_mois", "programme", "count"),
-            ("livraisons_cumul", "livraisons_cumul_annee", "programme", "count"),
+        mappings: list[tuple[str, str, str, str]] = [
+            ("lancements_mois", "lancements_mois", "subprogram", "count"),
+            ("lancements_cumul", "lancements_cumul_annee", "subprogram", "count"),
+            ("livraisons_mois", "livraisons_mois", "subprogram", "count"),
+            ("livraisons_cumul", "livraisons_cumul_annee", "subprogram", "count"),
         ]
 
         for dict_key, query_key, prog_col, count_col in mappings:
@@ -329,25 +318,25 @@ class ActiviteMensuelleGenerator(BaseGenerator):
                 df = query_results[query_key]
                 data_dicts[dict_key] = dict(zip(df[prog_col], df[count_col]))
                 self._logger.debug(
-                    f"Données {dict_key} : {len(data_dicts[dict_key])} programmes"
+                    f"Données {dict_key} : {len(data_dicts[dict_key])} sous-programmes"
                 )
 
         return data_dicts
 
-    def _add_programme_row(
+    def _add_program_row(
         self,
         sheet: Worksheet,
         row: int,
-        programme: str,
+        subprogram: str,
         data_dicts: dict[str, dict[str, int]],
     ) -> None:
-        """Add a single programme row to the table."""
+
         values: list[tuple[str, Any]] = [
-            ("A", programme),
-            ("B", data_dicts["livraisons_mois"].get(programme, 0) or "-"),
-            ("C", data_dicts["livraisons_cumul"].get(programme, 0) or "-"),
-            ("D", data_dicts["lancements_mois"].get(programme, 0) or "-"),
-            ("E", data_dicts["lancements_cumul"].get(programme, 0) or "-"),
+            ("A", subprogram),
+            ("B", data_dicts["livraisons_mois"].get(subprogram, 0) or "-"),
+            ("C", data_dicts["livraisons_cumul"].get(subprogram, 0) or "-"),
+            ("D", data_dicts["lancements_mois"].get(subprogram, 0) or "-"),
+            ("E", data_dicts["lancements_cumul"].get(subprogram, 0) or "-"),
         ]
 
         for col, value in values:
@@ -360,7 +349,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     def _add_total_row(
         self, sheet: Worksheet, row: int, totals: dict[str, int]
     ) -> None:
-        """Add a total row to the table."""
+
         values: list[tuple[str, Any]] = [
             ("A", "Total"),
             ("B", totals["livraisons_mois"]),
@@ -383,7 +372,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             "E",
             self._current_row,
             self._current_row,
-            value="Situation des programmes (à renseigner par la BNH, ex-CNL)",
+            value="Situation des programs (à renseigner par la BNH, ex-CNL)",
             font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )
@@ -408,7 +397,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     ) -> None:
         self._logger.debug("Ajout du second tableau (SITUATION DES PROGRAMMES)")
 
-        # En-têtes du second tableau
         headers: list[tuple[str, str]] = [
             ("A", "Programme"),
             ("B", "Consistance"),
@@ -426,58 +414,54 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         self._current_row += 1
 
-        # Add second table data
         self._add_second_table_data(sheet, query_results)
 
     def _add_second_table_data(
         self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
     ) -> None:
-        """Add data rows to the second table."""
-        # Get programmes data
-        programmes_situation: list[tuple[str, int]] = []
-        if "programmes_situation" in query_results:
-            df_prog = query_results["programmes_situation"]
-            programmes_situation = list(zip(df_prog["programme"], df_prog["aid_count"]))
+
+        subprograms_situation: list[tuple[str, int]] = []
+        if "subprograms_situation" in query_results:
+            df_prog = query_results["subprograms_situation"]
+            subprograms_situation = list(
+                zip(df_prog["subprogram"], df_prog["aid_count"])
+            )
             self._logger.info(
-                f"Trouvé {len(programmes_situation)} programmes pour le tableau de situation"
+                f"Trouvé {len(subprograms_situation)} sous-programmes pour le tableau de situation"
             )
 
-        # Create lookup dictionaries
         data_dicts = self._create_situation_dictionaries(query_results)
 
-        # Initialize totals
         totals = {"aid_count": 0, "finished": 0, "current": 0, "not_started": 0}
 
-        # Add data rows
-        for i, (programme, aid_count) in enumerate(programmes_situation):
+        for i, (subprogram, aid_count) in enumerate(subprograms_situation):
             row = self._current_row + i
             self._add_situation_row(
-                sheet, row, programme, aid_count, data_dicts, totals
+                sheet, row, subprogram, aid_count, data_dicts, totals
             )
 
-        # Add total row
-        self._current_row += len(programmes_situation)
+        self._current_row += len(subprograms_situation)
         self._add_situation_total_row(sheet, self._current_row, totals)
 
         self._logger.info(
-            f"Second tableau terminé avec {len(programmes_situation)} programmes"
+            f"Second tableau terminé avec {len(subprograms_situation)} sous-programmes"
         )
         self._current_row += 2
 
     def _create_situation_dictionaries(
         self, query_results: dict[str, pd.DataFrame]
     ) -> dict[str, dict[str, int]]:
-        """Create lookup dictionaries for situation table."""
+
         data_dicts: dict[str, dict[str, int]] = {
             "acheves": {},
             "en_cours": {},
             "non_lances": {},
         }
 
-        mappings = [
-            ("acheves", "acheves_derniere_tranche", "programme", "acheves"),
-            ("en_cours", "en_cours_calculation", "programme", "en_cours"),
-            ("non_lances", "non_lances_premiere_tranche", "programme", "non_lances"),
+        mappings: list[tuple[str, str, str, str]] = [
+            ("acheves", "acheves_derniere_tranche", "subprogram", "acheves"),
+            ("en_cours", "en_cours_calculation", "subprogram", "en_cours"),
+            ("non_lances", "non_lances_premiere_tranche", "subprogram", "non_lances"),
         ]
 
         for dict_key, query_key, prog_col, value_col in mappings:
@@ -491,18 +475,18 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self,
         sheet: Worksheet,
         row: int,
-        programme: str,
+        subprogram: str,
         aid_count: int,
         data_dicts: dict[str, dict[str, int]],
         totals: dict[str, int],
     ) -> None:
-        """Add a single situation row."""
-        finished: int = data_dicts["acheves"].get(programme, 0)
-        current: int = data_dicts["en_cours"].get(programme, 0)
-        not_started: int = data_dicts["non_lances"].get(programme, 0)
+
+        finished: int = data_dicts["acheves"].get(subprogram, 0)
+        current: int = data_dicts["en_cours"].get(subprogram, 0)
+        not_started: int = data_dicts["non_lances"].get(subprogram, 0)
 
         values: list[tuple[str, Any]] = [
-            ("A", programme),
+            ("A", subprogram),
             ("B", aid_count),
             ("C", finished if finished > 0 else "-"),
             ("D", current if current > 0 else "-"),
@@ -516,7 +500,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             cell.alignment = ExcelStylingService.ALIGNMENT_CENTER
             cell.border = ExcelStylingService.BORDER_THIN
 
-        # Update totals
         totals["aid_count"] += aid_count
         totals["finished"] += finished
         totals["current"] += current
@@ -525,7 +508,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     def _add_situation_total_row(
         self, sheet: Worksheet, row: int, totals: dict[str, int]
     ) -> None:
-        """Add total row for situation table."""
+
         values: list[tuple[str, Any]] = [
             ("A", "Total général"),
             ("B", totals["aid_count"]),
@@ -544,7 +527,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     def _add_footer(self, sheet: Worksheet) -> None:
         self._logger.debug("Ajout du pied de page du report")
 
-        # Texte de pied de page gauche (A-B)
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
@@ -556,7 +538,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             alignment=ExcelStylingService.ALIGNMENT_LEFT,
         )
 
-        # Texte de pied de page droit (D-E)
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "D",
@@ -571,7 +552,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._logger.debug("Pied de page ajouté avec succès")
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        """Apply final formatting to the worksheet."""
+
         self._logger.debug("Applying final formatting")
 
         column_widths: dict[str, int] = {

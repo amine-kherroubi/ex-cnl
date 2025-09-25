@@ -33,7 +33,6 @@ class CoreFacade:
         self._logger: Logger = get_logger(__name__)
         self._logger.debug("Initializing CoreFacade")
 
-        # Dependency injection
         self._config: AppConfig = config
         self._data_repository: DuckDBRepository = DuckDBRepository(
             self._config.database_config
@@ -52,18 +51,6 @@ class CoreFacade:
         report_context: ReportContext,
         **kwargs: Any,
     ) -> Path:
-        """Generate a report with the given parameters.
-
-        Args:
-            report_name: Name of the report to generate
-            source_file_paths: Dictionary mapping table names to file paths
-            output_directory_path: Directory to save the output file
-            report_context: Report context with wilaya, date, etc.
-            **kwargs: Additional report-specific parameters
-
-        Returns:
-            Path to the generated report file
-        """
         self._logger.info(f"Starting report generation: {report_name}")
 
         try:
@@ -73,7 +60,6 @@ class CoreFacade:
             self._logger.info(f"Generating report: {report_specification.display_name}")
             self._logger.debug(f"Report category: {report_specification.category}")
 
-            # Create generator and generate report
             generator: BaseGenerator = ReportGeneratorFactory.create_generator(
                 report_name=report_name,
                 file_io_service=self._file_io_service,
@@ -102,7 +88,7 @@ class CoreFacade:
             raise
 
     def get_available_reports(self) -> dict[str, ReportSpecification]:
-        """Get all available report specifications."""
+
         self._logger.debug("Retrieving available reports")
         reports: dict[str, ReportSpecification] = ReportSpecificationRegistry.all()
         self._logger.info(f"Found {len(reports)} available report types")

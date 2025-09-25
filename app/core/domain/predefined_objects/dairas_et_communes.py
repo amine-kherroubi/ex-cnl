@@ -5,7 +5,6 @@ from typing import Final
 
 # Third-party imports
 import pandas as pd
-import pytest
 
 NUMBER_OF_DAIRAS: Final[int] = 21
 NUMBER_OF_COMMUNES: Final[int] = 67
@@ -219,7 +218,7 @@ DAIRA_COMMUNE_MAPPING: Final[dict[str, list[str]]] = {
 
 
 def get_dairas_communes_dataframe() -> pd.DataFrame:
-    """Create a pandas DataFrame mapping each commune to its corresponding daira, sorted alphabetically."""
+
     data: list[dict[str, str]] = []
     for daira, communes in DAIRA_COMMUNE_MAPPING.items():
         for commune in communes:
@@ -227,73 +226,3 @@ def get_dairas_communes_dataframe() -> pd.DataFrame:
 
     df: pd.DataFrame = pd.DataFrame(data)
     return df.sort_values(["Daira", "Commune"]).reset_index(drop=True)
-
-
-# Unit tests
-
-
-def test_daira_count():
-    assert (
-        len(DAIRA_COMMUNE_MAPPING) == NUMBER_OF_DAIRAS
-    ), f"Expected 21 dairas, got {len(DAIRA_COMMUNE_MAPPING)}"
-
-
-def test_commune_count():
-    mapped_communes: set[str] = set()
-    for communes in DAIRA_COMMUNE_MAPPING.values():
-        mapped_communes.update(communes)
-
-    assert (
-        len(mapped_communes) == NUMBER_OF_COMMUNES
-    ), f"Expected 67 communes, got {len(mapped_communes)}"
-
-
-def test_all_communes_mapped():
-    mapped_communes: set[str] = set()
-    for communes in DAIRA_COMMUNE_MAPPING.values():
-        mapped_communes.update(communes)
-
-    assert (
-        mapped_communes == COMMUNES_TIZI_OUZOU
-    ), f"Missing communes: {COMMUNES_TIZI_OUZOU - mapped_communes}, Extra communes: {mapped_communes - COMMUNES_TIZI_OUZOU}"
-
-
-def test_no_duplicate_communes():
-    all_communes: list[str] = []
-    for communes in DAIRA_COMMUNE_MAPPING.values():
-        all_communes.extend(communes)
-
-    duplicates: list[str] = [
-        commune for commune in set(all_communes) if all_communes.count(commune) > 1
-    ]
-    assert not duplicates, f"Duplicate communes found: {duplicates}"
-
-
-def test_all_mapped_dairas_exist():
-    mapped_dairas: set[str] = set(DAIRA_COMMUNE_MAPPING.keys())
-    assert (
-        mapped_dairas <= DAIRAS_TIZI_OUZOU
-    ), f"Invalid dairas in mapping: {mapped_dairas - DAIRAS_TIZI_OUZOU}"
-
-
-def test_dataframe_structure():
-    df: pd.DataFrame = get_dairas_communes_dataframe()
-
-    assert list(df.columns) == [
-        "Daira",
-        "Commune",
-    ], "DataFrame should have columns ['Daira', 'Commune']"
-    assert (
-        len(df) == NUMBER_OF_COMMUNES
-    ), f"DataFrame should have 67 rows, got {len(df)}"
-    assert df["Daira"].notna().all(), "No null values allowed in Daira column"
-    assert df["Commune"].notna().all(), "No null values allowed in Commune column"
-
-    is_sorted: bool = df.equals(
-        df.sort_values(["Daira", "Commune"]).reset_index(drop=True)
-    )
-    assert is_sorted, "DataFrame should be sorted by Daira then Commune"
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])

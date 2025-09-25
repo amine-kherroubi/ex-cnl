@@ -17,7 +17,6 @@ from app.presentation.views.report_views.concrete_report_views.situation_financi
 
 @final
 class ReportViewFactory(object):
-    """Factory for creating appropriate report views based on report type."""
 
     __slots__ = ()
 
@@ -28,15 +27,12 @@ class ReportViewFactory(object):
         controller: ReportController,
         on_back: Callable[[], None],
     ) -> BaseReportView:
-        """Create the appropriate view for the given report specification."""
 
-        # Map report names to their specific view classes
         view_mapping: dict[str, type[BaseReportView]] = {
             "activite_mensuelle": ActiviteMenuselleView,
             "situation_financiere": SituationFinanciereView,
         }
 
-        # Get the view class for this report type, default to DefaultReportView
         view: type[BaseReportView] | None = view_mapping.get(report_spec.name)
         if view is None:
             raise Exception()

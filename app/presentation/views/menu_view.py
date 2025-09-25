@@ -33,7 +33,7 @@ class MenuView(ctk.CTkFrame):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
-        # Self configuration
+
         self.configure(  # type: ignore
             fg_color=DesignSystem.Color.LEAST_WHITE,
             corner_radius=DesignSystem.Roundness.MD,
@@ -41,10 +41,8 @@ class MenuView(ctk.CTkFrame):
             border_width=DesignSystem.BorderWidth.XS,
         )
 
-        # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
 
-        # Header
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -73,7 +71,6 @@ class MenuView(ctk.CTkFrame):
         )
         description.grid(row=1, column=0, padx=DesignSystem.Spacing.SM, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XS), sticky="w")  # type: ignore
 
-        # Scrollable frame for report cards
         scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -81,7 +78,6 @@ class MenuView(ctk.CTkFrame):
         scrollable_frame.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
-        # Create report cards
         for idx, (doc_name, doc_spec) in enumerate(self._available_reports.items()):
             card: ReportCard = ReportCard(
                 parent=scrollable_frame,

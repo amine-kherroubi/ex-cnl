@@ -14,7 +14,6 @@ from app.presentation.styling.design_system import DesignSystem
 
 
 class SuccessWindow(ctk.CTkToplevel):
-    """Success window with consistent styling and file opening functionality."""
 
     __slots__ = (
         "_output_file_path",
@@ -35,19 +34,17 @@ class SuccessWindow(ctk.CTkToplevel):
         self._auto_size_window()
 
     def _setup_window(self) -> None:
-        """Configure the window properties."""
+
         self.title("Rapport généré avec succès")
         self.resizable(False, False)
         self.transient(self.master)  # type: ignore
         self.configure(fg_color=DesignSystem.Color.WHITE)  # type: ignore
 
-        # Configure grid
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=0, weight=1)
 
     def _setup_ui(self) -> None:
-        """Set up the user interface."""
-        # Main content frame
+
         self._content_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self,
             fg_color=DesignSystem.Color.WHITE,
@@ -64,7 +61,6 @@ class SuccessWindow(ctk.CTkToplevel):
         )
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Inner content frame
         inner_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
         )
@@ -77,7 +73,6 @@ class SuccessWindow(ctk.CTkToplevel):
         )
         inner_frame.grid_columnconfigure(index=0, weight=1)
 
-        # Success title
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=inner_frame,
             text="Rapport généré avec succès !",
@@ -95,7 +90,6 @@ class SuccessWindow(ctk.CTkToplevel):
             sticky="ew",
         )
 
-        # Success message
         message: ctk.CTkLabel = ctk.CTkLabel(
             master=inner_frame,
             text="Le rapport a été généré et sauvegardé dans le répertoire spécifié",
@@ -112,7 +106,6 @@ class SuccessWindow(ctk.CTkToplevel):
             sticky="ew",
         )
 
-        # File path info frame
         file_info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=inner_frame,
             fg_color=DesignSystem.Color.LEAST_WHITE,
@@ -126,7 +119,6 @@ class SuccessWindow(ctk.CTkToplevel):
         )
         file_info_frame.grid_columnconfigure(index=0, weight=1)
 
-        # File path label
         path_label: ctk.CTkLabel = ctk.CTkLabel(
             master=file_info_frame,
             text="Fichier généré :",
@@ -145,7 +137,6 @@ class SuccessWindow(ctk.CTkToplevel):
             sticky="ew",
         )
 
-        # File path display
         file_path_display: ctk.CTkLabel = ctk.CTkLabel(
             master=file_info_frame,
             text=str(self._output_file_path.name),
@@ -164,7 +155,6 @@ class SuccessWindow(ctk.CTkToplevel):
             sticky="ew",
         )
 
-        # Button frame
         button_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=inner_frame,
             fg_color=DesignSystem.Color.TRANSPARENT,
@@ -177,7 +167,6 @@ class SuccessWindow(ctk.CTkToplevel):
         button_frame.grid_columnconfigure(index=0, weight=1)
         button_frame.grid_columnconfigure(index=1, weight=1)
 
-        # Open file location button
         open_button: ctk.CTkButton = ctk.CTkButton(
             master=button_frame,
             text="Ouvrir l'emplacement du fichier",
@@ -200,7 +189,6 @@ class SuccessWindow(ctk.CTkToplevel):
             sticky="ew",
         )
 
-        # Close button
         close_button: ctk.CTkButton = ctk.CTkButton(
             master=button_frame,
             text="Fermer",
@@ -223,7 +211,7 @@ class SuccessWindow(ctk.CTkToplevel):
         )
 
     def _auto_size_window(self) -> None:
-        """Automatically size the window based on its content."""
+
         self.update_idletasks()
 
         required_width: int = self.winfo_reqwidth()
@@ -239,7 +227,6 @@ class SuccessWindow(ctk.CTkToplevel):
         window_width: int = max(final_width, min_width)
         window_height: int = max(final_height, min_height)
 
-        # Calculate position for centering
         if self.master and hasattr(self.master, "winfo_x"):
             parent_x: int = self.master.winfo_x()
             parent_y: int = self.master.winfo_y()
@@ -257,7 +244,7 @@ class SuccessWindow(ctk.CTkToplevel):
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
     def _open_output_file_location(self) -> None:
-        """Open the directory containing the generated file."""
+
         try:
             system: str = platform.system()
             parent_dir: str = str(self._output_file_path.parent)
@@ -269,9 +256,9 @@ class SuccessWindow(ctk.CTkToplevel):
             else:  # Linux and other Unix-like systems
                 subprocess.run(["xdg-open", parent_dir], check=True)
         except Exception:
-            # If directory opening fails, fail silently
+
             pass
 
     def _close(self) -> None:
-        """Close the window."""
+
         self.destroy()

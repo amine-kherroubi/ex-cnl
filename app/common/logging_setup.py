@@ -14,7 +14,7 @@ from app.config import LoggingConfig
 
 class JSONFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
-        # Create the base log entry
+
         log_entry: Dict[str, Any] = {
             "timestamp": datetime.fromtimestamp(record.created).isoformat(),
             "level": record.levelname,
@@ -25,7 +25,6 @@ class JSONFormatter(logging.Formatter):
             "line": record.lineno,
         }
 
-        # Add process and thread info for debugging
         if record.levelno <= logging.DEBUG:
             log_entry.update(
                 {
@@ -34,7 +33,6 @@ class JSONFormatter(logging.Formatter):
                 }
             )
 
-        # Add exception info if present
         if record.exc_info:
             log_entry["exception"] = self.formatException(record.exc_info)
 
