@@ -64,8 +64,16 @@ class FileIOService(object):
                 output_file_path.parent.mkdir(parents=True, exist_ok=True)
 
                 if output_file_path.exists():
-                    self._logger.debug("File already exists, deleting before saving")
-                    output_file_path.unlink()
+                    try:
+                        self._logger.debug(
+                            "File already exists, trying to delete before saving"
+                        )
+                        output_file_path.unlink()
+                    except PermissionError:
+                        self._logger.error(
+                            f"File {output_file_path} is open in another program (e.g., Excel). Please close it and retry."
+                        )
+                        raise
 
                 data.save(output_file_path)
                 self._logger.info(f"Workbook saved successfully to {output_file_path}")

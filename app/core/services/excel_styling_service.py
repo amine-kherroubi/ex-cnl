@@ -87,6 +87,38 @@ class ExcelStylingService(object):
                     cell.border = border
 
     @classmethod
+    def merge_cells_with_same_content(
+        cls,
+        sheet: Worksheet,
+        col: str,
+        start_row: int,
+        end_row: int,
+        font: Font | None = None,
+        alignment: Alignment | None = None,
+        border: Border | None = None,
+    ) -> None:
+        start_row_content: str = sheet[f"{col}{start_row}"].value
+        for row in range(start_row + 1, end_row + 1):
+            if sheet[f"{col}{row}"].value == start_row_content:
+                sheet[f"{col}{row}"].value = ""
+            else:
+                raise ValueError("Can't merge cell with different content")
+
+        sheet.merge_cells(f"{col}{start_row}:{col}{end_row}")
+
+        if font or alignment or border:
+            font = font or cls.FONT_NORMAL
+            alignment = alignment or cls.ALIGNMENT_CENTER
+            for row in range(start_row, end_row + 1):
+                cell = sheet[f"{col}{row}"]
+                if font:
+                    cell.font = font
+                if alignment:
+                    cell.alignment = alignment
+                if border:
+                    cell.border = border
+
+    @classmethod
     def set_column_widths(cls, sheet: Worksheet, column_widths: dict[str, int]) -> None:
         for col, width in column_widths.items():
             sheet.column_dimensions[col].width = width

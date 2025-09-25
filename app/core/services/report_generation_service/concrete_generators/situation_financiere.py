@@ -33,6 +33,8 @@ class SituationFinanciereGenerator(BaseGenerator):
         "_target_subprogram",
         "_target_notification",
         "_totals",
+        "_data_start_row",
+        "_data_end_row",
     )
 
     def __init__(
@@ -49,6 +51,8 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._target_subprogram: Subprogram | None = None
         self._target_notification: Notification | None = None
         self._totals: Dict[str, int] = {}
+        self._data_start_row: int = 0
+        self._data_end_row: int = 0
 
     def configure(self, **kwargs: Any) -> None:
         subprogram_database_alias: str | None = kwargs.get("target_subprogram")
@@ -446,6 +450,9 @@ class SituationFinanciereGenerator(BaseGenerator):
             "cumul_total": 0,
         }
 
+        # Store the start row for merging later
+        self._data_start_row = self._current_row
+
         for i, (_, row) in enumerate(dairas_communes_df.iterrows()):
             daira: str = row["Daira"]
             commune: str = row["Commune"]
@@ -455,11 +462,68 @@ class SituationFinanciereGenerator(BaseGenerator):
                 sheet, current_row, daira, commune, data_dicts, totals
             )
 
+        self._data_end_row = self._current_row + len(dairas_communes_df) - 1
         self._current_row += len(dairas_communes_df)
+
+        # Apply merging to daira column (column A) for consecutive identical values
+        self._merge_daira_cells(sheet, dairas_communes_df)
 
         self._totals = totals
 
         self._logger.info(f"Added {len(dairas_communes_df)} data rows successfully")
+
+    def _merge_daira_cells(
+        self, sheet: Worksheet, dairas_communes_df: pd.DataFrame
+    ) -> None:
+        """
+        Merge consecutive daira cells that have identical content.
+        """
+        self._logger.debug("Merging daira cells")
+
+        current_row: int = self._data_start_row
+
+        while current_row <= self._data_end_row:
+            current_daira: str = sheet[f"A{current_row}"].value
+
+            # Find the end of consecutive identical daira values
+            merge_end_row: int = current_row
+            while (
+                merge_end_row + 1 <= self._data_end_row
+                and sheet[f"A{merge_end_row + 1}"].value == current_daira
+            ):
+                merge_end_row += 1
+
+            # If we have more than one cell with the same daira value, merge them
+            if merge_end_row > current_row:
+                try:
+                    ExcelStylingService.merge_cells_with_same_content(
+                        sheet=sheet,
+                        col="A",
+                        start_row=current_row,
+                        end_row=merge_end_row,
+                        font=ExcelStylingService.FONT_NORMAL,
+                        alignment=ExcelStylingService.ALIGNMENT_CENTER,
+                        border=ExcelStylingService.BORDER_THIN,
+                    )
+                    self._logger.debug(
+                        f"Merged daira '{current_daira}' from row {current_row} to {merge_end_row}"
+                    )
+                except ValueError as e:
+                    self._logger.warning(f"Failed to merge daira cells: {e}")
+            else:
+                # Apply styling to single cell
+                ExcelStylingService.apply_style_to_cell(
+                    sheet=sheet,
+                    col="A",
+                    row=current_row,
+                    font=ExcelStylingService.FONT_NORMAL,
+                    alignment=ExcelStylingService.ALIGNMENT_CENTER,
+                    border=ExcelStylingService.BORDER_THIN,
+                )
+
+            current_row = merge_end_row + 1
+
+        self._logger.info("Daira cell merging completed successfully")
 
     def _create_lookup_dictionaries(
         self, query_results: Dict[str, pd.DataFrame]
@@ -514,12 +578,15 @@ class SituationFinanciereGenerator(BaseGenerator):
     ) -> None:
         key: Tuple[str, str] = (daira, commune)
 
+        # Note: We don't style column A (daira) here since it will be handled by the merge function
         basic_values: List[Tuple[str, Any]] = [
-            ("A", daira),
             ("B", commune),
             ("C", "-"),
             ("D", "-"),
         ]
+
+        # Set the daira value directly without styling (will be styled during merge)
+        sheet[f"A{row}"].value = daira
 
         if key in data_dicts["aides_inscrites"]:
             aides_data = data_dicts["aides_inscrites"][key]
