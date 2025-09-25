@@ -11,11 +11,11 @@ class Notification(BaseModel):
     name: Annotated[
         str,
         Field(
-            description="Notification name",
+            description="Notification name to be displayed",
         ),
     ]
 
-    aliases: Annotated[
+    database_aliases: Annotated[
         list[str],
         Field(
             description="All the possible names of the same notification inside the database",

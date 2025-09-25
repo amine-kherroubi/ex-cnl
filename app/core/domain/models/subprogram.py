@@ -13,7 +13,15 @@ class Subprogram(BaseModel):
     name: Annotated[
         str,
         Field(
-            description="Official subprogram name for housing projects",
+            description="Subprogram name to be displayed",
+            min_length=1,
+        ),
+    ]
+
+    database_alias: Annotated[
+        str,
+        Field(
+            description="Exact subprogram name inside the database",
             min_length=1,
         ),
     ]

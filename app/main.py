@@ -11,7 +11,6 @@ from app.presentation.windows.main_window import MainWindow
 
 
 def main() -> None:
-
     config: AppConfig = AppConfig()
     LoggingSetup.configure(config.logging_config)
 

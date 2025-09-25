@@ -51,23 +51,23 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._totals: Dict[str, int] = {}
 
     def configure(self, **kwargs: Any) -> None:
-        subprogram_name: str | None = kwargs.get("target_subprogram")
+        subprogram_database_alias: str | None = kwargs.get("target_subprogram")
         notification_name: str | None = kwargs.get("target_notification")
 
-        if subprogram_name is None:
+        if subprogram_database_alias is None:
             raise ValueError("additional parameter 'target_subprogram' is required")
 
         if notification_name is None:
             raise ValueError("additional parameter 'target_notification' is required")
 
-        self._logger.debug(f"Setting target subprogram: {subprogram_name}")
+        self._logger.debug(f"Setting target subprogram: {subprogram_database_alias}")
         self._logger.debug(f"Setting target notification: {notification_name}")
 
         # Find the target subprogram
         for subprogram in SUBPROGRAMS:
-            if subprogram.name == subprogram_name:
+            if subprogram.database_alias == subprogram_database_alias:
                 self._target_subprogram = subprogram
-                self._logger.info(f"Target subprogram set: {subprogram.name}")
+                self._logger.info(f"Target subprogram set: {subprogram.database_alias}")
 
                 # Find the target notification within the subprogram
                 for notification in subprogram.notifications:
@@ -82,16 +82,16 @@ class SituationFinanciereGenerator(BaseGenerator):
                 # If notification not found in the subprogram
                 available_notifications = [n.name for n in subprogram.notifications]
                 error_msg = (
-                    f"Notification '{notification_name}' not found in subprogram '{subprogram_name}'. "
+                    f"Notification '{notification_name}' not found in subprogram '{subprogram_database_alias}'. "
                     f"Available notifications: {available_notifications}"
                 )
                 self._logger.error(error_msg)
                 raise ValueError(error_msg)
 
         # If subprogram not found
-        available_subprograms: List[str] = [p.name for p in SUBPROGRAMS]
+        available_subprograms: List[str] = [p.database_alias for p in SUBPROGRAMS]
         error_msg: str = (
-            f"Subprogram '{subprogram_name}' not found. "
+            f"Subprogram '{subprogram_database_alias}' not found. "
             f"Available subprograms: {available_subprograms}"
         )
         self._logger.error(error_msg)
@@ -115,7 +115,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             raise RuntimeError(error_msg)
 
         self._logger.debug(
-            f"Target selection verified: {self._target_subprogram.name} - {self._target_notification.name}"
+            f"Target selection verified: {self._target_subprogram.database_alias} - {self._target_notification.name}"
         )
 
     def generate(
@@ -163,7 +163,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         formatted_query: str = query_template
 
         formatted_query = (
-            formatted_query.replace("{subprogram}", f"'{self._target_subprogram.name}'")  # type: ignore
+            formatted_query.replace("{subprogram}", f"'{self._target_subprogram.database_alias}'")  # type: ignore
             .replace("{notification}", f"'{self._target_notification.name}'")  # type: ignore
             .replace("{aid_amount}", str(self._target_notification.aid_amount))  # type: ignore
             .replace("{year}", str(self._report_context.year))
@@ -173,7 +173,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.debug(
             f"Placeholders replaced with: month={self._report_context.month.number}, "
             f"year={self._report_context.year}, "
-            f"subprogram={self._target_subprogram.name}, "  # type: ignore
+            f"subprogram={self._target_subprogram.database_alias}, "  # type: ignore
             f"notification={self._target_notification.name}, "  # type: ignore
             f"aid_amount={self._target_notification.aid_amount}"  # type: ignore
         )
@@ -199,7 +199,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             self._current_row,
             self._current_row,
             value=(
-                f"Situation financière du sous-programme '{self._target_subprogram.name}'"  # type: ignore
+                f"Situation financière du sous-programme '{self._target_subprogram.database_alias}'"  # type: ignore
                 f"- Notification '{self._target_notification.name}' par daira et par commune",  # type: ignore
             ),
             font=ExcelStylingService.FONT_TITLE,
@@ -502,7 +502,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         key: Tuple[str, str] = (daira, commune)
 
         basic_values: List[Tuple[str, Any]] = [
-            ("A", f"{self._target_subprogram.name} - {self._target_notification.name}"),  # type: ignore
+            ("A", f"{self._target_subprogram.database_alias} - {self._target_notification.name}"),  # type: ignore
             ("B", daira),
             ("C", commune),
             ("D", "-"),
@@ -723,7 +723,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.info("Final formatting completed successfully")
 
     def _apply_number_formatting(self, sheet: Worksheet) -> None:
-        self._logger.debug("Applying number formatting to monetary columns")
+        self._logger.debug("Applying French number formatting to monetary columns")
 
         monetary_columns = ["G", "M", "Q", "R"]  # Montants columns and cumul
 
@@ -733,6 +733,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         for col in monetary_columns:
             for row in range(data_start_row, data_end_row):
                 cell = sheet[f"{col}{row}"]
-                cell.number_format = "#,##0"
+                # French number format with space as thousands separator
+                cell.number_format = "# ##0"
 
-        self._logger.info("Number formatting applied to monetary columns")
+        self._logger.info("French number formatting applied to monetary columns")

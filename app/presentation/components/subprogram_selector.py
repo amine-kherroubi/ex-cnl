@@ -36,7 +36,7 @@ class SubprogramSelector(BaseComponent):
         self._selected_notification: str | None = None
 
         subprogram_names: list[str] = [subprogram.name for subprogram in SUBPROGRAMS]
-        default_subprogram_name: str = subprogram_names[0] if subprogram_names else ""
+        default_subprogram_name: str = subprogram_names[-1] if subprogram_names else ""
         self._subprogram_var: ctk.StringVar = ctk.StringVar(
             value=default_subprogram_name
         )
@@ -49,7 +49,8 @@ class SubprogramSelector(BaseComponent):
         super().__init__(parent, "Sous-programme et notification")
 
     def _setup_content(self) -> None:
-        self._content_frame.grid_columnconfigure(index=0, weight=1)
+        self._content_frame.grid_columnconfigure(index=1, weight=1)
+        self._content_frame.grid_columnconfigure(index=3, weight=1)
 
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
@@ -65,6 +66,7 @@ class SubprogramSelector(BaseComponent):
         title.grid(  # type: ignore
             row=0,
             column=0,
+            columnspan=4,
             pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="w",
         )
@@ -81,6 +83,7 @@ class SubprogramSelector(BaseComponent):
         information.grid(  # type: ignore
             row=1,
             column=0,
+            columnspan=4,
             pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="w",
         )
@@ -100,7 +103,7 @@ class SubprogramSelector(BaseComponent):
         subprogram_label.grid(  # type: ignore
             row=2,
             column=0,
-            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.XS),
+            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="w",
         )
 
@@ -123,9 +126,9 @@ class SubprogramSelector(BaseComponent):
             corner_radius=DesignSystem.Roundness.SM,
         )
         self._subprogram_selector.grid(  # type: ignore
-            row=3,
-            column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            row=2,
+            column=1,
+            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
             sticky="ew",
         )
 
@@ -142,9 +145,9 @@ class SubprogramSelector(BaseComponent):
             anchor="w",
         )
         notification_label.grid(  # type: ignore
-            row=4,
-            column=0,
-            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.XS),
+            row=2,
+            column=2,
+            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="w",
         )
 
@@ -165,12 +168,7 @@ class SubprogramSelector(BaseComponent):
             border_width=DesignSystem.BorderWidth.XS,
             corner_radius=DesignSystem.Roundness.SM,
         )
-        self._notification_selector.grid(  # type: ignore
-            row=5,
-            column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
-            sticky="ew",
-        )
+        self._notification_selector.grid(row=2, column=3, sticky="ew")  # type: ignore
 
         # Info display frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
@@ -180,7 +178,13 @@ class SubprogramSelector(BaseComponent):
             border_color=DesignSystem.Color.LIGHTER_GRAY,
             corner_radius=DesignSystem.Roundness.SM,
         )
-        info_frame.grid(row=6, column=0, sticky="ew")  # type: ignore
+        info_frame.grid(  # type: ignore
+            row=3,
+            column=0,
+            columnspan=4,
+            pady=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE),
+            sticky="ew",
+        )
         info_frame.grid_columnconfigure(index=0, weight=1)
 
         self._selection_info_label: ctk.CTkLabel = ctk.CTkLabel(
@@ -251,10 +255,13 @@ class SubprogramSelector(BaseComponent):
             if subprogram.name == self._selected_subprogram:
                 for notification in subprogram.notifications:
                     if notification.name == self._selected_notification:
+                        formatted_amount: str = f"{notification.aid_amount:_}".replace(
+                            "_", " "
+                        )
                         return (
-                            f"Programme : {subprogram.name}\n"
+                            f"Sous-programme : {subprogram.name}\n"
                             f"Notification : {notification.name}\n"
-                            f"Montant de l'aide : {notification.aid_amount:,} DA\n"
+                            f"Montant de l'aide : {formatted_amount} DA\n"
                             f"Consistance : {notification.aid_count}"
                         )
                 break
