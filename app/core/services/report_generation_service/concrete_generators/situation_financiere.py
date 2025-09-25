@@ -11,6 +11,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 # Local application imports
 from app.core.domain.models.subprogram import Subprogram
+from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.predefined_objects.subprograms import (
@@ -27,7 +28,12 @@ from app.core.services.excel_styling_service import ExcelStylingService
 
 
 class SituationFinanciereGenerator(BaseGenerator):
-    __slots__ = ("_current_row", "_target_subprogram", "_totals")
+    __slots__ = (
+        "_current_row",
+        "_target_subprogram",
+        "_target_notification",
+        "_totals",
+    )
 
     def __init__(
         self,
@@ -41,25 +47,48 @@ class SituationFinanciereGenerator(BaseGenerator):
         )
         self._current_row: int = 1
         self._target_subprogram: Subprogram | None = None
+        self._target_notification: Notification | None = None
         self._totals: Dict[str, int] = {}
 
     def configure(self, **kwargs: Any) -> None:
-
         subprogram_name: str | None = kwargs.get("target_subprogram")
+        notification_name: str | None = kwargs.get("target_notification")
+
         if subprogram_name is None:
             raise ValueError("additional parameter 'target_subprogram' is required")
 
-        self._logger.debug(f"Setting target subprogram: {subprogram_name}")
+        if notification_name is None:
+            raise ValueError("additional parameter 'target_notification' is required")
 
+        self._logger.debug(f"Setting target subprogram: {subprogram_name}")
+        self._logger.debug(f"Setting target notification: {notification_name}")
+
+        # Find the target subprogram
         for subprogram in SUBPROGRAMS:
             if subprogram.name == subprogram_name:
                 self._target_subprogram = subprogram
-                self._logger.info(
-                    f"Target subprogram set: {subprogram.name} "
-                    f"(aid_amount: {subprogram.aid_amount}, aid_count: {subprogram.aid_count})"
-                )
-                return
+                self._logger.info(f"Target subprogram set: {subprogram.name}")
 
+                # Find the target notification within the subprogram
+                for notification in subprogram.notifications:
+                    if notification.name == notification_name:
+                        self._target_notification = notification
+                        self._logger.info(
+                            f"Target notification set: {notification.name} "
+                            f"(aid_amount: {notification.aid_amount}, aid_count: {notification.aid_count})"
+                        )
+                        return
+
+                # If notification not found in the subprogram
+                available_notifications = [n.name for n in subprogram.notifications]
+                error_msg = (
+                    f"Notification '{notification_name}' not found in subprogram '{subprogram_name}'. "
+                    f"Available notifications: {available_notifications}"
+                )
+                self._logger.error(error_msg)
+                raise ValueError(error_msg)
+
+        # If subprogram not found
         available_subprograms: List[str] = [p.name for p in SUBPROGRAMS]
         error_msg: str = (
             f"Subprogram '{subprogram_name}' not found. "
@@ -68,18 +97,25 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.error(error_msg)
         raise ValueError(error_msg)
 
-    def _verify_target_subprogram(self) -> None:
-
+    def _verify_target_selection(self) -> None:
         if self._target_subprogram is None:
             error_msg: str = (
-                "No target subprogram set. Please call set_target_subprogram() "
+                "No target subprogram set. Please call configure() with target_subprogram "
+                "before generating the report."
+            )
+            self._logger.error(error_msg)
+            raise RuntimeError(error_msg)
+
+        if self._target_notification is None:
+            error_msg: str = (
+                "No target notification set. Please call configure() with target_notification "
                 "before generating the report."
             )
             self._logger.error(error_msg)
             raise RuntimeError(error_msg)
 
         self._logger.debug(
-            f"Target subprogram verified: {self._target_subprogram.name}"
+            f"Target selection verified: {self._target_subprogram.name} - {self._target_notification.name}"
         )
 
     def generate(
@@ -87,12 +123,10 @@ class SituationFinanciereGenerator(BaseGenerator):
         source_file_paths: Dict[str, Path],
         output_directory_path: Path,
     ) -> Path:
-
-        self._verify_target_subprogram()
+        self._verify_target_selection()
         return super().generate(source_file_paths, output_directory_path)
 
     def _create_predefined_tables(self) -> None:
-
         self._logger.debug("Creating reference tables")
 
         try:
@@ -124,14 +158,14 @@ class SituationFinanciereGenerator(BaseGenerator):
             raise
 
     def _format_query_with_context(self, query_template: str) -> str:
-
         self._logger.debug("Formatting query template with report context")
 
         formatted_query: str = query_template
 
         formatted_query = (
-            formatted_query.replace("{subprogram}", f"'{self._target_subprogram.name}'")
-            .replace("{aid_amount}", str(self._target_subprogram.aid_amount))
+            formatted_query.replace("{subprogram}", f"'{self._target_subprogram.name}'")  # type: ignore
+            .replace("{notification}", f"'{self._target_notification.name}'")  # type: ignore
+            .replace("{aid_amount}", str(self._target_notification.aid_amount))  # type: ignore
             .replace("{year}", str(self._report_context.year))
             .replace("{month}", str(self._report_context.month.number))
         )
@@ -139,8 +173,9 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.debug(
             f"Placeholders replaced with: month={self._report_context.month.number}, "
             f"year={self._report_context.year}, "
-            f"subprogram={self._target_subprogram.name}, "
-            f"aid_amount={self._target_subprogram.aid_amount}"
+            f"subprogram={self._target_subprogram.name}, "  # type: ignore
+            f"notification={self._target_notification.name}, "  # type: ignore
+            f"aid_amount={self._target_notification.aid_amount}"  # type: ignore
         )
 
         self._logger.debug("Query formatting completed")
@@ -149,14 +184,12 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _add_content(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
-
         self._add_header(sheet)
         self._add_table_headers(sheet)
         self._add_data_rows(sheet, query_results)
         self._add_totals_row(sheet, query_results)
 
     def _add_header(self, sheet: Worksheet) -> None:
-
         self._logger.debug("Adding report header")
 
         ExcelStylingService.merge_and_style_cells(
@@ -165,7 +198,10 @@ class SituationFinanciereGenerator(BaseGenerator):
             "T",
             self._current_row,
             self._current_row,
-            value=f"Situation financière du sous-programme '{self._target_subprogram.name}' par daira et par commune",  # type: ignore
+            value=(
+                f"Situation financière du sous-programme '{self._target_subprogram.name}'"  # type: ignore
+                f"- Notification '{self._target_notification.name}' par daira et par commune",  # type: ignore
+            ),
             font=ExcelStylingService.FONT_TITLE,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )
@@ -199,7 +235,6 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.info("Report header added successfully")
 
     def _add_table_headers(self, sheet: Worksheet) -> None:
-
         self._logger.debug("Adding table headers")
 
         ExcelStylingService.merge_and_style_cells(
@@ -376,7 +411,6 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _add_data_rows(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
-
         self._logger.debug("Adding data rows")
 
         dairas_communes_df: pd.DataFrame = get_dairas_communes_dataframe()
@@ -417,7 +451,6 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _create_lookup_dictionaries(
         self, query_results: Dict[str, pd.DataFrame]
     ) -> Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]]:
-
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]] = {
             "aides_inscrites": {},
             "cumul_precedent": {},
@@ -466,11 +499,10 @@ class SituationFinanciereGenerator(BaseGenerator):
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
         totals: Dict[str, int],
     ) -> None:
-
         key: Tuple[str, str] = (daira, commune)
 
         basic_values: List[Tuple[str, Any]] = [
-            ("A", self._target_subprogram.name),  # type: ignore
+            ("A", f"{self._target_subprogram.name} - {self._target_notification.name}"),  # type: ignore
             ("B", daira),
             ("C", commune),
             ("D", "-"),
@@ -564,7 +596,6 @@ class SituationFinanciereGenerator(BaseGenerator):
         totals: Dict[str, int],
         total_keys: List[str],
     ) -> None:
-
         if key in data_dict:
             values = data_dict[key]
             column_data: List[Tuple[str, Any]] = []
@@ -597,7 +628,6 @@ class SituationFinanciereGenerator(BaseGenerator):
         key: Tuple[str, str],
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
     ) -> int:
-
         total: int = 0
         if key in data_dicts["cumul_precedent"]:
             total += data_dicts["cumul_precedent"][key][3]  # montant column
@@ -608,7 +638,6 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _add_totals_row(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
-
         self._logger.debug("Adding totals row")
 
         total_values: List[Tuple[str, Any]] = [
@@ -647,11 +676,10 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._current_row += 1
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-
         self._logger.debug("Applying final formatting")
 
         column_widths: Dict[str, int] = {
-            "A": 30,  # Sous-programme
+            "A": 35,  # Sous-programme - Notification (wider for both names)
             "B": 20,  # Daira
             "C": 25,  # Commune
             "D": 12,  # Aides notifiées
@@ -695,7 +723,6 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.info("Final formatting completed successfully")
 
     def _apply_number_formatting(self, sheet: Worksheet) -> None:
-
         self._logger.debug("Applying number formatting to monetary columns")
 
         monetary_columns = ["G", "M", "Q", "R"]  # Montants columns and cumul
@@ -704,10 +731,8 @@ class SituationFinanciereGenerator(BaseGenerator):
         data_end_row = self._current_row  # Current row after all data has been added
 
         for col in monetary_columns:
-
             for row in range(data_start_row, data_end_row):
                 cell = sheet[f"{col}{row}"]
-
                 cell.number_format = "#,##0"
 
         self._logger.info("Number formatting applied to monetary columns")

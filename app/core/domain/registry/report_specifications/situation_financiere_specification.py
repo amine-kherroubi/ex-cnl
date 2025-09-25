@@ -44,6 +44,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 COUNT(*) * {aid_amount} AS montant_inscrits
             FROM decisions d
             WHERE d."Sous program" = {subprogram}
+            AND p."Notification" = {notification}
             GROUP BY
                 d."Daira du projet",
                 d."Commune du projet"
@@ -64,6 +65,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
             WHERE p."Sous program" = {subprogram}
+            AND p."Notification" = {notification}
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
             GROUP BY
                 p.Daira,
@@ -85,6 +87,7 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
             WHERE p."Sous program" = {subprogram}
+            AND p."Notification" = {notification}
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
             AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month} 
             GROUP BY
