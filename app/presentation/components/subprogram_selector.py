@@ -35,7 +35,6 @@ class SubprogramSelector(BaseComponent):
         self._selected_subprogram_alias: str | None = None
         self._selected_notification_name: str | None = None
 
-        # Display names in UI but work with aliases internally
         subprogram_names: list[str] = [subprogram.name for subprogram in SUBPROGRAMS]
         default_subprogram_name: str = subprogram_names[-1] if subprogram_names else ""
         self._subprogram_var: ctk.StringVar = ctk.StringVar(
@@ -43,7 +42,6 @@ class SubprogramSelector(BaseComponent):
         )
         self._notification_var: ctk.StringVar = ctk.StringVar(value="")
 
-        # Set default alias based on default name
         if subprogram_names:
             for subprogram in SUBPROGRAMS:
                 if subprogram.name == default_subprogram_name:
@@ -92,7 +90,6 @@ class SubprogramSelector(BaseComponent):
             sticky="w",
         )
 
-        # Subprogram selector
         subprogram_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Sous-programme :",
@@ -111,7 +108,6 @@ class SubprogramSelector(BaseComponent):
             sticky="w",
         )
 
-        # Display names in combobox
         subprogram_names: list[str] = [subprogram.name for subprogram in SUBPROGRAMS]
         self._subprogram_selector: ctk.CTkComboBox = ctk.CTkComboBox(
             master=self._content_frame,
@@ -137,7 +133,6 @@ class SubprogramSelector(BaseComponent):
             sticky="ew",
         )
 
-        # Notification selector
         notification_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Notification :",
@@ -175,7 +170,6 @@ class SubprogramSelector(BaseComponent):
         )
         self._notification_selector.grid(row=2, column=3, sticky="ew")  # type: ignore
 
-        # Info display frame
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame,
             fg_color=DesignSystem.Color.LESS_WHITE,
@@ -210,14 +204,12 @@ class SubprogramSelector(BaseComponent):
             sticky="w",
         )
 
-        # Initialize notification selector and trigger callback if subprogram exists
         if subprogram_names:
             self._handle_subprogram_selection()
 
     def _handle_subprogram_selection(self) -> None:
         selected_subprogram_name = self._subprogram_var.get()
 
-        # Find the corresponding database_alias for the selected name
         self._selected_subprogram_alias = None
         selected_subprogram = None
         for subprogram in SUBPROGRAMS:
@@ -226,38 +218,35 @@ class SubprogramSelector(BaseComponent):
                 selected_subprogram = subprogram
                 break
 
-        # Update notification selector based on selected subprogram
         notification_names: list[str] = []
         if selected_subprogram:
             notification_names = [
                 notification.name for notification in selected_subprogram.notifications
             ]
 
+            if len(notification_names) > 1:
+                notification_names.insert(0, "Toutes")
+
         self._notification_selector.configure(values=notification_names)  # type: ignore
 
-        # Select first notification if available and get its alias
-        if notification_names and selected_subprogram:
-            first_notification_name = notification_names[0]
-            self._notification_var.set(first_notification_name)
-
-            # Find the corresponding database_alias for the first notification
-            for notification in selected_subprogram.notifications:
-                if notification.name == first_notification_name:
-                    self._selected_notification_name = notification.name
-                    break
+        if len(notification_names) > 1:
+            default_selection: str = "Toutes"
+            self._notification_var.set(default_selection)
+            self._selected_notification_name = default_selection
         else:
-            self._notification_var.set("")
+            self._notification_var.set(notification_names[0])
             self._selected_notification_name = None
 
         self._selection_info_label.configure(text=self._get_selection_info_text())  # type: ignore
-        # Pass database_alias values to the callback
         self._on_selection_changed(
             self._selected_subprogram_alias, self._selected_notification_name
         )
 
     def _handle_notification_selection(self) -> None:
+        selected_notification_name = self._notification_var.get()
+        self._selected_notification_name = selected_notification_name
+
         self._selection_info_label.configure(text=self._get_selection_info_text())  # type: ignore
-        # Pass database_alias values to the callback
         self._on_selection_changed(
             self._selected_subprogram_alias, self._selected_notification_name
         )
@@ -272,7 +261,26 @@ class SubprogramSelector(BaseComponent):
         if not selected_notification_name:
             return f"Programme : {selected_subprogram_name}\nAucune notification sélectionnée"
 
-        # Find the selected notification details using display names
+        if selected_notification_name == "Toutes":
+            for subprogram in SUBPROGRAMS:
+                if subprogram.name == selected_subprogram_name:
+                    notification_details: list[str] = []
+                    for notification in subprogram.notifications:
+                        formatted_amount: str = f"{notification.aid_amount:_}".replace(
+                            "_", " "
+                        )
+                        notification_details.append(
+                            f"{notification.name} {formatted_amount} DA ({notification.aid_count} aides)"
+                        )
+
+                    notifications_text = "\n".join(notification_details)
+
+                    return (
+                        f"Sous-programme : {subprogram.name}\n"
+                        f"Notifications :\n{notifications_text}"
+                    )
+            return "Information du sous-programme non disponible"
+
         for subprogram in SUBPROGRAMS:
             if subprogram.name == selected_subprogram_name:
                 for notification in subprogram.notifications:
@@ -291,24 +299,22 @@ class SubprogramSelector(BaseComponent):
         return "Information de la notification non disponible"
 
     def get_selected_subprogram(self) -> str | None:
-        """Returns the database_alias of the selected subprogram"""
         return self._selected_subprogram_alias
 
     def get_selected_notification(self) -> str | None:
-        """Returns the database_alias of the selected notification"""
         return self._selected_notification_name
 
     def get_selection(self) -> tuple[str | None, str | None]:
-        """Returns (subprogram_database_alias, notification_database_alias)"""
         return self._selected_subprogram_alias, self._selected_notification_name
 
     def get_selected_subprogram_name(self) -> str | None:
-        """Returns the display name of the selected subprogram"""
         return self._subprogram_var.get() if self._subprogram_var.get() else None
 
     def get_selected_notification_name(self) -> str | None:
-        """Returns the display name of the selected notification"""
         return self._notification_var.get() if self._notification_var.get() else None
+
+    def is_all_notifications_selected(self) -> bool:
+        return self._selected_notification_name == "Toutes"
 
     def reset_to_first(self) -> None:
         subprogram_names: list[str] = [subprogram.name for subprogram in SUBPROGRAMS]
