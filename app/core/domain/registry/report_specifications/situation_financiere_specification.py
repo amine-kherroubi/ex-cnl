@@ -43,8 +43,8 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 COUNT(*) AS nb_aides_inscrites,
                 COUNT(*) * {aid_amount} AS montant_inscrits
             FROM decisions d
-            WHERE d."Sous program" = {subprogram}
-            AND p."Notification" = {notification}
+            WHERE d."Sous programme" = {subprogram}
+            AND d."Notification" IN ({notification})
             GROUP BY
                 d."Daira du projet",
                 d."Commune du projet"
@@ -64,8 +64,8 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
                 SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
-            WHERE p."Sous program" = {subprogram}
-            AND p."Notification" = {notification}
+            WHERE p."Sous programme" = {subprogram}
+            AND p."Notification" IN ({notification})
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
             GROUP BY
                 p.Daira,
@@ -86,10 +86,10 @@ situation_financiere_specification: ReportSpecification = ReportSpecification(
                 SUM(COALESCE(p.T2, 0)) + SUM(COALESCE(p.C2, 0)) + SUM(COALESCE(p.N2, 0)) +
                 SUM(COALESCE(p.T3, 0))) AS montant
             FROM paiements p
-            WHERE p."Sous program" = {subprogram}
-            AND p."Notification" = {notification}
+            WHERE p."Sous programme" = {subprogram}
+            AND p."Notification" IN ({notification})
             AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
-            AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month} 
+            AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
             GROUP BY
                 p.Daira,
                 p."Commune de projet"

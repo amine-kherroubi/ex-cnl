@@ -162,9 +162,17 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         formatted_query: str = query_template
 
+        notification_value: str = (
+            f"'{self._target_notification.database_aliases[0]}'"  # type: ignore
+            if len(self._target_notification.database_aliases) == 1  # type: ignore
+            else ", ".join(f"'{alias}'" for alias in self._target_notification.database_aliases)  # type: ignore
+        )
+
         formatted_query = (
-            formatted_query.replace("{subprogram}", f"'{self._target_subprogram.database_alias}'")  # type: ignore
-            .replace("{notification}", f"'{self._target_notification.name}'")  # type: ignore
+            formatted_query.replace(
+                "{subprogram}", f"'{self._target_subprogram.database_alias}'"  # type: ignore
+            )
+            .replace("{notification}", notification_value)
             .replace("{aid_amount}", str(self._target_notification.aid_amount))  # type: ignore
             .replace("{year}", str(self._report_context.year))
             .replace("{month}", str(self._report_context.month.number))
@@ -174,7 +182,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             f"Placeholders replaced with: month={self._report_context.month.number}, "
             f"year={self._report_context.year}, "
             f"subprogram={self._target_subprogram.database_alias}, "  # type: ignore
-            f"notification={self._target_notification.name}, "  # type: ignore
+            f"notification={self._target_notification.database_aliases}, "  # type: ignore
             f"aid_amount={self._target_notification.aid_amount}"  # type: ignore
         )
 
@@ -192,15 +200,22 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _add_header(self, sheet: Worksheet) -> None:
         self._logger.debug("Adding report header")
 
+        subprogram_display: str = (
+            "de "
+            if self._target_subprogram.name.startswith("Rattrapage")  # type: ignore
+            else ""
+        ) + self._target_subprogram.name.lower()  # type: ignore
+        notification_display: str = self._target_notification.name.lower()  # type: ignore
+
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
-            "T",
+            "S",
             self._current_row,
             self._current_row,
             value=(
-                f"Situation financière du sous-programme '{self._target_subprogram.database_alias}'"  # type: ignore
-                f"- Notification '{self._target_notification.name}' par daira et par commune",  # type: ignore
+                f"Situation financière de la notification {notification_display} "  # type: ignore
+                f"du sous-programme {subprogram_display} par daira et par commune"  # type: ignore
             ),
             font=ExcelStylingService.FONT_TITLE,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
@@ -211,10 +226,10 @@ class SituationFinanciereGenerator(BaseGenerator):
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
-            "T",
+            "S",
             self._current_row,
             self._current_row,
-            value=f"Arrêté au {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
+            value=f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
             font=ExcelStylingService.FONT_HEADER,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )
@@ -239,8 +254,8 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.merge_and_style_cells(
             sheet,
+            "E",
             "F",
-            "G",
             self._current_row,
             self._current_row,
             value="Engagement par la BNH",
@@ -251,8 +266,8 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.merge_and_style_cells(
             sheet,
+            "G",
             "H",
-            "I",
             self._current_row,
             self._current_row,
             value="Engagement par le MHUV",
@@ -266,18 +281,17 @@ class SituationFinanciereGenerator(BaseGenerator):
         header_end_row: int = self._current_row + 3
 
         main_headers: List[Tuple[str, str]] = [
-            ("A", "Sous-programme"),
-            ("B", "Daira"),
-            ("C", "Commune"),
-            ("D", "Aides notifiées (1)"),
-            ("E", "Montants notifiés"),
-            ("F", "Aides inscrites"),
-            ("G", "Montants inscrits"),
-            ("H", "Aides inscrites (2)"),
-            ("I", "Montants inscrits (3)"),
-            ("R", "Cumul (6) = (4) + (5)"),
-            ("S", "Solde sur engagement (3) - (6)"),
-            ("T", "Reste à inscrire (1) - (2)"),
+            ("A", "Daira"),
+            ("B", "Commune"),
+            ("C", "Aides notifiées (1)"),
+            ("D", "Montants notifiés"),
+            ("E", "Aides inscrites"),
+            ("F", "Montants inscrits"),
+            ("G", "Aides inscrites (2)"),
+            ("H", "Montants inscrits (3)"),
+            ("Q", "Cumul (6) = (4) + (5)"),
+            ("R", "Solde sur engagement (3) - (6)"),
+            ("S", "Reste à inscrire (1) - (2)"),
         ]
 
         for col, title in main_headers:
@@ -295,8 +309,8 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.merge_and_style_cells(
             sheet,
-            "J",
-            "Q",
+            "I",
+            "P",
             self._current_row,
             self._current_row,
             value="Consommations",
@@ -309,8 +323,8 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.merge_and_style_cells(
             sheet,
-            "J",
-            "M",
+            "I",
+            "L",
             self._current_row,
             self._current_row,
             value=f"Cumuls au 31/12/{self._report_context.year - 1}",
@@ -327,8 +341,8 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.merge_and_style_cells(
             sheet,
-            "N",
-            "Q",
+            "M",
+            "P",
             self._current_row,
             self._current_row,
             value=f"Du 1 janvier {self._report_context.year} au {end_day} {self._report_context.month.value}",
@@ -341,8 +355,8 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.merge_and_style_cells(
             sheet,
-            "J",
-            "L",
+            "I",
+            "K",
             self._current_row,
             self._current_row,
             value="Aides",
@@ -353,7 +367,7 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.apply_style_to_cell(
             sheet,
-            "M",
+            "L",
             self._current_row,
             font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
@@ -363,8 +377,8 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.merge_and_style_cells(
             sheet,
-            "N",
-            "P",
+            "M",
+            "O",
             self._current_row,
             self._current_row,
             value="Aides",
@@ -375,7 +389,7 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         ExcelStylingService.apply_style_to_cell(
             sheet,
-            "Q",
+            "P",
             self._current_row,
             font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
@@ -386,12 +400,12 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._current_row += 1
 
         tranche_headers: List[Tuple[str, str]] = [
-            ("J", "T1"),
-            ("K", "T2"),
-            ("L", "T3"),
-            ("N", "T1"),
-            ("O", "T2"),
-            ("P", "T3"),
+            ("I", "T1"),
+            ("J", "T2"),
+            ("K", "T3"),
+            ("M", "T1"),
+            ("N", "T2"),
+            ("O", "T3"),
         ]
 
         for col, title in tranche_headers:
@@ -502,11 +516,10 @@ class SituationFinanciereGenerator(BaseGenerator):
         key: Tuple[str, str] = (daira, commune)
 
         basic_values: List[Tuple[str, Any]] = [
-            ("A", f"{self._target_subprogram.database_alias} - {self._target_notification.name}"),  # type: ignore
-            ("B", daira),
-            ("C", commune),
+            ("A", daira),
+            ("B", commune),
+            ("C", "-"),
             ("D", "-"),
-            ("E", "-"),
         ]
 
         if key in data_dicts["aides_inscrites"]:
@@ -514,16 +527,16 @@ class SituationFinanciereGenerator(BaseGenerator):
             aides, montants = aides_data[0], aides_data[1]
             basic_values.extend(
                 [
-                    ("F", aides if aides > 0 else "-"),
-                    ("G", montants if montants > 0 else "-"),
+                    ("E", aides if aides > 0 else "-"),
+                    ("F", montants if montants > 0 else "-"),
                 ]
             )
             totals["aides_inscrites"] += aides
             totals["montants_inscrits"] += montants
         else:
-            basic_values.extend([("F", "-"), ("G", "-")])
+            basic_values.extend([("E", "-"), ("F", "-")])
 
-        basic_values.extend([("H", "-"), ("I", "-")])
+        basic_values.extend([("G", "-"), ("H", "-")])
 
         ExcelStylingService.apply_data_row_styling(
             sheet,
@@ -539,7 +552,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             row,
             key,
             data_dicts["cumul_precedent"],
-            ["J", "K", "L", "M"],
+            ["I", "J", "K", "L"],
             totals,
             [
                 "cumul_precedent_t1",
@@ -554,7 +567,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             row,
             key,
             data_dicts["annee_actuelle"],
-            ["N", "O", "P", "Q"],
+            ["M", "N", "O", "P"],
             totals,
             [
                 "annee_actuelle_t1",
@@ -567,7 +580,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         cumul_total = self._calculate_cumul_total(key, data_dicts)
         ExcelStylingService.apply_style_to_cell(
             sheet,
-            "R",
+            "Q",
             row,
             font=ExcelStylingService.FONT_NORMAL,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
@@ -576,7 +589,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         )
         totals["cumul_total"] += cumul_total
 
-        final_columns: List[Tuple[str, str]] = [("S", "-"), ("T", "-")]
+        final_columns: List[Tuple[str, str]] = [("R", "-"), ("S", "-")]
         ExcelStylingService.apply_data_row_styling(
             sheet,
             row,
@@ -641,26 +654,25 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.debug("Adding totals row")
 
         total_values: List[Tuple[str, Any]] = [
-            ("A", "Total général"),
+            ("A", ""),
             ("B", ""),
-            ("C", ""),
+            ("C", "-"),
             ("D", "-"),
-            ("E", "-"),
-            ("F", self._totals.get("aides_inscrites", 0)),
-            ("G", self._totals.get("montants_inscrits", 0)),
+            ("E", self._totals.get("aides_inscrites", 0)),
+            ("F", self._totals.get("montants_inscrits", 0)),
+            ("G", "-"),
             ("H", "-"),
-            ("I", "-"),
-            ("J", self._totals.get("cumul_precedent_t1", 0)),
-            ("K", self._totals.get("cumul_precedent_t2", 0)),
-            ("L", self._totals.get("cumul_precedent_t3", 0)),
-            ("M", self._totals.get("cumul_precedent_montant", 0)),
-            ("N", self._totals.get("annee_actuelle_t1", 0)),
-            ("O", self._totals.get("annee_actuelle_t2", 0)),
-            ("P", self._totals.get("annee_actuelle_t3", 0)),
-            ("Q", self._totals.get("annee_actuelle_montant", 0)),
-            ("R", self._totals.get("cumul_total", 0)),
+            ("I", self._totals.get("cumul_precedent_t1", 0)),
+            ("J", self._totals.get("cumul_precedent_t2", 0)),
+            ("K", self._totals.get("cumul_precedent_t3", 0)),
+            ("L", self._totals.get("cumul_precedent_montant", 0)),
+            ("M", self._totals.get("annee_actuelle_t1", 0)),
+            ("N", self._totals.get("annee_actuelle_t2", 0)),
+            ("O", self._totals.get("annee_actuelle_t3", 0)),
+            ("P", self._totals.get("annee_actuelle_montant", 0)),
+            ("Q", self._totals.get("cumul_total", 0)),
+            ("R", "-"),
             ("S", "-"),
-            ("T", "-"),
         ]
 
         ExcelStylingService.apply_data_row_styling(
@@ -672,6 +684,18 @@ class SituationFinanciereGenerator(BaseGenerator):
             border=ExcelStylingService.BORDER_THIN,
         )
 
+        ExcelStylingService.merge_and_style_cells(
+            sheet,
+            "A",
+            "B",
+            self._current_row,
+            self._current_row,
+            value="Total général",
+            font=ExcelStylingService.FONT_NORMAL,
+            alignment=ExcelStylingService.ALIGNMENT_CENTER,
+            border=ExcelStylingService.BORDER_THIN,
+        )
+
         self._logger.info("Totals row added successfully")
         self._current_row += 1
 
@@ -679,26 +703,25 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.debug("Applying final formatting")
 
         column_widths: Dict[str, int] = {
-            "A": 35,  # Sous-programme - Notification (wider for both names)
-            "B": 20,  # Daira
-            "C": 25,  # Commune
-            "D": 12,  # Aides notifiées
-            "E": 15,  # Montants notifiés
-            "F": 12,  # Aides inscrites
-            "G": 15,  # Montants inscrits
-            "H": 12,  # Aides inscrites (2)
-            "I": 15,  # Montants inscrits (3)
-            "J": 8,  # T1 (prev)
-            "K": 8,  # T2 (prev)
-            "L": 8,  # T3 (prev)
-            "M": 15,  # Montant (4)
-            "N": 8,  # T1 (curr)
-            "O": 8,  # T2 (curr)
-            "P": 8,  # T3 (curr)
-            "Q": 15,  # Montant (5)
-            "R": 15,  # Cumul
-            "S": 20,  # Solde
-            "T": 20,  # Reste
+            "A": 20,  # Daira
+            "B": 25,  # Commune
+            "C": 12,  # Aides notifiées
+            "D": 15,  # Montants notifiés
+            "E": 12,  # Aides inscrites
+            "F": 15,  # Montants inscrits
+            "G": 12,  # Aides inscrites (2)
+            "H": 15,  # Montants inscrits (3)
+            "I": 8,  # T1 (prev)
+            "J": 8,  # T2 (prev)
+            "K": 8,  # T3 (prev)
+            "L": 15,  # Montant (4)
+            "M": 8,  # T1 (curr)
+            "N": 8,  # T2 (curr)
+            "O": 8,  # T3 (curr)
+            "P": 15,  # Montant (5)
+            "Q": 15,  # Cumul
+            "R": 20,  # Solde
+            "S": 20,  # Reste
         }
 
         ExcelStylingService.set_column_widths(sheet, column_widths)
@@ -725,7 +748,7 @@ class SituationFinanciereGenerator(BaseGenerator):
     def _apply_number_formatting(self, sheet: Worksheet) -> None:
         self._logger.debug("Applying French number formatting to monetary columns")
 
-        monetary_columns = ["G", "M", "Q", "R"]  # Montants columns and cumul
+        monetary_columns = ["F", "L", "P", "Q"]  # Montants columns and cumul
 
         data_start_row = 6  # Adjust based on your header structure
         data_end_row = self._current_row  # Current row after all data has been added

@@ -43,7 +43,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -55,8 +55,8 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     '100%  1+2+3 EME TRANCHE'
                 )
                 AND "Date OV" LIKE '%/{month}/{year}'
-                GROUP BY "Sous program"
-            ) data ON s.subprogram = data."Sous program"
+                GROUP BY "Sous programme"
+            ) data ON s.subprogram = data."Sous programme"
             ORDER BY s.display_order
         """,
         "lancements_cumul_annee": """
@@ -66,7 +66,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -79,8 +79,8 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 )
                 AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
-                GROUP BY "Sous program"
-            ) data ON s.subprogram = data."Sous program"
+                GROUP BY "Sous programme"
+            ) data ON s.subprogram = data."Sous programme"
             ORDER BY s.display_order
         """,
         "livraisons_mois": """
@@ -90,7 +90,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -102,8 +102,8 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     'Tranche complémentaire 2'
                 )
                 AND "Date OV" LIKE '%/{month}/{year}'
-                GROUP BY "Sous program"
-            ) data ON s.subprogram = data."Sous program"
+                GROUP BY "Sous programme"
+            ) data ON s.subprogram = data."Sous programme"
             ORDER BY s.display_order
         """,
         "livraisons_cumul_annee": """
@@ -113,7 +113,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE Tranche IN (
@@ -126,8 +126,8 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 )
                 AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
-                GROUP BY "Sous program"
-            ) data ON s.subprogram = data."Sous program"
+                GROUP BY "Sous programme"
+            ) data ON s.subprogram = data."Sous programme"
             ORDER BY s.display_order
         """,
         "subprograms_situation": """
@@ -146,15 +146,15 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N2 > 0
                     OR C2 > 0
                     OR T3 > 0
-                GROUP BY "Sous program"
-            ) data ON s.subprogram = data."Sous program"
+                GROUP BY "Sous programme"
+            ) data ON s.subprogram = data."Sous programme"
             WHERE s.aid_count > 0
             ORDER BY s.display_order
         """,
@@ -168,26 +168,26 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N1 > 0
                     OR C1 > 0
                     OR T1 > 0
-                GROUP BY "Sous program"
-            ) lances ON s.subprogram = lances."Sous program"
+                GROUP BY "Sous programme"
+            ) lances ON s.subprogram = lances."Sous programme"
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N2 > 0
                     OR C2 > 0
                     OR T3 > 0
-                GROUP BY "Sous program"
-            ) acheves ON s.subprogram = acheves."Sous program"
+                GROUP BY "Sous programme"
+            ) acheves ON s.subprogram = acheves."Sous programme"
             WHERE s.aid_count > 0
             ORDER BY s.display_order
         """,
@@ -199,15 +199,15 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous program",
+                    "Sous programme",
                     COUNT(*) as count
                 FROM paiements
                 WHERE
                     N1 > 0
                     OR C1 > 0
                     OR T1 > 0
-                GROUP BY "Sous program"
-            ) data ON s.subprogram = data."Sous program"
+                GROUP BY "Sous programme"
+            ) data ON s.subprogram = data."Sous programme"
             WHERE s.aid_count > 0
             ORDER BY s.display_order
         """,

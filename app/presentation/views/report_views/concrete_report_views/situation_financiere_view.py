@@ -53,7 +53,7 @@ class SituationFinanciereView(BaseReportView):
         if hasattr(self, "_status_display"):
             if selected_subprogram and selected_notification:
                 self._status_display.add_message(
-                    message=f"Sélection : Sous-programme {selected_subprogram} - {selected_notification}",
+                    message=f"Sélection : Sous-programme {selected_subprogram} - Notification {selected_notification}",
                     message_type="information",
                 )
             elif selected_subprogram:
