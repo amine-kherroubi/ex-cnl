@@ -3,6 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from typing import Final, final
 from logging import Logger
+import copy
 
 # Third-party imports
 import pandas as pd
@@ -29,17 +30,38 @@ class SubprogramRegistry(object):
         if cls.has_subprogram(subprogram.name):
             raise ValueError(f"Subprogram '{subprogram.name}' is already registered")
 
-        cls._SUBPROGRAMS.append(subprogram)
+        cls._DEFAULT_SUBPROGRAMS.append(subprogram)
         cls._logger.info(f"Registered new subprogram '{subprogram.name}'")
+
+    @classmethod
+    def update_subprogram(
+        cls, subprogram_name: str, updated_subprogram: Subprogram
+    ) -> None:
+        if not cls.has_subprogram(subprogram_name):
+            raise ValueError(f"Subprogram '{subprogram_name}' is not registered")
+
+        if updated_subprogram.name != subprogram_name and cls.has_subprogram(
+            updated_subprogram.name
+        ):
+            raise ValueError(f"Subprogram '{updated_subprogram.name}' already exists")
+
+        for i, existing_subprogram in enumerate(cls._DEFAULT_SUBPROGRAMS):
+            if existing_subprogram.name == subprogram_name:
+                cls._DEFAULT_SUBPROGRAMS[i] = updated_subprogram
+                break
+
+        cls._logger.info(
+            f"Updated subprogram '{subprogram_name}' to '{updated_subprogram.name}'"
+        )
 
     @classmethod
     def unregister_subprogram(cls, subprogram_name: str) -> None:
         if not cls.has_subprogram(subprogram_name):
             raise ValueError(f"Subprogram '{subprogram_name}' is not registered")
 
-        cls._SUBPROGRAMS[:] = [
+        cls._DEFAULT_SUBPROGRAMS[:] = [
             subprogram
-            for subprogram in cls._SUBPROGRAMS
+            for subprogram in cls._DEFAULT_SUBPROGRAMS
             if subprogram.name != subprogram_name
         ]
         cls._logger.info(f"Unregistered subprogram '{subprogram_name}'")
@@ -48,7 +70,7 @@ class SubprogramRegistry(object):
     def get_subprogram(cls, subprogram_name: str) -> Subprogram:
         cls._logger.debug(f"Retrieving subprogram: {subprogram_name}")
 
-        for subprogram in cls._SUBPROGRAMS:
+        for subprogram in cls._DEFAULT_SUBPROGRAMS:
             if subprogram.name == subprogram_name:
                 cls._logger.info(
                     f"Retrieved subprogram '{subprogram_name}' with {len(subprogram.notifications)} notifications"
@@ -56,7 +78,7 @@ class SubprogramRegistry(object):
                 return subprogram
 
         available_names: list[str] = [
-            subprogram.name for subprogram in cls._SUBPROGRAMS
+            subprogram.name for subprogram in cls._DEFAULT_SUBPROGRAMS
         ]
         error_msg: str = (
             f"Subprogram '{subprogram_name}' not found. Available: {available_names}"
@@ -68,7 +90,7 @@ class SubprogramRegistry(object):
     def get_subprogram_by_database_alias(cls, database_alias: str) -> Subprogram:
         cls._logger.debug(f"Retrieving subprogram by database alias: {database_alias}")
 
-        for subprogram in cls._SUBPROGRAMS:
+        for subprogram in cls._DEFAULT_SUBPROGRAMS:
             if subprogram.database_alias == database_alias:
                 cls._logger.info(
                     f"Retrieved subprogram '{subprogram.name}' by database alias '{database_alias}'"
@@ -76,7 +98,7 @@ class SubprogramRegistry(object):
                 return subprogram
 
         available_aliases: list[str] = [
-            subprogram.database_alias for subprogram in cls._SUBPROGRAMS
+            subprogram.database_alias for subprogram in cls._DEFAULT_SUBPROGRAMS
         ]
         error_msg: str = (
             f"Subprogram with database alias '{database_alias}' not found. Available: {available_aliases}"
@@ -88,7 +110,8 @@ class SubprogramRegistry(object):
     def has_subprogram(cls, subprogram_name: str) -> bool:
         cls._logger.debug(f"Checking existence of subprogram: {subprogram_name}")
         exists: bool = any(
-            subprogram.name == subprogram_name for subprogram in cls._SUBPROGRAMS
+            subprogram.name == subprogram_name
+            for subprogram in cls._DEFAULT_SUBPROGRAMS
         )
         cls._logger.debug(f"Subprogram '{subprogram_name}' exists: {exists}")
         return exists
@@ -100,7 +123,7 @@ class SubprogramRegistry(object):
         )
         exists: bool = any(
             subprogram.database_alias == database_alias
-            for subprogram in cls._SUBPROGRAMS
+            for subprogram in cls._DEFAULT_SUBPROGRAMS
         )
         cls._logger.debug(
             f"Subprogram with database alias '{database_alias}' exists: {exists}"
@@ -110,14 +133,14 @@ class SubprogramRegistry(object):
     @classmethod
     def get_all_subprograms(cls) -> list[Subprogram]:
         cls._logger.debug("Retrieving all subprograms")
-        cls._logger.info(f"Retrieved {len(cls._SUBPROGRAMS)} subprograms")
-        return list(cls._SUBPROGRAMS)
+        cls._logger.info(f"Retrieved {len(cls._DEFAULT_SUBPROGRAMS)} subprograms")
+        return list(cls._DEFAULT_SUBPROGRAMS)
 
     @classmethod
     def get_all_subprogram_names(cls) -> list[str]:
         cls._logger.debug("Retrieving all subprogram names")
-        cls._logger.info(f"Retrieved {len(cls._SUBPROGRAMS)} subprogram names")
-        return [subprogram.name for subprogram in cls._SUBPROGRAMS]
+        cls._logger.info(f"Retrieved {len(cls._DEFAULT_SUBPROGRAMS)} subprogram names")
+        return [subprogram.name for subprogram in cls._DEFAULT_SUBPROGRAMS]
 
     @classmethod
     def register_notification(
@@ -137,13 +160,55 @@ class SubprogramRegistry(object):
             update={"notifications": updated_notifications}
         )
 
-        for i, existing_subprogram in enumerate(cls._SUBPROGRAMS):
+        for i, existing_subprogram in enumerate(cls._DEFAULT_SUBPROGRAMS):
             if existing_subprogram.name == subprogram_name:
-                cls._SUBPROGRAMS[i] = updated_subprogram
+                cls._DEFAULT_SUBPROGRAMS[i] = updated_subprogram
                 break
 
         cls._logger.info(
             f"Registered new notification '{notification.name}' in subprogram '{subprogram_name}'"
+        )
+
+    @classmethod
+    def update_notification(
+        cls,
+        subprogram_name: str,
+        notification_name: str,
+        updated_notification: Notification,
+    ) -> None:
+        subprogram: Subprogram = cls.get_subprogram(subprogram_name)
+
+        if not any(
+            notif.name == notification_name for notif in subprogram.notifications
+        ):
+            raise ValueError(
+                f"Notification '{notification_name}' not found in subprogram '{subprogram_name}'"
+            )
+
+        # Check if the new name conflicts with existing notifications (if name is being changed)
+        if updated_notification.name != notification_name and any(
+            notif.name == updated_notification.name
+            for notif in subprogram.notifications
+        ):
+            raise ValueError(
+                f"Notification '{updated_notification.name}' already exists in subprogram '{subprogram_name}'"
+            )
+
+        updated_notifications: list[Notification] = [
+            updated_notification if notif.name == notification_name else notif
+            for notif in subprogram.notifications
+        ]
+        updated_subprogram: Subprogram = subprogram.model_copy(
+            update={"notifications": updated_notifications}
+        )
+
+        for i, existing_subprogram in enumerate(cls._DEFAULT_SUBPROGRAMS):
+            if existing_subprogram.name == subprogram_name:
+                cls._DEFAULT_SUBPROGRAMS[i] = updated_subprogram
+                break
+
+        cls._logger.info(
+            f"Updated notification '{notification_name}' to '{updated_notification.name}' in subprogram '{subprogram_name}'"
         )
 
     @classmethod
@@ -168,9 +233,9 @@ class SubprogramRegistry(object):
             update={"notifications": updated_notifications}
         )
 
-        for i, existing_subprogram in enumerate(cls._SUBPROGRAMS):
+        for i, existing_subprogram in enumerate(cls._DEFAULT_SUBPROGRAMS):
             if existing_subprogram.name == subprogram_name:
-                cls._SUBPROGRAMS[i] = updated_subprogram
+                cls._DEFAULT_SUBPROGRAMS[i] = updated_subprogram
                 break
 
         cls._logger.info(
@@ -209,7 +274,7 @@ class SubprogramRegistry(object):
             f"Retrieving notification by database alias: {database_alias}"
         )
 
-        for subprogram in cls._SUBPROGRAMS:
+        for subprogram in cls._DEFAULT_SUBPROGRAMS:
             for notification in subprogram.notifications:
                 if database_alias in notification.database_aliases:
                     cls._logger.info(
@@ -247,7 +312,7 @@ class SubprogramRegistry(object):
         cls._logger.debug("Retrieving all notifications")
         notifications: list[Notification] = [
             notification
-            for subprogram in cls._SUBPROGRAMS
+            for subprogram in cls._DEFAULT_SUBPROGRAMS
             for notification in subprogram.notifications
         ]
         cls._logger.info(f"Retrieved {len(notifications)} notifications")
@@ -265,9 +330,40 @@ class SubprogramRegistry(object):
                         for notification in subprogram.notifications
                     ),
                 }
-                for subprogram in cls._SUBPROGRAMS
+                for subprogram in cls._DEFAULT_SUBPROGRAMS
             ]
         )
+
+    @classmethod
+    def reset_to_default(cls) -> None:
+        """Reset the registry to its original default state."""
+        cls._logger.debug("Resetting registry to default state")
+
+        # Clear current subprograms
+        cls._DEFAULT_SUBPROGRAMS.clear()
+
+        # Restore default subprograms
+        cls._DEFAULT_SUBPROGRAMS.extend(copy.deepcopy(cls._DEFAULT_SUBPROGRAMS))
+
+        cls._logger.info(
+            f"Registry reset to default state with {len(cls._DEFAULT_SUBPROGRAMS)} subprograms"
+        )
+
+    @classmethod
+    def get_registry_statistics(cls) -> dict[str, int]:
+        """Get statistics about the current registry state."""
+        total_notifications = sum(
+            len(subprogram.notifications) for subprogram in cls._DEFAULT_SUBPROGRAMS
+        )
+        return {
+            "total_subprograms": len(cls._DEFAULT_SUBPROGRAMS),
+            "total_notifications": total_notifications,
+            "average_notifications_per_subprogram": (
+                total_notifications // len(cls._DEFAULT_SUBPROGRAMS)
+                if cls._DEFAULT_SUBPROGRAMS
+                else 0
+            ),
+        }
 
     ALL_NOTIFICATIONS_OBJECT: Notification = Notification(
         name="Toutes",
@@ -276,7 +372,7 @@ class SubprogramRegistry(object):
         aid_amount=0,
     )
 
-    _SUBPROGRAMS: Final[list[Subprogram]] = [
+    _DEFAULT_SUBPROGRAMS: Final[list[Subprogram]] = [
         Subprogram(
             name="2002",
             database_alias="PROGRAMME 2002",
@@ -839,3 +935,5 @@ class SubprogramRegistry(object):
             ],
         ),
     ]
+
+    _SUBPROGRAMS: Final[list[Subprogram]] = copy.deepcopy(_DEFAULT_SUBPROGRAMS)
