@@ -80,7 +80,13 @@ class BaseReportView(ctk.CTkFrame):
             master=self,
             fg_color=DesignSystem.Color.TRANSPARENT,
         )
-        self._scrollable_frame.grid(row=1, column=0, padx=DesignSystem.Spacing.XS, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG), sticky="nsew")  # type: ignore
+        self._scrollable_frame.grid(  # type: ignore
+            row=1,
+            column=0,
+            padx=DesignSystem.Spacing.XS,
+            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG),
+            sticky="nsew",
+        )
         self._scrollable_frame.grid_columnconfigure(index=0, weight=1)
 
         self._setup_report_specific_components()
