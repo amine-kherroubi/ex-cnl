@@ -19,7 +19,7 @@ from app.common.exceptions import QueryExecutionError
 from app.common.logging_setup import get_logger
 
 if TYPE_CHECKING:
-    from app.core.domain.registry.report_specification_registry import (
+    from app.core.domain.registries.report_specification_registry import (
         ReportSpecification,
     )
 

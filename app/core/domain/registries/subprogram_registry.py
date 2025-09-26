@@ -1,0 +1,841 @@
+from __future__ import annotations
+
+# Standard library imports
+from typing import Final, final
+from logging import Logger
+
+# Third-party imports
+import pandas as pd
+
+# Local application imports
+from app.common.logging_setup import get_logger
+from app.core.domain.models.notification import Notification
+from app.core.domain.models.subprogram import Subprogram
+
+
+@final
+class SubprogramRegistry(object):
+    __slots__ = ()
+
+    _logger: Final[Logger] = get_logger(__name__)
+
+    def __new__(cls) -> None:
+        raise RuntimeError(
+            f"{cls.__name__} is not intended to be instantiated. Use class methods"
+        )
+
+    @classmethod
+    def register_subprogram(cls, subprogram: Subprogram) -> None:
+        if cls.has_subprogram(subprogram.name):
+            raise ValueError(f"Subprogram '{subprogram.name}' is already registered")
+
+        cls._SUBPROGRAMS.append(subprogram)
+        cls._logger.info(f"Registered new subprogram '{subprogram.name}'")
+
+    @classmethod
+    def unregister_subprogram(cls, subprogram_name: str) -> None:
+        if not cls.has_subprogram(subprogram_name):
+            raise ValueError(f"Subprogram '{subprogram_name}' is not registered")
+
+        cls._SUBPROGRAMS[:] = [
+            subprogram
+            for subprogram in cls._SUBPROGRAMS
+            if subprogram.name != subprogram_name
+        ]
+        cls._logger.info(f"Unregistered subprogram '{subprogram_name}'")
+
+    @classmethod
+    def get_subprogram(cls, subprogram_name: str) -> Subprogram:
+        cls._logger.debug(f"Retrieving subprogram: {subprogram_name}")
+
+        for subprogram in cls._SUBPROGRAMS:
+            if subprogram.name == subprogram_name:
+                cls._logger.info(
+                    f"Retrieved subprogram '{subprogram_name}' with {len(subprogram.notifications)} notifications"
+                )
+                return subprogram
+
+        available_names: list[str] = [
+            subprogram.name for subprogram in cls._SUBPROGRAMS
+        ]
+        error_msg: str = (
+            f"Subprogram '{subprogram_name}' not found. Available: {available_names}"
+        )
+        cls._logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    @classmethod
+    def get_subprogram_by_database_alias(cls, database_alias: str) -> Subprogram:
+        cls._logger.debug(f"Retrieving subprogram by database alias: {database_alias}")
+
+        for subprogram in cls._SUBPROGRAMS:
+            if subprogram.database_alias == database_alias:
+                cls._logger.info(
+                    f"Retrieved subprogram '{subprogram.name}' by database alias '{database_alias}'"
+                )
+                return subprogram
+
+        available_aliases: list[str] = [
+            subprogram.database_alias for subprogram in cls._SUBPROGRAMS
+        ]
+        error_msg: str = (
+            f"Subprogram with database alias '{database_alias}' not found. Available: {available_aliases}"
+        )
+        cls._logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    @classmethod
+    def has_subprogram(cls, subprogram_name: str) -> bool:
+        cls._logger.debug(f"Checking existence of subprogram: {subprogram_name}")
+        exists: bool = any(
+            subprogram.name == subprogram_name for subprogram in cls._SUBPROGRAMS
+        )
+        cls._logger.debug(f"Subprogram '{subprogram_name}' exists: {exists}")
+        return exists
+
+    @classmethod
+    def has_subprogram_by_database_alias(cls, database_alias: str) -> bool:
+        cls._logger.debug(
+            f"Checking existence of subprogram by database alias: {database_alias}"
+        )
+        exists: bool = any(
+            subprogram.database_alias == database_alias
+            for subprogram in cls._SUBPROGRAMS
+        )
+        cls._logger.debug(
+            f"Subprogram with database alias '{database_alias}' exists: {exists}"
+        )
+        return exists
+
+    @classmethod
+    def get_all_subprograms(cls) -> list[Subprogram]:
+        cls._logger.debug("Retrieving all subprograms")
+        cls._logger.info(f"Retrieved {len(cls._SUBPROGRAMS)} subprograms")
+        return list(cls._SUBPROGRAMS)
+
+    @classmethod
+    def get_all_subprogram_names(cls) -> list[str]:
+        cls._logger.debug("Retrieving all subprogram names")
+        cls._logger.info(f"Retrieved {len(cls._SUBPROGRAMS)} subprogram names")
+        return [subprogram.name for subprogram in cls._SUBPROGRAMS]
+
+    @classmethod
+    def register_notification(
+        cls, subprogram_name: str, notification: Notification
+    ) -> None:
+        subprogram: Subprogram = cls.get_subprogram(subprogram_name)
+
+        if any(notif.name == notification.name for notif in subprogram.notifications):
+            raise ValueError(
+                f"Notification '{notification.name}' already exists in subprogram '{subprogram_name}'"
+            )
+
+        updated_notifications: list[Notification] = list(subprogram.notifications) + [
+            notification
+        ]
+        updated_subprogram: Subprogram = subprogram.model_copy(
+            update={"notifications": updated_notifications}
+        )
+
+        for i, existing_subprogram in enumerate(cls._SUBPROGRAMS):
+            if existing_subprogram.name == subprogram_name:
+                cls._SUBPROGRAMS[i] = updated_subprogram
+                break
+
+        cls._logger.info(
+            f"Registered new notification '{notification.name}' in subprogram '{subprogram_name}'"
+        )
+
+    @classmethod
+    def unregister_notification(
+        cls, subprogram_name: str, notification_name: str
+    ) -> None:
+        subprogram: Subprogram = cls.get_subprogram(subprogram_name)
+
+        if not any(
+            notif.name == notification_name for notif in subprogram.notifications
+        ):
+            raise ValueError(
+                f"Notification '{notification_name}' not found in subprogram '{subprogram_name}'"
+            )
+
+        updated_notifications: list[Notification] = [
+            notif
+            for notif in subprogram.notifications
+            if notif.name != notification_name
+        ]
+        updated_subprogram: Subprogram = subprogram.model_copy(
+            update={"notifications": updated_notifications}
+        )
+
+        for i, existing_subprogram in enumerate(cls._SUBPROGRAMS):
+            if existing_subprogram.name == subprogram_name:
+                cls._SUBPROGRAMS[i] = updated_subprogram
+                break
+
+        cls._logger.info(
+            f"Unregistered notification '{notification_name}' from subprogram '{subprogram_name}'"
+        )
+
+    @classmethod
+    def get_notification(
+        cls, subprogram_name: str, notification_name: str
+    ) -> Notification:
+        cls._logger.debug(
+            f"Retrieving notification '{notification_name}' from subprogram '{subprogram_name}'"
+        )
+
+        subprogram: Subprogram = cls.get_subprogram(subprogram_name)
+        for notification in subprogram.notifications:
+            if notification.name == notification_name:
+                cls._logger.info(
+                    f"Retrieved notification '{notification_name}' from subprogram '{subprogram_name}'"
+                )
+                return notification
+
+        available_notification_names: list[str] = [
+            notification.name for notification in subprogram.notifications
+        ]
+        error_msg: str = (
+            f"Notification '{notification_name}' not found in subprogram '{subprogram_name}'. "
+            f"Available: {available_notification_names}"
+        )
+        cls._logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    @classmethod
+    def get_notification_by_database_alias(cls, database_alias: str) -> Notification:
+        cls._logger.debug(
+            f"Retrieving notification by database alias: {database_alias}"
+        )
+
+        for subprogram in cls._SUBPROGRAMS:
+            for notification in subprogram.notifications:
+                if database_alias in notification.database_aliases:
+                    cls._logger.info(
+                        f"Retrieved notification '{notification.name}' by database alias '{database_alias}'"
+                    )
+                    return notification
+
+        error_msg: str = (
+            f"Notification with database alias '{database_alias}' not found"
+        )
+        cls._logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    @classmethod
+    def has_notification(cls, subprogram_name: str, notification_name: str) -> bool:
+        cls._logger.debug(
+            f"Checking existence of notification '{notification_name}' in subprogram '{subprogram_name}'"
+        )
+
+        if not cls.has_subprogram(subprogram_name):
+            return False
+
+        subprogram: Subprogram = cls.get_subprogram(subprogram_name)
+        exists: bool = any(
+            notification.name == notification_name
+            for notification in subprogram.notifications
+        )
+        cls._logger.debug(
+            f"Notification '{notification_name}' exists in subprogram '{subprogram_name}': {exists}"
+        )
+        return exists
+
+    @classmethod
+    def get_all_notifications(cls) -> list[Notification]:
+        cls._logger.debug("Retrieving all notifications")
+        notifications: list[Notification] = [
+            notification
+            for subprogram in cls._SUBPROGRAMS
+            for notification in subprogram.notifications
+        ]
+        cls._logger.info(f"Retrieved {len(notifications)} notifications")
+        return notifications
+
+    @classmethod
+    def get_subprograms_dataframe(cls) -> pd.DataFrame:
+        return pd.DataFrame(
+            [
+                {
+                    "subprogram": subprogram.database_alias,
+                    "display_order": subprogram.display_order,
+                    "aid_count": sum(
+                        notification.aid_count
+                        for notification in subprogram.notifications
+                    ),
+                }
+                for subprogram in cls._SUBPROGRAMS
+            ]
+        )
+
+    ALL_NOTIFICATIONS_OBJECT: Notification = Notification(
+        name="Toutes",
+        database_aliases=[],
+        aid_count=0,
+        aid_amount=0,
+    )
+
+    _SUBPROGRAMS: Final[list[Subprogram]] = [
+        Subprogram(
+            name="2002",
+            database_alias="PROGRAMME 2002",
+            display_order=1,
+            notifications=[
+                Notification(
+                    name="N° 530 (50 000 DA)",
+                    database_aliases=[
+                        "N°: 530. Du: 06/08/2002. TRANCHE: 0. Montant:    700 000"
+                    ],
+                    aid_count=250,
+                    aid_amount=500000,
+                ),
+                Notification(
+                    name="N° 530 (250 000 DA)",
+                    database_aliases=[
+                        "N°: 530. Du: 06/08/2002. TRANCHE: 0. Montant:    250 000"
+                    ],
+                    aid_count=249,
+                    aid_amount=250000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2003",
+            database_alias="PROGRAMME 2003",
+            display_order=7,
+            notifications=[
+                Notification(
+                    name="N° 1082 (500 000 DA)",
+                    database_aliases=[
+                        "N°: 1082. Du: 25/01/2003. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=250,
+                    aid_amount=500000,
+                ),
+                Notification(
+                    name="N° 1082 (250 000 DA)",
+                    database_aliases=[
+                        "N°: 1082. Du: 25/01/2003. TRANCHE: 0. Montant:    250 000",
+                    ],
+                    aid_count=245,
+                    aid_amount=250000,
+                ),
+                Notification(
+                    name="N° 731",
+                    database_aliases=[
+                        "N°: 731. Du: 30/12/2003. TRANCHE: 0. Montant:    700 000"
+                    ],
+                    aid_count=1093,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 281",
+                    database_aliases=[
+                        "N°: 281. Du: 28/04/2003. TRANCHE: 0. Montant:    700 000"
+                    ],
+                    aid_count=479,
+                    aid_amount=500000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2003 CEE",
+            database_alias="PROGRAMME 2003 CEE",
+            display_order=8,
+            notifications=[
+                Notification(
+                    name="N° 284",
+                    database_aliases=[
+                        "N°:284.Du:28/04/2003.TRANCHE:0.Montant:   700 000",
+                        "N°: 284. Du: 28/04/2003. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=200,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2004",
+            database_alias="PROGRAMME 2004",
+            display_order=6,
+            notifications=[
+                Notification(
+                    name="N° 430",
+                    database_aliases=[
+                        "N°: 430. Du: 03/08/2004. TRANCHE: 0. Montant:    700 000"
+                    ],
+                    aid_count=30,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2005",
+            database_alias="PROGRAMME INITIAL",
+            display_order=4,
+            notifications=[
+                Notification(
+                    name="N° 872",
+                    database_aliases=[
+                        "N°:872.Du:06/12/2004.TRANCHE:0.Montant:   700 000",
+                        "N°: 872. Du: 06/12/2004. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=20000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="Complémentaire 2007",
+            database_alias="COMPLEMENTAIRE 2007",
+            display_order=2,
+            notifications=[
+                Notification(
+                    name="N° 568",
+                    database_aliases=[
+                        "N°: 568. Du: 20/05/2007. TRANCHE: 0. Montant:    700 000"
+                    ],
+                    aid_count=50,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="Rattrapage 2007",
+            database_alias="PQR 2007",
+            display_order=3,
+            notifications=[
+                Notification(
+                    name="N° 592",
+                    database_aliases=[
+                        "N°:592.Du:26/05/2007.TRANCHE:0.Montant:   250 000",
+                        "N°: 592. Du: 26/05/2007. TRANCHE: 0. Montant:    250 000",
+                    ],
+                    aid_count=888,
+                    aid_amount=250000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="Complémentaire 2008",
+            database_alias="COMPLEMENTAIRE 2008",
+            display_order=9,
+            notifications=[
+                Notification(
+                    name="N° 738",
+                    database_aliases=[
+                        "N°: 738. Du: 20/07/2008. TRANCHE: 0. Montant:    700 000"
+                    ],
+                    aid_count=1000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 1077",
+                    database_aliases=[
+                        "N°:1077.Du:14/08/2008.TRANCHE:1.Montant:   700 000",
+                        "N°: 1077. Du: 14/08/2008. TRANCHE: 1. Montant:    700 000",
+                    ],
+                    aid_count=500,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="Complémentaire 2009",
+            database_alias="COMPLEMENTAIRE 2009",
+            display_order=5,
+            notifications=[
+                Notification(
+                    name="N° 260",
+                    database_aliases=[
+                        "N°:260.Du:19/02/2009.TRANCHE:0.Montant:   700 000",
+                        "N°: 260. Du: 19/02/2009. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=2000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 852",
+                    database_aliases=[
+                        "N°:852.Du:13/04/2009.TRANCHE:0.Montant:   700 000",
+                        "N°: 852. Du: 13/04/2009. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=1000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 1037",
+                    database_aliases=[
+                        "N°:1037.Du:01/10/2009.TRANCHE:1.Montant:   700 000",
+                        "N°: 1037. Du: 01/10/2009. TRANCHE: 1. Montant:    700 000",
+                    ],
+                    aid_count=1000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2010",
+            database_alias="QUINQUINNAL 2010",
+            display_order=24,
+            notifications=[
+                Notification(
+                    name="N° 250",
+                    database_aliases=[
+                        "N°:250.Du:23/03/2010.TRANCHE:0.Montant:   700 000",
+                        "N°: 250. Du: 23/03/2010. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=3000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 834",
+                    database_aliases=[
+                        "N°:834.Du:23/09/2010.TRANCHE:0.Montant:   700 000",
+                        "N°: 834. Du: 23/09/2010. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=3500,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2011",
+            database_alias="QUINQUENNAL 2011",
+            display_order=29,
+            notifications=[
+                Notification(
+                    name="N° 587",
+                    database_aliases=[
+                        "N°:587.Du:26/05/2016.TRANCHE:0.Montant:   700 000",
+                        "N°: 587. Du: 26/05/2016. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=1253,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 856",
+                    database_aliases=[
+                        "N°:856.Du:09/09/2017.TRANCHE:0.Montant:   700 000",
+                        "N°: 856. Du: 09/09/2017. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=42,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="Complémentaire 2011",
+            database_alias="QUINQUENNAL 2011C",
+            display_order=28,
+            notifications=[
+                Notification(
+                    name="N° 224",
+                    database_aliases=[
+                        "N°:224.Du:06/02/2011.TRANCHE:1.Montant:   700 000",
+                        "N°: 224. Du: 06/02/2011. TRANCHE: 1. Montant:    700 000",
+                    ],
+                    aid_count=224,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 463",
+                    database_aliases=[
+                        "N°:463.Du:03/03/2011.TRANCHE:1.Montant:   700 000",
+                        "N°: 463. Du: 03/03/2011. TRANCHE: 1. Montant:    700 000",
+                    ],
+                    aid_count=11000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 1161",
+                    database_aliases=[
+                        "N°:1161.Du:07/06/2011.TRANCHE:2.Montant:   700 000",
+                        "N°: 1161. Du: 07/06/2011. TRANCHE: 2. Montant:    700 000",
+                    ],
+                    aid_count=5000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2013",
+            database_alias="PQ2013",
+            display_order=31,
+            notifications=[
+                Notification(
+                    name="N° 1132",
+                    database_aliases=[
+                        "N°:1132.Du:16/07/2013.TRANCHE:2.Montant:   700 000",
+                        "N°: 1132. Du: 16/07/2013. TRANCHE: 2. Montant:    700 000",
+                    ],
+                    aid_count=5000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 587",
+                    database_aliases=[
+                        "N°:587.Du:26/05/2016.TRANCHE:0.Montant:   700 000",
+                        "N°: 587. Du: 26/05/2016. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=481,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 856",
+                    database_aliases=[
+                        "N°:856.Du:09/09/2017.TRANCHE:0.Montant:   700 000",
+                        "N°: 856. Du: 09/09/2017. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=37,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="Complémentaire 2013",
+            database_alias="QUINQUENNAL 2013 C",
+            display_order=32,
+            notifications=[
+                Notification(
+                    name="N° 587",
+                    database_aliases=[
+                        "N°:587.Du:26/05/2016.TRANCHE:0.Montant:   700 000",
+                        "N°: 587. Du: 26/05/2016. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=266,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2014",
+            database_alias="PROGRAMME Q 2014",
+            display_order=33,
+            notifications=[
+                Notification(
+                    name="N° 460",
+                    database_aliases=[
+                        "N°:460.Du:05/03/2014.TRANCHE:0.Montant:   700 000",
+                        "N°: 460. Du: 05/03/2014. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=8000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2015",
+            database_alias="Programme 2015",
+            display_order=34,
+            notifications=[
+                Notification(
+                    name="N° 605",
+                    database_aliases=[
+                        "N°:605.Du:25/08/2015.TRANCHE:0.Montant:   700 000",
+                        "N°: 605. Du: 25/08/2015. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=2040,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="Complémentaire 2015",
+            database_alias="Complémentaire 2015",
+            display_order=37,
+            notifications=[
+                Notification(
+                    name="N° 838",
+                    database_aliases=[
+                        "N°:838.Du:10/11/2015.TRANCHE:0.Montant:   700 000",
+                        "N°: 838. Du: 10/11/2015. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=3000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2016",
+            database_alias="Programme 2016",
+            display_order=39,
+            notifications=[
+                Notification(
+                    name="N° 1024",
+                    database_aliases=[
+                        "N°:1024.Du:15/10/2017.TRANCHE:0.Montant:   700 000",
+                        "N°: 1024. Du: 15/10/2017. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=1000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 183",
+                    database_aliases=[
+                        "N°:183.Du:04/02/2018.TRANCHE:0.Montant:   700 000",
+                        "N°: 183. Du: 04/02/2018. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=3000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2018",
+            database_alias="Programme  2018",
+            display_order=43,
+            notifications=[
+                Notification(
+                    name="N° 241",
+                    database_aliases=[
+                        "N°:241.Du:12/02/2018.TRANCHE:0.Montant:   700 000",
+                        "N°: 241. Du: 12/02/2018. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=3000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 798",
+                    database_aliases=[
+                        "N°:798.Du:09/07/2018.TRANCHE:1.Montant:   700 000",
+                        "N°: 798. Du: 09/07/2018. TRANCHE: 1. Montant:    700 000",
+                    ],
+                    aid_count=2000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2019",
+            database_alias="Programme 2019",
+            display_order=45,
+            notifications=[
+                Notification(
+                    name="N° 245",
+                    database_aliases=[
+                        "N°:245.Du:03/02/2019.TRANCHE:0.Montant:   700 000",
+                        "N°: 245. Du: 03/02/2019. TRANCHE: 0. Montant:    700 000",
+                    ],
+                    aid_count=2200,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 375",
+                    database_aliases=[
+                        "N°:375.Du:26/02/2019.TRANCHE:1.Montant:   700 000"
+                    ],
+                    aid_count=50,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2020",
+            database_alias="Programme 2020",
+            display_order=47,
+            notifications=[
+                Notification(
+                    name="N° 705",
+                    database_aliases=[
+                        "N°:705.Du:29/06/2020.TRANCHE:0.Montant:   700 000"
+                    ],
+                    aid_count=600,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 1350",
+                    database_aliases=[
+                        "N°:1350.Du:05/11/2020.TRANCHE:0.Montant:   700 000"
+                    ],
+                    aid_count=600,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2021",
+            database_alias="Programme 2021",
+            display_order=50,
+            notifications=[
+                Notification(
+                    name="N° 329",
+                    database_aliases=[
+                        "N°:329.Du:02/02/2021.TRANCHE:0.Montant:   700 000"
+                    ],
+                    aid_count=1500,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2022",
+            database_alias="program 2022",
+            display_order=51,
+            notifications=[
+                Notification(
+                    name="N° 238",
+                    database_aliases=[
+                        "N°:238.Du:26/03/2022.TRANCHE:0.Montant:   700 000"
+                    ],
+                    aid_count=2500,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2023",
+            database_alias="program 2023",
+            display_order=52,
+            notifications=[
+                Notification(
+                    name="N° 666",
+                    database_aliases=[
+                        "N°:666.Du:06/08/2023.TRANCHE:0.Montant:   700 000"
+                    ],
+                    aid_count=2000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2024",
+            database_alias="Programme 2024",
+            display_order=53,
+            notifications=[
+                Notification(
+                    name="N° 1061",
+                    database_aliases=[
+                        "N°:1061.Du:14/12/2023.TRANCHE:0.Montant:   700 000",
+                        "N°:1061.Du:14/12/2023.TRANCHE:1.Montant:   700 000",
+                    ],
+                    aid_count=1000,
+                    aid_amount=700000,
+                ),
+                Notification(
+                    name="N° 734",
+                    database_aliases=[
+                        "N°:734.Du:30/07/2024.TRANCHE:0.Montant:   700 000"
+                    ],
+                    aid_count=4000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+        Subprogram(
+            name="2025",
+            database_alias="PROGRAMME 2025",
+            display_order=55,
+            notifications=[
+                Notification(
+                    name="N° 16",
+                    database_aliases=[
+                        "N°:16.Du:06/01/2025.TRANCHE:0.Montant:   700 000"
+                    ],
+                    aid_count=1000,
+                    aid_amount=700000,
+                ),
+            ],
+        ),
+    ]

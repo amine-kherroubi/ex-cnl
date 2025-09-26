@@ -14,11 +14,7 @@ from app.core.domain.models.subprogram import Subprogram
 from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.predefined_objects.subprograms import (
-    ALL_NOTIFICATIONS_OBJECT,
-    SUBPROGRAMS,
-    get_subprograms_dataframe,
-)
+from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.domain.predefined_objects.dairas_et_communes import (
     get_dairas_communes_dataframe,
 )
@@ -68,20 +64,17 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._logger.debug(f"Setting target subprogram: {target_subprogram}")
         self._logger.debug(f"Setting target notification: {target_notification}")
 
-        if target_subprogram not in SUBPROGRAMS:
-            available_subprograms: List[Subprogram] = [
-                subprogram for subprogram in SUBPROGRAMS
-            ]
+        if not SubprogramRegistry.has_subprogram(target_subprogram.name):
             error_msg: str = (
                 f"Subprogram '{target_subprogram.name}' not found. "
-                f"Available subprograms: {available_subprograms}"
+                f"Available subprograms: {SubprogramRegistry.get_all_subprogram_names()}"
             )
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
         if (
             target_notification not in target_subprogram.notifications
-            and target_notification != ALL_NOTIFICATIONS_OBJECT
+            and target_notification != SubprogramRegistry.ALL_NOTIFICATIONS_OBJECT
         ):
             available_notifications: List[Notification] = [
                 notification for notification in target_subprogram.notifications
@@ -136,7 +129,7 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         try:
             self._logger.debug("Creating reference table 'subprograms'")
-            df: pd.DataFrame = get_subprograms_dataframe()
+            df: pd.DataFrame = SubprogramRegistry.get_subprograms_dataframe()
             self._data_repository.create_table_from_dataframe("subprograms", df)
             rows, cols = df.shape
             self._logger.info(
@@ -167,7 +160,7 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         formatted_query: str = query_template
 
-        if self._target_notification == ALL_NOTIFICATIONS_OBJECT:
+        if self._target_notification == SubprogramRegistry.ALL_NOTIFICATIONS_OBJECT:
             notification_value: str = ", ".join(
                 f"'{alias}'"
                 for notification in self._target_subprogram.notifications  # type: ignore
@@ -220,7 +213,7 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         notification_display: str = (
             "de toutes les notifications"
-            if self._target_notification == ALL_NOTIFICATIONS_OBJECT
+            if self._target_notification == SubprogramRegistry.ALL_NOTIFICATIONS_OBJECT
             else f"de la notification {self._target_notification.name.lower()}"  # type: ignore
         )
 

@@ -7,10 +7,7 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.core.domain.predefined_objects.subprograms import (
-    SUBPROGRAMS,
-    ALL_NOTIFICATIONS_OBJECT,
-)
+from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.domain.models.subprogram import Subprogram
 from app.core.domain.models.notification import Notification
 from app.presentation.components.base_component import BaseComponent
@@ -38,7 +35,9 @@ class SubprogramSelector(BaseComponent):
         self._on_selection_changed: Callable[[Subprogram, Notification], None] = (
             on_selection_changed
         )
-        self._selected_subprogram: Subprogram = SUBPROGRAMS[-1]
+        self._selected_subprogram: Subprogram = (
+            SubprogramRegistry.get_all_subprograms()[-1]
+        )
         self._subprogram_var: ctk.StringVar = ctk.StringVar(
             value=self._selected_subprogram.name
         )
@@ -110,7 +109,9 @@ class SubprogramSelector(BaseComponent):
             sticky="w",
         )
 
-        subprogram_names: list[str] = [subprogram.name for subprogram in SUBPROGRAMS]
+        subprogram_names: list[str] = [
+            subprogram.name for subprogram in SubprogramRegistry.get_all_subprograms()
+        ]
         self._subprogram_selector: ctk.CTkComboBox = ctk.CTkComboBox(
             master=self._content_frame,
             values=subprogram_names,
@@ -157,7 +158,9 @@ class SubprogramSelector(BaseComponent):
             notification for notification in self._selected_subprogram.notifications
         ]
         if len(self._selected_subprogram.notifications) > 1:
-            self._current_possible_notifications.insert(0, ALL_NOTIFICATIONS_OBJECT)
+            self._current_possible_notifications.insert(
+                0, SubprogramRegistry.ALL_NOTIFICATIONS_OBJECT
+            )
 
         current_notification_names: list[str] = [
             notification.name for notification in self._current_possible_notifications
@@ -218,7 +221,7 @@ class SubprogramSelector(BaseComponent):
     def _handle_subprogram_selection(self) -> None:
         selected_subprogram_name: str = self._subprogram_var.get()
 
-        for subprogram in SUBPROGRAMS:
+        for subprogram in SubprogramRegistry.get_all_subprograms():
             if subprogram.name == selected_subprogram_name:
                 self._selected_subprogram = subprogram
                 break
@@ -228,7 +231,9 @@ class SubprogramSelector(BaseComponent):
         ]
 
         if len(self._selected_subprogram.notifications) > 1:
-            self._current_possible_notifications.insert(0, ALL_NOTIFICATIONS_OBJECT)
+            self._current_possible_notifications.insert(
+                0, SubprogramRegistry.ALL_NOTIFICATIONS_OBJECT
+            )
 
         current_notification_names: list[str] = [
             notification.name for notification in self._current_possible_notifications
@@ -256,7 +261,7 @@ class SubprogramSelector(BaseComponent):
         )
 
     def _get_selection_info_text(self) -> str:
-        if self._selected_notification == ALL_NOTIFICATIONS_OBJECT:
+        if self._selected_notification == SubprogramRegistry.ALL_NOTIFICATIONS_OBJECT:
             notification_details: list[str] = []
             for notification in self._selected_subprogram.notifications:
                 formatted_amount: str = f"{notification.aid_amount:_}".replace("_", " ")

@@ -9,7 +9,7 @@ from typing import Any
 from app.config import AppConfig
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.registry.report_specification_registry import (
+from app.core.domain.registries.report_specification_registry import (
     ReportSpecificationRegistry,
 )
 from app.core.infrastructure.data.data_repository import DuckDBRepository

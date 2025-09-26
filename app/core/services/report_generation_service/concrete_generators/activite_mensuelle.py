@@ -12,7 +12,7 @@ from openpyxl.styles import Alignment
 # Imports de l'application locale
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.predefined_objects.subprograms import get_subprograms_dataframe
+from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation_service.base_generator import BaseGenerator
@@ -50,7 +50,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         try:
             self._logger.debug(f"Creating reference table 'programs'")
 
-            df: pd.DataFrame = get_subprograms_dataframe()
+            df: pd.DataFrame = SubprogramRegistry.get_subprograms_dataframe()
             self._data_repository.create_table_from_dataframe("programs", df)
 
             rows, cols = df.shape
