@@ -4,7 +4,9 @@ from __future__ import annotations
 from typing import Any, Callable
 
 # Local application imports
+from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_specification import ReportSpecification
+from app.core.domain.models.subprogram import Subprogram
 from app.presentation.controllers.report_controller import ReportController
 from app.presentation.views.report_views.base_report_view import BaseReportView
 from app.presentation.components.subprogram_selector import SubprogramSelector
@@ -25,8 +27,8 @@ class SituationFinanciereView(BaseReportView):
         controller: ReportController,
         on_back: Callable[[], None],
     ) -> None:
-        self._selected_subprogram: str | None = None
-        self._selected_notification: str | None = None
+        self._selected_subprogram: Subprogram | None = None
+        self._selected_notification: Notification | None = None
         super().__init__(parent, report_spec, controller, on_back)
 
     def _setup_report_specific_components(self) -> None:
@@ -44,23 +46,19 @@ class SituationFinanciereView(BaseReportView):
         self._next_row += 1
 
     def _on_selection_changed(
-        self, selected_subprogram: str | None, selected_notification: str | None
+        self,
+        selected_subprogram: Subprogram,
+        selected_notification: Notification,
     ) -> None:
         self._selected_subprogram = selected_subprogram
         self._selected_notification = selected_notification
         self._update_generate_button_state()
 
         if hasattr(self, "_status_display"):
-            if selected_subprogram and selected_notification:
-                self._status_display.add_message(
-                    message=f"Sélection : Sous-programme {selected_subprogram} - Notification {selected_notification}",
-                    message_type="information",
-                )
-            elif selected_subprogram:
-                self._status_display.add_message(
-                    message=f"Sous-programme sélectionné : {selected_subprogram}",
-                    message_type="information",
-                )
+            self._status_display.add_message(
+                message=f"Sélection : Sous-programme {selected_subprogram.name} - Notification {selected_notification.name}",
+                message_type="information",
+            )
 
     def _can_generate(self) -> bool:
         return (

@@ -236,7 +236,6 @@ class BaseReportView(ctk.CTkFrame):
             )
 
     def _can_generate(self) -> bool:
-
         return (
             len(self._selected_files) > 0
             and self._output_path is not None
@@ -249,7 +248,6 @@ class BaseReportView(ctk.CTkFrame):
             return
 
         if self._can_generate():
-
             self._generate_button.configure(  # type: ignore
                 state="normal",
                 text_color=DesignSystem.Color.WHITE,
@@ -257,7 +255,6 @@ class BaseReportView(ctk.CTkFrame):
                 hover_color=DesignSystem.Color.DARKER_PRIMARY,
             )
         else:
-
             self._generate_button.configure(  # type: ignore
                 state="disabled",
                 text_color=DesignSystem.Color.GRAY,
@@ -266,7 +263,6 @@ class BaseReportView(ctk.CTkFrame):
             )
 
     def _get_generation_parameters(self) -> dict[str, Any]:
-
         return {}
 
     def _generate_report(self) -> None:

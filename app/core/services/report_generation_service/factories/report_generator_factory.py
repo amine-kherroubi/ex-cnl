@@ -47,18 +47,6 @@ class ReportGeneratorFactory:
         report_context: ReportContext,
         **kwargs: Any,
     ) -> BaseGenerator:
-        """Create a report generator for the specified report.
-
-        Args:
-            report_name: Name of the report to generate
-            file_io_service: File I/O service instance
-            data_repository: Data repository instance
-            report_context: Report context with wilaya, date, etc.
-            **kwargs: Additional report-specific parameters (e.g., target_program)
-
-        Returns:
-            Configured report generator instance
-        """
         cls._logger.info(f"Creating generator for report: {report_name}")
         cls._logger.debug(f"Available generators: {list(cls._generators.keys())}")
         cls._logger.debug(f"Additional parameters: {kwargs}")

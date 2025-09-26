@@ -15,6 +15,7 @@ from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.predefined_objects.subprograms import (
+    ALL_NOTIFICATIONS_OBJECT,
     SUBPROGRAMS,
     get_subprograms_dataframe,
 )
@@ -55,51 +56,51 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._data_end_row: int = 0
 
     def configure(self, **kwargs: Any) -> None:
-        subprogram_database_alias: str | None = kwargs.get("target_subprogram")
-        notification_name: str | None = kwargs.get("target_notification")
+        target_subprogram: Subprogram | None = kwargs.get("target_subprogram")
+        target_notification: Notification | None = kwargs.get("target_notification")
 
-        if subprogram_database_alias is None:
+        if target_subprogram is None:
             raise ValueError("additional parameter 'target_subprogram' is required")
 
-        if notification_name is None:
+        if target_notification is None:
             raise ValueError("additional parameter 'target_notification' is required")
 
-        self._logger.debug(f"Setting target subprogram: {subprogram_database_alias}")
-        self._logger.debug(f"Setting target notification: {notification_name}")
+        self._logger.debug(f"Setting target subprogram: {target_subprogram}")
+        self._logger.debug(f"Setting target notification: {target_notification}")
 
-        # Find the target subprogram
-        for subprogram in SUBPROGRAMS:
-            if subprogram.database_alias == subprogram_database_alias:
-                self._target_subprogram = subprogram
-                self._logger.info(f"Target subprogram set: {subprogram.database_alias}")
+        if target_subprogram not in SUBPROGRAMS:
+            available_subprograms: List[Subprogram] = [
+                subprogram for subprogram in SUBPROGRAMS
+            ]
+            error_msg: str = (
+                f"Subprogram '{target_subprogram.name}' not found. "
+                f"Available subprograms: {available_subprograms}"
+            )
+            self._logger.error(error_msg)
+            raise ValueError(error_msg)
 
-                # Find the target notification within the subprogram
-                for notification in subprogram.notifications:
-                    if notification.name == notification_name:
-                        self._target_notification = notification
-                        self._logger.info(
-                            f"Target notification set: {notification.name} "
-                            f"(aid_amount: {notification.aid_amount}, aid_count: {notification.aid_count})"
-                        )
-                        return
+        if (
+            target_notification not in target_subprogram.notifications
+            and target_notification != ALL_NOTIFICATIONS_OBJECT
+        ):
+            available_notifications: List[Notification] = [
+                notification for notification in target_subprogram.notifications
+            ]
+            error_msg: str = (
+                f"Notification '{target_notification.name}' not found. "
+                f"Available notifications: {available_notifications}"
+            )
+            self._logger.error(error_msg)
+            raise ValueError(error_msg)
 
-                # If notification not found in the subprogram
-                available_notifications = [n.name for n in subprogram.notifications]
-                error_msg = (
-                    f"Notification '{notification_name}' not found in subprogram '{subprogram_database_alias}'. "
-                    f"Available notifications: {available_notifications}"
-                )
-                self._logger.error(error_msg)
-                raise ValueError(error_msg)
+        self._target_subprogram = target_subprogram
+        self._logger.info(f"Target subprogram set: {target_subprogram.database_alias}")
 
-        # If subprogram not found
-        available_subprograms: List[str] = [p.database_alias for p in SUBPROGRAMS]
-        error_msg: str = (
-            f"Subprogram '{subprogram_database_alias}' not found. "
-            f"Available subprograms: {available_subprograms}"
+        self._target_notification = target_notification
+        self._logger.info(
+            f"Target notification set: {target_notification.name} "
+            f"(aid_amount: {target_notification.aid_amount}, aid_count: {target_notification.aid_count})"
         )
-        self._logger.error(error_msg)
-        raise ValueError(error_msg)
 
     def _verify_target_selection(self) -> None:
         if self._target_subprogram is None:
@@ -119,7 +120,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             raise RuntimeError(error_msg)
 
         self._logger.debug(
-            f"Target selection verified: {self._target_subprogram.database_alias} - {self._target_notification.name}"
+            f"Target selection verified: {self._target_subprogram.name} - {self._target_notification.name}"
         )
 
     def generate(
@@ -166,11 +167,18 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         formatted_query: str = query_template
 
-        notification_value: str = (
-            f"'{self._target_notification.database_aliases[0]}'"  # type: ignore
-            if len(self._target_notification.database_aliases) == 1  # type: ignore
-            else ", ".join(f"'{alias}'" for alias in self._target_notification.database_aliases)  # type: ignore
-        )
+        if self._target_notification == ALL_NOTIFICATIONS_OBJECT:
+            notification_value: str = ", ".join(
+                f"'{alias}'"
+                for notification in self._target_subprogram.notifications  # type: ignore
+                for alias in notification.database_aliases
+            )
+        else:
+            aliases: list[str] = self._target_notification.database_aliases  # type: ignore
+            if len(aliases) == 1:
+                notification_value: str = f"'{aliases[0]}'"
+            else:
+                notification_value: str = ", ".join(f"'{alias}'" for alias in aliases)
 
         formatted_query = (
             formatted_query.replace(
@@ -210,16 +218,24 @@ class SituationFinanciereGenerator(BaseGenerator):
         ) + self._target_subprogram.name.lower()  # type: ignore
         notification_display: str = self._target_notification.name.lower()  # type: ignore
 
+        notification_display: str = (
+            "de toutes les notifications"
+            if self._target_notification == ALL_NOTIFICATIONS_OBJECT
+            else f"de la notification {self._target_notification.name.lower()}"  # type: ignore
+        )
+
+        title: str = (
+            f"Situation financière {notification_display} "
+            f"du sous-programme {subprogram_display} par daira et par commune"
+        )
+
         ExcelStylingService.merge_and_style_cells(
             sheet,
             "A",
             "S",
             self._current_row,
             self._current_row,
-            value=(
-                f"Situation financière de la notification {notification_display} "  # type: ignore
-                f"du sous-programme {subprogram_display} par daira et par commune"  # type: ignore
-            ),
+            value=title,
             font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )

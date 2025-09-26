@@ -558,6 +558,13 @@ SUBPROGRAMS: Final[list[Subprogram]] = [
     ),
 ]
 
+ALL_NOTIFICATIONS_OBJECT: Notification = Notification(
+    name="Toutes",
+    database_aliases=[],
+    aid_count=0,
+    aid_amount=0,
+)
+
 
 def get_subprograms_dataframe() -> pd.DataFrame:
     return pd.DataFrame(
