@@ -1,9 +1,9 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from pathlib import Path
 from tkinter import filedialog
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, Tuple, Union, List
 
 # Third-party imports
 import customtkinter as ctk  # type: ignore
@@ -24,7 +24,7 @@ class FileSelector(BaseComponent):
     )
 
     def __init__(
-        self, parent: Any, on_files_changed: Callable[[list[Path]], None]
+        self, parent: Any, on_files_changed: Callable[[List[Path]], None]
     ) -> None:
         self._on_files_changed: Callable[[list[Path]], None] = on_files_changed
         self._selected_files: list[Path] = []
@@ -36,12 +36,12 @@ class FileSelector(BaseComponent):
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
         title_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT
+            master=self._content_frame, fg_color=DesignSystem.Color.TRANSPARENT.value
         )
         title_frame.grid(  # type: ignore
             row=0,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="ew",
         )
         title_frame.grid_columnconfigure(index=0, weight=1)
@@ -49,10 +49,10 @@ class FileSelector(BaseComponent):
         title_label: ctk.CTkLabel = ctk.CTkLabel(
             master=title_frame,
             text=self._title,
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H3,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H3.value,
                 weight="bold",
             ),
             anchor="w",
@@ -62,35 +62,35 @@ class FileSelector(BaseComponent):
         self._clear_button: ctk.CTkButton = ctk.CTkButton(
             master=title_frame,
             text="Réinitialiser",
-            text_color=DesignSystem.Color.GRAY,
-            fg_color=DesignSystem.Color.LESS_WHITE,
-            hover_color=DesignSystem.Color.LEAST_WHITE,
+            text_color=DesignSystem.Color.GRAY.value,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            hover_color=DesignSystem.Color.LEAST_WHITE.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BUTTON
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value
             ),
-            corner_radius=DesignSystem.Roundness.SM,
-            height=DesignSystem.Height.SM,
+            corner_radius=DesignSystem.Roundness.SM.value,
+            height=DesignSystem.Height.SM.value,
             command=self._clear_files,
-            width=DesignSystem.Width.SM,
+            width=DesignSystem.Width.SM.value,
         )
         self._clear_button.grid(row=0, column=1)  # type: ignore
 
         self._select_button: ctk.CTkButton = ctk.CTkButton(
             master=title_frame,
             text="Sélectionner des fichiers",
-            text_color=DesignSystem.Color.WHITE,
-            fg_color=DesignSystem.Color.PRIMARY,
-            hover_color=DesignSystem.Color.DARKER_PRIMARY,
+            text_color=DesignSystem.Color.WHITE.value,
+            fg_color=DesignSystem.Color.PRIMARY.value,
+            hover_color=DesignSystem.Color.DARKER_PRIMARY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BUTTON
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value
             ),
-            corner_radius=DesignSystem.Roundness.SM,
-            height=DesignSystem.Height.SM,
+            corner_radius=DesignSystem.Roundness.SM.value,
+            height=DesignSystem.Height.SM.value,
             command=self._select_files,
-            width=DesignSystem.Width.MD,
+            width=DesignSystem.Width.MD.value,
         )
         self._select_button.grid(  # type: ignore
-            row=0, column=2, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE)
+            row=0, column=2, padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value)
         )
 
         info_text: str = (
@@ -100,17 +100,17 @@ class FileSelector(BaseComponent):
             master=self._content_frame,
             text=info_text,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.CAPTION,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
-            text_color=DesignSystem.Color.GRAY,
+            text_color=DesignSystem.Color.GRAY.value,
             wraplength=400,  # Allow text wrapping for longer description
         )
         information.grid(  # type: ignore
             row=1,
             columnspan=3,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -118,10 +118,10 @@ class FileSelector(BaseComponent):
             master=self._content_frame,
             height=100,
             state="disabled",
-            border_width=DesignSystem.BorderWidth.XS,
-            corner_radius=DesignSystem.Roundness.SM,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
         )
         self._files_listbox.grid(  # type: ignore
@@ -135,7 +135,7 @@ class FileSelector(BaseComponent):
 
     def _select_files(self) -> None:
 
-        files: tuple[str, ...] | Literal[""] = filedialog.askopenfilenames(
+        files: Union[Tuple[str, ...], Literal[""]] = filedialog.askopenfilenames(
             title="Sélectionner les fichiers source",
             filetypes=[
                 ("Fichiers Excel", "*.xlsx"),
@@ -195,15 +195,15 @@ class FileSelector(BaseComponent):
 
             self._clear_button.configure(  # type: ignore
                 state="normal",
-                text_color=DesignSystem.Color.WHITE,
-                fg_color=DesignSystem.Color.GRAY,
-                hover_color=DesignSystem.Color.DARKER_GRAY,
+                text_color=DesignSystem.Color.WHITE.value,
+                fg_color=DesignSystem.Color.GRAY.value,
+                hover_color=DesignSystem.Color.DARKER_GRAY.value,
             )
         else:
 
             self._clear_button.configure(  # type: ignore
                 state="disabled",
-                text_color=DesignSystem.Color.GRAY,
-                fg_color=DesignSystem.Color.LESS_WHITE,
-                hover_color=DesignSystem.Color.LEAST_WHITE,
+                text_color=DesignSystem.Color.GRAY.value,
+                fg_color=DesignSystem.Color.LESS_WHITE.value,
+                hover_color=DesignSystem.Color.LEAST_WHITE.value,
             )

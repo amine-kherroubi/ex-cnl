@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 # Standard library imports
 from datetime import date
 
 # Third-party imports
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, validator
 
 # Local application imports
 from app.core.domain.enums.space_time import Wilaya, Month
@@ -31,14 +29,12 @@ class ReportContext(BaseModel):
         description="Month of the report period in French (for monthly reports)",
     )
 
-    @field_validator("reporting_date")
-    @classmethod
+    @validator("reporting_date")
     def validate_report_date(cls, report_date: date) -> date:
         if report_date > date.today():
             raise ValueError("Report date cannot be in the future")
         return report_date
 
-    model_config = {
-        "frozen": True,
-        "validate_assignment": True,
-    }
+    class Config:
+        frozen = True
+        validate_assignment = True

@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from datetime import date
@@ -45,15 +45,15 @@ class SituationFinanciereGenerator(BaseGenerator):
             file_io_service, data_repository, report_specification, report_context
         )
         self._current_row: int = 1
-        self._target_subprogram: Subprogram | None = None
-        self._target_notification: Notification | None = None
+        self._target_subprogram: Optional[Subprogram] = None
+        self._target_notification: Optional[Notification] = None
         self._totals: Dict[str, int] = {}
         self._data_start_row: int = 0
         self._data_end_row: int = 0
 
     def configure(self, **kwargs: Any) -> None:
-        target_subprogram: Subprogram | None = kwargs.get("target_subprogram")
-        target_notification: Notification | None = kwargs.get("target_notification")
+        target_subprogram: Optional[Subprogram] = kwargs.get("target_subprogram")
+        target_notification: Optional[Notification] = kwargs.get("target_notification")
 
         if target_subprogram is None:
             raise ValueError("additional parameter 'target_subprogram' is required")

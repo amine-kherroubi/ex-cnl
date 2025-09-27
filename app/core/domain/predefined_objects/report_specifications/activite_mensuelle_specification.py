@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 # Standard library imports
-from typing import Final
+from typing import Final, Set
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
@@ -13,14 +11,14 @@ from app.core.services.report_generation_service.concrete_generators.activite_me
     ActiviteMensuelleGenerator,
 )
 
-TRANCHES_DE_LANCEMENT: Final[set[str]] = {
+TRANCHES_DE_LANCEMENT: Final[Set[str]] = {
     "N1        ",
     "C1        ",
     "T1        ",
     "T1, T2    ",
 }
 
-TRANCHES_DE_LIVRAISON: Final[set[str]] = {
+TRANCHES_DE_LIVRAISON: Final[Set[str]] = {
     "N1, N2    ",
     "N2        ",
     "T2, T3    ",
@@ -29,7 +27,7 @@ TRANCHES_DE_LIVRAISON: Final[set[str]] = {
     "C2        ",
 }
 
-TRANCHES_INTERMEDIARES: Final[set[str]] = {
+TRANCHES_INTERMEDIARES: Final[Set[str]] = {
     "T2        ",
     "          ",  # Empty
 }

@@ -1,8 +1,8 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from datetime import datetime
-from typing import Any, Literal, TypeAlias
+from typing import Any, Literal
 
 # Third-party imports
 import customtkinter as ctk  # type: ignore
@@ -11,7 +11,7 @@ import customtkinter as ctk  # type: ignore
 from app.presentation.gui.components.base_component import BaseComponent
 from app.presentation.gui.styling.design_system import DesignSystem
 
-MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
+MessageType = Literal["information", "succès", "avertissement", "erreur"]
 
 
 class StatusDisplay(BaseComponent):
@@ -29,10 +29,10 @@ class StatusDisplay(BaseComponent):
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text=self._title,
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H3,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H3.value,
                 weight="bold",
             ),
             anchor="w",
@@ -40,7 +40,7 @@ class StatusDisplay(BaseComponent):
         title.grid(  # type: ignore
             row=0,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -48,26 +48,26 @@ class StatusDisplay(BaseComponent):
             master=self._content_frame,
             text="Les messages de progression et d'erreur apparaîtront ici",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.CAPTION,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
-            text_color=DesignSystem.Color.GRAY,
+            text_color=DesignSystem.Color.GRAY.value,
         )
         information.grid(  # type: ignore
             row=1,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
         self._status_text: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self._content_frame,
             state="disabled",
-            border_width=DesignSystem.BorderWidth.XS,
-            corner_radius=DesignSystem.Roundness.SM,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.MONO,
-                size=DesignSystem.FontSize.CAPTION,
+                family=DesignSystem.FontFamily.MONO.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
         )
         self._status_text.grid(  # type: ignore
@@ -88,13 +88,13 @@ class StatusDisplay(BaseComponent):
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
         indications_map: dict[MessageType, str] = {
-            "information": DesignSystem.Color.INFO,
-            "succès": DesignSystem.Color.SUCCESS,
-            "avertissement": DesignSystem.Color.WARNING,
-            "erreur": DesignSystem.Color.ERROR,
+            "information": DesignSystem.Color.INFO.value,
+            "succès": DesignSystem.Color.SUCCESS.value,
+            "avertissement": DesignSystem.Color.WARNING.value,
+            "erreur": DesignSystem.Color.ERROR.value,
         }
 
-        color: str = indications_map.get(message_type, DesignSystem.Color.INFO)
+        color: str = indications_map.get(message_type, DesignSystem.Color.INFO.value)
         formatted_message: str = f"[{timestamp}] {message}\n"
 
         self._status_text.configure(state="normal")  # type: ignore

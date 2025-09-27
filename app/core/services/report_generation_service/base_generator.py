@@ -1,9 +1,9 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List
 from logging import Logger
 
 # Third-party imports
@@ -38,7 +38,7 @@ class BaseGenerator(ABC):
         self,
         file_io_service: FileIOService,
         data_repository: DataRepository,
-        report_specification: ReportSpecification,
+        report_specification: "ReportSpecification",
         report_context: ReportContext,
     ) -> None:
         self._logger: Logger = get_logger(__name__)
@@ -48,7 +48,7 @@ class BaseGenerator(ABC):
         self._data_repository: DataRepository = data_repository
         self._report_specification: ReportSpecification = report_specification
         self._report_context: ReportContext = report_context
-        self._workbook: Workbook | None = None
+        self._workbook: Optional[Workbook] = None
 
         self._logger.info(
             f"Generator initialized for report: {report_specification.display_name}"
@@ -59,7 +59,7 @@ class BaseGenerator(ABC):
 
     def generate(  # Template method
         self,
-        source_file_paths: dict[str, Path],
+        source_file_paths: Dict[str, Path],
         output_directory_path: Path,
     ) -> Path:
         self._logger.info("Starting report generation process")
@@ -80,7 +80,7 @@ class BaseGenerator(ABC):
             step += 1
 
             self._logger.debug(f"Generation step {step}: Executing queries")
-            query_results: dict[str, pd.DataFrame] = self._execute_queries()
+            query_results: Dict[str, pd.DataFrame] = self._execute_queries()
             self._logger.info(f"Successfully executed {len(query_results)} queries")
 
             step += 1
@@ -132,7 +132,7 @@ class BaseGenerator(ABC):
             f"{self.__class__.__name__} does not support additional configuration"
         )
 
-    def _load_data_into_db(self, source_file_paths: dict[str, Path]) -> None:
+    def _load_data_into_db(self, source_file_paths: Dict[str, Path]) -> None:
         self._logger.debug("Loading files into database tables")
 
         for table_name, file_path in source_file_paths.items():
@@ -140,9 +140,9 @@ class BaseGenerator(ABC):
             try:
                 df: pd.DataFrame = self._file_io_service.load_data_from_file(file_path)
 
-                original_columns: list[str] = list(df.columns)
+                original_columns: List[str] = list(df.columns)
                 df.columns = [column.strip() for column in df.columns]
-                cleaned_columns: list[str] = list(df.columns)
+                cleaned_columns: List[str] = list(df.columns)
 
                 if original_columns != cleaned_columns:
                     self._logger.debug(f"Column names cleaned for table '{table_name}'")
@@ -163,10 +163,10 @@ class BaseGenerator(ABC):
     @abstractmethod
     def _create_predefined_tables(self) -> None: ...
 
-    def _execute_queries(self) -> dict[str, pd.DataFrame]:
+    def _execute_queries(self) -> Dict[str, pd.DataFrame]:
         self._logger.debug("Executing report queries")
 
-        results: dict[str, pd.DataFrame] = {}
+        results: Dict[str, pd.DataFrame] = {}
         query_count: int = len(self._report_specification.queries)
         self._logger.debug(f"Preparing to execute {query_count} queries")
 
@@ -199,7 +199,7 @@ class BaseGenerator(ABC):
 
     @abstractmethod
     def _add_content(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None: ...
 
     @abstractmethod

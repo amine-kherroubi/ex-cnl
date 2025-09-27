@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 # Standard library imports
 import json
 import logging
@@ -14,7 +12,6 @@ from app.config import LoggingConfig
 
 class JSONFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
-
         log_entry: Dict[str, Any] = {
             "timestamp": datetime.fromtimestamp(record.created).isoformat(),
             "level": record.levelname,
@@ -40,12 +37,12 @@ class JSONFormatter(logging.Formatter):
 
 
 class ColoredFormatter(logging.Formatter):
-    COLORS: Final[dict[str, str]] = {
+    COLORS: Final[Dict[str, str]] = {
         "DEBUG": "\033[36m",  # Cyan
         "INFO": "\033[32m",  # Green
         "WARNING": "\033[33m",  # Yellow
         "ERROR": "\033[31m",  # Red
-        "CRITICAL": "\033[35m",  # Magenta
+        "CRITICbAL": "\033[35m",  # Magenta
     }
     RESET: Final[str] = "\033[0m"
     BOLD: Final[str] = "\033[1m"
@@ -70,7 +67,7 @@ class LoggingSetup(object):
         if config.enable_file_logging:
             config.log_file.parent.mkdir(parents=True, exist_ok=True)
 
-        logging_config: dict[str, Any] = cls._build_logging_config(config)
+        logging_config: Dict[str, Any] = cls._build_logging_config(config)
 
         logging.config.dictConfig(logging_config)
 

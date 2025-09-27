@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 # Standard library imports
-from typing import Any, Final, final
+from typing import Any, Final, final, List, Dict
 from logging import Logger
 import copy
 
@@ -51,13 +49,13 @@ class SubprogramRegistry(object):
     @classmethod
     def load_custom_subprograms_from_file(cls, file_io_service: FileIOService) -> None:
         try:
-            custom_data: list[dict[str, Any]] = (
+            custom_data: List[Dict[str, Any]] = (
                 file_io_service.load_additional_subprograms()
             )
 
             for subprogram_data in custom_data:
                 try:
-                    notifications: list[Notification] = []
+                    notifications: List[Notification] = []
                     for notif_data in subprogram_data.get("notifications", []):
                         notification: Notification = Notification(**notif_data)
                         notifications.append(notification)
@@ -93,7 +91,7 @@ class SubprogramRegistry(object):
                 )
                 return subprogram
 
-        available_names: list[str] = [
+        available_names: List[str] = [
             subprogram.name for subprogram in cls._SUBPROGRAMS
         ]
         error_msg: str = (
@@ -113,7 +111,7 @@ class SubprogramRegistry(object):
                 )
                 return subprogram
 
-        available_aliases: list[str] = [
+        available_aliases: List[str] = [
             subprogram.database_alias for subprogram in cls._SUBPROGRAMS
         ]
         error_msg: str = (
@@ -146,19 +144,19 @@ class SubprogramRegistry(object):
         return exists
 
     @classmethod
-    def get_all_subprograms(cls) -> list[Subprogram]:
+    def get_all_subprograms(cls) -> List[Subprogram]:
         cls._logger.debug("Retrieving all subprograms")
         cls._logger.info(f"Retrieved {len(cls._SUBPROGRAMS)} subprograms")
-        return list(cls._SUBPROGRAMS)
+        return List(cls._SUBPROGRAMS)
 
     @classmethod
-    def get_all_subprogram_names(cls) -> list[str]:
+    def get_all_subprogram_names(cls) -> List[str]:
         cls._logger.debug("Retrieving all subprogram names")
         cls._logger.info(f"Retrieved {len(cls._SUBPROGRAMS)} subprogram names")
         return [subprogram.name for subprogram in cls._SUBPROGRAMS]
 
     @classmethod
-    def _get_all_default_subprograms(cls) -> list[Subprogram]:
+    def _get_all_default_subprograms(cls) -> List[Subprogram]:
         return copy.deepcopy(cls._DEFAULT_SUBPROGRAMS)
 
     @classmethod
@@ -177,7 +175,7 @@ class SubprogramRegistry(object):
                 )
                 return notification
 
-        available_notification_names: list[str] = [
+        available_notification_names: List[str] = [
             notification.name for notification in subprogram.notifications
         ]
         error_msg: str = (
@@ -227,9 +225,9 @@ class SubprogramRegistry(object):
         return exists
 
     @classmethod
-    def get_all_notifications(cls) -> list[Notification]:
+    def get_all_notifications(cls) -> List[Notification]:
         cls._logger.debug("Retrieving all notifications")
-        notifications: list[Notification] = [
+        notifications: List[Notification] = [
             notification
             for subprogram in cls._SUBPROGRAMS
             for notification in subprogram.notifications
@@ -238,9 +236,9 @@ class SubprogramRegistry(object):
         return notifications
 
     @classmethod
-    def get_all_default_notifications(cls) -> list[Notification]:
+    def get_all_default_notifications(cls) -> List[Notification]:
         cls._logger.debug("Retrieving all notifications")
-        notifications: list[Notification] = [
+        notifications: List[Notification] = [
             notification
             for subprogram in cls._DEFAULT_SUBPROGRAMS
             for notification in subprogram.notifications
@@ -275,7 +273,7 @@ class SubprogramRegistry(object):
         )
 
     @classmethod
-    def get_registry_statistics(cls) -> dict[str, int]:
+    def get_registry_statistics(cls) -> Dict[str, int]:
         total_subprograms: int = len(cls._SUBPROGRAMS)
         total_default_subprograms: int = len(cls._DEFAULT_SUBPROGRAMS)
         total_notifications: int = sum(
@@ -296,7 +294,7 @@ class SubprogramRegistry(object):
         aid_amount=0,
     )
 
-    _DEFAULT_SUBPROGRAMS: Final[list[Subprogram]] = [
+    _DEFAULT_SUBPROGRAMS: Final[List[Subprogram]] = [
         Subprogram(
             name="2002",
             database_alias="PROGRAMME 2002",
@@ -834,4 +832,4 @@ class SubprogramRegistry(object):
         ),
     ]
 
-    _SUBPROGRAMS: list[Subprogram] = copy.deepcopy(_DEFAULT_SUBPROGRAMS)
+    _SUBPROGRAMS: List[Subprogram] = copy.deepcopy(_DEFAULT_SUBPROGRAMS)

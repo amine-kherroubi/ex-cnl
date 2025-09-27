@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 # Standard library imports
-from typing import Final, final
+from typing import Final, final, List, Dict
 from logging import Logger
 
 # Local application imports
@@ -35,7 +33,7 @@ class ReportSpecificationRegistry(object):
                 )
                 return report_spec
 
-        available: list[str] = [r.name for r in cls._REPORT_SPECIFICATIONS]
+        available: List[str] = [r.name for r in cls._REPORT_SPECIFICATIONS]
         error_msg = f"Report '{report_name}' not found. Available: {available}"
         cls._logger.error(error_msg)
         raise ValueError(error_msg)
@@ -48,13 +46,13 @@ class ReportSpecificationRegistry(object):
         return exists
 
     @classmethod
-    def all(cls) -> dict[str, ReportSpecification]:
+    def all(cls) -> Dict[str, ReportSpecification]:
         cls._logger.debug("Retrieving all report specifications")
         specifications = {r.name: r for r in cls._REPORT_SPECIFICATIONS}
         cls._logger.info(f"Retrieved {len(specifications)} report specifications")
         return specifications
 
-    _REPORT_SPECIFICATIONS: Final[list[ReportSpecification]] = [
+    _REPORT_SPECIFICATIONS: Final[List[ReportSpecification]] = [
         activite_mensuelle_specification,
         situation_financiere_specification,
     ]

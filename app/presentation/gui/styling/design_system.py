@@ -1,5 +1,5 @@
-from __future__ import annotations
-from enum import IntEnum, StrEnum
+# Standard library imports
+from enum import Enum
 from typing import Final, final
 import colorsys
 import platform
@@ -18,8 +18,8 @@ def adjust_color(hex_color: str, factor: float) -> str:
 
 
 @final
-class DesignSystem:
-    class Color(StrEnum):
+class DesignSystem(object):
+    class Color(Enum):
         PRIMARY = "#adad00"
         LIGHTER_PRIMARY = adjust_color(PRIMARY, 1.6)
         DARKER_PRIMARY = adjust_color(PRIMARY, 0.8)
@@ -41,7 +41,7 @@ class DesignSystem:
 
         TRANSPARENT = "transparent"
 
-    class FontSize(IntEnum):
+    class FontSize(Enum):
         H1 = 24
         H2 = 22
         H3 = 20
@@ -50,7 +50,7 @@ class DesignSystem:
         BUTTON = 16
         CAPTION = 14
 
-    class Spacing(IntEnum):
+    class Spacing(Enum):
         NONE = _BASE * 0
         XS = _BASE * 1
         SM = _BASE * 2
@@ -59,27 +59,27 @@ class DesignSystem:
         XL = _BASE * 5
         XXL = _BASE * 6
 
-    class Roundness(IntEnum):
+    class Roundness(Enum):
         NONE = 0
         XS = 4
         SM = 6
         MD = 8
 
-    class Width(IntEnum):
+    class Width(Enum):
         NONE = 0
         XS = 36
         SM = 100
         MD = 200
 
-    class Height(IntEnum):
+    class Height(Enum):
         NONE = 0
         SM = 36
 
-    class BorderWidth(IntEnum):
+    class BorderWidth(Enum):
         NONE = 0
         XS = 1
 
-    class FontFamily(StrEnum):
+    class FontFamily(Enum):
         NORMAL = (
             "SF Pro Display"
             if _SYSTEM == "Darwin"

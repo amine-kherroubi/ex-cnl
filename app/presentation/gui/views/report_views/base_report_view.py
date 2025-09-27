@@ -1,10 +1,10 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from abc import abstractmethod
 import threading
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Optional, List, Dict
 
 # Third-party imports
 import customtkinter as ctk  # type: ignore
@@ -54,21 +54,21 @@ class BaseReportView(ctk.CTkFrame):
         self._report_spec: ReportSpecification = report_spec
         self.core_facade: CoreFacade = core_facade
         self._on_back: Callable[[], None] = on_back
-        self._selected_month: Month | None = None
-        self._selected_year: int | None = None
+        self._selected_month: Optional[Month] = None
+        self._selected_year: Optional[int] = None
         self._selected_files: list[Path] = []
-        self._output_path: Path | None = None
-        self._last_generated_file: Path | None = None
+        self._output_path: Optional[Path] = None
+        self._last_generated_file: Optional[Path] = None
         self._next_row: int = 0
 
         self._setup_ui()
 
     def _setup_ui(self) -> None:
         self.configure(  # type: ignore
-            fg_color=DesignSystem.Color.LEAST_WHITE,
-            border_color=DesignSystem.Color.LIGHTER_GRAY,
-            corner_radius=DesignSystem.Roundness.MD,
-            border_width=DesignSystem.BorderWidth.XS,
+            fg_color=DesignSystem.Color.LEAST_WHITE.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            corner_radius=DesignSystem.Roundness.MD.value,
+            border_width=DesignSystem.BorderWidth.XS.value,
         )
 
         self.grid_columnconfigure(index=0, weight=1)
@@ -78,13 +78,13 @@ class BaseReportView(ctk.CTkFrame):
 
         self._scrollable_frame = ctk.CTkScrollableFrame(
             master=self,
-            fg_color=DesignSystem.Color.TRANSPARENT,
+            fg_color=DesignSystem.Color.TRANSPARENT.value,
         )
         self._scrollable_frame.grid(  # type: ignore
             row=1,
             column=0,
-            padx=DesignSystem.Spacing.XS,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.LG),
+            padx=DesignSystem.Spacing.XS.value,
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.LG.value),
             sticky="nsew",
         )
         self._scrollable_frame.grid_columnconfigure(index=0, weight=1)
@@ -101,31 +101,31 @@ class BaseReportView(ctk.CTkFrame):
 
     def _setup_header(self) -> None:
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=DesignSystem.Color.TRANSPARENT
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT.value
         )
-        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG, pady=(DesignSystem.Spacing.LG, DesignSystem.Spacing.XS), sticky="ew")  # type: ignore
+        header_frame.grid(row=0, column=0, padx=DesignSystem.Spacing.LG.value, pady=(DesignSystem.Spacing.LG.value, DesignSystem.Spacing.XS.value), sticky="ew")  # type: ignore
         header_frame.grid_columnconfigure(index=1, weight=1)
 
         self._back_button = ctk.CTkButton(
             master=header_frame,
             text="Retour",
-            text_color=DesignSystem.Color.WHITE,
-            fg_color=DesignSystem.Color.GRAY,
-            hover_color=DesignSystem.Color.DARKER_GRAY,
-            corner_radius=DesignSystem.Roundness.XS,
+            text_color=DesignSystem.Color.WHITE.value,
+            fg_color=DesignSystem.Color.GRAY.value,
+            hover_color=DesignSystem.Color.DARKER_GRAY.value,
+            corner_radius=DesignSystem.Roundness.XS.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.BUTTON,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BUTTON.value,
                 weight="bold",
             ),
             command=self._on_back,
-            width=DesignSystem.Width.SM,
-            height=DesignSystem.Height.SM,
+            width=DesignSystem.Width.SM.value,
+            height=DesignSystem.Height.SM.value,
         )
-        self._back_button.grid(row=0, column=0, padx=DesignSystem.Spacing.NONE, sticky="w")  # type: ignore
+        self._back_button.grid(row=0, column=0, padx=DesignSystem.Spacing.NONE.value, sticky="w")  # type: ignore
 
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=header_frame, fg_color=DesignSystem.Color.TRANSPARENT
+            master=header_frame, fg_color=DesignSystem.Color.TRANSPARENT.value
         )
         info_frame.grid(row=0, column=1, sticky="ew")  # type: ignore
         info_frame.grid_columnconfigure(index=0, weight=1)
@@ -134,38 +134,38 @@ class BaseReportView(ctk.CTkFrame):
             master=info_frame,
             text=self._report_spec.display_name,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H2,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H2.value,
                 weight="bold",
             ),
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
         )
-        title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD, pady=DesignSystem.Spacing.XS, sticky="w")  # type: ignore
+        title_label.grid(row=0, column=0, padx=DesignSystem.Spacing.MD.value, pady=DesignSystem.Spacing.XS.value, sticky="w")  # type: ignore
 
     def _setup_common_components(self) -> None:
         self._date_selector = DateSelector(
             parent=self._scrollable_frame, on_date_changed=self._on_date_changed
         )
-        self._date_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        self._date_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM.value, pady=DesignSystem.Spacing.SM.value, sticky="ew")  # type: ignore
         self._next_row += 1
 
         self._required_files_component = RequiredFilesComponent(
             parent=self._scrollable_frame,
             report_spec=self._report_spec,
         )
-        self._required_files_component.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        self._required_files_component.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM.value, pady=DesignSystem.Spacing.SM.value, sticky="ew")  # type: ignore
         self._next_row += 1
 
         self._file_selector = FileSelector(
             parent=self._scrollable_frame, on_files_changed=self._on_files_changed
         )
-        self._file_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        self._file_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM.value, pady=DesignSystem.Spacing.SM.value, sticky="ew")  # type: ignore
         self._next_row += 1
 
         self._output_selector = OutputSelector(
             parent=self._scrollable_frame, on_output_changed=self._on_output_changed
         )
-        self._output_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        self._output_selector.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM.value, pady=DesignSystem.Spacing.SM.value, sticky="ew")  # type: ignore
         self._next_row += 1
 
     @abstractmethod
@@ -173,26 +173,26 @@ class BaseReportView(ctk.CTkFrame):
 
     def _setup_action_buttons(self) -> None:
         self._status_display = StatusDisplay(parent=self._scrollable_frame)
-        self._status_display.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        self._status_display.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM.value, pady=DesignSystem.Spacing.SM.value, sticky="ew")  # type: ignore
         self._next_row += 1
 
         button_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._scrollable_frame,
-            fg_color=DesignSystem.Color.TRANSPARENT,
+            fg_color=DesignSystem.Color.TRANSPARENT.value,
         )
-        button_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM, pady=DesignSystem.Spacing.SM, sticky="ew")  # type: ignore
+        button_frame.grid(row=self._next_row, column=0, padx=DesignSystem.Spacing.SM.value, pady=DesignSystem.Spacing.SM.value, sticky="ew")  # type: ignore
         button_frame.grid_columnconfigure(index=0, weight=1)
 
         self._generate_button = ctk.CTkButton(
             master=button_frame,
             text="Générer le rapport",
-            text_color=DesignSystem.Color.GRAY,
-            fg_color=DesignSystem.Color.LESS_WHITE,
-            hover_color=DesignSystem.Color.LEAST_WHITE,
-            corner_radius=DesignSystem.Roundness.SM,
+            text_color=DesignSystem.Color.GRAY.value,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            hover_color=DesignSystem.Color.LEAST_WHITE.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.BUTTON,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BUTTON.value,
                 weight="bold",
             ),
             command=self._generate_report,
@@ -201,18 +201,18 @@ class BaseReportView(ctk.CTkFrame):
         self._generate_button.grid(row=0, column=0, sticky="ew")  # type: ignore
         self._generate_button.configure(state="disabled")  # type: ignore
 
-    def _on_date_changed(self, month: Month | None, year: int | None) -> None:
+    def _on_date_changed(self, month: Optional[Month], year: Optional[int]) -> None:
         self._selected_month = month
         self._selected_year = year
         self._update_generate_button_state()
 
         if month and year:
             self._status_display.add_message(
-                message=f"Période sélectionnée : {month.capitalize()} {year}",
+                message=f"Période sélectionnée : {month.value.capitalize()} {year}",
                 message_type="information",
             )
 
-    def _on_files_changed(self, files: list[Path]) -> None:
+    def _on_files_changed(self, files: List[Path]) -> None:
         self._selected_files = files
         self._update_generate_button_state()
 
@@ -226,7 +226,7 @@ class BaseReportView(ctk.CTkFrame):
                 message="Aucun fichier sélectionné", message_type="avertissement"
             )
 
-    def _on_output_changed(self, output_path: Path | None) -> None:
+    def _on_output_changed(self, output_path: Optional[Path]) -> None:
         self._output_path = output_path
         self._update_generate_button_state()
 
@@ -256,19 +256,19 @@ class BaseReportView(ctk.CTkFrame):
         if self._can_generate():
             self._generate_button.configure(  # type: ignore
                 state="normal",
-                text_color=DesignSystem.Color.WHITE,
-                fg_color=DesignSystem.Color.PRIMARY,
-                hover_color=DesignSystem.Color.DARKER_PRIMARY,
+                text_color=DesignSystem.Color.WHITE.value,
+                fg_color=DesignSystem.Color.PRIMARY.value,
+                hover_color=DesignSystem.Color.DARKER_PRIMARY.value,
             )
         else:
             self._generate_button.configure(  # type: ignore
                 state="disabled",
-                text_color=DesignSystem.Color.GRAY,
-                fg_color=DesignSystem.Color.LESS_WHITE,
-                hover_color=DesignSystem.Color.LEAST_WHITE,
+                text_color=DesignSystem.Color.GRAY.value,
+                fg_color=DesignSystem.Color.LESS_WHITE.value,
+                hover_color=DesignSystem.Color.LEAST_WHITE.value,
             )
 
-    def _get_generation_parameters(self) -> dict[str, Any]:
+    def _get_generation_parameters(self) -> Dict[str, Any]:
         return {}
 
     def _generate_report(self) -> None:
@@ -278,9 +278,9 @@ class BaseReportView(ctk.CTkFrame):
         self._generate_button.configure(  # type: ignore
             state="disabled",
             text="Génération en cours...",
-            text_color=DesignSystem.Color.GRAY,
-            fg_color=DesignSystem.Color.LESS_WHITE,
-            hover_color=DesignSystem.Color.LEAST_WHITE,
+            text_color=DesignSystem.Color.GRAY.value,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            hover_color=DesignSystem.Color.LEAST_WHITE.value,
         )
         self._back_button.configure(state="disabled")  # type: ignore
 

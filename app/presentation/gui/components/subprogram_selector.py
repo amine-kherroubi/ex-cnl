@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from typing import Any, Callable
@@ -58,10 +58,10 @@ class SubprogramSelector(BaseComponent):
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text=self._title,
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H3,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H3.value,
                 weight="bold",
             ),
             anchor="w",
@@ -70,7 +70,7 @@ class SubprogramSelector(BaseComponent):
             row=0,
             column=0,
             columnspan=4,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -78,16 +78,16 @@ class SubprogramSelector(BaseComponent):
             master=self._content_frame,
             text="Sélectionnez le sous-programme et la notification pour lesquels vous souhaitez générer le rapport",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.CAPTION,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
-            text_color=DesignSystem.Color.GRAY,
+            text_color=DesignSystem.Color.GRAY.value,
         )
         information.grid(  # type: ignore
             row=1,
             column=0,
             columnspan=4,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -95,17 +95,17 @@ class SubprogramSelector(BaseComponent):
             master=self._content_frame,
             text="Sous-programme :",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.BODY,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
                 weight="bold",
             ),
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             anchor="w",
         )
         subprogram_label.grid(  # type: ignore
             row=2,
             column=0,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -117,22 +117,22 @@ class SubprogramSelector(BaseComponent):
             values=subprogram_names,
             variable=self._subprogram_var,
             command=lambda _: self._handle_subprogram_selection(),
-            width=DesignSystem.Width.MD,
-            height=DesignSystem.Height.SM,
+            width=DesignSystem.Width.MD.value,
+            height=DesignSystem.Height.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             state="readonly",
-            border_width=DesignSystem.BorderWidth.XS,
-            corner_radius=DesignSystem.Roundness.SM,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
         )
         self._subprogram_selector.grid(  # type: ignore
             row=2,
             column=1,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.MD.value),
             sticky="ew",
         )
 
@@ -140,17 +140,17 @@ class SubprogramSelector(BaseComponent):
             master=self._content_frame,
             text="Notification :",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.BODY,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
                 weight="bold",
             ),
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             anchor="w",
         )
         notification_label.grid(  # type: ignore
             row=2,
             column=2,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -170,32 +170,32 @@ class SubprogramSelector(BaseComponent):
             values=current_notification_names,
             variable=self._notification_var,
             command=lambda _: self._handle_notification_selection(),
-            width=DesignSystem.Width.MD,
-            height=DesignSystem.Height.SM,
+            width=DesignSystem.Width.MD.value,
+            height=DesignSystem.Height.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             state="readonly",
-            border_width=DesignSystem.BorderWidth.XS,
-            corner_radius=DesignSystem.Roundness.SM,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
         )
         self._notification_selector.grid(row=2, column=3, sticky="ew")  # type: ignore
 
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame,
-            fg_color=DesignSystem.Color.LESS_WHITE,
-            border_width=DesignSystem.BorderWidth.XS,
-            border_color=DesignSystem.Color.LIGHTER_GRAY,
-            corner_radius=DesignSystem.Roundness.SM,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
         )
         info_frame.grid(  # type: ignore
             row=3,
             column=0,
             columnspan=4,
-            pady=(DesignSystem.Spacing.MD, DesignSystem.Spacing.NONE),
+            pady=(DesignSystem.Spacing.MD.value, DesignSystem.Spacing.NONE.value),
             sticky="ew",
         )
         info_frame.grid_columnconfigure(index=0, weight=1)
@@ -204,17 +204,17 @@ class SubprogramSelector(BaseComponent):
             master=info_frame,
             text=self._get_selection_info_text(),
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             justify="left",
             anchor="nw",
         )
         self._selection_info_label.grid(  # type: ignore
             row=0,
             column=0,
-            padx=DesignSystem.Spacing.MD,
-            pady=DesignSystem.Spacing.MD,
+            padx=DesignSystem.Spacing.MD.value,
+            pady=DesignSystem.Spacing.MD.value,
             sticky="w",
         )
 

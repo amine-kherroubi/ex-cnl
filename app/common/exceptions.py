@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from pathlib import Path

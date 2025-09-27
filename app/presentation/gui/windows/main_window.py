@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 # Standard library imports
 from logging import Logger
-from typing import Any
+from typing import Any, Optional
 
 # Third-party imports
 import customtkinter as ctk  # type: ignore
@@ -37,7 +35,7 @@ class MainWindow(ctk.CTk):
 
         self._facade: CoreFacade = core_facade
         self._state: State = State()
-        self._current_view: ctk.CTkFrame | None = None
+        self._current_view: Optional[ctk.CTkFrame] = None
 
         self.title(string="Générateur de rapports")
         self.geometry(geometry_string="900x700")
@@ -54,19 +52,19 @@ class MainWindow(ctk.CTk):
 
     def _setup_ui(self) -> None:
 
-        self.configure(fg_color=DesignSystem.Color.WHITE)  # type: ignore
+        self.configure(fg_color=DesignSystem.Color.WHITE.value)  # type: ignore
 
         self.grid_columnconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=1)
 
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
-            master=self, fg_color=DesignSystem.Color.TRANSPARENT
+            master=self, fg_color=DesignSystem.Color.TRANSPARENT.value
         )
         header_frame.grid(  # type: ignore
             row=0,
             column=0,
-            padx=DesignSystem.Spacing.XXL,
-            pady=(DesignSystem.Spacing.XXL, DesignSystem.Spacing.LG),
+            padx=DesignSystem.Spacing.XXL.value,
+            pady=(DesignSystem.Spacing.XXL.value, DesignSystem.Spacing.LG.value),
             sticky="ew",
         )
         header_frame.grid_columnconfigure(index=0, weight=0)
@@ -77,11 +75,11 @@ class MainWindow(ctk.CTk):
             master=header_frame,
             text="Générateur de rapports",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H1,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H1.value,
                 weight="bold",
             ),
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
         )
         self._title.grid(row=0, column=0, sticky="w")  # type: ignore
 
@@ -89,21 +87,21 @@ class MainWindow(ctk.CTk):
             master=header_frame,
             text="BNH (ex-CNL)",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H1,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H1.value,
                 weight="normal",
                 slant="italic",
             ),
-            text_color=DesignSystem.Color.LIGHTER_GRAY,
+            text_color=DesignSystem.Color.LIGHTER_GRAY.value,
         )
-        self._organization.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="w")  # type: ignore
+        self._organization.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value), sticky="w")  # type: ignore
 
         self._container: ctk.CTkFrame = ctk.CTkFrame(
             master=self,
-            fg_color=DesignSystem.Color.LEAST_WHITE,
-            corner_radius=DesignSystem.Roundness.MD,
+            fg_color=DesignSystem.Color.LEAST_WHITE.value,
+            corner_radius=DesignSystem.Roundness.MD.value,
         )
-        self._container.grid(row=1, column=0, padx=DesignSystem.Spacing.XXL, pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XXL), sticky="nsew")  # type: ignore
+        self._container.grid(row=1, column=0, padx=DesignSystem.Spacing.XXL.value, pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.XXL.value), sticky="nsew")  # type: ignore
         self._container.grid_columnconfigure(index=0, weight=1)
         self._container.grid_rowconfigure(index=0, weight=1)
 
@@ -127,7 +125,7 @@ class MainWindow(ctk.CTk):
 
     def _show_report_view(self, report_name: str) -> None:
         self._clear_current_view()
-        report_spec: ReportSpecification | None = self._state.available_reports.get(
+        report_spec: Optional[ReportSpecification] = self._state.available_reports.get(
             report_name
         )
 

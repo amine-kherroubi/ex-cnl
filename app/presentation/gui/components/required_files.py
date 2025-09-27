@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from typing import Any
@@ -34,10 +34,10 @@ class RequiredFilesComponent(BaseComponent):
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Fichiers requis",
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H3,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H3.value,
                 weight="bold",
             ),
             anchor="w",
@@ -45,7 +45,7 @@ class RequiredFilesComponent(BaseComponent):
         title.grid(  # type: ignore
             row=0,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )  # type: ignore
 
@@ -55,15 +55,15 @@ class RequiredFilesComponent(BaseComponent):
             master=self._content_frame,
             text="La génération de ce rapport nécessite les fichiers Excel ci-dessous",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.CAPTION,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
-            text_color=DesignSystem.Color.GRAY,
+            text_color=DesignSystem.Color.GRAY.value,
         )
         information.grid(  # type: ignore
             row=1,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -71,7 +71,7 @@ class RequiredFilesComponent(BaseComponent):
 
         files_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame,
-            fg_color=DesignSystem.Color.TRANSPARENT,
+            fg_color=DesignSystem.Color.TRANSPARENT.value,
         )
         files_frame.grid(  # type: ignore
             row=2,
@@ -91,15 +91,15 @@ class RequiredFilesComponent(BaseComponent):
 
         entry_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=parent,
-            fg_color=DesignSystem.Color.LEAST_WHITE,
-            border_width=DesignSystem.BorderWidth.XS,
-            border_color=DesignSystem.Color.LIGHTER_GRAY,
-            corner_radius=DesignSystem.Roundness.SM,
+            fg_color=DesignSystem.Color.LEAST_WHITE.value,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
         )
         entry_frame.grid(  # type: ignore
             row=row,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.XS),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.XS.value),
             sticky="ew",
         )  # type: ignore
         entry_frame.grid_columnconfigure(index=0, weight=1)
@@ -107,10 +107,10 @@ class RequiredFilesComponent(BaseComponent):
         name: ctk.CTkLabel = ctk.CTkLabel(
             master=entry_frame,
             text=f"{required_file.name}",
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.BODY,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
                 weight="bold",
             ),
             anchor="w",
@@ -118,25 +118,25 @@ class RequiredFilesComponent(BaseComponent):
         name.grid(  # type: ignore
             row=0,
             column=0,
-            padx=DesignSystem.Spacing.SM,
-            pady=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE),
+            padx=DesignSystem.Spacing.SM.value,
+            pady=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value),
             sticky="w",
         )  # type: ignore
 
         pattern: ctk.CTkLabel = ctk.CTkLabel(
             master=entry_frame,
             text=f"Doit respecter la forme : {required_file.readable_pattern}",
-            text_color=DesignSystem.Color.DARKER_GRAY,
+            text_color=DesignSystem.Color.DARKER_GRAY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.CAPTION,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
             anchor="w",
         )
         pattern.grid(  # type: ignore
             row=1,
             column=0,
-            padx=DesignSystem.Spacing.SM,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            padx=DesignSystem.Spacing.SM.value,
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )  # type: ignore

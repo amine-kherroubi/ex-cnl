@@ -1,8 +1,8 @@
-from __future__ import annotations
+
 
 # Standard library imports
 from datetime import date
-from typing import Any, Callable
+from typing import Any, Callable, Optional, List
 
 # Third-party imports
 import customtkinter as ctk  # type: ignore
@@ -28,9 +28,9 @@ class DateSelector(BaseComponent):
     def __init__(
         self,
         parent: Any,
-        on_date_changed: Callable[[Month | None, int | None], None],
+        on_date_changed: Callable[[Optional[Month], Optional[int]], None],
     ) -> None:
-        self._on_date_changed: Callable[[Month | None, int | None], None] = (
+        self._on_date_changed: Callable[[Optional[Month], Optional[int]], None] = (
             on_date_changed
         )
 
@@ -39,7 +39,7 @@ class DateSelector(BaseComponent):
         self._current_year: int = today.year
 
         self._month_var: ctk.StringVar = ctk.StringVar(
-            value=self._current_month.capitalize()
+            value=self._current_month.value.capitalize()
         )
         self._year_var: ctk.StringVar = ctk.StringVar(value=str(self._current_year))
 
@@ -53,10 +53,10 @@ class DateSelector(BaseComponent):
         title: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text=self._title,
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.H3,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.H3.value,
                 weight="bold",
             ),
             anchor="w",
@@ -65,7 +65,7 @@ class DateSelector(BaseComponent):
             row=0,
             column=0,
             columnspan=4,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -73,31 +73,31 @@ class DateSelector(BaseComponent):
             master=self._content_frame,
             text="Sélectionnez la période pour laquelle vous souhaitez générer le rapport",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.CAPTION,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
-            text_color=DesignSystem.Color.GRAY,
+            text_color=DesignSystem.Color.GRAY.value,
         )
         information.grid(  # type: ignore
             row=1,
             columnspan=4,
             column=0,
-            pady=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
         year_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Année :",
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
         )
         year_label.grid(  # type: ignore
             row=2,
             column=0,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -109,37 +109,37 @@ class DateSelector(BaseComponent):
             values=year_values,
             variable=self._year_var,
             command=lambda _: self._on_year_changed(),
-            width=DesignSystem.Width.MD,
-            height=DesignSystem.Height.SM,
+            width=DesignSystem.Width.MD.value,
+            height=DesignSystem.Height.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             state="readonly",
-            border_width=DesignSystem.BorderWidth.XS,
-            corner_radius=DesignSystem.Roundness.SM,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
         )
         self._year_dropdown.grid(  # type: ignore
             row=2,
             column=1,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.MD.value),
             sticky="ew",
         )
 
         month_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Mois :",
-            text_color=DesignSystem.Color.BLACK,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
         )
         month_label.grid(  # type: ignore
             row=2,
             column=2,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="w",
         )
 
@@ -149,17 +149,17 @@ class DateSelector(BaseComponent):
             values=self._get_available_months(),
             variable=self._month_var,
             command=lambda _: self._on_month_changed(),
-            width=DesignSystem.Width.MD,
-            height=DesignSystem.Height.SM,
+            width=DesignSystem.Width.MD.value,
+            height=DesignSystem.Height.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             state="readonly",
-            border_width=DesignSystem.BorderWidth.XS,
-            corner_radius=DesignSystem.Roundness.SM,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
         )
         self._month_dropdown.grid(  # type: ignore
             row=2,
@@ -167,7 +167,7 @@ class DateSelector(BaseComponent):
             sticky="ew",
         )
 
-    def _get_available_months(self) -> list[str]:
+    def _get_available_months(self) -> List[str]:
         """Get available months based on selected year."""
         try:
             selected_year = int(self._year_var.get())
@@ -179,11 +179,11 @@ class DateSelector(BaseComponent):
             available_months = []
             for month in Month:
                 if month.number <= self._current_month.number:
-                    available_months.append(month.capitalize())  # type: ignore
+                    available_months.append(month.value.capitalize())  # type: ignore
             return available_months  # type: ignore
         else:
             # For other years, show all months
-            return [month.capitalize() for month in Month]
+            return [month.value.capitalize() for month in Month]
 
     def _update_month_dropdown(self) -> None:
         """Update the month dropdown values based on selected year."""
@@ -208,10 +208,10 @@ class DateSelector(BaseComponent):
 
     def _on_selection_changed(self) -> None:
         month_str: str = self._month_var.get()
-        selected_month: Month | None = None
+        selected_month: Optional[Month] = None
 
         for month in Month:
-            if month.capitalize() == month_str:
+            if month.value.capitalize() == month_str:
                 selected_month = month
                 break
 
@@ -225,7 +225,7 @@ class DateSelector(BaseComponent):
             today: date = date.today()
 
             if selected_date > today:
-                self._month_var.set(self._current_month.capitalize())
+                self._month_var.set(self._current_month.value.capitalize())
                 self._year_var.set(str(self._current_year))
                 selected_month = self._current_month
                 selected_year = self._current_year
@@ -233,21 +233,21 @@ class DateSelector(BaseComponent):
 
         self._on_date_changed(selected_month, selected_year)
 
-    def get_selected_month(self) -> Month | None:
+    def get_selected_month(self) -> Optional[Month]:
         month_str: str = self._month_var.get()
         for month in Month:
-            if month.capitalize() == month_str:
+            if month.value.capitalize() == month_str:
                 return month
         return None
 
-    def get_selected_year(self) -> int | None:
+    def get_selected_year(self) -> Optional[int]:
         try:
             return int(self._year_var.get())
         except ValueError:
             return None
 
     def reset_to_current(self) -> None:
-        self._month_var.set(self._current_month.capitalize())
+        self._month_var.set(self._current_month.value.capitalize())
         self._year_var.set(str(self._current_year))
         self._update_month_dropdown()
         self._on_selection_changed()

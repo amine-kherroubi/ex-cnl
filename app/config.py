@@ -1,36 +1,33 @@
-from __future__ import annotations
-
 # Standard library imports
 import os
 import sys
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional, List
 
 # Third-party imports
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, validator
 
 
 def get_app_data_dir() -> Path:
     app_name: str = "GenerateurReports"
-
     if sys.platform == "win32":
-        base: str | None = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+        base: Optional[str] = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
         if base:
             return Path(base) / app_name
         return Path.home() / "AppData" / "Local" / app_name
     elif sys.platform == "darwin":
         return Path.home() / "Library" / "Application Support" / app_name
     else:
-        xdg_data: str | None = os.environ.get("XDG_DATA_HOME")
+        xdg_data: Optional[str] = os.environ.get("XDG_DATA_HOME")
         if xdg_data:
             return Path(xdg_data) / app_name.lower()
         return Path.home() / ".local" / "share" / app_name.lower()
 
 
 class FileIOConfig(BaseModel):
-    allowed_source_file_extensions: list[str] = ["xlsx", "xls"]
+    allowed_source_file_extensions: List[str] = ["xlsx", "xls"]
     custom_subprograms_file: str = "custom_subprograms.json"
 
     @property
@@ -39,7 +36,7 @@ class FileIOConfig(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    path: Path | None = None
+    path: Optional[Path] = None
     max_memory: str = "1GB"
     enable_logging: bool = True
 
@@ -58,8 +55,7 @@ class LoggingConfig(BaseModel):
     backup_count: int = 5
     disable_existing_loggers: bool = False
 
-    @field_validator("log_file")
-    @classmethod
+    @validator("log_file")
     def ensure_log_directory(cls, log_file: Path) -> Path:
         try:
             log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -67,11 +63,9 @@ class LoggingConfig(BaseModel):
             test_file.write_text("test")
             test_file.unlink()
             return log_file
-
         except (OSError, PermissionError):
             temp_dir: Path = Path(tempfile.gettempdir()) / "GenerateurReports"
             temp_log_file = temp_dir / "app.log"
-
             try:
                 temp_dir.mkdir(parents=True, exist_ok=True)
                 warnings.warn(

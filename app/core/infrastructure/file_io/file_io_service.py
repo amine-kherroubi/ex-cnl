@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 # Standard library imports
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 from logging import Logger
 import json
 
@@ -39,8 +37,10 @@ class FileIOService(object):
             self._logger.debug(f"Table starts at row {skiprows}")
 
             self._logger.debug("Reading Excel file with pandas")
-            dataframe: pd.DataFrame = pd.read_excel(  # type: ignore
-                source_file_path, dtype_backend="numpy_nullable", skiprows=skiprows
+            dataframe: pd.DataFrame = pd.read_excel(
+                source_file_path, 
+                skiprows=skiprows,
+                engine='openpyxl'
             )
 
             self._logger.info(
@@ -92,8 +92,12 @@ class FileIOService(object):
         )
 
         try:
-            preview_df: pd.DataFrame = pd.read_excel(  # type: ignore
-                source_file_path, nrows=30, header=None
+            # For pandas 1.5.3, use openpyxl engine explicitly
+            preview_df: pd.DataFrame = pd.read_excel(
+                source_file_path, 
+                nrows=30, 
+                header=None,
+                engine='openpyxl'
             )
             self._logger.debug(f"Loaded {len(preview_df)} preview rows")
 
@@ -123,7 +127,7 @@ class FileIOService(object):
         self._logger.error(error_msg)
         raise DataLoadError(source_file_path, Exception(error_msg))
 
-    def load_additional_subprograms(self) -> list[dict[str, Any]]:
+    def load_additional_subprograms(self) -> List[Dict[str, Any]]:
         custom_file_path: Path = self._config.custom_subprograms_path
 
         if not custom_file_path.exists():
@@ -167,21 +171,21 @@ class FileIOService(object):
                 )
                 return []
 
-            enabled_subprograms: list[dict[str, Any]] = []
+            enabled_subprograms: List[Dict[str, Any]] = []
             disabled_count: int = 0
 
-            for subprogram in data:  # type: ignore
+            for subprogram in data:
                 if not isinstance(subprogram, dict):
                     self._logger.warning(
-                        f"Skipping invalid subprogram entry (not a dict): {type(subprogram).__name__}"  # type: ignore
+                        f"Skipping invalid subprogram entry (not a dict): {type(subprogram).__name__}"
                     )
                     continue
 
-                is_enabled: bool = subprogram.get("enabled", True)  # type: ignore
-                subprogram_name: str = subprogram.get("name", "unnamed")  # type: ignore
+                is_enabled: bool = subprogram.get("enabled", True)
+                subprogram_name: str = subprogram.get("name", "unnamed")
 
                 if is_enabled:
-                    enabled_subprograms.append(subprogram)  # type: ignore
+                    enabled_subprograms.append(subprogram)
                     self._logger.debug(
                         f"Including enabled subprogram: '{subprogram_name}'"
                     )
@@ -227,7 +231,7 @@ class FileIOService(object):
                 f"Creating default custom subprograms file at: {file_path}"
             )
 
-            template_content: list[dict[str, Any]] = [
+            template_content: List[Dict[str, Any]] = [
                 {
                     "name": "Custom Subprogram",
                     "database_alias": "CUSTOM_PROGRAM_2025",

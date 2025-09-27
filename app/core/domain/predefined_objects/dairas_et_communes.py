@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 # Standard library imports
-from typing import Final
+from typing import Final, Dict, List, Set
 
 # Third-party imports
 import pandas as pd
@@ -9,7 +7,7 @@ import pandas as pd
 NUMBER_OF_DAIRAS: Final[int] = 21
 NUMBER_OF_COMMUNES: Final[int] = 67
 
-DAIRAS_TIZI_OUZOU: Final[set[str]] = {
+DAIRAS_TIZI_OUZOU: Final[Set[str]] = {
     "AIN EL HAMMAM",
     "AZZAZGA",
     "AZZEFOUN",
@@ -33,7 +31,7 @@ DAIRAS_TIZI_OUZOU: Final[set[str]] = {
     "TIZI RACHED",
 }
 
-COMMUNES_TIZI_OUZOU: Final[set[str]] = {
+COMMUNES_TIZI_OUZOU: Final[Set[str]] = {
     "01_TIZI OUZOU",
     "02_AIN EL HAMMAM",
     "03_AKBIL",
@@ -103,8 +101,7 @@ COMMUNES_TIZI_OUZOU: Final[set[str]] = {
     "67_AIT TOUDERT",
 }
 
-# Daira-commune mapping
-DAIRA_COMMUNE_MAPPING: Final[dict[str, list[str]]] = {
+DAIRA_COMMUNE_MAPPING: Final[Dict[str, List[str]]] = {
     "AIN EL HAMMAM": [
         "31_ABI YOUCEF",
         "02_AIN EL HAMMAM",
@@ -218,8 +215,7 @@ DAIRA_COMMUNE_MAPPING: Final[dict[str, list[str]]] = {
 
 
 def get_dairas_communes_dataframe() -> pd.DataFrame:
-
-    data: list[dict[str, str]] = []
+    data: List[Dict[str, str]] = []
     for daira, communes in DAIRA_COMMUNE_MAPPING.items():
         for commune in communes:
             data.append({"Daira": daira, "Commune": commune})

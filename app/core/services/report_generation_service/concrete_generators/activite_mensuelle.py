@@ -1,8 +1,8 @@
-from __future__ import annotations
+
 
 # Imports de la bibliothèque standard
 from datetime import date
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 # Imports tiers
 import pandas as pd
@@ -82,7 +82,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         return formatted_query
 
     def _add_content(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
         self._add_first_table_header(sheet)
         self._add_first_table(sheet, query_results)
@@ -148,7 +148,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._current_row += 2
 
     def _add_first_table(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
         self._logger.debug("Ajout du tableau principal de données")
         self._logger.debug(
@@ -218,12 +218,12 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         sub_headers: list[tuple[str, str]] = [
             (
                 "B",
-                f"{self._report_context.month.capitalize()} {self._report_context.year}",
+                f"{self._report_context.month.value.capitalize()} {self._report_context.year}",
             ),
             ("C", self._get_cumul_text()),
             (
                 "D",
-                f"{self._report_context.month.capitalize()} {self._report_context.year}",
+                f"{self._report_context.month.value.capitalize()} {self._report_context.year}",
             ),
             ("E", self._get_cumul_text()),
         ]
@@ -255,7 +255,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         )
 
     def _add_first_table_data(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
 
         self._logger.debug(
@@ -296,8 +296,8 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._current_row += 2
 
     def _create_data_dictionaries(
-        self, query_results: dict[str, pd.DataFrame]
-    ) -> dict[str, dict[str, int]]:
+        self, query_results: Dict[str, pd.DataFrame]
+    ) -> Dict[str, Dict[str, int]]:
 
         self._logger.debug("Création des dictionnaires de recherche")
 
@@ -330,7 +330,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         sheet: Worksheet,
         row: int,
         subprogram: str,
-        data_dicts: dict[str, dict[str, int]],
+        data_dicts: Dict[str, Dict[str, int]],
     ) -> None:
 
         values: list[tuple[str, Any]] = [
@@ -349,7 +349,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             cell.border = ExcelStylingService.BORDER_THIN
 
     def _add_total_row(
-        self, sheet: Worksheet, row: int, totals: dict[str, int]
+        self, sheet: Worksheet, row: int, totals: Dict[str, int]
     ) -> None:
 
         values: list[tuple[str, Any]] = [
@@ -395,11 +395,11 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._current_row += 2
 
     def _add_second_table(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
         self._logger.debug("Ajout du second tableau (SITUATION DES PROGRAMMES)")
 
-        headers: list[tuple[str, str]] = [
+        headers: List[Tuple[str, str]] = [
             ("A", "Programme"),
             ("B", "Consistance"),
             ("C", "Achevés (dernières tranches payées)"),
@@ -419,7 +419,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._add_second_table_data(sheet, query_results)
 
     def _add_second_table_data(
-        self, sheet: Worksheet, query_results: dict[str, pd.DataFrame]
+        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
 
         subprograms_situation: list[tuple[str, int]] = []
@@ -451,8 +451,8 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._current_row += 2
 
     def _create_situation_dictionaries(
-        self, query_results: dict[str, pd.DataFrame]
-    ) -> dict[str, dict[str, int]]:
+        self, query_results: Dict[str, pd.DataFrame]
+    ) -> Dict[str, Dict[str, int]]:
 
         data_dicts: dict[str, dict[str, int]] = {
             "acheves": {},
@@ -479,8 +479,8 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         row: int,
         subprogram: str,
         aid_count: int,
-        data_dicts: dict[str, dict[str, int]],
-        totals: dict[str, int],
+        data_dicts: Dict[str, Dict[str, int]],
+        totals: Dict[str, int],
     ) -> None:
 
         finished: int = data_dicts["acheves"].get(subprogram, 0)
@@ -508,7 +508,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         totals["not_started"] += not_started
 
     def _add_situation_total_row(
-        self, sheet: Worksheet, row: int, totals: dict[str, int]
+        self, sheet: Worksheet, row: int, totals: Dict[str, int]
     ) -> None:
 
         values: list[tuple[str, Any]] = [

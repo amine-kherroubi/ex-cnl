@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 # Standard library imports
 from logging import Logger
-from typing import Any, final
+from typing import Any, final, Dict, Type
 
 # Local application imports
 from app.core.domain.models.report_context import ReportContext
@@ -28,7 +26,7 @@ class ReportGeneratorFactory:
 
     _logger: Logger = get_logger(__name__)
 
-    _generators: dict[str, type[BaseGenerator]] = {
+    _generators: Dict[str, Type[BaseGenerator]] = {
         "activite_mensuelle": ActiviteMensuelleGenerator,
         "situation_financiere": SituationFinanciereGenerator,
     }
@@ -64,7 +62,7 @@ class ReportGeneratorFactory:
                 f"Retrieved report specification: {report_specification.display_name}"
             )
 
-            generator_class: type[BaseGenerator] = cls._generators[report_name]
+            generator_class: Type[BaseGenerator] = cls._generators[report_name]
             cls._logger.debug(f"Using generator class: {generator_class.__name__}")
 
             generator: BaseGenerator = generator_class(

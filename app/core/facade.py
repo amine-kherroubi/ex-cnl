@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 # Standard library imports
 import re
 from logging import Logger
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List
 
 # Local application imports
 from app.config import AppConfig
@@ -51,11 +49,11 @@ class CoreFacade(object):
 
         self._logger.info("CoreFacade initialized successfully")
 
-    def get_available_reports(self) -> dict[str, ReportSpecification]:
+    def get_available_reports(self) -> Dict[str, ReportSpecification]:
         self._logger.debug("Retrieving available reports from registry")
 
         try:
-            reports: dict[str, ReportSpecification] = ReportSpecificationRegistry.all()
+            reports: Dict[str, ReportSpecification] = ReportSpecificationRegistry.all()
             self._logger.info(f"Retrieved {len(reports)} available report types")
             return reports
         except Exception as e:
@@ -65,7 +63,7 @@ class CoreFacade(object):
     def generate_report(
         self,
         report_name: str,
-        source_files: list[Path],
+        source_files: List[Path],
         output_directory_path: Path,
         month: Month,
         year: int,
@@ -84,7 +82,7 @@ class CoreFacade(object):
 
         try:
             self._logger.debug("Validating source files against report requirements")
-            validated_files: dict[str, Path] = self._validate_source_files(
+            validated_files: Dict[str, Path] = self._validate_source_files(
                 report_name, source_files
             )
             self._logger.info(
@@ -108,7 +106,7 @@ class CoreFacade(object):
                 report_name
             )
             self._logger.info(f"Generating report: {report_specification.display_name}")
-            self._logger.debug(f"Report category: {report_specification.category}")
+            self._logger.debug(f"Report category: {report_specification.category.value}")
 
             generator: BaseGenerator = ReportGeneratorFactory.create_generator(
                 report_name=report_name,
@@ -141,13 +139,13 @@ class CoreFacade(object):
             raise
 
     def _validate_source_files(
-        self, report_name: str, input_files: list[Path]
-    ) -> dict[str, Path]:
+        self, report_name: str, input_files: List[Path]
+    ) -> Dict[str, Path]:
         self._logger.debug(
             f"Validating {len(input_files)} source files for report: {report_name}"
         )
 
-        available_reports: dict[str, ReportSpecification] = self.get_available_reports()
+        available_reports: Dict[str, ReportSpecification] = self.get_available_reports()
 
         if report_name not in available_reports:
             error_msg: str = f"Unknown report type: {report_name}"
@@ -155,7 +153,7 @@ class CoreFacade(object):
             raise ValueError(error_msg)
 
         report_spec: ReportSpecification = available_reports[report_name]
-        required_files: list[RequiredFile] = report_spec.required_files
+        required_files: List[RequiredFile] = report_spec.required_files
         self._logger.debug(
             f"Report requires {len(required_files)} files: "
             f"{[(rf.name, rf.readable_pattern) for rf in required_files]}"
@@ -170,8 +168,8 @@ class CoreFacade(object):
         self._logger.debug("All input files exist")
 
         self._logger.debug("Matching files to required patterns")
-        matched_files: dict[str, Path] = {}
-        unmatched_files: list[Path] = []
+        matched_files: Dict[str, Path] = {}
+        unmatched_files: List[Path] = []
 
         for file_path in input_files:
             file_matched: bool = False
@@ -194,7 +192,7 @@ class CoreFacade(object):
                 )
 
         self._logger.debug("Checking if all required files are satisfied")
-        missing_files: list[str] = []
+        missing_files: List[str] = []
         for rf in required_files:
             if rf.table_name not in matched_files:
                 missing_files.append(

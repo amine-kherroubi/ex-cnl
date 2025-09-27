@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 # Standard library imports
-from enum import StrEnum
+from enum import Enum
 
 
-class ReportCategory(StrEnum):
+class ReportCategory(Enum):
     HABITAT_RURAL = "Habitat rural"

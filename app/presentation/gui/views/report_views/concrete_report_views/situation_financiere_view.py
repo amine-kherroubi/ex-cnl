@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 # Standard library imports
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Dict
 
 # Local application imports
 from app.core.domain.models.notification import Notification
@@ -27,8 +25,8 @@ class SituationFinanciereView(BaseReportView):
         core_facade: CoreFacade,
         on_back: Callable[[], None],
     ) -> None:
-        self._selected_subprogram: Subprogram | None = None
-        self._selected_notification: Notification | None = None
+        self._selected_subprogram: Optional[Subprogram] = None
+        self._selected_notification: Optional[Notification] = None
         super().__init__(parent, report_spec, core_facade, on_back)
 
     def _setup_report_specific_components(self) -> None:
@@ -39,8 +37,8 @@ class SituationFinanciereView(BaseReportView):
         self._subprogram_selector.grid(  # type: ignore
             row=self._next_row,
             column=0,
-            padx=DesignSystem.Spacing.SM,
-            pady=DesignSystem.Spacing.SM,
+            padx=DesignSystem.Spacing.SM.value,
+            pady=DesignSystem.Spacing.SM.value,
             sticky="ew",
         )
         self._next_row += 1
@@ -67,7 +65,7 @@ class SituationFinanciereView(BaseReportView):
             and self._selected_notification is not None
         )
 
-    def _get_generation_parameters(self) -> dict[str, Any]:
+    def _get_generation_parameters(self) -> Dict[str, Any]:
         return {
             "target_subprogram": self._selected_subprogram,
             "target_notification": self._selected_notification,

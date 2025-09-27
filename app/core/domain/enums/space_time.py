@@ -1,12 +1,10 @@
-from __future__ import annotations
-
 # Standard library imports
 from calendar import monthrange
 from datetime import date
-from enum import StrEnum
+from enum import Enum
 
 
-class Wilaya(StrEnum):
+class Wilaya(Enum):
     ADRAR = "Adrar"
     CHLEF = "Chlef"
     LAGHOUAT = "Laghouat"
@@ -81,7 +79,7 @@ class Wilaya(StrEnum):
         }
 
 
-class Month(StrEnum):
+class Month(Enum):
     JANVIER = "janvier"
     FEVRIER = "février"
     MARS = "mars"
@@ -100,7 +98,7 @@ class Month(StrEnum):
         return list(Month).index(self) + 1
 
     @classmethod
-    def from_number(cls, n: int) -> Month:
+    def from_number(cls, n: int) -> "Month":
         return list(cls)[n - 1]
 
     @property

@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 # Standard library imports
-from typing import Any, Literal, final
+from typing import Any, Dict, List, Literal, Optional, Tuple, final
 
 # Third-party imports
 from openpyxl.styles import Alignment, Border, Font, Side
@@ -36,9 +34,9 @@ class ExcelStylingService(object):
         sheet: Worksheet,
         col: str,
         row: int,
-        font: Font | None = None,
-        alignment: Alignment | None = None,
-        border: Border | None = None,
+        font: Optional[Font] = None,
+        alignment: Optional[Alignment] = None,
+        border: Optional[Border] = None,
         value: Any = None,
     ) -> None:
         font = font or cls.FONT_NORMAL
@@ -61,9 +59,9 @@ class ExcelStylingService(object):
         start_row: int,
         end_row: int,
         value: Any = None,
-        font: Font | None = None,
-        alignment: Alignment | None = None,
-        border: Border | None = None,
+        font: Optional[Font] = None,
+        alignment: Optional[Alignment] = None,
+        border: Optional[Border] = None,
     ) -> None:
 
         if value is not None:
@@ -93,9 +91,9 @@ class ExcelStylingService(object):
         col: str,
         start_row: int,
         end_row: int,
-        font: Font | None = None,
-        alignment: Alignment | None = None,
-        border: Border | None = None,
+        font: Optional[Font] = None,
+        alignment: Optional[Alignment] = None,
+        border: Optional[Border] = None,
     ) -> None:
         start_row_content: str = sheet[f"{col}{start_row}"].value
         for row in range(start_row + 1, end_row + 1):
@@ -119,7 +117,7 @@ class ExcelStylingService(object):
                     cell.border = border
 
     @classmethod
-    def set_column_widths(cls, sheet: Worksheet, column_widths: dict[str, int]) -> None:
+    def set_column_widths(cls, sheet: Worksheet, column_widths: Dict[str, int]) -> None:
         for col, width in column_widths.items():
             sheet.column_dimensions[col].width = width
 
@@ -158,10 +156,10 @@ class ExcelStylingService(object):
         cls,
         sheet: Worksheet,
         row: int,
-        data: list[tuple[str, Any]],
-        font: Font | None = None,
-        alignment: Alignment | None = None,
-        border: Border | None = None,
+        data: List[Tuple[str, Any]],
+        font: Optional[Font] = None,
+        alignment: Optional[Alignment] = None,
+        border: Optional[Border] = None,
     ) -> None:
         font = font or cls.FONT_NORMAL
         alignment = alignment or cls.ALIGNMENT_CENTER

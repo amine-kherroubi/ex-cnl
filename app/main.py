@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 # Third-party imports
 from customtkinter import CTk  # type: ignore

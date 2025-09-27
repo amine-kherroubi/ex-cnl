@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 # Standard library imports
-from typing import Any, Protocol
+from typing import Any, Protocol, Dict, Optional
 from logging import Logger
 
 # Third-party imports
@@ -29,7 +27,7 @@ class DataRepository(Protocol):
         offset: int = 0,
         limit: int = 5,
     ) -> pd.DataFrame: ...
-    def summarize(self, table_name: str) -> dict[str, Any]: ...
+    def summarize(self, table_name: str) -> Dict[str, Any]: ...
     def close(self) -> None: ...
 
 
@@ -47,28 +45,32 @@ class DuckDBRepository:
 
         self._config: DatabaseConfig = db_config
 
-        config_dict: dict[str, Any] = {
+        config_dict: Dict[str, Any] = {
             "max_memory": db_config.max_memory if db_config.max_memory else "1GB",
         }
         self._logger.debug(f"DuckDB configuration: {config_dict}")
 
-        self._connection: duckdb.DuckDBPyConnection | None
+        self._connection: Optional[duckdb.DuckDBPyConnection]
         if db_config.path:
             self._logger.info(f"Connecting to DuckDB file: {db_config.path}")
-            self._connection = duckdb.connect(  # type: ignore
+            self._connection = duckdb.connect(
                 database=db_config.path, config=config_dict
             )
         else:
             self._logger.info("Creating in-memory DuckDB connection")
-            self._connection = duckdb.connect(database=":memory:", config=config_dict)  # type: ignore
+            self._connection = duckdb.connect(database=":memory:", config=config_dict)
 
         if db_config.enable_logging:
             if not self._connection:
                 error_msg: str = "Failed to initialize DuckDB connection"
                 self._logger.error(error_msg)
                 raise DatabaseError(error_msg)
-            self._logger.debug("Enabling DuckDB query logging")
-            self._connection.execute("CALL enable_logging();")
+            try:
+                self._logger.debug("Enabling DuckDB query logging")
+                self._connection.execute("SET enable_profiling='query_tree';")
+                self._connection.execute("SET profiling_mode='detailed';")
+            except Exception as e:
+                self._logger.warning(f"Could not enable query logging: {e}")
 
         self._data_loaded: bool = False
         self._logger.info("DuckDB repository initialized successfully")
@@ -152,10 +154,10 @@ class DuckDBRepository:
         )
         return result
 
-    def summarize(self, table_name: str) -> dict[str, Any]:
+    def summarize(self, table_name: str) -> Dict[str, Any]:
         self._logger.debug(f"Generating summary for table '{table_name}'")
         try:
-            summary: dict[str, Any] = {
+            summary: Dict[str, Any] = {
                 "total_records": self.count_records(table_name),
                 "table_description": self.describe(table_name),
                 "sample_data": self.get_data(table_name),
