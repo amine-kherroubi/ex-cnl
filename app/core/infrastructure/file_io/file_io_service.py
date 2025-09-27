@@ -1,6 +1,6 @@
 # Standard library imports
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from logging import Logger
 import json
 
@@ -127,15 +127,21 @@ class FileIOService(object):
         self._logger.error(error_msg)
         raise DataLoadError(source_file_path, Exception(error_msg))
 
-    def load_additional_subprograms(self) -> List[Dict[str, Any]]:
+    def load_additional_subprograms(self, default_subprograms: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
         custom_file_path: Path = self._config.custom_subprograms_path
 
         if not custom_file_path.exists():
             self._logger.info(
                 f"Additional subprograms file not found at '{custom_file_path}'. "
-                "Creating template file for user customization."
+                "Creating file with all default subprograms for user customization."
             )
-            self._create_custom_subprograms_file(custom_file_path)
+            if default_subprograms:
+                self._create_custom_subprograms_file(custom_file_path, default_subprograms)
+            else:
+                self._logger.warning(
+                    "No default subprograms provided for template creation. Creating minimal template."
+                )
+                self._create_custom_subprograms_file(custom_file_path)
             return []
 
         try:
@@ -171,8 +177,7 @@ class FileIOService(object):
                 )
                 return []
 
-            enabled_subprograms: List[Dict[str, Any]] = []
-            disabled_count: int = 0
+            loaded_subprograms: List[Dict[str, Any]] = []
 
             for subprogram in data:  # type: ignore
                 if not isinstance(subprogram, dict):
@@ -181,34 +186,22 @@ class FileIOService(object):
                     )
                     continue
 
-                is_enabled: bool = subprogram.get("enabled", True)  # type: ignore
+                # All subprograms from file are considered (enabled flag removed)
+                loaded_subprograms.append(subprogram)  # type: ignore
                 subprogram_name: str = subprogram.get("name", "unnamed")  # type: ignore
-
-                if is_enabled:
-                    enabled_subprograms.append(subprogram)  # type: ignore
-                    self._logger.debug(
-                        f"Including enabled subprogram: '{subprogram_name}'"
-                    )
-                else:
-                    disabled_count += 1
-                    self._logger.debug(
-                        f"Skipping disabled subprogram: '{subprogram_name}'"
-                    )
+                self._logger.debug(f"Loading subprogram: '{subprogram_name}'")
 
             self._logger.info(
-                f"Successfully loaded {len(enabled_subprograms)} enabled subprogram(s) "
+                f"Successfully loaded {len(loaded_subprograms)} subprogram(s) "
                 f"from '{custom_file_path}'"
             )
 
-            if disabled_count > 0:
-                self._logger.info(f"Skipped {disabled_count} disabled subprogram(s)")
-
-            if enabled_subprograms:
+            if loaded_subprograms:
                 self._logger.debug(
-                    f"Enabled subprogram names: {[item.get('name', 'unnamed') for item in enabled_subprograms]}"
+                    f"Loaded subprogram names: {[item.get('name', 'unnamed') for item in loaded_subprograms]}"
                 )
 
-            return enabled_subprograms
+            return loaded_subprograms
 
         except json.JSONDecodeError as json_error:
             error_msg: str = (
@@ -225,48 +218,54 @@ class FileIOService(object):
             self._logger.error(error_msg)
             raise DataLoadError(custom_file_path, error) from error
 
-    def _create_custom_subprograms_file(self, file_path: Path) -> None:
+    def _create_custom_subprograms_file(self, file_path: Path, default_subprograms: Optional[List[Dict[str, Any]]] = None) -> None:
         try:
             self._logger.debug(
-                f"Creating default custom subprograms file at: {file_path}"
+                f"Creating custom subprograms file at: {file_path}"
             )
 
-            template_content: List[Dict[str, Any]] = [
-                {
-                    "name": "Custom Subprogram",
-                    "database_alias": "CUSTOM_PROGRAM_2025",
-                    "enabled": False,
-                    "notifications": [
-                        {
-                            "name": "N° 001",
-                            "database_aliases": [
-                                "N°:001.Du:01/01/2025.TRANCHE:0.Montant:   700 000",
-                                "N° :001.Du:01/01/2025.TRANCHE:0.Montant:  700 000",
-                            ],
-                            "aid_count": 1009,
-                            "aid_amount": 700000,
-                        }
-                    ],
-                }
-            ]
+            if default_subprograms:
+                # Write all default subprograms to file
+                template_content = default_subprograms
+                self._logger.info(
+                    f"Writing {len(default_subprograms)} default subprograms to custom file"
+                )
+            else:
+                # Fallback minimal template if no defaults provided
+                template_content: List[Dict[str, Any]] = [
+                    {
+                        "name": "Custom Subprogram Example",
+                        "database_alias": "CUSTOM_PROGRAM_2025",
+                        "notifications": [
+                            {
+                                "name": "N° 001",
+                                "database_aliases": [
+                                    "N°:001.Du:01/01/2025.TRANCHE:0.Montant:   700 000",
+                                ],
+                                "aid_count": 1000,
+                                "aid_amount": 700000,
+                            }
+                        ],
+                    }
+                ]
 
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(template_content, f, indent=2, ensure_ascii=False)
 
             self._logger.info(
-                f"Created custom subprograms file with template data: {file_path}"
+                f"Created custom subprograms file: {file_path}"
             )
             self._logger.info(
-                "Note: Use 'enabled': true/false to control whether subprograms are loaded. "
-                "Template example is disabled by default - set 'enabled': true to activate it."
+                "Users can modify existing subprograms or add new ones in this file. "
+                "Subprograms with the same name will override internal defaults."
             )
 
         except Exception as error:
             self._logger.error(
-                f"Failed to create default custom subprograms file '{file_path}': {error}"
+                f"Failed to create custom subprograms file '{file_path}': {error}"
             )
 
-    def ensure_custom_subprograms_file_exists(self) -> None:
+    def ensure_custom_subprograms_file_exists(self, default_subprograms: Optional[List[Dict[str, Any]]] = None) -> None:
         custom_file_path: Path = self._config.custom_subprograms_path
         if not custom_file_path.exists():
-            self._create_custom_subprograms_file(custom_file_path)
+            self._create_custom_subprograms_file(custom_file_path, default_subprograms)
