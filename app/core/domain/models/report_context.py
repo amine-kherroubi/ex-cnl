@@ -2,7 +2,7 @@
 from datetime import date
 
 # Third-party imports
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator  # type: ignore
 
 # Local application imports
 from app.core.domain.enums.space_time import Wilaya, Month
@@ -29,7 +29,7 @@ class ReportContext(BaseModel):
         description="Month of the report period in French (for monthly reports)",
     )
 
-    @validator("reporting_date")
+    @validator("reporting_date")  # type: ignore
     def validate_report_date(cls, report_date: date) -> date:
         if report_date > date.today():
             raise ValueError("Report date cannot be in the future")

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Literal, Optional, List
 
 # Third-party imports
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator  # type: ignore
 
 
 def get_app_data_dir() -> Path:
@@ -55,7 +55,7 @@ class LoggingConfig(BaseModel):
     backup_count: int = 5
     disable_existing_loggers: bool = False
 
-    @validator("log_file")
+    @validator("log_file")  # type: ignore
     def ensure_log_directory(cls, log_file: Path) -> Path:
         try:
             log_file.parent.mkdir(parents=True, exist_ok=True)
