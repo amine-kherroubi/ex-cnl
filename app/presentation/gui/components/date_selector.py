@@ -46,7 +46,6 @@ class DateSelector(BaseComponent):
         super().__init__(parent, "Période du rapport")
 
     def _setup_content(self) -> None:
-
         self._content_frame.grid_columnconfigure(index=1, weight=1)
         self._content_frame.grid_columnconfigure(index=3, weight=1)
 
@@ -91,7 +90,7 @@ class DateSelector(BaseComponent):
             text="Année :",
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value,
             ),
         )
         year_label.grid(  # type: ignore
@@ -111,6 +110,7 @@ class DateSelector(BaseComponent):
             command=lambda _: self._on_year_changed(),
             width=DesignSystem.Width.MD.value,
             height=DesignSystem.Height.SM.value,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
@@ -119,7 +119,14 @@ class DateSelector(BaseComponent):
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,
-            corner_radius=DesignSystem.Roundness.SM.value,
+            corner_radius=DesignSystem.Roundness.XS.value,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_hover_color=DesignSystem.Color.GRAY.value,
+            dropdown_fg_color=DesignSystem.Color.LESS_WHITE.value,
+            dropdown_text_color=DesignSystem.Color.BLACK.value,
+            dropdown_hover_color=DesignSystem.Color.LIGHTER_GRAY.value,
         )
         self._year_dropdown.grid(  # type: ignore
             row=2,
@@ -133,7 +140,7 @@ class DateSelector(BaseComponent):
             text="Mois :",
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value,
             ),
         )
         month_label.grid(  # type: ignore
@@ -151,6 +158,7 @@ class DateSelector(BaseComponent):
             command=lambda _: self._on_month_changed(),
             width=DesignSystem.Width.MD.value,
             height=DesignSystem.Height.SM.value,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
@@ -160,6 +168,13 @@ class DateSelector(BaseComponent):
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,
             corner_radius=DesignSystem.Roundness.SM.value,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_hover_color=DesignSystem.Color.GRAY.value,
+            dropdown_fg_color=DesignSystem.Color.LESS_WHITE.value,
+            dropdown_text_color=DesignSystem.Color.BLACK.value,
+            dropdown_hover_color=DesignSystem.Color.LIGHTER_GRAY.value,
         )
         self._month_dropdown.grid(  # type: ignore
             row=2,

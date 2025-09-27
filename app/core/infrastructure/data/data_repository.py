@@ -31,7 +31,7 @@ class DataRepository(Protocol):
     def close(self) -> None: ...
 
 
-class DuckDBRepository:
+class DuckDBRepository(object):
     __slots__ = (
         "_config",
         "_connection",
@@ -53,12 +53,12 @@ class DuckDBRepository:
         self._connection: Optional[duckdb.DuckDBPyConnection]
         if db_config.path:
             self._logger.info(f"Connecting to DuckDB file: {db_config.path}")
-            self._connection = duckdb.connect(
-                database=db_config.path, config=config_dict
+            self._connection = duckdb.connect( # type: ignore
+                database=str(db_config.path), config=config_dict
             )
         else:
             self._logger.info("Creating in-memory DuckDB connection")
-            self._connection = duckdb.connect(database=":memory:", config=config_dict)
+            self._connection = duckdb.connect(database=":memory:", config=config_dict)  # type: ignore
 
         if db_config.enable_logging:
             if not self._connection:
@@ -116,7 +116,7 @@ class DuckDBRepository:
             raise DatabaseError(error_msg)
 
         try:
-            result: pd.DataFrame = self._connection.execute(query).fetchdf()
+            result: pd.DataFrame = self._connection.execute(query).fetchdf() # type: ignore
             self._logger.debug(
                 f"Query returned: {len(result)} rows and {len(result.columns)} columns"
             )

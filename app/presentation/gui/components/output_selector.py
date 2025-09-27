@@ -15,7 +15,7 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 class OutputSelector(BaseComponent):
 
-    __slots__ = ("_on_output_changed", "_output_path", "_select_button", "_path_entry")
+    __slots__ = ("_on_output_changed", "_output_path", "_select_button", "_path_textbox")
 
     def __init__(
         self, parent: Any, on_output_changed: Callable[[Optional[Path]], None]
@@ -60,7 +60,7 @@ class OutputSelector(BaseComponent):
             fg_color=DesignSystem.Color.PRIMARY.value,
             hover_color=DesignSystem.Color.DARKER_PRIMARY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value,
             ),
             corner_radius=DesignSystem.Roundness.SM.value,
             height=DesignSystem.Height.SM.value,
@@ -89,20 +89,25 @@ class OutputSelector(BaseComponent):
             sticky="w",
         )
 
-        self._path_entry: ctk.CTkEntry = ctk.CTkEntry(
+        self._path_textbox: ctk.CTkTextbox = ctk.CTkTextbox(
             master=self._content_frame,
-            placeholder_text="Aucun répertoire sélectionné",
-            border_width=DesignSystem.BorderWidth.XS.value,
-            corner_radius=DesignSystem.Roundness.SM.value,
+            width=DesignSystem.Width.MD.value,
             height=DesignSystem.Height.SM.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
+            border_width=DesignSystem.BorderWidth.XS.value,
+            fg_color=DesignSystem.Color.LEAST_WHITE.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            text_color=DesignSystem.Color.GRAY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
         )
-        self._path_entry.grid(row=2, column=0, sticky="ew")  # type: ignore
+        self._path_textbox.grid(row=2, column=0, sticky="ew")  # type: ignore
+        self._path_textbox.insert("0.0", "Aucun répertoire selectionné")  # type: ignore
+        self._path_textbox.configure(state="disabled")  # type: ignore
 
     def _select_folder(self) -> None:
-
         folder: str = filedialog.askdirectory(
             title="Sélectionner le répertoire de destination"
         )
@@ -113,11 +118,13 @@ class OutputSelector(BaseComponent):
             self._on_output_changed(self._output_path)
 
     def _update_display(self) -> None:
-
-        self._path_entry.configure(state="normal")  # type: ignore
-        self._path_entry.delete(first_index=0, last_index="end")  # type: ignore
+        self._path_textbox.configure(state="normal")  # type: ignore
+        self._path_textbox.configure(text_color=DesignSystem.Color.BLACK.value)  # type: ignore
+        self._path_textbox.delete("0.0", "end")  # type: ignore
 
         if self._output_path:
-            self._path_entry.insert(index=0, string=str(self._output_path))  # type: ignore
+            self._path_textbox.insert("0.0", str(self._output_path))  # type: ignore
         else:
-            self._path_entry.insert(index=0, string="")  # type: ignore
+            self._path_textbox.insert("0.0", "")  # type: ignore
+
+        self._path_textbox.configure(state="disabled")  # type: ignore

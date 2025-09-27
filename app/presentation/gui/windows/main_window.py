@@ -38,10 +38,10 @@ class MainWindow(ctk.CTk):
         self._current_view: Optional[ctk.CTkFrame] = None
 
         self.title("Générateur de rapports")
-        self.geometry("1024x768")
+        self.geometry("800x600")
         self.resizable(False, False)
-        ctk.set_widget_scaling(0.8)
-        ctk.set_window_scaling(0.8)
+        ctk.set_widget_scaling(0.9)
+        ctk.set_window_scaling(0.9)
 
         self._setup_ui()
         self._load_available_reports()

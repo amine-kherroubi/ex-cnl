@@ -21,7 +21,7 @@ from app.common.logging_setup import get_logger
 
 
 @final
-class ReportGeneratorFactory:
+class ReportGeneratorFactory(object):
     __slots__ = ()
 
     _logger: Logger = get_logger(__name__)

@@ -13,7 +13,6 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class ReportCard(BaseComponent):
-
     __slots__ = (
         "_report_spec",
         "_on_generate_clicked",
@@ -32,7 +31,6 @@ class ReportCard(BaseComponent):
         super().__init__(parent, report_spec.display_name)
 
     def _setup_content(self) -> None:
-
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
         info_frame: ctk.CTkFrame = ctk.CTkFrame(
@@ -89,7 +87,7 @@ class ReportCard(BaseComponent):
                 family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
             anchor="w",
-            wraplength=700,
+            wraplength=620,
             justify="left",
         )
         description.grid(row=2, column=0, sticky="w")  # type: ignore
@@ -104,7 +102,6 @@ class ReportCard(BaseComponent):
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value,
                 size=DesignSystem.FontSize.BUTTON.value,
-                weight="bold",
             ),
             text_color=DesignSystem.Color.WHITE.value,
             corner_radius=DesignSystem.Roundness.SM.value,

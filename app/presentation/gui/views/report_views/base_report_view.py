@@ -116,7 +116,6 @@ class BaseReportView(ctk.CTkFrame):
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value,
                 size=DesignSystem.FontSize.BUTTON.value,
-                weight="bold",
             ),
             command=self._on_back,
             width=DesignSystem.Width.SM.value,
@@ -193,7 +192,6 @@ class BaseReportView(ctk.CTkFrame):
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value,
                 size=DesignSystem.FontSize.BUTTON.value,
-                weight="bold",
             ),
             command=self._generate_report,
             height=40,

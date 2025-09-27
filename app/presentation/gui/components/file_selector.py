@@ -66,7 +66,7 @@ class FileSelector(BaseComponent):
             fg_color=DesignSystem.Color.LESS_WHITE.value,
             hover_color=DesignSystem.Color.LEAST_WHITE.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value,
             ),
             corner_radius=DesignSystem.Roundness.SM.value,
             height=DesignSystem.Height.SM.value,
@@ -82,7 +82,7 @@ class FileSelector(BaseComponent):
             fg_color=DesignSystem.Color.PRIMARY.value,
             hover_color=DesignSystem.Color.DARKER_PRIMARY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value
+                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value,
             ),
             corner_radius=DesignSystem.Roundness.SM.value,
             height=DesignSystem.Height.SM.value,
@@ -120,9 +120,12 @@ class FileSelector(BaseComponent):
             state="disabled",
             border_width=DesignSystem.BorderWidth.XS.value,
             corner_radius=DesignSystem.Roundness.SM.value,
+            text_color=DesignSystem.Color.GRAY.value,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
+            fg_color=DesignSystem.Color.LEAST_WHITE.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
         )
         self._files_listbox.grid(  # type: ignore
             row=2,
@@ -134,7 +137,6 @@ class FileSelector(BaseComponent):
         self._update_display()
 
     def _select_files(self) -> None:
-
         files: Union[Tuple[str, ...], Literal[""]] = filedialog.askopenfilenames(
             title="Sélectionner les fichiers source",
             filetypes=[
@@ -144,9 +146,7 @@ class FileSelector(BaseComponent):
         )
 
         if files:
-
             new_files: list[Path] = [Path(file) for file in files]
-
             existing_paths: set[Path] = set(self._selected_files)
 
             added_files: list[Path] = []
@@ -162,18 +162,16 @@ class FileSelector(BaseComponent):
                 self._on_files_changed(self._selected_files)
 
     def _clear_files(self) -> None:
-
         self._selected_files = []
         self._update_display()
         self._on_files_changed(self._selected_files)
 
     def _update_display(self) -> None:
-
         self._files_listbox.configure(state="normal")  # type: ignore
         self._files_listbox.delete(index1="1.0", index2="end")  # type: ignore
 
         if self._selected_files:
-
+            self._files_listbox.configure(text_color=DesignSystem.Color.BLACK.value)  # type: ignore
             count_text: str = (
                 f"Fichiers sélectionnés ({len(self._selected_files)}):\n\n"
             )
@@ -187,12 +185,12 @@ class FileSelector(BaseComponent):
                     index="end", text=f"   {file_path.parent}\n\n"
                 )
         else:
+            self._files_listbox.configure(text_color=DesignSystem.Color.GRAY.value)  # type: ignore
             self._files_listbox.insert(index="end", text="Aucun fichier sélectionné")  # type: ignore
 
         self._files_listbox.configure(state="disabled")  # type: ignore
 
         if self._selected_files:
-
             self._clear_button.configure(  # type: ignore
                 state="normal",
                 text_color=DesignSystem.Color.WHITE.value,
@@ -200,7 +198,6 @@ class FileSelector(BaseComponent):
                 hover_color=DesignSystem.Color.DARKER_GRAY.value,
             )
         else:
-
             self._clear_button.configure(  # type: ignore
                 state="disabled",
                 text_color=DesignSystem.Color.GRAY.value,

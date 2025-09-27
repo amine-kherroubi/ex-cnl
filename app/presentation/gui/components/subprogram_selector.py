@@ -119,6 +119,7 @@ class SubprogramSelector(BaseComponent):
             command=lambda _: self._handle_subprogram_selection(),
             width=DesignSystem.Width.MD.value,
             height=DesignSystem.Height.SM.value,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
@@ -127,7 +128,14 @@ class SubprogramSelector(BaseComponent):
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,
-            corner_radius=DesignSystem.Roundness.SM.value,
+            corner_radius=DesignSystem.Roundness.XS.value,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_hover_color=DesignSystem.Color.GRAY.value,
+            dropdown_fg_color=DesignSystem.Color.LESS_WHITE.value,
+            dropdown_text_color=DesignSystem.Color.BLACK.value,
+            dropdown_hover_color=DesignSystem.Color.LIGHTER_GRAY.value,
         )
         self._subprogram_selector.grid(  # type: ignore
             row=2,
@@ -172,6 +180,7 @@ class SubprogramSelector(BaseComponent):
             command=lambda _: self._handle_notification_selection(),
             width=DesignSystem.Width.MD.value,
             height=DesignSystem.Height.SM.value,
+            text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
             ),
@@ -180,7 +189,14 @@ class SubprogramSelector(BaseComponent):
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,
-            corner_radius=DesignSystem.Roundness.SM.value,
+            corner_radius=DesignSystem.Roundness.XS.value,
+            fg_color=DesignSystem.Color.LESS_WHITE.value,
+            border_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_color=DesignSystem.Color.LIGHTER_GRAY.value,
+            button_hover_color=DesignSystem.Color.GRAY.value,
+            dropdown_fg_color=DesignSystem.Color.LESS_WHITE.value,
+            dropdown_text_color=DesignSystem.Color.BLACK.value,
+            dropdown_hover_color=DesignSystem.Color.LIGHTER_GRAY.value,
         )
         self._notification_selector.grid(row=2, column=3, sticky="ew")  # type: ignore
 
