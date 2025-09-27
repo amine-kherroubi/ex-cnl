@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# Standard library imports
+from typing import Final
+
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
 from app.core.domain.models.report_specification import (
@@ -10,13 +13,34 @@ from app.core.services.report_generation_service.concrete_generators.activite_me
     ActiviteMensuelleGenerator,
 )
 
-activite_mensuelle_specification: ReportSpecification = ReportSpecification(
+TRANCHES_DE_LANCEMENT: Final[set[str]] = {
+    "N1        ",
+    "C1        ",
+    "T1        ",
+    "T1, T2    ",
+}
+
+TRANCHES_DE_LIVRAISON: Final[set[str]] = {
+    "N1, N2    ",
+    "N2        ",
+    "T2, T3    ",
+    "T1, T2, T3",
+    "T3        ",
+    "C2        ",
+}
+
+TRANCHES_INTERMEDIARES: Final[set[str]] = {
+    "T2        ",
+    "          ",  # Empty
+}
+
+activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecification(
     name="activite_mensuelle",
     display_name="Rapport d'activité mensuelle",
     category=ReportCategory.HABITAT_RURAL,
     description=(
-        "Comprend l’état d’exécution des tranches financières durant "
-        "le mois et l’année spécifiés, en valeurs actuelles et cumulées, "
+        "Comprend l'état d'exécution des tranches financières durant "
+        "le mois et l'année spécifiés, en valeurs actuelles et cumulées, "
         "ainsi que la situation des sous-programmes "
         "en aides achevées, en cours ou non encore lancés."
     ),
@@ -35,7 +59,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
             SELECT s.subprogram
             FROM subprograms s
         """,
-        "lancements_mois": """
+        "lancements_mois": f"""
             SELECT 
                 s.subprogram,
                 COALESCE(data.count, 0) as count
@@ -45,20 +69,13 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE Tranche IN (
-                    '20%  1 ERE TRANCHE',
-                    '40%  Première Tranche',
-                    '60%  Première Tranche',
-                    '60%  1+2 EME TRANCHE',
-                    '100%  Tranche totale',
-                    '100%  1+2+3 EME TRANCHE'
-                )
-                AND "Date OV" LIKE '%/{month}/{year}'
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND "Date OV" LIKE '%/{{month}}/{{year}}'
                 AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
-        "lancements_cumul_annee": """
+        "lancements_cumul_annee": f"""
             SELECT 
                 s.subprogram,
                 COALESCE(data.count, 0) as count
@@ -68,21 +85,14 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE Tranche IN (
-                    '20%  1 ERE TRANCHE',
-                    '40%  Première Tranche',
-                    '60%  Première Tranche',
-                    '60%  1+2 EME TRANCHE',
-                    '100%  Tranche totale',
-                    '100%  1+2+3 EME TRANCHE'
-                )
-                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
-                AND "Date OV" LIKE '%/{year}'
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {{month}}
+                AND "Date OV" LIKE '%/{{year}}'
                 AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
-        "livraisons_mois": """
+        "livraisons_mois": f"""
             SELECT
                 s.subprogram,
                 COALESCE(data.count, 0) as count
@@ -92,20 +102,13 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE Tranche IN (
-                    '40%  3 EME TRANCHE',
-                    '40%  Deuxième Tranche',
-                    '60%  Deuxième Tranche',
-                    '80%  2+3 EME TRANCHE',
-                    '100%  1+2+3 EME TRANCHE',
-                    'Tranche complémentaire 2'
-                )
-                AND "Date OV" LIKE '%/{month}/{year}'
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                AND "Date OV" LIKE '%/{{month}}/{{year}}'
                 AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
-        "livraisons_cumul_annee": """
+        "livraisons_cumul_annee": f"""
             SELECT 
                 s.subprogram,
                 COALESCE(data.count, 0) as count
@@ -115,16 +118,9 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE Tranche IN (
-                    '40%  3 EME TRANCHE',
-                    '40%  Deuxième Tranche',
-                    '60%  Deuxième Tranche',
-                    '80%  2+3 EME TRANCHE',
-                    '100%  1+2+3 EME TRANCHE',
-                    'Tranche complémentaire 2'
-                )
-                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
-                AND "Date OV" LIKE '%/{year}'
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {{month}}
+                AND "Date OV" LIKE '%/{{year}}'
                 AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
@@ -135,7 +131,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 s.aid_count,
             FROM subprograms s
         """,
-        "acheves_derniere_tranche": """
+        "acheves_derniere_tranche": f"""
             SELECT 
                 s.subprogram,
                 s.aid_count,
@@ -146,16 +142,13 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE
-                    N2 > 0
-                    OR C2 > 0
-                    OR T3 > 0
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
                 AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
             WHERE s.aid_count > 0
         """,
-        "en_cours_calculation": """
+        "en_cours_calculation": f"""
             SELECT 
                 s.subprogram,
                 s.aid_count,
@@ -168,10 +161,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE
-                    N1 > 0
-                    OR C1 > 0
-                    OR T1 > 0
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
                 AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) lances ON s.subprogram = lances."Sous programme"
@@ -180,15 +170,12 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE
-                    N2 > 0
-                    OR C2 > 0
-                    OR T3 > 0
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
                 GROUP BY "Sous programme"
             ) acheves ON s.subprogram = acheves."Sous programme"
             WHERE s.aid_count > 0
         """,
-        "non_lances_premiere_tranche": """
+        "non_lances_premiere_tranche": f"""
             SELECT 
                 s.subprogram,
                 s.aid_count,
@@ -199,10 +186,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     "Sous programme",
                     COUNT(*) as count
                 FROM paiements
-                WHERE
-                    N1 > 0
-                    OR C1 > 0
-                    OR T1 > 0
+                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
                 AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"

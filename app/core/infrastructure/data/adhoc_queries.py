@@ -47,7 +47,7 @@ queries: dict[str, str] = {
     """,
     "query7": """
         SELECT DISTINCT
-            p."Tranche"
+            p."Tranche du rapport"
         FROM paiements p
     """,
 }

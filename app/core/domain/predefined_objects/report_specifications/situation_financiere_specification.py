@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# Standard library imports
+from typing import Final
+
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
 from app.core.domain.models.report_specification import (
@@ -10,7 +13,7 @@ from app.core.services.report_generation_service.concrete_generators.situation_f
     SituationFinanciereGenerator,
 )
 
-situation_financiere_specification: ReportSpecification = ReportSpecification(
+situation_financiere_specification: Final[ReportSpecification] = ReportSpecification(
     name="situation_financiere",
     display_name="Situation financière d'un sous-programme",
     category=ReportCategory.HABITAT_RURAL,
