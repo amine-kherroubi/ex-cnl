@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 from logging import Logger
+import json
 
 # Third-party imports
 import pandas as pd
@@ -121,3 +122,71 @@ class FileIOService(object):
         )
         self._logger.error(error_msg)
         raise DataLoadError(source_file_path, Exception(error_msg))
+
+    def load_additional_subprograms(self) -> list[dict[str, Any]]:
+        custom_file_path: Path = self._config.custom_subprograms_path
+
+        if not custom_file_path.exists():
+            self._logger.info(
+                f"Additional subprograms file not found at '{custom_file_path}'. "
+                "Proceeding with default subprograms only."
+            )
+            return []
+
+        try:
+            self._logger.debug(
+                f"Reading additional subprograms file: {custom_file_path}"
+            )
+
+            with open(custom_file_path, "r", encoding="utf-8") as f:
+                file_content: str = f.read().strip()
+
+            if not file_content:
+                self._logger.warning(
+                    f"Additional subprograms file '{custom_file_path}' is empty. "
+                    "No additional subprograms will be loaded."
+                )
+                return []
+
+            self._logger.debug(f"Parsing JSON content from {custom_file_path}")
+            data: Any = json.loads(file_content)
+
+            if not isinstance(data, list):
+                error_msg: str = (
+                    f"Invalid format in '{custom_file_path}': expected JSON array, "
+                    f"got {type(data).__name__}"
+                )
+                self._logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            if not data:
+                self._logger.info(
+                    f"Additional subprograms file '{custom_file_path}' contains empty array. "
+                    "No additional subprograms to load."
+                )
+                return []
+
+            self._logger.info(
+                f"Successfully loaded {len(data)} additional subprogram(s) "  # type: ignore
+                f"from '{custom_file_path}'"
+            )
+            self._logger.debug(
+                f"Additional subprogram names: {[item.get('name', 'unnamed') for item in data if isinstance(item, dict)]}"  # type: ignore
+            )
+
+            return data  # type: ignore
+
+        except json.JSONDecodeError as json_error:
+            error_msg: str = (
+                f"Invalid JSON format in '{custom_file_path}': {json_error}. "
+                "Please verify the file contains valid JSON."
+            )
+            self._logger.error(error_msg)
+            raise DataLoadError(custom_file_path, Exception(error_msg)) from json_error
+
+        except Exception as error:
+            error_msg: str = (
+                f"Failed to load additional subprograms from '{custom_file_path}': {error}"
+            )
+            self._logger.error(error_msg)
+            raise DataLoadError(custom_file_path, error) from error

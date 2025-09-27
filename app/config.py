@@ -16,19 +16,14 @@ def get_app_data_dir() -> Path:
     app_name: str = "GenerateurReports"
 
     if sys.platform == "win32":
-
-        base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+        base: str | None = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
         if base:
             return Path(base) / app_name
         return Path.home() / "AppData" / "Local" / app_name
-
     elif sys.platform == "darwin":
-
         return Path.home() / "Library" / "Application Support" / app_name
-
     else:
-
-        xdg_data = os.environ.get("XDG_DATA_HOME")
+        xdg_data: str | None = os.environ.get("XDG_DATA_HOME")
         if xdg_data:
             return Path(xdg_data) / app_name.lower()
         return Path.home() / ".local" / "share" / app_name.lower()
@@ -36,6 +31,11 @@ def get_app_data_dir() -> Path:
 
 class FileIOConfig(BaseModel):
     allowed_source_file_extensions: list[str] = ["xlsx", "xls"]
+    custom_subprograms_file: str = "custom_subprograms.json"
+
+    @property
+    def custom_subprograms_path(self) -> Path:
+        return Path.cwd() / self.custom_subprograms_file
 
 
 class DatabaseConfig(BaseModel):
@@ -61,20 +61,16 @@ class LoggingConfig(BaseModel):
     @field_validator("log_file")
     @classmethod
     def ensure_log_directory(cls, log_file: Path) -> Path:
-
         try:
-
             log_file.parent.mkdir(parents=True, exist_ok=True)
 
-            test_file = log_file.parent / ".write_test"
+            test_file: Path = log_file.parent / ".write_test"
             test_file.write_text("test")
             test_file.unlink()
-
             return log_file
 
         except (OSError, PermissionError):
-
-            temp_dir = Path(tempfile.gettempdir()) / "GenerateurReports"
+            temp_dir: Path = Path(tempfile.gettempdir()) / "GenerateurReports"
             temp_log_file = temp_dir / "app.log"
 
             try:
@@ -85,7 +81,6 @@ class LoggingConfig(BaseModel):
                 )
                 return temp_log_file
             except Exception:
-
                 warnings.warn(
                     "Cannot create log file anywhere, file logging will be disabled",
                     UserWarning,

@@ -9,13 +9,11 @@ from typing import Any
 # Local application imports
 from app.config import AppConfig
 from app.core.domain.enums.space_time import Month, Wilaya
-from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import (
     ReportSpecification,
     RequiredFile,
 )
-from app.core.domain.models.subprogram import Subprogram
 from app.core.domain.registries.report_specification_registry import (
     ReportSpecificationRegistry,
 )
@@ -48,6 +46,8 @@ class CoreFacade(object):
         self._file_io_service: FileIOService = FileIOService(
             self._config.file_io_config
         )
+
+        SubprogramRegistry.initialize(self._file_io_service)
 
         self._logger.info("CoreFacade initialized successfully")
 
@@ -225,75 +225,3 @@ class CoreFacade(object):
             f"File validation successful: {len(matched_files)} files matched to required patterns"
         )
         return matched_files
-
-    # Subprogram and notification management methods (unchanged)
-    def create_new_subprogram(self, subprogram: Subprogram) -> None:
-        self._logger.debug(f"Creating new subprogram: {subprogram}")
-        SubprogramRegistry.register_subprogram(subprogram)
-        self._logger.info(f"New subprogram {subprogram.name} created successfully")
-
-    def update_subprogram(
-        self, subprogram_name: str, updated_subprogram: Subprogram
-    ) -> None:
-        self._logger.debug(f"Updating subprogram: {subprogram_name}")
-        SubprogramRegistry.update_subprogram(subprogram_name, updated_subprogram)
-        self._logger.info(f"Subprogram {subprogram_name} updated successfully")
-
-    def delete_subprogram(self, subprogram_name: str) -> None:
-        self._logger.debug(f"Deleting subprogram: {subprogram_name}")
-        SubprogramRegistry.unregister_subprogram(subprogram_name)
-        self._logger.info(f"Subprogram {subprogram_name} deleted successfully")
-
-    def create_new_notification(
-        self, subprogram_name: str, notification: Notification
-    ) -> None:
-        self._logger.debug(
-            f"Creating new notification for subprogram {subprogram_name}: {notification}"
-        )
-        SubprogramRegistry.register_notification(subprogram_name, notification)
-        self._logger.info(
-            f"New notification {notification.name} for subprogram {subprogram_name} created successfully"
-        )
-
-    def update_notification(
-        self,
-        subprogram_name: str,
-        notification_name: str,
-        updated_notification: Notification,
-    ) -> None:
-        self._logger.debug(
-            f"Updating notification {notification_name} in subprogram {subprogram_name}"
-        )
-        SubprogramRegistry.update_notification(
-            subprogram_name, notification_name, updated_notification
-        )
-        self._logger.info(
-            f"Notification {notification_name} in subprogram {subprogram_name} updated successfully"
-        )
-
-    def delete_notification(self, subprogram_name: str, notification_name: str) -> None:
-        self._logger.debug(
-            f"Deleting notification {notification_name} from subprogram {subprogram_name}"
-        )
-        SubprogramRegistry.unregister_notification(subprogram_name, notification_name)
-        self._logger.info(
-            f"Notification {notification_name} from subprogram {subprogram_name} deleted successfully"
-        )
-
-    def reset_subprogram_registry(self) -> None:
-        self._logger.debug("Resetting subprogram registry to default state")
-        SubprogramRegistry.reset_to_default()
-        self._logger.info("Subprogram registry reset to default state successfully")
-
-    def get_subprogram_registry_status(self) -> dict[str, int]:
-        self._logger.debug("Getting subprogram registry status")
-        subprograms: list[Subprogram] = SubprogramRegistry.get_all_subprograms()
-        notifications: list[Notification] = SubprogramRegistry.get_all_notifications()
-
-        status: dict[str, int] = {
-            "total_subprograms": len(subprograms),
-            "total_notifications": len(notifications),
-        }
-
-        self._logger.info(f"Registry status: {status}")
-        return status
