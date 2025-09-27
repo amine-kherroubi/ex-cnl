@@ -45,6 +45,11 @@ queries: dict[str, str] = {
         FROM paiements p
         ORDER BY p."Sous programme", p."Notification"
     """,
+    "query7": """
+        SELECT DISTINCT
+            p."Tranche"
+        FROM paiements p
+    """,
 }
 
 
@@ -75,4 +80,4 @@ def run_query(name: str) -> None:
 
 
 if __name__ == "__main__":
-    run_query("query6")
+    run_query("query7")
