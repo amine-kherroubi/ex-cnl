@@ -1,16 +1,17 @@
 [
   {
-    "name": "Custom Program 2025",
-    "database_alias": "CUSTOM_2025",
-    "display_order": 100,
+    "name": "Custom Program Example",
+    "database_alias": "CUSTOM_PROGRAM_2025",
+    "display_order": 60,
+    "enabled": false,
     "notifications": [
       {
-        "name": "N° 999",
+        "name": "N° 001",
         "database_aliases": [
-          "N°:999.Du:01/01/2025.TRANCHE:0.Montant:   800 000"
+          "N°:001.Du:01/01/2025.TRANCHE:0.Montant:   700 000"
         ],
-        "aid_count": 500,
-        "aid_amount": 800000
+        "aid_count": 100,
+        "aid_amount": 700000
       }
     ]
   }

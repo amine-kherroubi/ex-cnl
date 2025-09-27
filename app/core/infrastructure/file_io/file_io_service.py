@@ -129,8 +129,9 @@ class FileIOService(object):
         if not custom_file_path.exists():
             self._logger.info(
                 f"Additional subprograms file not found at '{custom_file_path}'. "
-                "Proceeding with default subprograms only."
+                "Creating template file for user customization."
             )
+            self._create_custom_subprograms_file(custom_file_path)
             return []
 
         try:
@@ -166,15 +167,44 @@ class FileIOService(object):
                 )
                 return []
 
+            enabled_subprograms: list[dict[str, Any]] = []
+            disabled_count: int = 0
+
+            for subprogram in data:  # type: ignore
+                if not isinstance(subprogram, dict):
+                    self._logger.warning(
+                        f"Skipping invalid subprogram entry (not a dict): {type(subprogram).__name__}"  # type: ignore
+                    )
+                    continue
+
+                is_enabled: bool = subprogram.get("enabled", True)  # type: ignore
+                subprogram_name: str = subprogram.get("name", "unnamed")  # type: ignore
+
+                if is_enabled:
+                    enabled_subprograms.append(subprogram)  # type: ignore
+                    self._logger.debug(
+                        f"Including enabled subprogram: '{subprogram_name}'"
+                    )
+                else:
+                    disabled_count += 1
+                    self._logger.debug(
+                        f"Skipping disabled subprogram: '{subprogram_name}'"
+                    )
+
             self._logger.info(
-                f"Successfully loaded {len(data)} additional subprogram(s) "  # type: ignore
+                f"Successfully loaded {len(enabled_subprograms)} enabled subprogram(s) "
                 f"from '{custom_file_path}'"
             )
-            self._logger.debug(
-                f"Additional subprogram names: {[item.get('name', 'unnamed') for item in data if isinstance(item, dict)]}"  # type: ignore
-            )
 
-            return data  # type: ignore
+            if disabled_count > 0:
+                self._logger.info(f"Skipped {disabled_count} disabled subprogram(s)")
+
+            if enabled_subprograms:
+                self._logger.debug(
+                    f"Enabled subprogram names: {[item.get('name', 'unnamed') for item in enabled_subprograms]}"
+                )
+
+            return enabled_subprograms
 
         except json.JSONDecodeError as json_error:
             error_msg: str = (
@@ -190,3 +220,49 @@ class FileIOService(object):
             )
             self._logger.error(error_msg)
             raise DataLoadError(custom_file_path, error) from error
+
+    def _create_custom_subprograms_file(self, file_path: Path) -> None:
+        try:
+            self._logger.debug(
+                f"Creating default custom subprograms file at: {file_path}"
+            )
+
+            template_content: list[dict[str, Any]] = [
+                {
+                    "name": "Custom Program Example",
+                    "database_alias": "CUSTOM_PROGRAM_2025",
+                    "display_order": 60,
+                    "enabled": False,
+                    "notifications": [
+                        {
+                            "name": "N° 001",
+                            "database_aliases": [
+                                "N°:001.Du:01/01/2025.TRANCHE:0.Montant:   700 000"
+                            ],
+                            "aid_count": 100,
+                            "aid_amount": 700000,
+                        }
+                    ],
+                }
+            ]
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(template_content, f, indent=2, ensure_ascii=False)
+
+            self._logger.info(
+                f"Created custom subprograms file with template data: {file_path}"
+            )
+            self._logger.info(
+                "Note: Use 'enabled': true/false to control whether subprograms are loaded. "
+                "Template example is disabled by default - set 'enabled': true to activate it."
+            )
+
+        except Exception as error:
+            self._logger.error(
+                f"Failed to create default custom subprograms file '{file_path}': {error}"
+            )
+
+    def ensure_custom_subprograms_file_exists(self) -> None:
+        custom_file_path: Path = self._config.custom_subprograms_path
+        if not custom_file_path.exists():
+            self._create_custom_subprograms_file(custom_file_path)

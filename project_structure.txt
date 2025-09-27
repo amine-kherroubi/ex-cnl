@@ -1,5 +1,7 @@
 .
 ├── .gitignore
+├── .vscode
+│   └── settings.json
 ├── README.md
 ├── app
 │   ├── common
@@ -7,27 +9,30 @@
 │   │   └── logging_setup.py
 │   ├── config.py
 │   ├── core
-│   │   ├── core_facade.py
 │   │   ├── domain
 │   │   │   ├── enums
 │   │   │   │   ├── report_category.py
 │   │   │   │   └── space_time.py
 │   │   │   ├── models
-│   │   │   │   ├── subprogram.py
+│   │   │   │   ├── notification.py
 │   │   │   │   ├── report_context.py
 │   │   │   │   ├── report_specification.py
-│   │   │   │   └── required_file.py
+│   │   │   │   ├── required_file.py
+│   │   │   │   └── subprogram.py
 │   │   │   ├── predefined_objects
 │   │   │   │   ├── dairas_et_communes.py
-│   │   │   │   ├── programs.py
+│   │   │   │   ├── report_specifications
+│   │   │   │   │   ├── activite_mensuelle_specification.py
+│   │   │   │   │   └── situation_financiere_specification.py
+│   │   │   │   ├── subprograms.py
 │   │   │   │   └── tranches.py
-│   │   │   └── registry
+│   │   │   └── registries
 │   │   │       ├── report_specification_registry.py
-│   │   │       └── report_specifications
-│   │   │           ├── activite_mensuelle_specification.py
-│   │   │           └── situation_financiere_specification.py
+│   │   │       └── subprogram_registry.py
+│   │   ├── facade.py
 │   │   ├── infrastructure
 │   │   │   ├── data
+│   │   │   │   ├── adhoc_queries.py
 │   │   │   │   └── data_repository.py
 │   │   │   └── file_io
 │   │   │       └── file_io_service.py
@@ -50,9 +55,8 @@
 │       │   ├── output_selector.py
 │       │   ├── report_card.py
 │       │   ├── required_files.py
-│       │   └── status_display.py
-│       ├── controllers
-│       │   └── report_controller.py
+│       │   ├── status_display.py
+│       │   └── subprogram_selector.py
 │       ├── models
 │       │   └── state.py
 │       ├── styling
@@ -69,7 +73,8 @@
 │       └── windows
 │           ├── main_window.py
 │           └── success_window.py
+├── custom_subprograms.json
 ├── project_structure.txt
 └── requirements.txt
 
-27 directories, 46 files
+27 directories, 51 files

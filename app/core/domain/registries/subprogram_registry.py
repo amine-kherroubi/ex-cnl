@@ -35,6 +35,8 @@ class SubprogramRegistry(object):
 
         cls._logger.info("Initializing SubprogramRegistry")
 
+        file_io_service.ensure_custom_subprograms_file_exists()
+
         cls._SUBPROGRAMS.clear()
         cls._SUBPROGRAMS.extend(copy.deepcopy(cls._DEFAULT_SUBPROGRAMS))
         cls._logger.info(f"Loaded {len(cls._DEFAULT_SUBPROGRAMS)} default subprograms")
