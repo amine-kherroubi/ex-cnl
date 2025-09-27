@@ -24,7 +24,6 @@
 │   │   │   │   ├── report_specifications
 │   │   │   │   │   ├── activite_mensuelle_specification.py
 │   │   │   │   │   └── situation_financiere_specification.py
-│   │   │   │   ├── subprograms.py
 │   │   │   │   └── tranches.py
 │   │   │   └── registries
 │   │   │       ├── report_specification_registry.py
@@ -77,4 +76,4 @@
 ├── project_structure.txt
 └── requirements.txt
 
-27 directories, 51 files
+27 directories, 50 files
