@@ -488,7 +488,7 @@ class SubprogramRegistry(object):
         ),
         Subprogram(
             name="2010",
-            database_alias="QUINQUINNAL 2010",
+            database_alias=" QUINQUINNAL 2010",
             notifications=[
                 Notification(
                     name="N° 250",
@@ -512,7 +512,7 @@ class SubprogramRegistry(object):
         ),
         Subprogram(
             name="2011",
-            database_alias="QUINQUENNAL 2011",
+            database_alias=" QUINQUENNAL 2011",
             notifications=[
                 Notification(
                     name="N° 587",

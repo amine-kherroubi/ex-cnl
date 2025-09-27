@@ -50,6 +50,12 @@ queries: dict[str, str] = {
             p."Tranche du rapport"
         FROM paiements p
     """,
+    "query8": """
+        SELECT
+            COUNT(*)
+        FROM paiements p
+        WHERE p."Sous programme" = ' QUINQUINNAL 2010'
+    """,
 }
 
 
@@ -80,4 +86,4 @@ def run_query(name: str) -> None:
 
 
 if __name__ == "__main__":
-    run_query("query7")
+    run_query("query8")
