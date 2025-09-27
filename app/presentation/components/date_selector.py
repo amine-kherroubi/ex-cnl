@@ -108,7 +108,7 @@ class DateSelector(BaseComponent):
             master=self._content_frame,
             values=year_values,
             variable=self._year_var,
-            command=lambda _: self._on_selection_changed(),
+            command=lambda _: self._on_year_changed(),
             width=DesignSystem.Width.MD,
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(
@@ -143,12 +143,12 @@ class DateSelector(BaseComponent):
             sticky="w",
         )
 
-        month_values: list[str] = [month.capitalize() for month in Month]
+        # Initialize month dropdown with current year's available months
         self._month_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
             master=self._content_frame,
-            values=month_values,
+            values=self._get_available_months(),
             variable=self._month_var,
-            command=lambda _: self._on_selection_changed(),
+            command=lambda _: self._on_month_changed(),
             width=DesignSystem.Width.MD,
             height=DesignSystem.Height.SM,
             font=ctk.CTkFont(
@@ -166,6 +166,45 @@ class DateSelector(BaseComponent):
             column=3,
             sticky="ew",
         )
+
+    def _get_available_months(self) -> list[str]:
+        """Get available months based on selected year."""
+        try:
+            selected_year = int(self._year_var.get())
+        except ValueError:
+            selected_year = self._current_year
+
+        if selected_year == self._current_year:
+            # For current year, only show months up to current month
+            available_months = []
+            for month in Month:
+                if month.number <= self._current_month.number:
+                    available_months.append(month.capitalize())  # type: ignore
+            return available_months  # type: ignore
+        else:
+            # For other years, show all months
+            return [month.capitalize() for month in Month]
+
+    def _update_month_dropdown(self) -> None:
+        """Update the month dropdown values based on selected year."""
+        available_months = self._get_available_months()
+        self._month_dropdown.configure(values=available_months)  # type: ignore
+
+        # Check if current selection is still valid
+        current_month_str = self._month_var.get()
+        if current_month_str not in available_months:
+            # Reset to first available month if current selection is invalid
+            if available_months:
+                self._month_var.set(available_months[0])
+
+    def _on_year_changed(self) -> None:
+        """Handle year selection change."""
+        self._update_month_dropdown()
+        self._on_selection_changed()
+
+    def _on_month_changed(self) -> None:
+        """Handle month selection change."""
+        self._on_selection_changed()
 
     def _on_selection_changed(self) -> None:
         month_str: str = self._month_var.get()
@@ -186,11 +225,11 @@ class DateSelector(BaseComponent):
             today: date = date.today()
 
             if selected_date > today:
-
                 self._month_var.set(self._current_month.capitalize())
                 self._year_var.set(str(self._current_year))
                 selected_month = self._current_month
                 selected_year = self._current_year
+                self._update_month_dropdown()
 
         self._on_date_changed(selected_month, selected_year)
 
@@ -210,4 +249,5 @@ class DateSelector(BaseComponent):
     def reset_to_current(self) -> None:
         self._month_var.set(self._current_month.capitalize())
         self._year_var.set(str(self._current_year))
+        self._update_month_dropdown()
         self._on_selection_changed()
