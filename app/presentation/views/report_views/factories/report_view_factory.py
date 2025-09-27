@@ -5,7 +5,7 @@ from typing import Any, Callable, final
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
-from app.presentation.controllers.report_controller import ReportController
+from app.core.facade import CoreFacade
 from app.presentation.views.report_views.concrete_report_views.activite_mensuelle_view import (
     ActiviteMenuselleView,
 )
@@ -24,7 +24,7 @@ class ReportViewFactory(object):
     def create_view(
         parent: Any,
         report_spec: ReportSpecification,
-        controller: ReportController,
+        core_facade: CoreFacade,
         on_back: Callable[[], None],
     ) -> BaseReportView:
 
@@ -40,6 +40,6 @@ class ReportViewFactory(object):
         return view(
             parent=parent,
             report_spec=report_spec,
-            controller=controller,
+            core_facade=core_facade,
             on_back=on_back,
         )

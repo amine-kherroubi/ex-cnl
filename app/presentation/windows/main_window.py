@@ -11,13 +11,11 @@ import customtkinter as ctk  # type: ignore
 from app.core.domain.models.report_specification import ReportSpecification
 from app.presentation.styling.design_system import DesignSystem
 from app.presentation.views.menu_view import MenuView
-from app.presentation.views.settings_view import SettingsView
 from app.presentation.views.report_views.factories.report_view_factory import (
     ReportViewFactory,
 )
 from app.presentation.models.state import State
-from app.presentation.controllers.report_controller import ReportController
-from app.core.core_facade import CoreFacade
+from app.core.facade import CoreFacade
 from app.common.logging_setup import get_logger
 
 
@@ -26,22 +24,19 @@ class MainWindow(ctk.CTk):
         "_logger",
         "_facade",
         "_state",
-        "_controller",
         "_current_view",
         "_container",
         "_title_label",
-        "_settings_button",
     )
 
-    def __init__(self, facade: CoreFacade) -> None:
+    def __init__(self, core_facade: CoreFacade) -> None:
         super().__init__()  # type: ignore
 
         self._logger: Logger = get_logger(__name__)
         self._logger.info("Initializing main application window")
 
-        self._facade: CoreFacade = facade
+        self._facade: CoreFacade = core_facade
         self._state: State = State()
-        self._controller: ReportController = ReportController(facade)
         self._current_view: ctk.CTkFrame | None = None
 
         self.title(string="Générateur de rapports")
@@ -103,23 +98,6 @@ class MainWindow(ctk.CTk):
         )
         self._organization.grid(row=0, column=1, padx=(DesignSystem.Spacing.SM, DesignSystem.Spacing.NONE), sticky="w")  # type: ignore
 
-        self._settings_button: ctk.CTkButton = ctk.CTkButton(
-            master=header_frame,
-            text="Paramètres",
-            font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL,
-                size=DesignSystem.FontSize.BODY,
-                weight="bold",
-            ),
-            fg_color=DesignSystem.Color.GRAY,
-            text_color=DesignSystem.Color.WHITE,
-            hover_color=DesignSystem.Color.DARKER_GRAY,
-            corner_radius=DesignSystem.Roundness.SM,
-            height=DesignSystem.Height.SM,
-            width=DesignSystem.Width.SM,
-            command=self._show_settings,
-        )
-
         self._container: ctk.CTkFrame = ctk.CTkFrame(
             master=self,
             fg_color=DesignSystem.Color.LEAST_WHITE,
@@ -131,7 +109,7 @@ class MainWindow(ctk.CTk):
 
     def _load_available_reports(self) -> None:
         try:
-            reports: dict[str, Any] = self._controller.get_available_reports()
+            reports: dict[str, Any] = self._facade.get_available_reports()
             self._state.available_reports = reports
             self._logger.info(f"Loaded {len(reports)} report types")
         except Exception as e:
@@ -139,23 +117,11 @@ class MainWindow(ctk.CTk):
 
     def _show_menu(self) -> None:
         self._clear_current_view()
-        self._settings_button.grid(row=0, column=2, sticky="e")  # type: ignore
 
         self._current_view = MenuView(
             parent=self._container,
             available_reports=self._state.available_reports,
             on_report_selected=self._show_report_view,
-        )
-        self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
-
-    def _show_settings(self) -> None:
-        self._clear_current_view()
-        self._settings_button.grid_remove()
-
-        self._current_view = SettingsView(
-            parent=self._container,
-            facade=self._facade,
-            on_back=self._show_menu,
         )
         self._current_view.grid(row=0, column=0, sticky="nsew")  # type: ignore
 
@@ -172,7 +138,7 @@ class MainWindow(ctk.CTk):
         self._current_view = ReportViewFactory.create_view(
             parent=self._container,
             report_spec=report_spec,
-            controller=self._controller,
+            core_facade=self._facade,
             on_back=self._show_menu,
         )
 

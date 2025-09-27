@@ -7,10 +7,10 @@ from typing import Any, Callable
 from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.models.subprogram import Subprogram
-from app.presentation.controllers.report_controller import ReportController
 from app.presentation.views.report_views.base_report_view import BaseReportView
 from app.presentation.components.subprogram_selector import SubprogramSelector
 from app.presentation.styling.design_system import DesignSystem
+from app.core.facade import CoreFacade
 
 
 class SituationFinanciereView(BaseReportView):
@@ -24,12 +24,12 @@ class SituationFinanciereView(BaseReportView):
         self,
         parent: Any,
         report_spec: ReportSpecification,
-        controller: ReportController,
+        core_facade: CoreFacade,
         on_back: Callable[[], None],
     ) -> None:
         self._selected_subprogram: Subprogram | None = None
         self._selected_notification: Notification | None = None
-        super().__init__(parent, report_spec, controller, on_back)
+        super().__init__(parent, report_spec, core_facade, on_back)
 
     def _setup_report_specific_components(self) -> None:
         self._subprogram_selector = SubprogramSelector(

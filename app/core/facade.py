@@ -7,31 +7,55 @@ from pathlib import Path
 from typing import Any
 
 # Local application imports
-from app.core.core_facade import CoreFacade
+from app.config import AppConfig
 from app.core.domain.enums.space_time import Month, Wilaya
+from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import (
     ReportSpecification,
     RequiredFile,
 )
+from app.core.domain.models.subprogram import Subprogram
+from app.core.domain.registries.report_specification_registry import (
+    ReportSpecificationRegistry,
+)
+from app.core.domain.registries.subprogram_registry import SubprogramRegistry
+from app.core.infrastructure.data.data_repository import DuckDBRepository
+from app.core.infrastructure.file_io.file_io_service import FileIOService
+from app.core.services.report_generation_service.factories.report_generator_factory import (
+    ReportGeneratorFactory,
+)
+from app.core.services.report_generation_service.base_generator import BaseGenerator
 from app.common.logging_setup import get_logger
 
 
-class ReportController:
-    __slots__ = ("_facade", "_logger")
+class CoreFacade(object):
+    __slots__ = (
+        "_config",
+        "_data_repository",
+        "_file_io_service",
+        "_logger",
+    )
 
-    def __init__(self, facade: CoreFacade) -> None:
+    def __init__(self, config: AppConfig) -> None:
         self._logger: Logger = get_logger(__name__)
-        self._logger.debug("Initializing ReportController with injected facade")
+        self._logger.debug("Initializing application core facade")
 
-        self._facade: CoreFacade = facade
-        self._logger.info("ReportController initialized successfully")
+        self._config: AppConfig = config
+        self._data_repository: DuckDBRepository = DuckDBRepository(
+            self._config.database_config
+        )
+        self._file_io_service: FileIOService = FileIOService(
+            self._config.file_io_config
+        )
+
+        self._logger.info("CoreFacade initialized successfully")
 
     def get_available_reports(self) -> dict[str, ReportSpecification]:
-        self._logger.debug("Retrieving available reports from facade")
+        self._logger.debug("Retrieving available reports from registry")
 
         try:
-            reports = self._facade.get_available_reports()
+            reports: dict[str, ReportSpecification] = ReportSpecificationRegistry.all()
             self._logger.info(f"Retrieved {len(reports)} available report types")
             return reports
         except Exception as e:
@@ -53,7 +77,6 @@ class ReportController:
         self._logger.debug(f"Period: {month} {year}")
         self._logger.debug(f"Additional parameters: {kwargs}")
 
-        # Log subprogram and notification selection if provided
         if "target_subprogram" in kwargs:
             self._logger.info(f"Target subprogram: {kwargs['target_subprogram']}")
         if "target_notification" in kwargs:
@@ -81,17 +104,32 @@ class ReportController:
                 f"Period: {month} {year}, Report date: {report_context.reporting_date}"
             )
 
-            output_file_path: Path = self._facade.generate_report(
+            report_specification: ReportSpecification = ReportSpecificationRegistry.get(
+                report_name
+            )
+            self._logger.info(f"Generating report: {report_specification.display_name}")
+            self._logger.debug(f"Report category: {report_specification.category}")
+
+            generator: BaseGenerator = ReportGeneratorFactory.create_generator(
                 report_name=report_name,
-                source_file_paths=validated_files,
-                output_directory_path=output_directory_path,
+                file_io_service=self._file_io_service,
+                data_repository=self._data_repository,
                 report_context=report_context,
                 **kwargs,
+            )
+            self._logger.debug(f"Generator created: {generator.__class__.__name__}")
+
+            self._logger.info("Starting report generation process")
+            output_file_path: Path = generator.generate(
+                source_file_paths=validated_files,
+                output_directory_path=output_directory_path,
             )
 
             self._logger.info(
                 f"Report generation completed successfully: {output_file_path}"
             )
+            self._logger.info(f"Report generated successfully: {output_file_path}")
+            print(f"Report generated successfully: {output_file_path}")
 
             return output_file_path
 
@@ -109,12 +147,10 @@ class ReportController:
             f"Validating {len(input_files)} source files for report: {report_name}"
         )
 
-        available_reports: dict[str, ReportSpecification] = (
-            self._facade.get_available_reports()
-        )
+        available_reports: dict[str, ReportSpecification] = self.get_available_reports()
 
         if report_name not in available_reports:
-            error_msg = f"Unknown report type: {report_name}"
+            error_msg: str = f"Unknown report type: {report_name}"
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
@@ -128,7 +164,7 @@ class ReportController:
         self._logger.debug("Checking if all input files exist")
         for file_path in input_files:
             if not file_path.exists():
-                error_msg = f"File does not exist: {file_path}"
+                error_msg: str = f"File does not exist: {file_path}"
                 self._logger.error(error_msg)
                 raise FileNotFoundError(error_msg)
         self._logger.debug("All input files exist")
@@ -169,14 +205,14 @@ class ReportController:
                 )
 
         if missing_files:
-            error_msg = "Missing files for required patterns:\n" + "\n".join(
+            error_msg: str = "Missing files for required patterns:\n" + "\n".join(
                 missing_files
             )
             self._logger.error("Validation failed: missing required patterns")
             raise ValueError(error_msg)
 
         if unmatched_files:
-            error_msg = (
+            error_msg: str = (
                 "The following files don't match any required pattern:\n"
                 + "\n".join(str(f) for f in unmatched_files)
             )
@@ -189,3 +225,75 @@ class ReportController:
             f"File validation successful: {len(matched_files)} files matched to required patterns"
         )
         return matched_files
+
+    # Subprogram and notification management methods (unchanged)
+    def create_new_subprogram(self, subprogram: Subprogram) -> None:
+        self._logger.debug(f"Creating new subprogram: {subprogram}")
+        SubprogramRegistry.register_subprogram(subprogram)
+        self._logger.info(f"New subprogram {subprogram.name} created successfully")
+
+    def update_subprogram(
+        self, subprogram_name: str, updated_subprogram: Subprogram
+    ) -> None:
+        self._logger.debug(f"Updating subprogram: {subprogram_name}")
+        SubprogramRegistry.update_subprogram(subprogram_name, updated_subprogram)
+        self._logger.info(f"Subprogram {subprogram_name} updated successfully")
+
+    def delete_subprogram(self, subprogram_name: str) -> None:
+        self._logger.debug(f"Deleting subprogram: {subprogram_name}")
+        SubprogramRegistry.unregister_subprogram(subprogram_name)
+        self._logger.info(f"Subprogram {subprogram_name} deleted successfully")
+
+    def create_new_notification(
+        self, subprogram_name: str, notification: Notification
+    ) -> None:
+        self._logger.debug(
+            f"Creating new notification for subprogram {subprogram_name}: {notification}"
+        )
+        SubprogramRegistry.register_notification(subprogram_name, notification)
+        self._logger.info(
+            f"New notification {notification.name} for subprogram {subprogram_name} created successfully"
+        )
+
+    def update_notification(
+        self,
+        subprogram_name: str,
+        notification_name: str,
+        updated_notification: Notification,
+    ) -> None:
+        self._logger.debug(
+            f"Updating notification {notification_name} in subprogram {subprogram_name}"
+        )
+        SubprogramRegistry.update_notification(
+            subprogram_name, notification_name, updated_notification
+        )
+        self._logger.info(
+            f"Notification {notification_name} in subprogram {subprogram_name} updated successfully"
+        )
+
+    def delete_notification(self, subprogram_name: str, notification_name: str) -> None:
+        self._logger.debug(
+            f"Deleting notification {notification_name} from subprogram {subprogram_name}"
+        )
+        SubprogramRegistry.unregister_notification(subprogram_name, notification_name)
+        self._logger.info(
+            f"Notification {notification_name} from subprogram {subprogram_name} deleted successfully"
+        )
+
+    def reset_subprogram_registry(self) -> None:
+        self._logger.debug("Resetting subprogram registry to default state")
+        SubprogramRegistry.reset_to_default()
+        self._logger.info("Subprogram registry reset to default state successfully")
+
+    def get_subprogram_registry_status(self) -> dict[str, int]:
+        self._logger.debug("Getting subprogram registry status")
+        subprograms: list[Subprogram] = SubprogramRegistry.get_all_subprograms()
+        notifications: list[Notification] = SubprogramRegistry.get_all_notifications()
+
+        status: dict[str, int] = {
+            "total_subprograms": len(subprograms),
+            "total_notifications": len(notifications),
+        }
+
+        self._logger.info(f"Registry status: {status}")
+        return status

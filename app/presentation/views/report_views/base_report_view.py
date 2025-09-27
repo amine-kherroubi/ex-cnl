@@ -18,14 +18,14 @@ from app.presentation.components.output_selector import OutputSelector
 from app.presentation.components.status_display import StatusDisplay
 from app.presentation.components.required_files import RequiredFilesComponent
 from app.presentation.windows.success_window import SuccessWindow
-from app.presentation.controllers.report_controller import ReportController
+from app.core.facade import CoreFacade
 from app.presentation.styling.design_system import DesignSystem
 
 
 class BaseReportView(ctk.CTkFrame):
     __slots__ = (
         "_report_spec",
-        "_controller",
+        "_facade",
         "_on_back",
         "_date_selector",
         "_file_selector",
@@ -47,12 +47,12 @@ class BaseReportView(ctk.CTkFrame):
         self,
         parent: Any,
         report_spec: ReportSpecification,
-        controller: ReportController,
+        core_facade: CoreFacade,
         on_back: Callable[[], None],
     ) -> None:
         super().__init__(master=parent)  # type: ignore
         self._report_spec: ReportSpecification = report_spec
-        self._controller: ReportController = controller
+        self.core_facade: CoreFacade = core_facade
         self._on_back: Callable[[], None] = on_back
         self._selected_month: Month | None = None
         self._selected_year: int | None = None
@@ -297,7 +297,7 @@ class BaseReportView(ctk.CTkFrame):
 
                 additional_params: dict[str, Any] = self._get_generation_parameters()
 
-                result_path: Path = self._controller.generate_report(
+                result_path: Path = self.core_facade.generate_report(
                     report_name=self._report_spec.name,
                     source_files=self._selected_files,
                     output_directory_path=self._output_path,  # type: ignore
