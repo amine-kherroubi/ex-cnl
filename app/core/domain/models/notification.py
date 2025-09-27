@@ -42,6 +42,5 @@ class Notification(BaseModel):
 
     model_config = {
         "frozen": True,
-        "str_strip_whitespace": True,
         "validate_assignment": True,
     }

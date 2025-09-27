@@ -9,54 +9,7 @@ import pandas as pd
 
 connection: duckdb.DuckDBPyConnection = duckdb.connect()  # type: ignore
 
-queries: dict[str, str] = {
-    "query1": """
-        SELECT DISTINCT Programme,
-                MIN(STRPTIME("Date OV", '%d/%m/%Y')) AS first_date,
-                MAX(STRPTIME("Date OV", '%d/%m/%Y')) AS last_date,
-                COUNT(*) AS OVs
-        FROM paiements
-        GROUP BY Programme
-        ORDER BY first_date
-    """,
-    "query2": """
-        SELECT DISTINCT "Sous programme"
-        FROM decisions
-    """,
-    "query3": """
-        SELECT DISTINCT Programme,
-                "Sous programme"
-        FROM paiements
-    """,
-    "query4": """
-        SELECT DISTINCT Daira
-        FROM paiements
-        ORDER BY Daira
-    """,
-    "query5": """
-        SELECT DISTINCT "Commune de projet"
-        FROM paiements
-        ORDER BY "Commune de projet"
-    """,
-    "query6": """
-        SELECT DISTINCT
-            p."Sous programme",
-            p."Notification"
-        FROM paiements p
-        ORDER BY p."Sous programme", p."Notification"
-    """,
-    "query7": """
-        SELECT DISTINCT
-            p."Tranche du rapport"
-        FROM paiements p
-    """,
-    "query8": """
-        SELECT
-            COUNT(*)
-        FROM paiements p
-        WHERE p."Sous programme" = ' QUINQUINNAL 2010'
-    """,
-}
+queries: dict[str, str] = {}
 
 
 def run_query(name: str) -> None:
@@ -78,6 +31,20 @@ def run_query(name: str) -> None:
         )
         connection.register("decisions", df)
 
+    if "subprograms" in sql:
+        from app.core.domain.registries.subprogram_registry import SubprogramRegistry
+
+        df: pd.DataFrame = SubprogramRegistry.get_subprograms_dataframe()
+        connection.register("subprograms", df)
+
+    if "dairas_communes" in sql:
+        from app.core.domain.predefined_objects.dairas_et_communes import (
+            get_dairas_communes_dataframe,
+        )
+
+        df: pd.DataFrame = get_dairas_communes_dataframe()
+        connection.register("dairas_communes", df)
+
     result: pd.DataFrame = connection.execute(sql).fetch_df()
     out_file: Path = Path(f"{name}_result.txt")
     with open(out_file, "w", encoding="utf-8") as f:
@@ -86,4 +53,4 @@ def run_query(name: str) -> None:
 
 
 if __name__ == "__main__":
-    run_query("query8")
+    pass

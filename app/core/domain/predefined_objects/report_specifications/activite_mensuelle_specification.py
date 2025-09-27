@@ -60,19 +60,19 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
             FROM subprograms s
         """,
         "lancements_mois": f"""
-            SELECT 
+            SELECT
                 s.subprogram,
                 COALESCE(data.count, 0) as count
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND "Date OV" LIKE '%/{{month}}/{{year}}'
-                AND "valeur physique" > 0
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
+                AND p."valeur physique" > 0
+                GROUP BY p."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "lancements_cumul_annee": f"""
@@ -82,14 +82,14 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {{month}}
-                AND "Date OV" LIKE '%/{{year}}'
-                AND "valeur physique" > 0
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND CAST(SUBSTRING(p."Date OV", 4, 2) AS INTEGER) <= {{month}}
+                AND p."Date OV" LIKE '%/{{year}}'
+                AND p."valeur physique" > 0
+                GROUP BY p."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "livraisons_mois": f"""
@@ -99,13 +99,13 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                AND "Date OV" LIKE '%/{{month}}/{{year}}'
-                AND "valeur physique" > 0
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
+                AND p."valeur physique" > 0
+                GROUP BY p."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "livraisons_cumul_annee": f"""
@@ -115,14 +115,14 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {{month}}
-                AND "Date OV" LIKE '%/{{year}}'
-                AND "valeur physique" > 0
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                AND CAST(SUBSTRING(p."Date OV", 4, 2) AS INTEGER) <= {{month}}
+                AND p."Date OV" LIKE '%/{{year}}'
+                AND p."valeur physique" > 0
+                GROUP BY p."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "subprograms_situation": """
@@ -134,63 +134,57 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
         "acheves_derniere_tranche": f"""
             SELECT 
                 s.subprogram,
-                s.aid_count,
                 COALESCE(data.count, 0) as acheves
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                AND "valeur physique" > 0
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                AND p."valeur physique" > 0
+                GROUP BY p."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
-            WHERE s.aid_count > 0
         """,
         "en_cours_calculation": f"""
             SELECT 
                 s.subprogram,
-                s.aid_count,
                 COALESCE(lances.count, 0) as lances_count,
                 COALESCE(acheves.count, 0) as acheves_count,
                 GREATEST(0, COALESCE(lances.count, 0) - COALESCE(acheves.count, 0)) as en_cours
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND "valeur physique" > 0
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND p."valeur physique" > 0
+                GROUP BY p."Sous programme"
             ) lances ON s.subprogram = lances."Sous programme"
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                GROUP BY p."Sous programme"
             ) acheves ON s.subprogram = acheves."Sous programme"
-            WHERE s.aid_count > 0
         """,
         "non_lances_premiere_tranche": f"""
             SELECT 
                 s.subprogram,
-                s.aid_count,
                 COALESCE(s.aid_count - data.count, s.aid_count) as non_lances
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    "Sous programme",
+                    p."Sous programme",
                     COUNT(*) as count
-                FROM paiements
-                WHERE "Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND "valeur physique" > 0
-                GROUP BY "Sous programme"
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND p."valeur physique" > 0
+                GROUP BY p."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
-            WHERE s.aid_count > 0
         """,
     },
 )
