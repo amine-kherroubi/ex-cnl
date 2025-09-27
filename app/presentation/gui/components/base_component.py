@@ -8,7 +8,7 @@ from typing import Any
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class BaseComponent(ctk.CTkFrame, ABC):

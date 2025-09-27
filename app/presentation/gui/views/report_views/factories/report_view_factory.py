@@ -6,11 +6,11 @@ from typing import Any, Callable, final
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.facade import CoreFacade
-from app.presentation.views.report_views.concrete_report_views.activite_mensuelle_view import (
+from app.presentation.gui.views.report_views.concrete_report_views.activite_mensuelle_view import (
     ActiviteMenuselleView,
 )
-from app.presentation.views.report_views.base_report_view import BaseReportView
-from app.presentation.views.report_views.concrete_report_views.situation_financiere_view import (
+from app.presentation.gui.views.report_views.base_report_view import BaseReportView
+from app.presentation.gui.views.report_views.concrete_report_views.situation_financiere_view import (
     SituationFinanciereView,
 )
 

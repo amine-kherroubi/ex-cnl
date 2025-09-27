@@ -11,8 +11,8 @@ from app.core.domain.models.report_specification import (
     ReportSpecification,
     RequiredFile,
 )
-from app.presentation.components.base_component import BaseComponent
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.components.base_component import BaseComponent
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class RequiredFilesComponent(BaseComponent):

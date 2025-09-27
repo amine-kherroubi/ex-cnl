@@ -9,12 +9,12 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
-from app.presentation.styling.design_system import DesignSystem
-from app.presentation.views.menu_view import MenuView
-from app.presentation.views.report_views.factories.report_view_factory import (
+from app.presentation.gui.styling.design_system import DesignSystem
+from app.presentation.gui.views.menu_view import MenuView
+from app.presentation.gui.views.report_views.factories.report_view_factory import (
     ReportViewFactory,
 )
-from app.presentation.models.state import State
+from app.presentation.gui.models.state import State
 from app.core.facade import CoreFacade
 from app.common.logging_setup import get_logger
 

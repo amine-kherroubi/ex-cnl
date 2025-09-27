@@ -7,9 +7,9 @@ from typing import Any, Callable
 from app.core.domain.models.notification import Notification
 from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.models.subprogram import Subprogram
-from app.presentation.views.report_views.base_report_view import BaseReportView
-from app.presentation.components.subprogram_selector import SubprogramSelector
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.views.report_views.base_report_view import BaseReportView
+from app.presentation.gui.components.subprogram_selector import SubprogramSelector
+from app.presentation.gui.styling.design_system import DesignSystem
 from app.core.facade import CoreFacade
 
 

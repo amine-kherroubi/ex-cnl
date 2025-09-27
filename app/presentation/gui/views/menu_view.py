@@ -7,8 +7,8 @@ from typing import Any, Callable
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.components.report_card import ReportCard
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.components.report_card import ReportCard
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class MenuView(ctk.CTkFrame):

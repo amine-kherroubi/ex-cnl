@@ -9,8 +9,8 @@ import customtkinter as ctk  # type: ignore
 
 # Local application imports
 from app.core.domain.enums.space_time import Month
-from app.presentation.components.base_component import BaseComponent
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.components.base_component import BaseComponent
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class DateSelector(BaseComponent):

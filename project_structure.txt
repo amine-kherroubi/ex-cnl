@@ -46,33 +46,35 @@
 │   │               └── report_generator_factory.py
 │   ├── main.py
 │   └── presentation
-│       ├── components
-│       │   ├── base_component.py
-│       │   ├── date_selector.py
-│       │   ├── file_selector.py
-│       │   ├── output_selector.py
-│       │   ├── report_card.py
-│       │   ├── required_files.py
-│       │   ├── status_display.py
-│       │   └── subprogram_selector.py
-│       ├── models
-│       │   └── state.py
-│       ├── styling
-│       │   └── design_system.py
-│       ├── views
-│       │   ├── menu_view.py
-│       │   └── report_views
-│       │       ├── base_report_view.py
-│       │       ├── concrete_report_views
-│       │       │   ├── activite_mensuelle_view.py
-│       │       │   └── situation_financiere_view.py
-│       │       └── factories
-│       │           └── report_view_factory.py
-│       └── windows
-│           ├── main_window.py
-│           └── success_window.py
+│       ├── cli
+│       └── gui
+│           ├── components
+│           │   ├── base_component.py
+│           │   ├── date_selector.py
+│           │   ├── file_selector.py
+│           │   ├── output_selector.py
+│           │   ├── report_card.py
+│           │   ├── required_files.py
+│           │   ├── status_display.py
+│           │   └── subprogram_selector.py
+│           ├── models
+│           │   └── state.py
+│           ├── styling
+│           │   └── design_system.py
+│           ├── views
+│           │   ├── menu_view.py
+│           │   └── report_views
+│           │       ├── base_report_view.py
+│           │       ├── concrete_report_views
+│           │       │   ├── activite_mensuelle_view.py
+│           │       │   └── situation_financiere_view.py
+│           │       └── factories
+│           │           └── report_view_factory.py
+│           └── windows
+│               ├── main_window.py
+│               └── success_window.py
 ├── custom_subprograms.json
 ├── project_structure.txt
 └── requirements.txt
 
-27 directories, 49 files
+29 directories, 49 files

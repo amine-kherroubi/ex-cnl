@@ -8,8 +8,8 @@ from typing import Any, Literal, TypeAlias
 import customtkinter as ctk  # type: ignore
 
 # Local application imports
-from app.presentation.components.base_component import BaseComponent
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.components.base_component import BaseComponent
+from app.presentation.gui.styling.design_system import DesignSystem
 
 MessageType: TypeAlias = Literal["information", "succès", "avertissement", "erreur"]
 

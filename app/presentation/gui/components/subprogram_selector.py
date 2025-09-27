@@ -10,8 +10,8 @@ import customtkinter as ctk  # type: ignore
 from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.domain.models.subprogram import Subprogram
 from app.core.domain.models.notification import Notification
-from app.presentation.components.base_component import BaseComponent
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.components.base_component import BaseComponent
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class SubprogramSelector(BaseComponent):

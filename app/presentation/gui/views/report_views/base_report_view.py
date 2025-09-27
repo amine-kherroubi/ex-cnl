@@ -12,14 +12,14 @@ import customtkinter as ctk  # type: ignore
 # Local application imports
 from app.core.domain.enums.space_time import Month
 from app.core.domain.models.report_specification import ReportSpecification
-from app.presentation.components.date_selector import DateSelector
-from app.presentation.components.file_selector import FileSelector
-from app.presentation.components.output_selector import OutputSelector
-from app.presentation.components.status_display import StatusDisplay
-from app.presentation.components.required_files import RequiredFilesComponent
-from app.presentation.windows.success_window import SuccessWindow
+from app.presentation.gui.components.date_selector import DateSelector
+from app.presentation.gui.components.file_selector import FileSelector
+from app.presentation.gui.components.output_selector import OutputSelector
+from app.presentation.gui.components.status_display import StatusDisplay
+from app.presentation.gui.components.required_files import RequiredFilesComponent
+from app.presentation.gui.windows.success_window import SuccessWindow
 from app.core.facade import CoreFacade
-from app.presentation.styling.design_system import DesignSystem
+from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class BaseReportView(ctk.CTkFrame):
