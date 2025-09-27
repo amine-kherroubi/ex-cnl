@@ -172,17 +172,10 @@ class FileSelector(BaseComponent):
 
         if self._selected_files:
             self._files_listbox.configure(text_color=DesignSystem.Color.BLACK.value)  # type: ignore
-            count_text: str = (
-                f"Fichiers sélectionnés ({len(self._selected_files)}):\n\n"
-            )
-            self._files_listbox.insert(index="end", text=count_text)  # type: ignore
 
-            for file_path in self._selected_files:
+            for i, file_path in enumerate(self._selected_files):
                 self._files_listbox.insert(  # type: ignore
-                    index="end", text=f"Fichier : {file_path.name}\n"
-                )
-                self._files_listbox.insert(  # type: ignore
-                    index="end", text=f"   {file_path.parent}\n\n"
+                    index="end", text=f"{i + 1} - {file_path}\n"
                 )
         else:
             self._files_listbox.configure(text_color=DesignSystem.Color.GRAY.value)  # type: ignore
