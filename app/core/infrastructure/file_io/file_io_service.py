@@ -231,7 +231,6 @@ class FileIOService(object):
                 {
                     "name": "Custom Program Example",
                     "database_alias": "CUSTOM_PROGRAM_2025",
-                    "display_order": 60,
                     "enabled": False,
                     "notifications": [
                         {

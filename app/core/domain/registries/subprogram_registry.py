@@ -254,7 +254,6 @@ class SubprogramRegistry(object):
             [
                 {
                     "subprogram": subprogram.database_alias,
-                    "display_order": subprogram.display_order,
                     "aid_count": sum(
                         notification.aid_count
                         for notification in subprogram.notifications
@@ -301,7 +300,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2002",
             database_alias="PROGRAMME 2002",
-            display_order=1,
             notifications=[
                 Notification(
                     name="N° 530 (50 000 DA)",
@@ -324,7 +322,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2003",
             database_alias="PROGRAMME 2003",
-            display_order=7,
             notifications=[
                 Notification(
                     name="N° 1082 (500 000 DA)",
@@ -363,7 +360,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2003 CEE",
             database_alias="PROGRAMME 2003 CEE",
-            display_order=8,
             notifications=[
                 Notification(
                     name="N° 284",
@@ -379,7 +375,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2004",
             database_alias="PROGRAMME 2004",
-            display_order=6,
             notifications=[
                 Notification(
                     name="N° 430",
@@ -394,7 +389,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2005",
             database_alias="PROGRAMME INITIAL",
-            display_order=4,
             notifications=[
                 Notification(
                     name="N° 872",
@@ -410,7 +404,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="Complémentaire 2007",
             database_alias="COMPLEMENTAIRE 2007",
-            display_order=2,
             notifications=[
                 Notification(
                     name="N° 568",
@@ -425,7 +418,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="Rattrapage 2007",
             database_alias="PQR 2007",
-            display_order=3,
             notifications=[
                 Notification(
                     name="N° 592",
@@ -441,7 +433,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="Complémentaire 2008",
             database_alias="COMPLEMENTAIRE 2008",
-            display_order=9,
             notifications=[
                 Notification(
                     name="N° 738",
@@ -465,7 +456,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="Complémentaire 2009",
             database_alias="COMPLEMENTAIRE 2009",
-            display_order=5,
             notifications=[
                 Notification(
                     name="N° 260",
@@ -499,7 +489,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2010",
             database_alias="QUINQUINNAL 2010",
-            display_order=24,
             notifications=[
                 Notification(
                     name="N° 250",
@@ -524,7 +513,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2011",
             database_alias="QUINQUENNAL 2011",
-            display_order=29,
             notifications=[
                 Notification(
                     name="N° 587",
@@ -549,7 +537,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="Complémentaire 2011",
             database_alias="QUINQUENNAL 2011C",
-            display_order=28,
             notifications=[
                 Notification(
                     name="N° 224",
@@ -583,7 +570,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2013",
             database_alias="PQ2013",
-            display_order=31,
             notifications=[
                 Notification(
                     name="N° 1132",
@@ -617,7 +603,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="Complémentaire 2013",
             database_alias="QUINQUENNAL 2013 C",
-            display_order=32,
             notifications=[
                 Notification(
                     name="N° 587",
@@ -633,7 +618,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2014",
             database_alias="PROGRAMME Q 2014",
-            display_order=33,
             notifications=[
                 Notification(
                     name="N° 460",
@@ -649,7 +633,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2015",
             database_alias="Programme 2015",
-            display_order=34,
             notifications=[
                 Notification(
                     name="N° 605",
@@ -665,7 +648,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="Complémentaire 2015",
             database_alias="Complémentaire 2015",
-            display_order=37,
             notifications=[
                 Notification(
                     name="N° 838",
@@ -681,7 +663,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2016",
             database_alias="Programme 2016",
-            display_order=39,
             notifications=[
                 Notification(
                     name="N° 1024",
@@ -706,7 +687,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2018",
             database_alias="Programme  2018",
-            display_order=43,
             notifications=[
                 Notification(
                     name="N° 241",
@@ -731,7 +711,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2019",
             database_alias="Programme 2019",
-            display_order=45,
             notifications=[
                 Notification(
                     name="N° 245",
@@ -755,7 +734,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2020",
             database_alias="Programme 2020",
-            display_order=47,
             notifications=[
                 Notification(
                     name="N° 705",
@@ -778,7 +756,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2021",
             database_alias="Programme 2021",
-            display_order=50,
             notifications=[
                 Notification(
                     name="N° 329",
@@ -793,7 +770,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2022",
             database_alias="program 2022",
-            display_order=51,
             notifications=[
                 Notification(
                     name="N° 238",
@@ -808,7 +784,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2023",
             database_alias="program 2023",
-            display_order=52,
             notifications=[
                 Notification(
                     name="N° 666",
@@ -823,7 +798,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2024",
             database_alias="Programme 2024",
-            display_order=53,
             notifications=[
                 Notification(
                     name="N° 1061",
@@ -847,7 +821,6 @@ class SubprogramRegistry(object):
         Subprogram(
             name="2025",
             database_alias="PROGRAMME 2025",
-            display_order=55,
             notifications=[
                 Notification(
                     name="N° 16",

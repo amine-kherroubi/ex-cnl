@@ -26,13 +26,6 @@ class Subprogram(BaseModel):
         ),
     ]
 
-    display_order: Annotated[
-        int,
-        Field(
-            description="Display order of subprogram in reports and tables",
-        ),
-    ]
-
     notifications: Annotated[
         list[Notification],
         Field(

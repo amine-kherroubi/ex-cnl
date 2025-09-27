@@ -34,7 +34,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
         "subprograms": """
             SELECT s.subprogram
             FROM subprograms s
-            ORDER BY s.display_order
         """,
         "lancements_mois": """
             SELECT 
@@ -57,7 +56,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 AND "Date OV" LIKE '%/{month}/{year}'
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
-            ORDER BY s.display_order
         """,
         "lancements_cumul_annee": """
             SELECT 
@@ -81,7 +79,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 AND "Date OV" LIKE '%/{year}'
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
-            ORDER BY s.display_order
         """,
         "livraisons_mois": """
             SELECT
@@ -104,7 +101,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 AND "Date OV" LIKE '%/{month}/{year}'
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
-            ORDER BY s.display_order
         """,
         "livraisons_cumul_annee": """
             SELECT 
@@ -128,15 +124,12 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 AND "Date OV" LIKE '%/{year}'
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
-            ORDER BY s.display_order
         """,
         "subprograms_situation": """
             SELECT 
                 s.subprogram,
                 s.aid_count,
-                s.display_order
             FROM subprograms s
-            ORDER BY s.display_order
         """,
         "acheves_derniere_tranche": """
             SELECT 
@@ -156,7 +149,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
             WHERE s.aid_count > 0
-            ORDER BY s.display_order
         """,
         "en_cours_calculation": """
             SELECT 
@@ -189,7 +181,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 GROUP BY "Sous programme"
             ) acheves ON s.subprogram = acheves."Sous programme"
             WHERE s.aid_count > 0
-            ORDER BY s.display_order
         """,
         "non_lances_premiere_tranche": """
             SELECT 
@@ -209,7 +200,6 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
             WHERE s.aid_count > 0
-            ORDER BY s.display_order
         """,
     },
 )
