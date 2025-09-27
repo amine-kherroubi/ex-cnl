@@ -50,7 +50,6 @@ class MainWindow(ctk.CTk):
         self._logger.info("Main application window initialized successfully")
 
     def _setup_ui(self) -> None:
-
         self.configure(fg_color=DesignSystem.Color.WHITE.value)  # type: ignore
 
         self.grid_columnconfigure(index=0, weight=1)

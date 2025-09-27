@@ -14,7 +14,6 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class SuccessWindow(ctk.CTkToplevel):
-
     __slots__ = (
         "_output_file_path",
         "_content_frame",
@@ -31,11 +30,10 @@ class SuccessWindow(ctk.CTkToplevel):
 
         self._setup_window()
         self._setup_ui()
-        self._auto_size_window()
 
     def _setup_window(self) -> None:
-
         self.title("Rapport généré avec succès")
+        self.geometry("600x400")
         self.resizable(False, False)
         self.transient(self.master)  # type: ignore
         self.configure(fg_color=DesignSystem.Color.WHITE.value)  # type: ignore
@@ -44,7 +42,6 @@ class SuccessWindow(ctk.CTkToplevel):
         self.grid_rowconfigure(index=0, weight=1)
 
     def _setup_ui(self) -> None:
-
         self._content_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self,
             fg_color=DesignSystem.Color.WHITE.value,
@@ -210,41 +207,7 @@ class SuccessWindow(ctk.CTkToplevel):
             sticky="ew",
         )
 
-    def _auto_size_window(self) -> None:
-
-        self.update_idletasks()
-
-        required_width: int = self.winfo_reqwidth()
-        required_height: int = self.winfo_reqheight()
-
-        padding: int = 20
-        final_width: int = required_width + padding
-        final_height: int = required_height + padding
-
-        min_width: int = 450
-        min_height: int = 250
-
-        window_width: int = max(final_width, min_width)
-        window_height: int = max(final_height, min_height)
-
-        if self.master and hasattr(self.master, "winfo_x"):
-            parent_x: int = self.master.winfo_x()
-            parent_y: int = self.master.winfo_y()
-            parent_width: int = self.master.winfo_width()
-            parent_height: int = self.master.winfo_height()
-
-            x: int = parent_x + (parent_width - window_width) // 2
-            y: int = parent_y + (parent_height - window_height) // 2
-        else:
-            screen_width: int = self.winfo_screenwidth()
-            screen_height: int = self.winfo_screenheight()
-            x = (screen_width - window_width) // 2
-            y = (screen_height - window_height) // 2
-
-        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
-
     def _open_output_file_location(self) -> None:
-
         try:
             system: str = platform.system()
             parent_dir: str = str(self._output_file_path.parent)
@@ -260,5 +223,4 @@ class SuccessWindow(ctk.CTkToplevel):
             pass
 
     def _close(self) -> None:
-
         self.destroy()
