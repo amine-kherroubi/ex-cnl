@@ -229,7 +229,7 @@ class FileIOService(object):
 
             template_content: list[dict[str, Any]] = [
                 {
-                    "name": "Custom Program Example",
+                    "name": "Custom Subprogram",
                     "database_alias": "CUSTOM_PROGRAM_2025",
                     "enabled": False,
                     "notifications": [

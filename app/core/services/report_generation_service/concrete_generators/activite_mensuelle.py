@@ -48,20 +48,20 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     def _create_predefined_tables(self) -> None:
         self._logger.debug("Creating reference tables")
         try:
-            self._logger.debug(f"Creating reference table 'programs'")
+            self._logger.debug(f"Creating reference table 'subprograms'")
 
             df: pd.DataFrame = SubprogramRegistry.get_subprograms_dataframe()
-            self._data_repository.create_table_from_dataframe("programs", df)
+            self._data_repository.create_table_from_dataframe("subprograms", df)
 
             rows, cols = df.shape
             self._logger.info(
-                f"Reference table 'programs' created: {rows} rows and {cols} columns"
+                f"Reference table 'subprograms' created: {rows} rows and {cols} columns"
             )
-            self._logger.debug(f"Columns for 'programs': {list(df.columns)}")
+            self._logger.debug(f"Columns for 'subprograms': {list(df.columns)}")
 
         except Exception as error:
             self._logger.exception(
-                f"Failed to create reference table 'programs': {error}"
+                f"Failed to create reference table 'subprograms': {error}"
             )
             raise
 
@@ -289,7 +289,9 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._current_row += len(subprograms)
         self._add_total_row(sheet, self._current_row, totals)
 
-        self._logger.info(f"Premier tableau terminé avec {len(subprograms)} programs")
+        self._logger.info(
+            f"Premier tableau terminé avec {len(subprograms)} sous-programmes"
+        )
 
         self._current_row += 2
 
@@ -372,7 +374,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             "E",
             self._current_row,
             self._current_row,
-            value="Situation des programs (à renseigner par la BNH, ex-CNL)",
+            value="Situation des programmes (à renseigner par la BNH, ex-CNL)",
             font=ExcelStylingService.FONT_BOLD,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
         )

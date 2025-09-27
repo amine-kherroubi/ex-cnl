@@ -769,7 +769,7 @@ class SubprogramRegistry(object):
         ),
         Subprogram(
             name="2022",
-            database_alias="program 2022",
+            database_alias="programme 2022",
             notifications=[
                 Notification(
                     name="N° 238",
@@ -783,7 +783,7 @@ class SubprogramRegistry(object):
         ),
         Subprogram(
             name="2023",
-            database_alias="program 2023",
+            database_alias="programme 2023",
             notifications=[
                 Notification(
                     name="N° 666",

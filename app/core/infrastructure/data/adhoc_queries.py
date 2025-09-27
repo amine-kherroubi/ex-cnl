@@ -20,12 +20,12 @@ queries: dict[str, str] = {
         ORDER BY first_date
     """,
     "query2": """
-        SELECT DISTINCT "Sous program"
+        SELECT DISTINCT "Sous programme"
         FROM decisions
     """,
     "query3": """
         SELECT DISTINCT Programme,
-                "Sous program"
+                "Sous programme"
         FROM paiements
     """,
     "query4": """
@@ -40,10 +40,10 @@ queries: dict[str, str] = {
     """,
     "query6": """
         SELECT DISTINCT
-            p."Sous program",
+            p."Sous programme",
             p."Notification"
         FROM paiements p
-        ORDER BY p."Sous program", p."Notification"
+        ORDER BY p."Sous programme", p."Notification"
     """,
 }
 
