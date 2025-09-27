@@ -21,10 +21,9 @@
 │   │   │   │   └── subprogram.py
 │   │   │   ├── predefined_objects
 │   │   │   │   ├── dairas_et_communes.py
-│   │   │   │   ├── report_specifications
-│   │   │   │   │   ├── activite_mensuelle_specification.py
-│   │   │   │   │   └── situation_financiere_specification.py
-│   │   │   │   └── tranches.py
+│   │   │   │   └── report_specifications
+│   │   │   │       ├── activite_mensuelle_specification.py
+│   │   │   │       └── situation_financiere_specification.py
 │   │   │   └── registries
 │   │   │       ├── report_specification_registry.py
 │   │   │       └── subprogram_registry.py
@@ -76,4 +75,4 @@
 ├── project_structure.txt
 └── requirements.txt
 
-27 directories, 50 files
+27 directories, 49 files
