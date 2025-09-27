@@ -86,46 +86,6 @@ class DateSelector(BaseComponent):
             sticky="w",
         )
 
-        month_label: ctk.CTkLabel = ctk.CTkLabel(
-            master=self._content_frame,
-            text="Mois :",
-            text_color=DesignSystem.Color.BLACK,
-            font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
-            ),
-        )
-        month_label.grid(  # type: ignore
-            row=2,
-            column=0,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
-            sticky="w",
-        )
-
-        month_values: list[str] = [month.capitalize() for month in Month]
-        self._month_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
-            master=self._content_frame,
-            values=month_values,
-            variable=self._month_var,
-            command=lambda _: self._on_selection_changed(),
-            width=DesignSystem.Width.MD,
-            height=DesignSystem.Height.SM,
-            font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
-            ),
-            dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
-            ),
-            state="readonly",
-            border_width=DesignSystem.BorderWidth.XS,
-            corner_radius=DesignSystem.Roundness.SM,
-        )
-        self._month_dropdown.grid(  # type: ignore
-            row=2,
-            column=1,
-            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
-            sticky="ew",
-        )
-
         year_label: ctk.CTkLabel = ctk.CTkLabel(
             master=self._content_frame,
             text="Année :",
@@ -136,7 +96,7 @@ class DateSelector(BaseComponent):
         )
         year_label.grid(  # type: ignore
             row=2,
-            column=2,
+            column=0,
             padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
             sticky="w",
         )
@@ -161,10 +121,53 @@ class DateSelector(BaseComponent):
             border_width=DesignSystem.BorderWidth.XS,
             corner_radius=DesignSystem.Roundness.SM,
         )
-        self._year_dropdown.grid(row=2, column=3, sticky="ew")  # type: ignore
+        self._year_dropdown.grid(  # type: ignore
+            row=2,
+            column=1,
+            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.MD),
+            sticky="ew",
+        )
+
+        month_label: ctk.CTkLabel = ctk.CTkLabel(
+            master=self._content_frame,
+            text="Mois :",
+            text_color=DesignSystem.Color.BLACK,
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+            ),
+        )
+        month_label.grid(  # type: ignore
+            row=2,
+            column=2,
+            padx=(DesignSystem.Spacing.NONE, DesignSystem.Spacing.SM),
+            sticky="w",
+        )
+
+        month_values: list[str] = [month.capitalize() for month in Month]
+        self._month_dropdown: ctk.CTkComboBox = ctk.CTkComboBox(
+            master=self._content_frame,
+            values=month_values,
+            variable=self._month_var,
+            command=lambda _: self._on_selection_changed(),
+            width=DesignSystem.Width.MD,
+            height=DesignSystem.Height.SM,
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+            ),
+            dropdown_font=ctk.CTkFont(
+                family=DesignSystem.FontFamily.NORMAL, size=DesignSystem.FontSize.BODY
+            ),
+            state="readonly",
+            border_width=DesignSystem.BorderWidth.XS,
+            corner_radius=DesignSystem.Roundness.SM,
+        )
+        self._month_dropdown.grid(  # type: ignore
+            row=2,
+            column=3,
+            sticky="ew",
+        )
 
     def _on_selection_changed(self) -> None:
-
         month_str: str = self._month_var.get()
         selected_month: Month | None = None
 
@@ -192,7 +195,6 @@ class DateSelector(BaseComponent):
         self._on_date_changed(selected_month, selected_year)
 
     def get_selected_month(self) -> Month | None:
-
         month_str: str = self._month_var.get()
         for month in Month:
             if month.capitalize() == month_str:
@@ -200,14 +202,12 @@ class DateSelector(BaseComponent):
         return None
 
     def get_selected_year(self) -> int | None:
-
         try:
             return int(self._year_var.get())
         except ValueError:
             return None
 
     def reset_to_current(self) -> None:
-
         self._month_var.set(self._current_month.capitalize())
         self._year_var.set(str(self._current_year))
         self._on_selection_changed()
