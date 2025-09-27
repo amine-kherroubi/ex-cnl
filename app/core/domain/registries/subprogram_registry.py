@@ -147,7 +147,7 @@ class SubprogramRegistry(object):
     def get_all_subprograms(cls) -> List[Subprogram]:
         cls._logger.debug("Retrieving all subprograms")
         cls._logger.info(f"Retrieved {len(cls._SUBPROGRAMS)} subprograms")
-        return List(cls._SUBPROGRAMS)
+        return list(cls._SUBPROGRAMS)
 
     @classmethod
     def get_all_subprogram_names(cls) -> List[str]:
