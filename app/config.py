@@ -52,10 +52,8 @@ class LoggingConfig(BaseModel):
         default_factory=lambda: get_app_data_dir() / "logs" / "app.log"
     )
     use_json_format: bool = False
-    include_traceback: bool = True
     console_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG"
-    max_file_size_mb: int = 10
-    backup_count: int = 5
+
     disable_existing_loggers: bool = False
 
     @field_validator("log_file")
