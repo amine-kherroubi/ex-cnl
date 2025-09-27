@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, validator  # type: ignore
 
 
 def get_app_data_dir() -> Path:
-    app_name: str = "GenerateurRapports"
+    app_name: str = "Générateur_de_rapports"
     if sys.platform == "win32":
         base: Optional[str] = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
         if base:
