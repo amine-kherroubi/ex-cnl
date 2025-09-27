@@ -54,6 +54,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     '100%  1+2+3 EME TRANCHE'
                 )
                 AND "Date OV" LIKE '%/{month}/{year}'
+                AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
@@ -77,6 +78,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 )
                 AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
+                AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
@@ -99,6 +101,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     'Tranche complémentaire 2'
                 )
                 AND "Date OV" LIKE '%/{month}/{year}'
+                AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
@@ -122,6 +125,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                 )
                 AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 AND "Date OV" LIKE '%/{year}'
+                AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
@@ -146,6 +150,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     N2 > 0
                     OR C2 > 0
                     OR T3 > 0
+                AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
             WHERE s.aid_count > 0
@@ -167,6 +172,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     N1 > 0
                     OR C1 > 0
                     OR T1 > 0
+                AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) lances ON s.subprogram = lances."Sous programme"
             LEFT JOIN (
@@ -197,6 +203,7 @@ activite_mensuelle_specification: ReportSpecification = ReportSpecification(
                     N1 > 0
                     OR C1 > 0
                     OR T1 > 0
+                AND "valeur physique" > 0
                 GROUP BY "Sous programme"
             ) data ON s.subprogram = data."Sous programme"
             WHERE s.aid_count > 0
