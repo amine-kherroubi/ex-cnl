@@ -52,8 +52,10 @@ class LoggingConfig(BaseModel):
         default_factory=lambda: get_app_data_dir() / "logs" / "app.log"
     )
     use_json_format: bool = False
+    include_traceback: bool = True
     console_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG"
-
+    max_file_size_mb: int = 5
+    backup_count: int = 5
     disable_existing_loggers: bool = False
 
     @field_validator("log_file")
@@ -61,7 +63,6 @@ class LoggingConfig(BaseModel):
     def ensure_log_directory(cls, log_file: Path) -> Path:
         try:
             log_file.parent.mkdir(parents=True, exist_ok=True)
-
             test_file: Path = log_file.parent / ".write_test"
             test_file.write_text("test")
             test_file.unlink()
