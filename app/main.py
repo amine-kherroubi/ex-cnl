@@ -1,5 +1,3 @@
-
-
 # Third-party imports
 from customtkinter import CTk  # type: ignore
 
