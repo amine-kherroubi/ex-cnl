@@ -97,7 +97,6 @@ class SubprogramSelector(BaseComponent):
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value,
                 size=DesignSystem.FontSize.BODY.value,
-                weight="bold",
             ),
             text_color=DesignSystem.Color.BLACK.value,
             anchor="w",
@@ -150,7 +149,6 @@ class SubprogramSelector(BaseComponent):
             font=ctk.CTkFont(
                 family=DesignSystem.FontFamily.NORMAL.value,
                 size=DesignSystem.FontSize.BODY.value,
-                weight="bold",
             ),
             text_color=DesignSystem.Color.BLACK.value,
             anchor="w",
