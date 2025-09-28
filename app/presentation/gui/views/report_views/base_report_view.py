@@ -1,5 +1,3 @@
-
-
 # Standard library imports
 from abc import abstractmethod
 import threading

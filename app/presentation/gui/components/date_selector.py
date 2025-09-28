@@ -1,5 +1,3 @@
-
-
 # Standard library imports
 from datetime import date
 from typing import Any, Callable, Optional, List

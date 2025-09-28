@@ -1,5 +1,3 @@
-
-
 # Standard library imports
 import platform
 import subprocess

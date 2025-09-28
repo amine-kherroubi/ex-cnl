@@ -1,5 +1,3 @@
-
-
 # Standard library imports
 from datetime import datetime
 from typing import Any, Literal
