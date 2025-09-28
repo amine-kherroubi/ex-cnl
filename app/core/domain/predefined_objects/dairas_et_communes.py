@@ -221,4 +221,4 @@ def get_dairas_communes_dataframe() -> pd.DataFrame:
             data.append({"Daira": daira, "Commune": commune})
 
     df: pd.DataFrame = pd.DataFrame(data)
-    return df.sort_values(["Daira", "Commune"]).reset_index(drop=True)
+    return df.sort_values(["Daira", "Commune"]).reset_index(drop=True)  # type: ignore
