@@ -316,7 +316,7 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
         for i, (_, row) in enumerate(subprograms_df.iterrows()):
             subprogram: str = row["subprogram"]
             row_number: int = self._current_row + i
-            
+
             try:
                 subprogram_obj: Subprogram = (
                     SubprogramRegistry.get_subprogram_by_database_alias(subprogram)
@@ -326,7 +326,9 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
                 display_name = subprogram
 
             aides_data = data_dicts["aides_inscrites"].get(subprogram, (0, 0))
-            cumul_precedent = data_dicts["cumul_precedent"].get(subprogram, (0, 0, 0, 0))
+            cumul_precedent = data_dicts["cumul_precedent"].get(
+                subprogram, (0, 0, 0, 0)
+            )
             annee_actuelle = data_dicts["annee_actuelle"].get(subprogram, (0, 0, 0, 0))
 
             cumul_formula = f"=K{row_number}+O{row_number}"
@@ -461,9 +463,21 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
 
     def _add_totals_row(self, sheet: Worksheet) -> None:
         data_end_row: int = self._current_row - 1
-        
-        formula_columns: List[str] = ["D", "E", "H", "I", "J", "K", "L", "M", "N", "O", "P"]
-        
+
+        formula_columns: List[str] = [
+            "D",
+            "E",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+        ]
+
         total_cells: List[CellData] = [
             CellData(
                 "A",

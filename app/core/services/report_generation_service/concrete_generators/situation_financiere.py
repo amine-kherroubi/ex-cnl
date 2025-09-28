@@ -33,7 +33,7 @@ from app.core.services.excel_styling_service import (
 class SituationFinanciereGenerator(BaseGenerator):
     __slots__ = (
         "_current_row",
-        "_target_subprogram", 
+        "_target_subprogram",
         "_target_notification",
         "_data_start_row",
         "_dairas_communes_count",
@@ -114,7 +114,9 @@ class SituationFinanciereGenerator(BaseGenerator):
             df: pd.DataFrame = SubprogramRegistry.get_subprograms_dataframe()
             self._data_repository.create_table_from_dataframe("subprograms", df)
         except Exception as error:
-            self._logger.exception(f"Failed to create reference table 'subprograms': {error}")
+            self._logger.exception(
+                f"Failed to create reference table 'subprograms': {error}"
+            )
             raise
 
         try:
@@ -122,7 +124,9 @@ class SituationFinanciereGenerator(BaseGenerator):
             self._data_repository.create_table_from_dataframe("dairas_communes", df)
             self._dairas_communes_count = len(df)
         except Exception as error:
-            self._logger.exception(f"Failed to create reference table 'dairas_communes': {error}")
+            self._logger.exception(
+                f"Failed to create reference table 'dairas_communes': {error}"
+            )
             raise
 
     def _format_query_with_context(self, query_template: str) -> str:
@@ -595,9 +599,21 @@ class SituationFinanciereGenerator(BaseGenerator):
 
     def _add_totals_row(self, sheet: Worksheet) -> None:
         data_end_row: int = self._current_row - 1
-        
-        formula_columns: List[str] = ["E", "F", "I", "J", "K", "L", "M", "N", "O", "P", "Q"]
-        
+
+        formula_columns: List[str] = [
+            "E",
+            "F",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+        ]
+
         total_cells: List[CellData] = []
 
         for col in ["C", "D", "G", "H", "R", "S"]:

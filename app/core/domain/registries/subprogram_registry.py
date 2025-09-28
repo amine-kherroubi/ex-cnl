@@ -639,7 +639,7 @@ class SubprogramRegistry(object):
                         "N°:224.Du:06/02/2011.TRANCHE:1.Montant:   700 000",
                         "N°: 224. Du: 06/02/2011. TRANCHE: 1. Montant:    700 000",
                     ],
-                    aid_count=224,
+                    aid_count=4500,
                     aid_amount=700000,
                 ),
                 Notification(

@@ -376,7 +376,9 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         for dict_key, query_key, subprogram_column, count_column in mappings:
             if query_key in query_results:
                 df: pd.DataFrame = query_results[query_key]
-                data_dicts[dict_key] = dict(zip(df[subprogram_column], df[count_column]))
+                data_dicts[dict_key] = dict(
+                    zip(df[subprogram_column], df[count_column])
+                )
         return data_dicts
 
     def _add_second_table_header(self, sheet: Worksheet) -> None:
@@ -566,7 +568,9 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         for dict_key, query_key, subprogram_column, value_column in mappings:
             if query_key in query_results:
                 df: pd.DataFrame = query_results[query_key]
-                data_dicts[dict_key] = dict(zip(df[subprogram_column], df[value_column]))
+                data_dicts[dict_key] = dict(
+                    zip(df[subprogram_column], df[value_column])
+                )
         return data_dicts
 
     def _add_footer(self, sheet: Worksheet) -> None:
