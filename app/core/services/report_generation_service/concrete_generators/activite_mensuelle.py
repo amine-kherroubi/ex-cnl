@@ -437,9 +437,9 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         totals = {"aid_count": 0, "finished": 0, "current": 0, "not_started": 0}
 
         for i, (subprogram, aid_count) in enumerate(subprograms_situation):
-            row = self._current_row + i
+            row: int = self._current_row + i
             self._add_situation_row(
-                sheet, row, subprogram, aid_count, data_dicts, totals
+                sheet, row, subprogram, aid_count, data_dicts, totals  # type: ignore
             )
 
         self._current_row += len(subprograms_situation)

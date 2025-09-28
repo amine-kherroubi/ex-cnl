@@ -3,7 +3,7 @@
 # Standard library imports
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from logging import Logger
 
 # Third-party imports
@@ -57,7 +57,7 @@ class BaseGenerator(ABC):
             f"Report context: wilaya={report_context.wilaya.value}, date={report_context.reporting_date}"
         )
 
-    def generate(  # Template method
+    def generate(
         self,
         source_file_paths: Dict[str, Path],
         output_directory_path: Path,
@@ -123,11 +123,6 @@ class BaseGenerator(ABC):
             raise
 
     def configure(self, **kwargs: Any) -> None:
-        """Configure the generator with additional parameters.
-
-        Default implementation raises NotImplementedError.
-        Override in subclasses that need additional configuration.
-        """
         raise NotImplementedError(
             f"{self.__class__.__name__} does not support additional configuration"
         )
