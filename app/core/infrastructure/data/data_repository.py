@@ -53,7 +53,7 @@ class DuckDBRepository(object):
         self._connection: Optional[duckdb.DuckDBPyConnection]
         if db_config.path:
             self._logger.info(f"Connecting to DuckDB file: {db_config.path}")
-            self._connection = duckdb.connect( # type: ignore
+            self._connection = duckdb.connect(  # type: ignore
                 database=str(db_config.path), config=config_dict
             )
         else:
@@ -116,7 +116,7 @@ class DuckDBRepository(object):
             raise DatabaseError(error_msg)
 
         try:
-            result: pd.DataFrame = self._connection.execute(query).fetchdf() # type: ignore
+            result: pd.DataFrame = self._connection.execute(query).fetchdf()  # type: ignore
             self._logger.debug(
                 f"Query returned: {len(result)} rows and {len(result.columns)} columns"
             )

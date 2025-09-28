@@ -1,6 +1,6 @@
 # Standard library imports
 from logging import Logger
-from typing import Any, final, Dict, Type
+from typing import Any, final, Type
 
 # Local application imports
 from app.core.domain.models.report_context import ReportContext
@@ -10,15 +10,11 @@ from app.core.domain.registries.report_specification_registry import (
 )
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation_service.concrete_generators.activite_mensuelle import (
-    ActiviteMensuelleGenerator,
+from app.core.services.report_generation_service.base_report_generator import (
+    BaseGenerator,
 )
-from app.core.services.report_generation_service.base_report_generator import BaseGenerator
-from app.core.services.report_generation_service.concrete_generators.situation_financiere import (
-    SituationFinanciereGenerator,
-)
+from app.core.services.report_generation_service.concrete_generators import *
 from app.common.logging_setup import get_logger
-from app.core.services.report_generation_service.concrete_generators.situation_par_sous_programme import SituationParSousProgrammeGenerator
 
 
 @final
@@ -26,12 +22,6 @@ class ReportGeneratorFactory(object):
     __slots__ = ()
 
     _logger: Logger = get_logger(__name__)
-
-    _generators: Dict[str, Type[BaseGenerator]] = {
-        "activite_mensuelle": ActiviteMensuelleGenerator,
-        "situation_financiere": SituationFinanciereGenerator,
-        "situation_par_sous_programme": SituationParSousProgrammeGenerator,
-    }
 
     def __new__(cls) -> None:
         raise RuntimeError(
@@ -48,12 +38,12 @@ class ReportGeneratorFactory(object):
         **kwargs: Any,
     ) -> BaseGenerator:
         cls._logger.info(f"Creating generator for report: {report_name}")
-        cls._logger.debug(f"Available generators: {list(cls._generators.keys())}")
+        cls._logger.debug(f"Available generators: {list(generators.keys())}")
         cls._logger.debug(f"Additional parameters: {kwargs}")
 
-        if report_name not in cls._generators:
+        if report_name not in generators:
             error_msg: str = f"Unknown report: {report_name}"
-            cls._logger.error(f"{error_msg}. Available: {list(cls._generators.keys())}")
+            cls._logger.error(f"{error_msg}. Available: {list(generators.keys())}")
             raise ValueError(error_msg)
 
         try:
@@ -64,7 +54,7 @@ class ReportGeneratorFactory(object):
                 f"Retrieved report specification: {report_specification.display_name}"
             )
 
-            generator_class: Type[BaseGenerator] = cls._generators[report_name]
+            generator_class: Type[BaseGenerator] = generators[report_name]
             cls._logger.debug(f"Using generator class: {generator_class.__name__}")
 
             generator: BaseGenerator = generator_class(

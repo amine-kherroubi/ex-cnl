@@ -13,7 +13,12 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 class OutputSelector(BaseComponent):
 
-    __slots__ = ("_on_output_changed", "_output_path", "_select_button", "_path_textbox")
+    __slots__ = (
+        "_on_output_changed",
+        "_output_path",
+        "_select_button",
+        "_path_textbox",
+    )
 
     def __init__(
         self, parent: Any, on_output_changed: Callable[[Optional[Path]], None]
@@ -58,7 +63,8 @@ class OutputSelector(BaseComponent):
             fg_color=DesignSystem.Color.PRIMARY.value,
             hover_color=DesignSystem.Color.DARKER_PRIMARY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BUTTON.value,
             ),
             corner_radius=DesignSystem.Roundness.SM.value,
             height=DesignSystem.Height.SM.value,

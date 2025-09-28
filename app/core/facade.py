@@ -18,10 +18,12 @@ from app.core.domain.registries.report_specification_registry import (
 from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.infrastructure.data.data_repository import DuckDBRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation_service.factories.report_generator_factory import (
+from app.core.services.report_generation_service.report_generator_factory import (
     ReportGeneratorFactory,
 )
-from app.core.services.report_generation_service.base_report_generator import BaseGenerator
+from app.core.services.report_generation_service.base_report_generator import (
+    BaseGenerator,
+)
 from app.common.logging_setup import get_logger
 
 
@@ -106,7 +108,9 @@ class CoreFacade(object):
                 report_name
             )
             self._logger.info(f"Generating report: {report_specification.display_name}")
-            self._logger.debug(f"Report category: {report_specification.category.value}")
+            self._logger.debug(
+                f"Report category: {report_specification.category.value}"
+            )
 
             generator: BaseGenerator = ReportGeneratorFactory.create_generator(
                 report_name=report_name,

@@ -18,7 +18,9 @@ from app.core.domain.predefined_objects.dairas_et_communes import (
 )
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation_service.base_report_generator import BaseGenerator
+from app.core.services.report_generation_service.base_report_generator import (
+    BaseGenerator,
+)
 from app.core.services.excel_styling_service import ExcelStylingService
 
 

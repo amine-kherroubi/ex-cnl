@@ -1,5 +1,3 @@
-
-
 # Standard library imports
 from pathlib import Path
 from typing import Final

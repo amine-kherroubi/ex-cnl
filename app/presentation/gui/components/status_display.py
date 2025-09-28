@@ -63,7 +63,8 @@ class StatusDisplay(BaseComponent):
             border_width=DesignSystem.BorderWidth.XS.value,
             corner_radius=DesignSystem.Roundness.SM.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.MONO.value, size=DesignSystem.FontSize.CAPTION.value
+                family=DesignSystem.FontFamily.MONO.value,
+                size=DesignSystem.FontSize.CAPTION.value,
             ),
             fg_color=DesignSystem.Color.LEAST_WHITE.value,
             border_color=DesignSystem.Color.LIGHTER_GRAY.value,

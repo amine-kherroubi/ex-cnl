@@ -1,5 +1,3 @@
-
-
 # Imports de la bibliothèque standard
 from datetime import date
 from typing import Any, Dict, List, Tuple
@@ -15,7 +13,9 @@ from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation_service.base_report_generator import BaseGenerator
+from app.core.services.report_generation_service.base_report_generator import (
+    BaseGenerator,
+)
 from app.core.services.excel_styling_service import ExcelStylingService
 
 

@@ -34,8 +34,10 @@ class SubprogramRegistry(object):
         cls._logger.info("Initializing SubprogramRegistry")
 
         # Convert default subprograms to dict format for file creation
-        default_subprograms_dict = cls._convert_subprograms_to_dict(cls._DEFAULT_SUBPROGRAMS)
-        
+        default_subprograms_dict = cls._convert_subprograms_to_dict(
+            cls._DEFAULT_SUBPROGRAMS
+        )
+
         # Ensure file exists with defaults if not present
         file_io_service.ensure_custom_subprograms_file_exists(default_subprograms_dict)
 
@@ -53,31 +55,39 @@ class SubprogramRegistry(object):
         )
 
     @classmethod
-    def _convert_subprograms_to_dict(cls, subprograms: List[Subprogram]) -> List[Dict[str, Any]]:
+    def _convert_subprograms_to_dict(
+        cls, subprograms: List[Subprogram]
+    ) -> List[Dict[str, Any]]:
         """Convert Subprogram objects to dictionary format for JSON serialization"""
         result: List[Dict[str, Any]] = []
         for subprogram in subprograms:
             notifications_dict: List[Dict[str, Any]] = []
             for notification in subprogram.notifications:
-                notifications_dict.append({
-                    "name": notification.name,
-                    "database_aliases": notification.database_aliases,
-                    "aid_count": notification.aid_count,
-                    "aid_amount": notification.aid_amount,
-                })
-            
-            result.append({
-                "name": subprogram.name,
-                "database_alias": subprogram.database_alias,
-                "notifications": notifications_dict,
-            })
+                notifications_dict.append(
+                    {
+                        "name": notification.name,
+                        "database_aliases": notification.database_aliases,
+                        "aid_count": notification.aid_count,
+                        "aid_amount": notification.aid_amount,
+                    }
+                )
+
+            result.append(
+                {
+                    "name": subprogram.name,
+                    "database_alias": subprogram.database_alias,
+                    "notifications": notifications_dict,
+                }
+            )
         return result
 
     @classmethod
     def load_and_override_from_file(cls, file_io_service: FileIOService) -> None:
         try:
             # Pass default subprograms dict to file_io_service
-            default_subprograms_dict = cls._convert_subprograms_to_dict(cls._DEFAULT_SUBPROGRAMS)
+            default_subprograms_dict = cls._convert_subprograms_to_dict(
+                cls._DEFAULT_SUBPROGRAMS
+            )
             custom_data: List[Dict[str, Any]] = (
                 file_io_service.load_additional_subprograms(default_subprograms_dict)
             )
@@ -107,16 +117,20 @@ class SubprogramRegistry(object):
                         if existing.name == subprogram.name:
                             existing_index = i
                             break
-                    
+
                     if existing_index is not None:
                         # Override existing subprogram
                         cls._SUBPROGRAMS[existing_index] = subprogram
                         overridden_names.add(subprogram.name)
-                        cls._logger.info(f"Overriding default subprogram: {subprogram.name}")
+                        cls._logger.info(
+                            f"Overriding default subprogram: {subprogram.name}"
+                        )
                     else:
                         # Add as new subprogram
                         new_subprograms.append(subprogram)
-                        cls._logger.info(f"Adding new custom subprogram: {subprogram.name}")
+                        cls._logger.info(
+                            f"Adding new custom subprogram: {subprogram.name}"
+                        )
 
                 except Exception as error:
                     cls._logger.error(
@@ -130,7 +144,7 @@ class SubprogramRegistry(object):
                 cls._logger.info(
                     f"Overrode {len(overridden_names)} default subprogram(s): {list(overridden_names)}"
                 )
-            
+
             if new_subprograms:
                 cls._logger.info(
                     f"Added {len(new_subprograms)} new custom subprogram(s): "
@@ -338,31 +352,29 @@ class SubprogramRegistry(object):
         total_subprograms: int = len(cls._SUBPROGRAMS)
         total_default_subprograms: int = len(cls._DEFAULT_SUBPROGRAMS)
         total_notifications: int = sum(
-            len(subprogram.notifications)
-            for subprogram in cls._SUBPROGRAMS
+            len(subprogram.notifications) for subprogram in cls._SUBPROGRAMS
         )
         total_default_notifications: int = sum(
-            len(subprogram.notifications)
-            for subprogram in cls._DEFAULT_SUBPROGRAMS
+            len(subprogram.notifications) for subprogram in cls._DEFAULT_SUBPROGRAMS
         )
-        
+
         # Count overrides and additions
         overrides = 0
         additions = 0
         default_names = {s.name for s in cls._DEFAULT_SUBPROGRAMS}
-        
+
         for subprogram in cls._SUBPROGRAMS:
             if subprogram.name in default_names:
                 # Check if it's actually modified
                 default_subprogram = next(
                     (s for s in cls._DEFAULT_SUBPROGRAMS if s.name == subprogram.name),
-                    None
+                    None,
                 )
                 if default_subprogram and subprogram != default_subprogram:
                     overrides += 1
             else:
                 additions += 1
-        
+
         return {
             "total_subprograms": total_subprograms,
             "default_subprograms": total_default_subprograms,

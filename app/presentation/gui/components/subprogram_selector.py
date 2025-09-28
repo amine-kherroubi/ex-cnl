@@ -118,10 +118,12 @@ class SubprogramSelector(BaseComponent):
             height=DesignSystem.Height.SM.value,
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,
@@ -178,10 +180,12 @@ class SubprogramSelector(BaseComponent):
             height=DesignSystem.Height.SM.value,
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,
@@ -216,7 +220,8 @@ class SubprogramSelector(BaseComponent):
             master=info_frame,
             text=self._get_selection_info_text(),
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             text_color=DesignSystem.Color.BLACK.value,
             justify="left",

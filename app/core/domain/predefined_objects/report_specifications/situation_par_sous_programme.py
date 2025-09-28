@@ -11,37 +11,38 @@ from app.core.services.report_generation_service.concrete_generators.situation_f
     SituationFinanciereGenerator,
 )
 
-situation_par_sous_programme_specification: Final[ReportSpecification] = ReportSpecification(
-    name="situation_par_sous_programme",
-    display_name="Situation financière par sous-programme",
-    category=ReportCategory.HABITAT_RURAL,
-    description=(
-        "Présente la situation financière par sous-programme "
-        "(tous les sous-programmes). Inclut les engagements, les consommations, "
-        "les cumuls et les restes relatifs à chaque sous-programme."
-    ),
-    required_files=[
-        RequiredFile(
-            name="Journal des paiements",
-            pattern=r"^Journal_paiements__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
-            readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
-            table_name="paiements",
+situation_par_sous_programme_specification: Final[ReportSpecification] = (
+    ReportSpecification(
+        name="situation_par_sous_programme",
+        display_name="Situation financière par sous-programme",
+        category=ReportCategory.HABITAT_RURAL,
+        description=(
+            "Présente la situation financière par sous-programme "
+            "(tous les sous-programmes). Inclut les engagements, les consommations, "
+            "les cumuls et les restes relatifs à chaque sous-programme."
         ),
-        RequiredFile(
-            name="Journal des décisions",
-            pattern=r"^Journal_décisions__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
-            readable_pattern="Journal_décisions__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
-            table_name="decisions",
-        ),
-    ],
-    output_filename="situation_par_sous_programme_{wilaya}_{date}.xlsx",
-    generator=SituationFinanciereGenerator,
-    queries={
-        "subprograms": """
+        required_files=[
+            RequiredFile(
+                name="Journal des paiements",
+                pattern=r"^Journal_paiements__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+                readable_pattern="Journal_paiements__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
+                table_name="paiements",
+            ),
+            RequiredFile(
+                name="Journal des décisions",
+                pattern=r"^Journal_décisions__Agence_[A-Z+-_]+_\d{2}\.\d{2}\.\d{4}_[0-9]+.xlsx$",
+                readable_pattern="Journal_décisions__Agence_WILAYA_JJ.MM.AAAA_CODE.xlsx",
+                table_name="decisions",
+            ),
+        ],
+        output_filename="situation_par_sous_programme_{wilaya}_{date}.xlsx",
+        generator=SituationFinanciereGenerator,
+        queries={
+            "subprograms": """
             SELECT s.subprogram
             FROM subprograms s
         """,
-        "nb_aides_et_montants_inscrits_par_sous_programme": """
+            "nb_aides_et_montants_inscrits_par_sous_programme": """
             WITH decision_summary AS (
                 SELECT
                     d."Sous programme",
@@ -62,7 +63,7 @@ situation_par_sous_programme_specification: Final[ReportSpecification] = ReportS
             GROUP BY
                 ds."Sous programme"
         """,
-        "consommations_cumulees_fin_annee_precedente": """
+            "consommations_cumulees_fin_annee_precedente": """
             WITH payment_summary AS (
                 SELECT
                     p."Sous programme",
@@ -92,7 +93,7 @@ situation_par_sous_programme_specification: Final[ReportSpecification] = ReportS
             GROUP BY
                 ps."Sous programme"
         """,
-        "consommations_annee_actuelle_jusqua_mois_actuel": """
+            "consommations_annee_actuelle_jusqua_mois_actuel": """
             WITH payment_summary AS (
                 SELECT
                     p."Sous programme",
@@ -123,5 +124,6 @@ situation_par_sous_programme_specification: Final[ReportSpecification] = ReportS
             GROUP BY
                 ps."Sous programme"
         """,
-    },
+        },
+    )
 )

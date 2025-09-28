@@ -44,13 +44,13 @@ class MenuView(ctk.CTkFrame):
         header_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT.value
         )
-        header_frame.grid(# type: ignore
+        header_frame.grid(  # type: ignore
             row=0,
             column=0,
             padx=DesignSystem.Spacing.LG.value,
             pady=(DesignSystem.Spacing.LG.value, DesignSystem.Spacing.XS.value),
             sticky="ew",
-        ) 
+        )
         header_frame.grid_columnconfigure(index=0, weight=1)
 
         title: ctk.CTkLabel = ctk.CTkLabel(
@@ -63,34 +63,35 @@ class MenuView(ctk.CTkFrame):
             ),
             text_color=DesignSystem.Color.BLACK.value,
         )
-        title.grid(# type: ignore
+        title.grid(  # type: ignore
             row=0,
             column=0,
             padx=DesignSystem.Spacing.SM.value,
             pady=(DesignSystem.Spacing.XS.value, DesignSystem.Spacing.SM.value),
             sticky="w",
-        ) 
+        )
 
         description: ctk.CTkLabel = ctk.CTkLabel(
             master=header_frame,
             text="Choisissez un type de rapport à générer",
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             text_color=DesignSystem.Color.DARKER_GRAY.value,
         )
-        description.grid(# type: ignore
+        description.grid(  # type: ignore
             row=1,
             column=0,
             padx=DesignSystem.Spacing.SM.value,
             pady=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.XS.value),
             sticky="w",
-        ) 
+        )
 
         scrollable_frame: ctk.CTkScrollableFrame = ctk.CTkScrollableFrame(
             master=self, fg_color=DesignSystem.Color.TRANSPARENT.value
         )
-        scrollable_frame.grid(# type: ignore
+        scrollable_frame.grid(  # type: ignore
             row=1,
             column=0,
             padx=DesignSystem.Spacing.XS.value,
@@ -108,11 +109,11 @@ class MenuView(ctk.CTkFrame):
                     name
                 ),
             )
-            card.grid( # type: ignore
+            card.grid(  # type: ignore
                 row=idx,
                 column=0,
                 padx=DesignSystem.Spacing.SM.value,
                 pady=DesignSystem.Spacing.SM.value,
                 sticky="ew",
-            ) 
+            )
             self._report_cards.append(card)

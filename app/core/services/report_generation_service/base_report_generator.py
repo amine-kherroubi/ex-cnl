@@ -1,5 +1,3 @@
-
-
 # Standard library imports
 from abc import ABC, abstractmethod
 from pathlib import Path

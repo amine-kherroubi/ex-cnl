@@ -82,7 +82,8 @@ class ReportCard(BaseComponent):
             text=self._report_spec.description,
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             anchor="w",
             wraplength=620,

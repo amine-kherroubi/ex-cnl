@@ -38,9 +38,7 @@ class FileIOService(object):
 
             self._logger.debug("Reading Excel file with pandas")
             dataframe: pd.DataFrame = pd.read_excel(  # type: ignore
-                source_file_path, 
-                skiprows=skiprows,
-                engine='openpyxl'
+                source_file_path, skiprows=skiprows, engine="openpyxl"
             )
 
             self._logger.info(
@@ -94,10 +92,7 @@ class FileIOService(object):
         try:
             # For pandas 1.5.3, use openpyxl engine explicitly
             preview_df: pd.DataFrame = pd.read_excel(  # type: ignore
-                source_file_path, 
-                nrows=30, 
-                header=None,
-                engine='openpyxl'
+                source_file_path, nrows=30, header=None, engine="openpyxl"
             )
             self._logger.debug(f"Loaded {len(preview_df)} preview rows")
 
@@ -127,7 +122,9 @@ class FileIOService(object):
         self._logger.error(error_msg)
         raise DataLoadError(source_file_path, Exception(error_msg))
 
-    def load_additional_subprograms(self, default_subprograms: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+    def load_additional_subprograms(
+        self, default_subprograms: Optional[List[Dict[str, Any]]] = None
+    ) -> List[Dict[str, Any]]:
         custom_file_path: Path = self._config.custom_subprograms_path
 
         if not custom_file_path.exists():
@@ -136,7 +133,9 @@ class FileIOService(object):
                 "Creating file with all default subprograms for user customization."
             )
             if default_subprograms:
-                self._create_custom_subprograms_file(custom_file_path, default_subprograms)
+                self._create_custom_subprograms_file(
+                    custom_file_path, default_subprograms
+                )
             else:
                 self._logger.warning(
                     "No default subprograms provided for template creation. Creating minimal template."
@@ -218,11 +217,13 @@ class FileIOService(object):
             self._logger.error(error_msg)
             raise DataLoadError(custom_file_path, error) from error
 
-    def _create_custom_subprograms_file(self, file_path: Path, default_subprograms: Optional[List[Dict[str, Any]]] = None) -> None:
+    def _create_custom_subprograms_file(
+        self,
+        file_path: Path,
+        default_subprograms: Optional[List[Dict[str, Any]]] = None,
+    ) -> None:
         try:
-            self._logger.debug(
-                f"Creating custom subprograms file at: {file_path}"
-            )
+            self._logger.debug(f"Creating custom subprograms file at: {file_path}")
 
             if default_subprograms:
                 # Write all default subprograms to file
@@ -252,9 +253,7 @@ class FileIOService(object):
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(template_content, f, indent=2, ensure_ascii=False)
 
-            self._logger.info(
-                f"Created custom subprograms file: {file_path}"
-            )
+            self._logger.info(f"Created custom subprograms file: {file_path}")
             self._logger.info(
                 "Users can modify existing subprograms or add new ones in this file. "
                 "Subprograms with the same name will override internal defaults."
@@ -265,7 +264,9 @@ class FileIOService(object):
                 f"Failed to create custom subprograms file '{file_path}': {error}"
             )
 
-    def ensure_custom_subprograms_file_exists(self, default_subprograms: Optional[List[Dict[str, Any]]] = None) -> None:
+    def ensure_custom_subprograms_file_exists(
+        self, default_subprograms: Optional[List[Dict[str, Any]]] = None
+    ) -> None:
         custom_file_path: Path = self._config.custom_subprograms_path
         if not custom_file_path.exists():
             self._create_custom_subprograms_file(custom_file_path, default_subprograms)

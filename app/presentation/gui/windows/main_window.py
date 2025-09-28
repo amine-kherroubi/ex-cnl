@@ -9,7 +9,7 @@ import customtkinter as ctk  # type: ignore
 from app.core.domain.models.report_specification import ReportSpecification
 from app.presentation.gui.styling.design_system import DesignSystem
 from app.presentation.gui.views.menu_view import MenuView
-from app.presentation.gui.views.report_views.factories.report_view_factory import (
+from app.presentation.gui.views.report_views.report_view_factory import (
     ReportViewFactory,
 )
 from app.presentation.gui.models.state import State

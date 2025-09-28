@@ -88,7 +88,8 @@ class DateSelector(BaseComponent):
             text="Année :",
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
         )
         year_label.grid(  # type: ignore
@@ -110,10 +111,12 @@ class DateSelector(BaseComponent):
             height=DesignSystem.Height.SM.value,
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,
@@ -138,7 +141,8 @@ class DateSelector(BaseComponent):
             text="Mois :",
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
         )
         month_label.grid(  # type: ignore
@@ -158,10 +162,12 @@ class DateSelector(BaseComponent):
             height=DesignSystem.Height.SM.value,
             text_color=DesignSystem.Color.BLACK.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             dropdown_font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             state="readonly",
             border_width=DesignSystem.BorderWidth.XS.value,

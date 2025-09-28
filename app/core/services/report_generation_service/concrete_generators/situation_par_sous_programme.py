@@ -12,7 +12,9 @@ from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation_service.base_report_generator import BaseGenerator
+from app.core.services.report_generation_service.base_report_generator import (
+    BaseGenerator,
+)
 from app.core.services.excel_styling_service import ExcelStylingService
 
 
@@ -44,7 +46,7 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
             self._logger.debug(
                 f"Ignoring unused configuration parameters: {list(kwargs.keys())}"
             )
-    
+
     def _create_predefined_tables(self) -> None:
         self._logger.debug("Creating reference tables")
 
@@ -397,7 +399,9 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
     ) -> None:
         # Get the display name for the subprogram
         try:
-            subprogram_obj = SubprogramRegistry.get_subprogram_by_database_alias(subprogram)
+            subprogram_obj = SubprogramRegistry.get_subprogram_by_database_alias(
+                subprogram
+            )
             display_name = subprogram_obj.name
         except ValueError:
             display_name = subprogram
@@ -586,19 +590,19 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
 
         column_widths: Dict[str, int] = {
             "A": 25,  # Sous-programme
-            "B": 8,   # Aides notifiées
+            "B": 8,  # Aides notifiées
             "C": 12,  # Montants notifiés
-            "D": 8,   # Aides inscrites
+            "D": 8,  # Aides inscrites
             "E": 12,  # Montants inscrits
-            "F": 8,   # Aides inscrites (2)
+            "F": 8,  # Aides inscrites (2)
             "G": 12,  # Montants inscrits (3)
-            "H": 6,   # T1 (prev)
-            "I": 6,   # T2 (prev)
-            "J": 6,   # T3 (prev)
+            "H": 6,  # T1 (prev)
+            "I": 6,  # T2 (prev)
+            "J": 6,  # T3 (prev)
             "K": 12,  # Montant (4)
-            "L": 6,   # T1 (curr)
-            "M": 6,   # T2 (curr)
-            "N": 6,   # T3 (curr)
+            "L": 6,  # T1 (curr)
+            "M": 6,  # T2 (curr)
+            "N": 6,  # T3 (curr)
             "O": 12,  # Montant (5)
             "P": 12,  # Cumul
             "Q": 12,  # Solde

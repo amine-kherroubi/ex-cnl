@@ -64,7 +64,8 @@ class FileSelector(BaseComponent):
             fg_color=DesignSystem.Color.LESS_WHITE.value,
             hover_color=DesignSystem.Color.LEAST_WHITE.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BUTTON.value,
             ),
             corner_radius=DesignSystem.Roundness.SM.value,
             height=DesignSystem.Height.SM.value,
@@ -80,7 +81,8 @@ class FileSelector(BaseComponent):
             fg_color=DesignSystem.Color.PRIMARY.value,
             hover_color=DesignSystem.Color.DARKER_PRIMARY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BUTTON.value,
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BUTTON.value,
             ),
             corner_radius=DesignSystem.Roundness.SM.value,
             height=DesignSystem.Height.SM.value,
@@ -88,7 +90,9 @@ class FileSelector(BaseComponent):
             width=DesignSystem.Width.MD.value,
         )
         self._select_button.grid(  # type: ignore
-            row=0, column=2, padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value)
+            row=0,
+            column=2,
+            padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value),
         )
 
         info_text: str = (
@@ -120,7 +124,8 @@ class FileSelector(BaseComponent):
             corner_radius=DesignSystem.Roundness.SM.value,
             text_color=DesignSystem.Color.GRAY.value,
             font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value, size=DesignSystem.FontSize.BODY.value
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BODY.value,
             ),
             fg_color=DesignSystem.Color.LEAST_WHITE.value,
             border_color=DesignSystem.Color.LIGHTER_GRAY.value,
