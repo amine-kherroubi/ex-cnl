@@ -58,69 +58,109 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
             FROM subprograms s
         """,
         "lancements_mois": f"""
+            WITH payment_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT
                 s.subprogram,
                 COALESCE(data.count, 0) as count
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    ps."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
-                AND p."valeur physique" > 0
-                GROUP BY p."Sous programme"
+                FROM payment_summary ps
+                GROUP BY ps."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "lancements_cumul_annee": f"""
+            WITH payment_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                AND CAST(SUBSTRING(p."Date OV", 4, 2) AS INTEGER) <= {{month}}
+                AND p."Date OV" LIKE '%/{{year}}'
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT 
                 s.subprogram,
                 COALESCE(data.count, 0) as count
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    ps."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND CAST(SUBSTRING(p."Date OV", 4, 2) AS INTEGER) <= {{month}}
-                AND p."Date OV" LIKE '%/{{year}}'
-                AND p."valeur physique" > 0
-                GROUP BY p."Sous programme"
+                FROM payment_summary ps
+                GROUP BY ps."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "livraisons_mois": f"""
+            WITH payment_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT
                 s.subprogram,
                 COALESCE(data.count, 0) as count
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    ps."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
-                AND p."valeur physique" > 0
-                GROUP BY p."Sous programme"
+                FROM payment_summary ps
+                GROUP BY ps."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "livraisons_cumul_annee": f"""
+            WITH payment_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                AND CAST(SUBSTRING(p."Date OV", 4, 2) AS INTEGER) <= {{month}}
+                AND p."Date OV" LIKE '%/{{year}}'
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT 
                 s.subprogram,
                 COALESCE(data.count, 0) as count
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    ps."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                AND CAST(SUBSTRING(p."Date OV", 4, 2) AS INTEGER) <= {{month}}
-                AND p."Date OV" LIKE '%/{{year}}'
-                AND p."valeur physique" > 0
-                GROUP BY p."Sous programme"
+                FROM payment_summary ps
+                GROUP BY ps."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "subprograms_situation": """
@@ -130,21 +170,55 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
             FROM subprograms s
         """,
         "acheves_derniere_tranche": f"""
+            WITH payment_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT 
                 s.subprogram,
                 COALESCE(data.count, 0) as acheves
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    ps."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                AND p."valeur physique" > 0
-                GROUP BY p."Sous programme"
+                FROM payment_summary ps
+                GROUP BY ps."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
         "en_cours_calculation": f"""
+            WITH lances_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            ),
+            acheves_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT 
                 s.subprogram,
                 COALESCE(lances.count, 0) as lances_count,
@@ -153,35 +227,42 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    ls."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND p."valeur physique" > 0
-                GROUP BY p."Sous programme"
+                FROM lances_summary ls
+                GROUP BY ls."Sous programme"
             ) lances ON s.subprogram = lances."Sous programme"
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    as_."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                GROUP BY p."Sous programme"
+                FROM acheves_summary as_
+                GROUP BY as_."Sous programme"
             ) acheves ON s.subprogram = acheves."Sous programme"
         """,
         "non_lances_premiere_tranche": f"""
+            WITH payment_summary AS (
+                SELECT
+                    p."Sous programme",
+                    p."Code OV",
+                    SUM(p."valeur physique") AS decision_value
+                FROM paiements p
+                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
+                GROUP BY
+                    p."Sous programme",
+                    p."Code OV"
+                HAVING decision_value > 0
+            )
             SELECT 
                 s.subprogram,
                 COALESCE(s.aid_count - data.count, s.aid_count) as non_lances
             FROM subprograms s
             LEFT JOIN (
                 SELECT
-                    p."Sous programme",
+                    ps."Sous programme",
                     COUNT(*) as count
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND p."valeur physique" > 0
-                GROUP BY p."Sous programme"
+                FROM payment_summary ps
+                GROUP BY ps."Sous programme"
             ) data ON s.subprogram = data."Sous programme"
         """,
     },

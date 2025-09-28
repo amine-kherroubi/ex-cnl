@@ -34,7 +34,7 @@ situation_par_sous_programme_specification: Final[ReportSpecification] = ReportS
             table_name="decisions",
         ),
     ],
-    output_filename="situation_financiere_{wilaya}_{date}.xlsx",
+    output_filename="situation_par_sous_programme_{wilaya}_{date}.xlsx",
     generator=SituationFinanciereGenerator,
     queries={
         "subprograms": """
@@ -47,7 +47,7 @@ situation_par_sous_programme_specification: Final[ReportSpecification] = ReportS
                     d."Sous programme",
                     d."Code décision",
                     SUM(d."Financier") AS net_amount,
-                    SUM(d."Physique") AS decsision_value
+                    SUM(d."Physique") AS decision_value
                 FROM decisions d
                 GROUP BY
                     d."Sous programme",
@@ -76,7 +76,7 @@ situation_par_sous_programme_specification: Final[ReportSpecification] = ReportS
                     SUM(COALESCE(p.T3, 0)) AS net_t3,
                     SUM(p."valeur physique") AS decision_value
                 FROM paiements p
-                AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
+                WHERE CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) < {year}
                 GROUP BY
                     p."Sous programme",
                     p."Code OV"
@@ -106,7 +106,7 @@ situation_par_sous_programme_specification: Final[ReportSpecification] = ReportS
                     SUM(COALESCE(p.T3, 0)) AS net_t3,
                     SUM(p."valeur physique") AS decision_value
                 FROM paiements p
-                AND CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
+                WHERE CAST(SUBSTRING("Date OV", 7, 4) AS INTEGER) = {year}
                 AND CAST(SUBSTRING("Date OV", 4, 2) AS INTEGER) <= {month}
                 GROUP BY
                     p."Sous programme",
