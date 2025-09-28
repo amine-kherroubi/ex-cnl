@@ -4,10 +4,7 @@ from logging import Logger
 
 # Local application imports
 from app.core.domain.models.report_specification import ReportSpecification
-from app.core.domain.predefined_objects.report_specifications import (
-    activite_mensuelle_specification,
-    situation_financiere_specification,
-)
+from app.core.domain.predefined_objects.report_specifications import *
 from app.common.logging_setup import get_logger
 
 
@@ -55,4 +52,5 @@ class ReportSpecificationRegistry(object):
     _REPORT_SPECIFICATIONS: Final[List[ReportSpecification]] = [
         activite_mensuelle_specification,
         situation_financiere_specification,
+        situation_par_sous_programme_specification,
     ]

@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
 from app.core.domain.models.required_file import RequiredFile
-from app.core.services.report_generation_service.base_generator import (
+from app.core.services.report_generation_service.base_report_generator import (
     BaseGenerator,
 )
 

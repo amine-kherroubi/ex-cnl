@@ -21,7 +21,7 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation_service.factories.report_generator_factory import (
     ReportGeneratorFactory,
 )
-from app.core.services.report_generation_service.base_generator import BaseGenerator
+from app.core.services.report_generation_service.base_report_generator import BaseGenerator
 from app.common.logging_setup import get_logger
 
 

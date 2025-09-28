@@ -13,11 +13,12 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation_service.concrete_generators.activite_mensuelle import (
     ActiviteMensuelleGenerator,
 )
-from app.core.services.report_generation_service.base_generator import BaseGenerator
+from app.core.services.report_generation_service.base_report_generator import BaseGenerator
 from app.core.services.report_generation_service.concrete_generators.situation_financiere import (
     SituationFinanciereGenerator,
 )
 from app.common.logging_setup import get_logger
+from app.core.services.report_generation_service.concrete_generators.situation_par_sous_programme import SituationParSousProgrammeGenerator
 
 
 @final
@@ -29,6 +30,7 @@ class ReportGeneratorFactory(object):
     _generators: Dict[str, Type[BaseGenerator]] = {
         "activite_mensuelle": ActiviteMensuelleGenerator,
         "situation_financiere": SituationFinanciereGenerator,
+        "situation_par_sous_programme": SituationParSousProgrammeGenerator,
     }
 
     def __new__(cls) -> None:

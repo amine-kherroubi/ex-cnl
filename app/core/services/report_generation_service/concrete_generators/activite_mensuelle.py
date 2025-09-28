@@ -15,7 +15,7 @@ from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation_service.base_generator import BaseGenerator
+from app.core.services.report_generation_service.base_report_generator import BaseGenerator
 from app.core.services.excel_styling_service import ExcelStylingService
 
 
@@ -35,11 +35,6 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         self._current_row: int = 1
 
     def configure(self, **kwargs: Any) -> None:
-        """Configure the generator with additional parameters.
-
-        This generator doesn't need additional configuration,
-        but overrides the method to avoid NotImplementedError.
-        """
         if kwargs:
             self._logger.debug(
                 f"Ignoring unused configuration parameters: {list(kwargs.keys())}"
