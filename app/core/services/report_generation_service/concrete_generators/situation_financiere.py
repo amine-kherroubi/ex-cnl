@@ -21,17 +21,22 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation_service.base_report_generator import (
     BaseGenerator,
 )
-from app.core.services.excel_styling_service import ExcelStylingService
+from app.core.services.excel_styling_service import (
+    ExcelStylingService,
+    CellData,
+    RowData,
+    MergeData,
+    ColumnData,
+)
 
 
 class SituationFinanciereGenerator(BaseGenerator):
     __slots__ = (
         "_current_row",
-        "_target_subprogram",
+        "_target_subprogram", 
         "_target_notification",
-        "_totals",
         "_data_start_row",
-        "_data_end_row",
+        "_dairas_communes_count",
     )
 
     def __init__(
@@ -47,9 +52,8 @@ class SituationFinanciereGenerator(BaseGenerator):
         self._current_row: int = 1
         self._target_subprogram: Optional[Subprogram] = None
         self._target_notification: Optional[Notification] = None
-        self._totals: Dict[str, int] = {}
         self._data_start_row: int = 0
-        self._data_end_row: int = 0
+        self._dairas_communes_count: int = 0
 
     def configure(self, **kwargs: Any) -> None:
         target_subprogram: Optional[Subprogram] = kwargs.get("target_subprogram")
@@ -61,15 +65,11 @@ class SituationFinanciereGenerator(BaseGenerator):
         if target_notification is None:
             raise ValueError("additional parameter 'target_notification' is required")
 
-        self._logger.debug(f"Setting target subprogram: {target_subprogram}")
-        self._logger.debug(f"Setting target notification: {target_notification}")
-
         if not SubprogramRegistry.has_subprogram(target_subprogram.name):
             error_msg: str = (
                 f"Subprogram '{target_subprogram.name}' not found. "
                 f"Available subprograms: {SubprogramRegistry.get_all_subprogram_names()}"
             )
-            self._logger.error(error_msg)
             raise ValueError(error_msg)
 
         if (
@@ -83,38 +83,23 @@ class SituationFinanciereGenerator(BaseGenerator):
                 f"Notification '{target_notification.name}' not found. "
                 f"Available notifications: {available_notifications}"
             )
-            self._logger.error(error_msg)
             raise ValueError(error_msg)
 
         self._target_subprogram = target_subprogram
-        self._logger.info(f"Target subprogram set: {target_subprogram.database_alias}")
-
         self._target_notification = target_notification
-        self._logger.info(
-            f"Target notification set: {target_notification.name} "
-            f"(aid_amount: {target_notification.aid_amount}, aid_count: {target_notification.aid_count})"
-        )
 
     def _verify_target_selection(self) -> None:
         if self._target_subprogram is None:
-            error_msg: str = (
+            raise RuntimeError(
                 "No target subprogram set. Please call configure() with target_subprogram "
                 "before generating the report."
             )
-            self._logger.error(error_msg)
-            raise RuntimeError(error_msg)
 
         if self._target_notification is None:
-            error_msg: str = (
+            raise RuntimeError(
                 "No target notification set. Please call configure() with target_notification "
                 "before generating the report."
             )
-            self._logger.error(error_msg)
-            raise RuntimeError(error_msg)
-
-        self._logger.debug(
-            f"Target selection verified: {self._target_subprogram.name} - {self._target_notification.name}"
-        )
 
     def generate(
         self,
@@ -125,39 +110,22 @@ class SituationFinanciereGenerator(BaseGenerator):
         return super().generate(source_file_paths, output_directory_path)
 
     def _create_predefined_tables(self) -> None:
-        self._logger.debug("Creating reference tables")
-
         try:
-            self._logger.debug("Creating reference table 'subprograms'")
             df: pd.DataFrame = SubprogramRegistry.get_subprograms_dataframe()
             self._data_repository.create_table_from_dataframe("subprograms", df)
-            rows, cols = df.shape
-            self._logger.info(
-                f"Reference table 'subprograms' created: {rows} rows and {cols} columns"
-            )
         except Exception as error:
-            self._logger.exception(
-                f"Failed to create reference table 'subprograms': {error}"
-            )
+            self._logger.exception(f"Failed to create reference table 'subprograms': {error}")
             raise
 
         try:
-            self._logger.debug("Creating reference table 'dairas_communes'")
             df: pd.DataFrame = get_dairas_communes_dataframe()
             self._data_repository.create_table_from_dataframe("dairas_communes", df)
-            rows, cols = df.shape
-            self._logger.info(
-                f"Reference table 'dairas_communes' created: {rows} rows and {cols} columns"
-            )
+            self._dairas_communes_count = len(df)
         except Exception as error:
-            self._logger.exception(
-                f"Failed to create reference table 'dairas_communes': {error}"
-            )
+            self._logger.exception(f"Failed to create reference table 'dairas_communes': {error}")
             raise
 
     def _format_query_with_context(self, query_template: str) -> str:
-        self._logger.debug("Formatting query template with report context")
-
         formatted_query: str = query_template
 
         if self._target_notification == SubprogramRegistry.ALL_NOTIFICATIONS_OBJECT:
@@ -173,7 +141,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             else:
                 notification_value: str = ", ".join(f"'{alias}'" for alias in aliases)
 
-        formatted_query = (
+        return (
             formatted_query.replace(
                 "{subprogram}", f"'{self._target_subprogram.database_alias}'"  # type: ignore
             )
@@ -182,34 +150,20 @@ class SituationFinanciereGenerator(BaseGenerator):
             .replace("{month}", str(self._report_context.month.number))
         )
 
-        self._logger.debug(
-            f"Placeholders replaced with: month={self._report_context.month.number}, "
-            f"year={self._report_context.year}, "
-            f"subprogram={self._target_subprogram.database_alias}, "  # type: ignore
-            f"notification={self._target_notification.database_aliases}, "  # type: ignore
-            f"aid_amount={self._target_notification.aid_amount}"  # type: ignore
-        )
-
-        self._logger.debug("Query formatting completed")
-        return formatted_query
-
     def _add_content(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
         self._add_header(sheet)
         self._add_table_headers(sheet)
         self._add_data_rows(sheet, query_results)
-        self._add_totals_row(sheet, query_results)
+        self._add_totals_row(sheet)
 
     def _add_header(self, sheet: Worksheet) -> None:
-        self._logger.debug("Adding report header")
-
         subprogram_display: str = (
             "de "
             if self._target_subprogram.name.startswith("Rattrapage")  # type: ignore
             else ""
         ) + self._target_subprogram.name.lower()  # type: ignore
-        notification_display: str = self._target_notification.name.lower()  # type: ignore
 
         notification_display: str = (
             "de toutes les notifications"
@@ -222,73 +176,72 @@ class SituationFinanciereGenerator(BaseGenerator):
             f"du sous-programme {subprogram_display} par daira et par commune"
         )
 
-        ExcelStylingService.merge_and_style_cells(
+        ExcelStylingService.batch_merge_and_style_cells(
             sheet,
-            "A",
-            "S",
-            self._current_row,
-            self._current_row,
-            value=title,
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
-        )
-
-        self._current_row += 1
-
-        ExcelStylingService.merge_and_style_cells(
-            sheet,
-            "A",
-            "S",
-            self._current_row,
-            self._current_row,
-            value=f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
-        )
-
-        self._current_row += 1
-
-        ExcelStylingService.apply_style_to_cell(
-            sheet,
-            "A",
-            self._current_row,
-            value=f"DL de {self._report_context.wilaya.value}",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
+            [
+                MergeData(
+                    "A",
+                    "S",
+                    self._current_row,
+                    self._current_row,
+                    value=title,
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER,
+                ),
+                MergeData(
+                    "A",
+                    "S",
+                    self._current_row + 1,
+                    self._current_row + 1,
+                    value=f"Arrêté le {self._report_context.reporting_date.strftime('%d/%m/%Y')}",
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER,
+                ),
+            ],
         )
 
         self._current_row += 2
 
-        self._logger.info("Report header added successfully")
+        ExcelStylingService.style_cell(
+            sheet,
+            CellData(
+                "A",
+                self._current_row,
+                value=f"DL de {self._report_context.wilaya.value}",
+                font=ExcelStylingService.FONT_BOLD,
+                alignment=ExcelStylingService.ALIGN_CENTER,
+            ),
+        )
+        self._current_row += 2
 
     def _add_table_headers(self, sheet: Worksheet) -> None:
-        self._logger.debug("Adding table headers")
-
-        ExcelStylingService.merge_and_style_cells(
+        ExcelStylingService.batch_merge_and_style_cells(
             sheet,
-            "E",
-            "F",
-            self._current_row,
-            self._current_row,
-            value="Engagement par la BNH",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
+            [
+                MergeData(
+                    "E",
+                    "F",
+                    self._current_row,
+                    self._current_row,
+                    value="Engagement par la BNH",
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                MergeData(
+                    "G",
+                    "H",
+                    self._current_row,
+                    self._current_row,
+                    value="Engagement par le MHUV",
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+            ],
         )
-
-        ExcelStylingService.merge_and_style_cells(
-            sheet,
-            "G",
-            "H",
-            self._current_row,
-            self._current_row,
-            value="Engagement par le MHUV",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
-        )
-
         self._current_row += 1
+
         header_start_row: int = self._current_row
         header_end_row: int = self._current_row + 3
 
@@ -306,44 +259,37 @@ class SituationFinanciereGenerator(BaseGenerator):
             ("S", "Reste à inscrire\n(1) - (2)"),
         ]
 
-        for col, title in main_headers:
-            ExcelStylingService.merge_and_style_cells(
-                sheet,
-                col,
-                col,
-                header_start_row,
-                header_end_row,
-                value=title,
+        ExcelStylingService.batch_merge_and_style_cells(
+            sheet,
+            [
+                MergeData(
+                    col,
+                    col,
+                    header_start_row,
+                    header_end_row,
+                    value=title,
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
+                    border=ExcelStylingService.BORDER_THIN,
+                )
+                for col, title in main_headers
+            ],
+        )
+
+        ExcelStylingService.merge_and_style_cell(
+            sheet,
+            MergeData(
+                "I",
+                "P",
+                self._current_row,
+                self._current_row,
+                value="Consommations",
                 font=ExcelStylingService.FONT_BOLD,
-                alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
+                alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
                 border=ExcelStylingService.BORDER_THIN,
-            )
-
-        ExcelStylingService.merge_and_style_cells(
-            sheet,
-            "I",
-            "P",
-            self._current_row,
-            self._current_row,
-            value="Consommations",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
+            ),
         )
-
         self._current_row += 1
-
-        ExcelStylingService.merge_and_style_cells(
-            sheet,
-            "I",
-            "L",
-            self._current_row,
-            self._current_row,
-            value=f"Cumuls au 31/12/{self._report_context.year - 1}",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
-        )
 
         end_day: int = (
             self._report_context.month.last_day(self._report_context.year)
@@ -351,64 +297,83 @@ class SituationFinanciereGenerator(BaseGenerator):
             else date.today().day
         )
 
-        ExcelStylingService.merge_and_style_cells(
+        ExcelStylingService.batch_merge_and_style_cells(
             sheet,
-            "M",
-            "P",
-            self._current_row,
-            self._current_row,
-            value=f"Du 1 janvier {self._report_context.year} au {end_day} {self._report_context.month.value}",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
+            [
+                MergeData(
+                    "I",
+                    "L",
+                    self._current_row,
+                    self._current_row,
+                    value=f"Cumuls au 31/12/{self._report_context.year - 1}",
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                MergeData(
+                    "M",
+                    "P",
+                    self._current_row,
+                    self._current_row,
+                    value=f"Du 1 janvier {self._report_context.year} au {end_day} {self._report_context.month.value}",
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+            ],
         )
-
         self._current_row += 1
 
-        ExcelStylingService.merge_and_style_cells(
+        ExcelStylingService.batch_merge_and_style_cells(
             sheet,
-            "I",
-            "K",
-            self._current_row,
-            self._current_row,
-            value="Aides",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
+            [
+                MergeData(
+                    "I",
+                    "K",
+                    self._current_row,
+                    self._current_row,
+                    value="Aides",
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                MergeData(
+                    "M",
+                    "O",
+                    self._current_row,
+                    self._current_row,
+                    value="Aides",
+                    font=ExcelStylingService.FONT_BOLD,
+                    alignment=ExcelStylingService.ALIGN_CENTER_WRAP,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+            ],
         )
 
-        ExcelStylingService.apply_style_to_cell(
+        ExcelStylingService.style_row(
             sheet,
-            "L",
-            self._current_row,
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
-            value="Montant (4)",
+            RowData(
+                number=self._current_row,
+                cells=[
+                    CellData(
+                        "L",
+                        self._current_row,
+                        "Montant (4)",
+                        ExcelStylingService.FONT_BOLD,
+                        ExcelStylingService.ALIGN_CENTER_WRAP,
+                        ExcelStylingService.BORDER_THIN,
+                    ),
+                    CellData(
+                        "P",
+                        self._current_row,
+                        "Montant (5)",
+                        ExcelStylingService.FONT_BOLD,
+                        ExcelStylingService.ALIGN_CENTER_WRAP,
+                        ExcelStylingService.BORDER_THIN,
+                    ),
+                ],
+            ),
         )
-
-        ExcelStylingService.merge_and_style_cells(
-            sheet,
-            "M",
-            "O",
-            self._current_row,
-            self._current_row,
-            value="Aides",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
-        )
-
-        ExcelStylingService.apply_style_to_cell(
-            sheet,
-            "P",
-            self._current_row,
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-            border=ExcelStylingService.BORDER_THIN,
-            value="Montant (5)",
-        )
-
         self._current_row += 1
 
         tranche_headers: List[Tuple[str, str]] = [
@@ -420,119 +385,171 @@ class SituationFinanciereGenerator(BaseGenerator):
             ("O", "T3"),
         ]
 
-        for col, title in tranche_headers:
-            ExcelStylingService.apply_style_to_cell(
-                sheet,
-                col,
-                self._current_row,
-                font=ExcelStylingService.FONT_BOLD,
-                alignment=ExcelStylingService.ALIGNMENT_CENTER_WRAP,
-                border=ExcelStylingService.BORDER_THIN,
-                value=title,
-            )
-
+        ExcelStylingService.style_row(
+            sheet,
+            RowData(
+                number=self._current_row,
+                cells=[
+                    CellData(
+                        col,
+                        self._current_row,
+                        title,
+                        ExcelStylingService.FONT_BOLD,
+                        ExcelStylingService.ALIGN_CENTER_WRAP,
+                        ExcelStylingService.BORDER_THIN,
+                    )
+                    for col, title in tranche_headers
+                ],
+            ),
+        )
         self._current_row += 1
-        self._logger.info("Table headers added successfully")
 
     def _add_data_rows(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
     ) -> None:
-        self._logger.debug("Adding data rows")
-
         dairas_communes_df: pd.DataFrame = get_dairas_communes_dataframe()
-
         data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]] = (
             self._create_lookup_dictionaries(query_results)
         )
 
-        totals: Dict[str, int] = {
-            "aides_inscrites": 0,
-            "montants_inscrits": 0,
-            "cumul_precedent_t1": 0,
-            "cumul_precedent_t2": 0,
-            "cumul_precedent_t3": 0,
-            "cumul_precedent_montant": 0,
-            "annee_actuelle_t1": 0,
-            "annee_actuelle_t2": 0,
-            "annee_actuelle_t3": 0,
-            "annee_actuelle_montant": 0,
-            "cumul_total": 0,
-        }
-
-        # Store the start row for merging later
         self._data_start_row = self._current_row
+        rows: List[RowData] = []
 
         for i, (_, row) in enumerate(dairas_communes_df.iterrows()):
             daira: str = row["Daira"]
             commune: str = row["Commune"]
-            current_row: int = self._current_row + i
+            row_number: int = self._current_row + i
+            key: Tuple[str, str] = (daira, commune)
 
-            self._add_single_data_row(
-                sheet, current_row, daira, commune, data_dicts, totals
-            )
+            aides_data = data_dicts["aides_inscrites"].get(key, (0, 0))
+            cumul_precedent = data_dicts["cumul_precedent"].get(key, (0, 0, 0, 0))
+            annee_actuelle = data_dicts["annee_actuelle"].get(key, (0, 0, 0, 0))
 
-        self._data_end_row = self._current_row + len(dairas_communes_df) - 1
+            cumul_formula = f"=L{row_number}+P{row_number}"
+
+            cells: List[CellData] = [
+                CellData(
+                    "A",
+                    row_number,
+                    daira,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "B",
+                    row_number,
+                    commune,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData("C", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData("D", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData(
+                    "E",
+                    row_number,
+                    aides_data[0],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "F",
+                    row_number,
+                    aides_data[1],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData("G", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData("H", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData(
+                    "I",
+                    row_number,
+                    cumul_precedent[0],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "J",
+                    row_number,
+                    cumul_precedent[1],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "K",
+                    row_number,
+                    cumul_precedent[2],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "L",
+                    row_number,
+                    cumul_precedent[3],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "M",
+                    row_number,
+                    annee_actuelle[0],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "N",
+                    row_number,
+                    annee_actuelle[1],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "O",
+                    row_number,
+                    annee_actuelle[2],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "P",
+                    row_number,
+                    annee_actuelle[3],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "Q",
+                    row_number,
+                    cumul_formula,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData("R", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData("S", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+            ]
+
+            rows.append(RowData(number=row_number, cells=cells))
+
+        ExcelStylingService.batch_style_rows(sheet, rows)
         self._current_row += len(dairas_communes_df)
-
-        # Apply merging to daira column (column A) for consecutive identical values
         self._merge_daira_cells(sheet, dairas_communes_df)
-
-        self._totals = totals
-
-        self._logger.info(f"Added {len(dairas_communes_df)} data rows successfully")
 
     def _merge_daira_cells(
         self, sheet: Worksheet, dairas_communes_df: pd.DataFrame
     ) -> None:
-        """
-        Merge consecutive daira cells that have identical content.
-        """
-        self._logger.debug("Merging daira cells")
-
         current_row: int = self._data_start_row
 
-        while current_row <= self._data_end_row:
+        while current_row <= self._data_start_row + len(dairas_communes_df) - 1:
             current_daira: str = sheet[f"A{current_row}"].value
 
-            # Find the end of consecutive identical daira values
             merge_end_row: int = current_row
             while (
-                merge_end_row + 1 <= self._data_end_row
+                merge_end_row + 1 <= self._data_start_row + len(dairas_communes_df) - 1
                 and sheet[f"A{merge_end_row + 1}"].value == current_daira
             ):
                 merge_end_row += 1
 
-            # If we have more than one cell with the same daira value, merge them
             if merge_end_row > current_row:
                 try:
-                    ExcelStylingService.merge_cells_with_same_content(
+                    ExcelStylingService.merge_and_style_cells_with_same_value(
                         sheet=sheet,
-                        col="A",
+                        column="A",
                         start_row=current_row,
                         end_row=merge_end_row,
                         font=ExcelStylingService.FONT_NORMAL,
-                        alignment=ExcelStylingService.ALIGNMENT_CENTER,
+                        alignment=ExcelStylingService.ALIGN_CENTER,
                         border=ExcelStylingService.BORDER_THIN,
                     )
-                    self._logger.debug(
-                        f"Merged daira '{current_daira}' from row {current_row} to {merge_end_row}"
-                    )
-                except ValueError as e:
-                    self._logger.warning(f"Failed to merge daira cells: {e}")
-            else:
-                # Apply styling to single cell
-                ExcelStylingService.apply_style_to_cell(
-                    sheet=sheet,
-                    col="A",
-                    row=current_row,
-                    font=ExcelStylingService.FONT_NORMAL,
-                    alignment=ExcelStylingService.ALIGNMENT_CENTER,
-                    border=ExcelStylingService.BORDER_THIN,
-                )
+                except ValueError:
+                    pass
 
             current_row = merge_end_row + 1
-
-        self._logger.info("Daira cell merging completed successfully")
 
     def _create_lookup_dictionaries(
         self, query_results: Dict[str, pd.DataFrame]
@@ -576,266 +593,100 @@ class SituationFinanciereGenerator(BaseGenerator):
 
         return data_dicts
 
-    def _add_single_data_row(
-        self,
-        sheet: Worksheet,
-        row: int,
-        daira: str,
-        commune: str,
-        data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
-        totals: Dict[str, int],
-    ) -> None:
-        key: Tuple[str, str] = (daira, commune)
+    def _add_totals_row(self, sheet: Worksheet) -> None:
+        data_end_row: int = self._current_row - 1
+        
+        formula_columns: List[str] = ["E", "F", "I", "J", "K", "L", "M", "N", "O", "P", "Q"]
+        
+        total_cells: List[CellData] = []
 
-        # Note: We don't style column A (daira) here since it will be handled by the merge function
-        basic_values: List[Tuple[str, Any]] = [
-            ("B", commune),
-            ("C", 0),
-            ("D", 0),
-        ]
-
-        # Set the daira value directly without styling (will be styled during merge)
-        sheet[f"A{row}"].value = daira
-
-        if key in data_dicts["aides_inscrites"]:
-            aides_data = data_dicts["aides_inscrites"][key]
-            aides, montants = aides_data[0], aides_data[1]
-            basic_values.extend(
-                [
-                    ("E", aides),
-                    ("F", montants),
-                ]
-            )
-            totals["aides_inscrites"] += aides
-            totals["montants_inscrits"] += montants
-        else:
-            basic_values.extend([("E", 0), ("F", 0)])
-
-        basic_values.extend([("G", 0), ("H", 0)])
-
-        ExcelStylingService.apply_data_row_styling(
-            sheet,
-            row,
-            basic_values,
-            font=ExcelStylingService.FONT_NORMAL,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
-            border=ExcelStylingService.BORDER_THIN,
-        )
-
-        self._add_cumulative_data(
-            sheet,
-            row,
-            key,
-            data_dicts["cumul_precedent"],
-            ["I", "J", "K", "L"],
-            totals,
-            [
-                "cumul_precedent_t1",
-                "cumul_precedent_t2",
-                "cumul_precedent_t3",
-                "cumul_precedent_montant",
-            ],
-        )
-
-        self._add_cumulative_data(
-            sheet,
-            row,
-            key,
-            data_dicts["annee_actuelle"],
-            ["M", "N", "O", "P"],
-            totals,
-            [
-                "annee_actuelle_t1",
-                "annee_actuelle_t2",
-                "annee_actuelle_t3",
-                "annee_actuelle_montant",
-            ],
-        )
-
-        cumul_total = self._calculate_cumul_total(key, data_dicts)
-        ExcelStylingService.apply_style_to_cell(
-            sheet,
-            "Q",
-            row,
-            font=ExcelStylingService.FONT_NORMAL,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
-            border=ExcelStylingService.BORDER_THIN,
-            value=cumul_total,
-        )
-        totals["cumul_total"] += cumul_total
-
-        final_columns: List[Tuple[str, int]] = [("R", 0), ("S", 0)]
-        ExcelStylingService.apply_data_row_styling(
-            sheet,
-            row,
-            final_columns,
-            font=ExcelStylingService.FONT_NORMAL,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
-            border=ExcelStylingService.BORDER_THIN,
-        )
-
-    def _add_cumulative_data(
-        self,
-        sheet: Worksheet,
-        row: int,
-        key: Tuple[str, str],
-        data_dict: Dict[Tuple[str, str], Tuple[int, ...]],
-        columns: List[str],
-        totals: Dict[str, int],
-        total_keys: List[str],
-    ) -> None:
-        if key in data_dict:
-            values = data_dict[key]
-            column_data: List[Tuple[str, Any]] = []
-            for i, (col, total_key) in enumerate(zip(columns, total_keys)):
-                value = values[i]
-                column_data.append(
-                    (col, value)
+        for col in ["C", "D", "G", "H", "R", "S"]:
+            total_cells.append(
+                CellData(
+                    col,
+                    self._current_row,
+                    0,
+                    ExcelStylingService.FONT_BOLD,
+                    ExcelStylingService.ALIGN_CENTER,
+                    ExcelStylingService.BORDER_THIN,
                 )
-                totals[total_key] += value
-
-            ExcelStylingService.apply_data_row_styling(
-                sheet,
-                row,
-                column_data,
-                font=ExcelStylingService.FONT_NORMAL,
-                alignment=ExcelStylingService.ALIGNMENT_CENTER,
-                border=ExcelStylingService.BORDER_THIN,
-            )
-        else:
-            column_data = [(col, 0) for col in columns]
-            ExcelStylingService.apply_data_row_styling(
-                sheet,
-                row,
-                column_data,
-                font=ExcelStylingService.FONT_NORMAL,
-                alignment=ExcelStylingService.ALIGNMENT_CENTER,
-                border=ExcelStylingService.BORDER_THIN,
             )
 
-    def _calculate_cumul_total(
-        self,
-        key: Tuple[str, str],
-        data_dicts: Dict[str, Dict[Tuple[str, str], Tuple[int, ...]]],
-    ) -> int:
-        total: int = 0
-        if key in data_dicts["cumul_precedent"]:
-            total += data_dicts["cumul_precedent"][key][3]  # montant column
-        if key in data_dicts["annee_actuelle"]:
-            total += data_dicts["annee_actuelle"][key][3]  # montant column
-        return total
+        for col in formula_columns:
+            total_cells.append(
+                CellData(
+                    col,
+                    self._current_row,
+                    ExcelStylingService.create_sum_formula(
+                        col, self._data_start_row, data_end_row
+                    ),
+                    ExcelStylingService.FONT_BOLD,
+                    ExcelStylingService.ALIGN_CENTER,
+                    ExcelStylingService.BORDER_THIN,
+                )
+            )
 
-    def _add_totals_row(
-        self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame]
-    ) -> None:
-        self._logger.debug("Adding totals row")
-
-        total_values: List[Tuple[str, Any]] = [
-            ("A", ""),
-            ("B", ""),
-            ("C", "0"),
-            ("D", "0"),
-            ("E", self._totals.get("aides_inscrites", 0)),
-            ("F", self._totals.get("montants_inscrits", 0)),
-            ("G", "0"),
-            ("H", "0"),
-            ("I", self._totals.get("cumul_precedent_t1", 0)),
-            ("J", self._totals.get("cumul_precedent_t2", 0)),
-            ("K", self._totals.get("cumul_precedent_t3", 0)),
-            ("L", self._totals.get("cumul_precedent_montant", 0)),
-            ("M", self._totals.get("annee_actuelle_t1", 0)),
-            ("N", self._totals.get("annee_actuelle_t2", 0)),
-            ("O", self._totals.get("annee_actuelle_t3", 0)),
-            ("P", self._totals.get("annee_actuelle_montant", 0)),
-            ("Q", self._totals.get("cumul_total", 0)),
-            ("R", "0"),
-            ("S", "0"),
-        ]
-
-        ExcelStylingService.apply_data_row_styling(
-            sheet,
-            self._current_row,
-            total_values,
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
-            border=ExcelStylingService.BORDER_THIN,
+        ExcelStylingService.style_row(
+            sheet, RowData(number=self._current_row, cells=total_cells)
         )
 
-        ExcelStylingService.merge_and_style_cells(
+        ExcelStylingService.merge_and_style_cell(
             sheet,
-            "A",
-            "B",
-            self._current_row,
-            self._current_row,
-            value="Total général",
-            font=ExcelStylingService.FONT_BOLD,
-            alignment=ExcelStylingService.ALIGNMENT_CENTER,
-            border=ExcelStylingService.BORDER_THIN,
+            MergeData(
+                "A",
+                "B",
+                self._current_row,
+                self._current_row,
+                value="Total général",
+                font=ExcelStylingService.FONT_BOLD,
+                alignment=ExcelStylingService.ALIGN_CENTER,
+                border=ExcelStylingService.BORDER_THIN,
+            ),
         )
-
-        self._logger.info("Totals row added successfully")
         self._current_row += 1
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
-        self._logger.debug("Applying final formatting")
-
         column_widths: Dict[str, int] = {
-            "A": 20,  # Daira
-            "B": 20,  # Commune
-            "C": 8,  # Aides notifiées
-            "D": 12,  # Montants notifiés
-            "E": 8,  # Aides inscrites
-            "F": 12,  # Montants inscrits
-            "G": 8,  # Aides inscrites (2)
-            "H": 12,  # Montants inscrits (3)
-            "I": 6,  # T1 (prev)
-            "J": 6,  # T2 (prev)
-            "K": 6,  # T3 (prev)
-            "L": 12,  # Montant (4)
-            "M": 6,  # T1 (curr)
-            "N": 6,  # T2 (curr)
-            "O": 6,  # T3 (curr)
-            "P": 12,  # Montant (5)
-            "Q": 12,  # Cumul
-            "R": 12,  # Solde
-            "S": 12,  # Reste
+            "A": 20,
+            "B": 20,
+            "C": 8,
+            "D": 12,
+            "E": 8,
+            "F": 12,
+            "G": 8,
+            "H": 12,
+            "I": 6,
+            "J": 6,
+            "K": 6,
+            "L": 12,
+            "M": 6,
+            "N": 6,
+            "O": 6,
+            "P": 12,
+            "Q": 12,
+            "R": 12,
+            "S": 12,
         }
 
-        ExcelStylingService.set_column_widths(sheet, column_widths)
+        ExcelStylingService.batch_style_columns(
+            sheet,
+            [ColumnData(letter, width) for letter, width in column_widths.items()],
+        )
 
         self._apply_number_formatting(sheet)
 
-        ExcelStylingService.setup_page_layout(
-            sheet,
-            orientation="landscape",
-            fit_to_width=True,
-            fit_to_height=False,
+        ExcelStylingService.set_page_layout(
+            sheet, orientation="landscape", fit_to_width=True
         )
-
-        ExcelStylingService.setup_page_margins(
-            sheet,
-            left=0.25,
-            right=0.25,
-            top=0.5,
-            bottom=0.5,
+        ExcelStylingService.set_page_margins(
+            sheet, left=0.25, right=0.25, top=0.5, bottom=0.5
         )
-
-        self._logger.info("Final formatting completed successfully")
 
     def _apply_number_formatting(self, sheet: Worksheet) -> None:
-        self._logger.debug("Applying French number formatting to monetary columns")
-
         monetary_columns = ["F", "L", "P", "Q", "R"]
-
-        data_start_row: int = 6
-        data_end_row: int = (
-            self._current_row
-        )  # Current row after all data has been added
+        data_end_row: int = self._current_row
 
         for col in monetary_columns:
-            for row in range(data_start_row, data_end_row):
-                cell: Any = sheet[f"{col}{row}"]
-                # French number format with space as thousands separator
+            for row in range(self._data_start_row, data_end_row):
+                cell = sheet[f"{col}{row}"]
                 cell.number_format = "#,##0"
-
-        self._logger.info("French number formatting applied to monetary columns")

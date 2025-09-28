@@ -162,6 +162,27 @@ class SuccessWindow(ctk.CTkToplevel):
         button_frame.grid_columnconfigure(index=0, weight=1)
         button_frame.grid_columnconfigure(index=1, weight=1)
 
+        close_button: ctk.CTkButton = ctk.CTkButton(
+            master=button_frame,
+            text="Fermer",
+            command=self._close,
+            height=DesignSystem.Height.SM.value,
+            fg_color=DesignSystem.Color.GRAY.value,
+            hover_color=DesignSystem.Color.DARKER_GRAY.value,
+            font=ctk.CTkFont(
+                family=DesignSystem.FontFamily.NORMAL.value,
+                size=DesignSystem.FontSize.BUTTON.value,
+            ),
+            text_color=DesignSystem.Color.WHITE.value,
+            corner_radius=DesignSystem.Roundness.SM.value,
+        )
+        close_button.grid(  # type: ignore
+            row=0,
+            column=0,
+            padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value),
+            sticky="ew",
+        )
+
         open_button: ctk.CTkButton = ctk.CTkButton(
             master=button_frame,
             text="Ouvrir l'emplacement du fichier",
@@ -179,29 +200,8 @@ class SuccessWindow(ctk.CTkToplevel):
         )
         open_button.grid(  # type: ignore
             row=0,
-            column=0,
-            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
-            sticky="ew",
-        )
-
-        close_button: ctk.CTkButton = ctk.CTkButton(
-            master=button_frame,
-            text="Fermer",
-            command=self._close,
-            height=DesignSystem.Height.SM.value,
-            fg_color=DesignSystem.Color.GRAY.value,
-            hover_color=DesignSystem.Color.DARKER_GRAY.value,
-            font=ctk.CTkFont(
-                family=DesignSystem.FontFamily.NORMAL.value,
-                size=DesignSystem.FontSize.BUTTON.value,
-            ),
-            text_color=DesignSystem.Color.WHITE.value,
-            corner_radius=DesignSystem.Roundness.SM.value,
-        )
-        close_button.grid(  # type: ignore
-            row=0,
             column=1,
-            padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="ew",
         )
 
