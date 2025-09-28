@@ -9,6 +9,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 # Local application imports
 from app.core.domain.models.report_context import ReportContext
 from app.core.domain.models.report_specification import ReportSpecification
+from app.core.domain.models.subprogram import Subprogram
 from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.infrastructure.data.data_repository import DataRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
@@ -397,9 +398,8 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
         data_dicts: Dict[str, Dict[str, Tuple[int, ...]]],
         totals: Dict[str, int],
     ) -> None:
-        # Get the display name for the subprogram
         try:
-            subprogram_obj = SubprogramRegistry.get_subprogram_by_database_alias(
+            subprogram_obj: Subprogram = SubprogramRegistry.get_subprogram_by_database_alias(
                 subprogram
             )
             display_name = subprogram_obj.name
@@ -408,8 +408,8 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
 
         basic_values: List[Tuple[str, Any]] = [
             ("A", display_name),
-            ("B", "-"),
-            ("C", "-"),
+            ("B", 0),
+            ("C", 0),
         ]
 
         if subprogram in data_dicts["aides_inscrites"]:
@@ -417,16 +417,16 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
             aides, montants = aides_data[0], aides_data[1]
             basic_values.extend(
                 [
-                    ("D", aides if aides > 0 else "-"),
-                    ("E", montants if montants > 0 else "-"),
+                    ("D", aides),
+                    ("E", montants),
                 ]
             )
             totals["aides_inscrites"] += aides
             totals["montants_inscrits"] += montants
         else:
-            basic_values.extend([("D", "-"), ("E", "-")])
+            basic_values.extend([("D", 0), ("E", 0)])
 
-        basic_values.extend([("F", "-"), ("G", "-")])
+        basic_values.extend([("F", 0), ("G", 0)])
 
         ExcelStylingService.apply_data_row_styling(
             sheet,
@@ -475,11 +475,11 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
             font=ExcelStylingService.FONT_NORMAL,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
             border=ExcelStylingService.BORDER_THIN,
-            value=cumul_total if cumul_total > 0 else "-",
+            value=cumul_total,
         )
         totals["cumul_total"] += cumul_total
 
-        final_columns: List[Tuple[str, str]] = [("Q", "-"), ("R", "-")]
+        final_columns: List[Tuple[str, int]] = [("Q", 0), ("R", 0)]
         ExcelStylingService.apply_data_row_styling(
             sheet,
             row,
@@ -504,7 +504,7 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
             column_data: List[Tuple[str, Any]] = []
             for i, (col, total_key) in enumerate(zip(columns, total_keys)):
                 value = values[i]
-                column_data.append((col, value if value > 0 else "-"))
+                column_data.append((col, value))
                 totals[total_key] += value
 
             ExcelStylingService.apply_data_row_styling(
@@ -516,7 +516,7 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
                 border=ExcelStylingService.BORDER_THIN,
             )
         else:
-            column_data = [(col, "-") for col in columns]
+            column_data = [(col, 0) for col in columns]
             ExcelStylingService.apply_data_row_styling(
                 sheet,
                 row,
@@ -544,12 +544,12 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
         self._logger.debug("Adding totals row")
 
         total_values: List[Tuple[str, Any]] = [
-            ("B", "-"),
-            ("C", "-"),
+            ("B", 0),
+            ("C", 0),
             ("D", self._totals.get("aides_inscrites", 0)),
             ("E", self._totals.get("montants_inscrits", 0)),
-            ("F", "-"),
-            ("G", "-"),
+            ("F", 0),
+            ("G", 0),
             ("H", self._totals.get("cumul_precedent_t1", 0)),
             ("I", self._totals.get("cumul_precedent_t2", 0)),
             ("J", self._totals.get("cumul_precedent_t3", 0)),
@@ -559,8 +559,8 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
             ("N", self._totals.get("annee_actuelle_t3", 0)),
             ("O", self._totals.get("annee_actuelle_montant", 0)),
             ("P", self._totals.get("cumul_total", 0)),
-            ("Q", "-"),
-            ("R", "-"),
+            ("Q", 0),
+            ("R", 0),
         ]
 
         ExcelStylingService.apply_data_row_styling(

@@ -330,10 +330,10 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
         values: list[tuple[str, Any]] = [
             ("A", subprogram),
-            ("B", data_dicts["livraisons_mois"].get(subprogram, 0) or "-"),
-            ("C", data_dicts["livraisons_cumul"].get(subprogram, 0) or "-"),
-            ("D", data_dicts["lancements_mois"].get(subprogram, 0) or "-"),
-            ("E", data_dicts["lancements_cumul"].get(subprogram, 0) or "-"),
+            ("B", data_dicts["livraisons_mois"].get(subprogram, 0)),
+            ("C", data_dicts["livraisons_cumul"].get(subprogram, 0)),
+            ("D", data_dicts["lancements_mois"].get(subprogram, 0)),
+            ("E", data_dicts["lancements_cumul"].get(subprogram, 0)),
         ]
 
         for col, value in values:
@@ -485,9 +485,9 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         values: list[tuple[str, Any]] = [
             ("A", subprogram),
             ("B", aid_count),
-            ("C", finished if finished > 0 else "-"),
-            ("D", current if current > 0 else "-"),
-            ("E", not_started if not_started > 0 else "-"),
+            ("C", finished),
+            ("D", current),
+            ("E", not_started),
         ]
 
         for col, value in values:

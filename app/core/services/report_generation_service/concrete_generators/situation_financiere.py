@@ -590,8 +590,8 @@ class SituationFinanciereGenerator(BaseGenerator):
         # Note: We don't style column A (daira) here since it will be handled by the merge function
         basic_values: List[Tuple[str, Any]] = [
             ("B", commune),
-            ("C", "-"),
-            ("D", "-"),
+            ("C", 0),
+            ("D", 0),
         ]
 
         # Set the daira value directly without styling (will be styled during merge)
@@ -602,16 +602,16 @@ class SituationFinanciereGenerator(BaseGenerator):
             aides, montants = aides_data[0], aides_data[1]
             basic_values.extend(
                 [
-                    ("E", aides if aides > 0 else "-"),
-                    ("F", montants if montants > 0 else "-"),
+                    ("E", aides),
+                    ("F", montants),
                 ]
             )
             totals["aides_inscrites"] += aides
             totals["montants_inscrits"] += montants
         else:
-            basic_values.extend([("E", "-"), ("F", "-")])
+            basic_values.extend([("E", 0), ("F", 0)])
 
-        basic_values.extend([("G", "-"), ("H", "-")])
+        basic_values.extend([("G", 0), ("H", 0)])
 
         ExcelStylingService.apply_data_row_styling(
             sheet,
@@ -660,11 +660,11 @@ class SituationFinanciereGenerator(BaseGenerator):
             font=ExcelStylingService.FONT_NORMAL,
             alignment=ExcelStylingService.ALIGNMENT_CENTER,
             border=ExcelStylingService.BORDER_THIN,
-            value=cumul_total if cumul_total > 0 else "-",
+            value=cumul_total,
         )
         totals["cumul_total"] += cumul_total
 
-        final_columns: List[Tuple[str, str]] = [("R", "-"), ("S", "-")]
+        final_columns: List[Tuple[str, int]] = [("R", 0), ("S", 0)]
         ExcelStylingService.apply_data_row_styling(
             sheet,
             row,
@@ -689,7 +689,9 @@ class SituationFinanciereGenerator(BaseGenerator):
             column_data: List[Tuple[str, Any]] = []
             for i, (col, total_key) in enumerate(zip(columns, total_keys)):
                 value = values[i]
-                column_data.append((col, value if value > 0 else "-"))
+                column_data.append(
+                    (col, value)
+                )
                 totals[total_key] += value
 
             ExcelStylingService.apply_data_row_styling(
@@ -701,7 +703,7 @@ class SituationFinanciereGenerator(BaseGenerator):
                 border=ExcelStylingService.BORDER_THIN,
             )
         else:
-            column_data = [(col, "-") for col in columns]
+            column_data = [(col, 0) for col in columns]
             ExcelStylingService.apply_data_row_styling(
                 sheet,
                 row,
@@ -731,12 +733,12 @@ class SituationFinanciereGenerator(BaseGenerator):
         total_values: List[Tuple[str, Any]] = [
             ("A", ""),
             ("B", ""),
-            ("C", "-"),
-            ("D", "-"),
+            ("C", "0"),
+            ("D", "0"),
             ("E", self._totals.get("aides_inscrites", 0)),
             ("F", self._totals.get("montants_inscrits", 0)),
-            ("G", "-"),
-            ("H", "-"),
+            ("G", "0"),
+            ("H", "0"),
             ("I", self._totals.get("cumul_precedent_t1", 0)),
             ("J", self._totals.get("cumul_precedent_t2", 0)),
             ("K", self._totals.get("cumul_precedent_t3", 0)),
@@ -746,8 +748,8 @@ class SituationFinanciereGenerator(BaseGenerator):
             ("O", self._totals.get("annee_actuelle_t3", 0)),
             ("P", self._totals.get("annee_actuelle_montant", 0)),
             ("Q", self._totals.get("cumul_total", 0)),
-            ("R", "-"),
-            ("S", "-"),
+            ("R", "0"),
+            ("S", "0"),
         ]
 
         ExcelStylingService.apply_data_row_styling(
