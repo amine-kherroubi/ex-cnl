@@ -425,11 +425,13 @@ class SituationFinanciereGenerator(BaseGenerator):
             row_number: int = self._current_row + i
             key: Tuple[str, str] = (daira, commune)
 
-            aides_data = data_dicts["aides_inscrites"].get(key, (0, 0))
-            cumul_precedent = data_dicts["cumul_precedent"].get(key, (0, 0, 0, 0))
-            annee_actuelle = data_dicts["annee_actuelle"].get(key, (0, 0, 0, 0))
+            aides_data: Tuple[int, ...] = data_dicts["aides_inscrites"].get(key, (0, 0))
+            cumul_precedent: Tuple[int, ...] = data_dicts["cumul_precedent"].get(key, (0, 0, 0, 0))
+            annee_actuelle: Tuple[int, ...] = data_dicts["annee_actuelle"].get(key, (0, 0, 0, 0))
 
-            cumul_formula = f"=L{row_number}+P{row_number}"
+            cumul_formula: str = f"=L{row_number}+P{row_number}"
+            solde_formula: str = f"=H{row_number}-Q{row_number}"
+            reste_formula: str = f"=C{row_number}-G{row_number}"
 
             cells: List[CellData] = [
                 CellData(
@@ -444,8 +446,18 @@ class SituationFinanciereGenerator(BaseGenerator):
                     commune,
                     border=ExcelStylingService.BORDER_THIN,
                 ),
-                CellData("C", row_number, 0, border=ExcelStylingService.BORDER_THIN),
-                CellData("D", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData(
+                    "C",
+                    row_number,
+                    aides_data[0],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "D",
+                    row_number,
+                    aides_data[1],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
                 CellData(
                     "E",
                     row_number,
@@ -458,8 +470,18 @@ class SituationFinanciereGenerator(BaseGenerator):
                     aides_data[1],
                     border=ExcelStylingService.BORDER_THIN,
                 ),
-                CellData("G", row_number, 0, border=ExcelStylingService.BORDER_THIN),
-                CellData("H", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData(
+                    "G",
+                    row_number,
+                    aides_data[0],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "H",
+                    row_number,
+                    aides_data[1],
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
                 CellData(
                     "I",
                     row_number,
@@ -514,8 +536,18 @@ class SituationFinanciereGenerator(BaseGenerator):
                     cumul_formula,
                     border=ExcelStylingService.BORDER_THIN,
                 ),
-                CellData("R", row_number, 0, border=ExcelStylingService.BORDER_THIN),
-                CellData("S", row_number, 0, border=ExcelStylingService.BORDER_THIN),
+                CellData(
+                    "R",
+                    row_number,
+                    solde_formula,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
+                CellData(
+                    "S",
+                    row_number,
+                    reste_formula,
+                    border=ExcelStylingService.BORDER_THIN,
+                ),
             ]
 
             rows.append(RowData(number=row_number, cells=cells))
@@ -601,8 +633,12 @@ class SituationFinanciereGenerator(BaseGenerator):
         data_end_row: int = self._current_row - 1
 
         formula_columns: List[str] = [
+            "C",
+            "D",
             "E",
             "F",
+            "G",
+            "H",
             "I",
             "J",
             "K",
@@ -612,21 +648,11 @@ class SituationFinanciereGenerator(BaseGenerator):
             "O",
             "P",
             "Q",
+            "R",
+            "S",
         ]
 
         total_cells: List[CellData] = []
-
-        for col in ["C", "D", "G", "H", "R", "S"]:
-            total_cells.append(
-                CellData(
-                    col,
-                    self._current_row,
-                    0,
-                    ExcelStylingService.FONT_BOLD,
-                    ExcelStylingService.ALIGN_CENTER,
-                    ExcelStylingService.BORDER_THIN,
-                )
-            )
 
         for col in formula_columns:
             total_cells.append(
@@ -699,7 +725,7 @@ class SituationFinanciereGenerator(BaseGenerator):
         )
 
     def _apply_number_formatting(self, sheet: Worksheet) -> None:
-        monetary_columns = ["F", "L", "P", "Q", "R"]
+        monetary_columns: List[str] = ["D", "F", "H", "L", "P", "Q", "R"]
         data_end_row: int = self._current_row
 
         for col in monetary_columns:
