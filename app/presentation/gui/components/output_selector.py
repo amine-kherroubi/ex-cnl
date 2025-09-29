@@ -12,7 +12,6 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class OutputSelector(BaseComponent):
-
     __slots__ = (
         "_on_output_changed",
         "_output_path",

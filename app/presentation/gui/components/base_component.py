@@ -10,7 +10,6 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class BaseComponent(ctk.CTkFrame, ABC):
-
     __slots__ = ("_content_frame", "_title")
 
     def __init__(self, parent: Any, title: str) -> None:

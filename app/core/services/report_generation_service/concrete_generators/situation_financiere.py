@@ -426,8 +426,12 @@ class SituationFinanciereGenerator(BaseGenerator):
             key: Tuple[str, str] = (daira, commune)
 
             aides_data: Tuple[int, ...] = data_dicts["aides_inscrites"].get(key, (0, 0))
-            cumul_precedent: Tuple[int, ...] = data_dicts["cumul_precedent"].get(key, (0, 0, 0, 0))
-            annee_actuelle: Tuple[int, ...] = data_dicts["annee_actuelle"].get(key, (0, 0, 0, 0))
+            cumul_precedent: Tuple[int, ...] = data_dicts["cumul_precedent"].get(
+                key, (0, 0, 0, 0)
+            )
+            annee_actuelle: Tuple[int, ...] = data_dicts["annee_actuelle"].get(
+                key, (0, 0, 0, 0)
+            )
 
             cumul_formula: str = f"=L{row_number}+P{row_number}"
             solde_formula: str = f"=H{row_number}-Q{row_number}"

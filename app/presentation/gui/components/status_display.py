@@ -19,7 +19,6 @@ class StatusDisplay(BaseComponent):
         super().__init__(parent, "Statut")
 
     def _setup_content(self) -> None:
-
         self._content_frame.grid_columnconfigure(index=0, weight=1)
         self._content_frame.grid_rowconfigure(index=1, weight=1)
 
@@ -83,7 +82,6 @@ class StatusDisplay(BaseComponent):
     def add_message(
         self, message: str, message_type: MessageType = "information"
     ) -> None:
-
         timestamp: str = datetime.now().strftime("%H:%M:%S")
 
         indications_map: dict[MessageType, str] = {
@@ -103,7 +101,6 @@ class StatusDisplay(BaseComponent):
         self._status_text.configure(state="disabled")  # type: ignore
 
     def clear_messages(self) -> None:
-
         self._status_text.configure(state="normal")  # type: ignore
         self._status_text.delete(index1="1.0", index2="end")  # type: ignore
         self._status_text.configure(state="disabled")  # type: ignore

@@ -12,7 +12,6 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class FileSelector(BaseComponent):
-
     __slots__ = (
         "_on_files_changed",
         "_selected_files",

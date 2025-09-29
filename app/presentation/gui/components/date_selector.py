@@ -12,7 +12,6 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class DateSelector(BaseComponent):
-
     __slots__ = (
         "_on_date_changed",
         "_month_var",

@@ -14,7 +14,6 @@ from app.presentation.gui.styling.design_system import DesignSystem
 
 
 class RequiredFilesComponent(BaseComponent):
-
     __slots__ = ("_report_spec",)
 
     def __init__(
@@ -26,7 +25,6 @@ class RequiredFilesComponent(BaseComponent):
         super().__init__(parent, "Fichiers requis")
 
     def _setup_content(self) -> None:
-
         self._content_frame.grid_columnconfigure(index=0, weight=1)
 
         title: ctk.CTkLabel = ctk.CTkLabel(
@@ -66,7 +64,6 @@ class RequiredFilesComponent(BaseComponent):
         )
 
     def _create_required_files_list(self) -> None:
-
         files_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=self._content_frame,
             fg_color=DesignSystem.Color.TRANSPARENT.value,
@@ -86,7 +83,6 @@ class RequiredFilesComponent(BaseComponent):
     def _create_file_entry(
         self, parent: ctk.CTkFrame, required_file: RequiredFile, row: int
     ) -> None:
-
         entry_frame: ctk.CTkFrame = ctk.CTkFrame(
             master=parent,
             fg_color=DesignSystem.Color.LEAST_WHITE.value,
