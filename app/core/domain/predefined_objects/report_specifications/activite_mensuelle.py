@@ -1,5 +1,5 @@
 # Standard library imports
-from typing import Final, Set
+from typing import Final
 
 # Local application imports
 from app.core.domain.enums.report_category import ReportCategory
@@ -7,38 +7,14 @@ from app.core.domain.models.report_specification import (
     ReportSpecification,
     RequiredFile,
 )
+from app.core.domain.predefined_objects.tranches import (
+    TRANCHES_DE_LANCEMENT,
+    TRANCHES_DE_LIVRAISON,
+)
 from app.core.services.report_generation_service.concrete_generators.activite_mensuelle import (
     ActiviteMensuelleGenerator,
 )
 
-TRANCHES_DE_LANCEMENT: Final[Set[str]] = {
-    "60%  1+2 EME TRANCHE ",
-    "20%  1 ERE TRANCHE ",
-    "100%  Tranche totale",
-    "60%  Première Tranche",
-    "100%  1+2+3 EME TRANCHE ",
-    "40%  Première Tranche",
-}
-
-TRANCHES_DE_LIVRAISON: Final[Set[str]] = {
-    "100%  Tranche totale",
-    "100%  1+2+3 EME TRANCHE ",
-    "40%  3 EME TRANCHE ",
-    "40%  Deuxième Tranche",
-    "80%  2+3 EME TRANCHE ",
-    "40%  C2",
-    "60%  Deuxième Tranche",
-    "Tranche complémentaire 2",
-}
-
-AUTRES_TRANCHES: Final[Set[str]] = {
-    "40%  2 EME TRANCHE ",
-    "100%  La Complémentaire 1,2 ET 3 ",
-    "20%  C1",
-    "20%  La Complémentaire 1 ",
-    "60%  La Complémentaire 1 ET 2 ",
-    "Tranche complémentaire ",
-}
 
 activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecification(
     name="activite_mensuelle",
