@@ -415,10 +415,10 @@ class ActiviteMensuelleGenerator(BaseGenerator):
     ) -> None:
         headers: List[Tuple[str, str]] = [
             ("A", "Programme"),
-            ("B", "Consistance"),
-            ("C", "Achevés (dernières tranches payées)"),
-            ("D", "En cours"),
-            ("E", "Non lancés (consistance - achevés - en cours)"),
+            ("B", "Consistance\n(1)"),
+            ("C", "Achevés\n(2)"),
+            ("D", "En cours\n(3)"),
+            ("E", "Non lancés\n(1) - (2) - (3)"),
         ]
         header_row: RowData = RowData(
             number=self._current_row,
@@ -437,8 +437,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         ExcelStylingService.style_row(sheet, header_row)
 
         self._current_row += 1
-        start_row = self._current_row
-        self._add_second_table_data(sheet, query_results, start_row)
+        self._add_second_table_data(sheet, query_results, self._current_row)
 
     def _add_second_table_data(
         self, sheet: Worksheet, query_results: Dict[str, pd.DataFrame], start_row: int

@@ -615,7 +615,7 @@ class SubprogramRegistry(object):
                         "N°:587.Du:26/05/2016.TRANCHE:0.Montant:   700 000",
                         "N°: 587. Du: 26/05/2016. TRANCHE: 0. Montant:    700 000",
                     ],
-                    aid_count=1253,
+                    aid_count=266,
                     aid_amount=700000,
                 ),
                 Notification(
@@ -705,7 +705,7 @@ class SubprogramRegistry(object):
                         "N°:587.Du:26/05/2016.TRANCHE:0.Montant:   700 000",
                         "N°: 587. Du: 26/05/2016. TRANCHE: 0. Montant:    700 000",
                     ],
-                    aid_count=266,
+                    aid_count=1253,
                     aid_amount=700000,
                 ),
             ],
