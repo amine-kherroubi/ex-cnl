@@ -418,7 +418,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             ("B", "Consistance"),
             ("C", "Achevés (dernières tranches payées)"),
             ("D", "En cours"),
-            ("E", "Non lancés (consistance - (achevés + en cours))"),
+            ("E", "Non lancés (consistance - achevés - en cours)"),
         ]
         header_row: RowData = RowData(
             number=self._current_row,
@@ -512,7 +512,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
                     self._current_row,
                     "Total général",
                     ExcelStylingService.FONT_BOLD,
-                    ExcelStylingService.ALIGN_LEFT,
+                    ExcelStylingService.ALIGN_CENTER,
                     ExcelStylingService.BORDER_THIN,
                 ),
                 CellData(
@@ -520,7 +520,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
                     self._current_row,
                     ExcelStylingService.create_sum_formula("B", start_row, end_row),
                     ExcelStylingService.FONT_BOLD,
-                    ExcelStylingService.ALIGN_RIGHT,
+                    ExcelStylingService.ALIGN_CENTER,
                     ExcelStylingService.BORDER_THIN,
                 ),
                 CellData(
@@ -528,7 +528,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
                     self._current_row,
                     ExcelStylingService.create_sum_formula("C", start_row, end_row),
                     ExcelStylingService.FONT_BOLD,
-                    ExcelStylingService.ALIGN_RIGHT,
+                    ExcelStylingService.ALIGN_CENTER,
                     ExcelStylingService.BORDER_THIN,
                 ),
                 CellData(
@@ -536,7 +536,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
                     self._current_row,
                     ExcelStylingService.create_sum_formula("D", start_row, end_row),
                     ExcelStylingService.FONT_BOLD,
-                    ExcelStylingService.ALIGN_RIGHT,
+                    ExcelStylingService.ALIGN_CENTER,
                     ExcelStylingService.BORDER_THIN,
                 ),
                 CellData(
@@ -544,7 +544,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
                     self._current_row,
                     ExcelStylingService.create_sum_formula("E", start_row, end_row),
                     ExcelStylingService.FONT_BOLD,
-                    ExcelStylingService.ALIGN_RIGHT,
+                    ExcelStylingService.ALIGN_CENTER,
                     ExcelStylingService.BORDER_THIN,
                 ),
             ],
