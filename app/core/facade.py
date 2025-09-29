@@ -84,12 +84,22 @@ class CoreFacade(object):
 
         try:
             self._logger.debug("Validating source files against report requirements")
-            validated_files: Dict[str, Path] = self._validate_source_files(
+            validation_result = self._validate_source_files(
                 report_name, source_files
             )
+            validated_files: Dict[str, Path] = validation_result["matched_files"]
+            unmatched_files: List[Path] = validation_result["unmatched_files"]
+            
             self._logger.info(
                 f"File validation successful. Validated {len(validated_files)} files"
             )
+            
+            if unmatched_files:
+                warning_msg: str = (
+                    f"{len(unmatched_files)} files did not match any pattern and will be "
+                    f"ignored : {', '.join(f.name for f in unmatched_files)}"
+                )
+                self._logger.warning(warning_msg)
 
             self._logger.debug("Delegating report generation to facade")
 
@@ -144,7 +154,7 @@ class CoreFacade(object):
 
     def _validate_source_files(
         self, report_name: str, input_files: List[Path]
-    ) -> Dict[str, Path]:
+    ) -> Dict[str, Any]:
         self._logger.debug(
             f"Validating {len(input_files)} source files for report: {report_name}"
         )
@@ -192,7 +202,7 @@ class CoreFacade(object):
             if not file_matched:
                 unmatched_files.append(file_path)
                 self._logger.warning(
-                    f"File '{file_path.name}' did not match any required pattern"
+                    f"File '{file_path.name}' did not match any required pattern and will be ignored"
                 )
 
         self._logger.debug("Checking if all required files are satisfied")
@@ -213,17 +223,16 @@ class CoreFacade(object):
             self._logger.error("Validation failed: missing required patterns")
             raise ValueError(error_msg)
 
-        if unmatched_files:
-            error_msg: str = (
-                "The following files don't match any required pattern:\n"
-                + "\n".join(str(f) for f in unmatched_files)
-            )
-            self._logger.error(
-                f"Validation failed: {len(unmatched_files)} unmatched files"
-            )
-            raise ValueError(error_msg)
-
         self._logger.info(
             f"File validation successful: {len(matched_files)} files matched to required patterns"
         )
-        return matched_files
+        
+        if unmatched_files:
+            self._logger.info(
+                f"{len(unmatched_files)} unmatched files will be ignored"
+            )
+
+        return {
+            "matched_files": matched_files,
+            "unmatched_files": unmatched_files,
+        }
