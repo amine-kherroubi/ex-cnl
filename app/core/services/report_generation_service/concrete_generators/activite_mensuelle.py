@@ -418,7 +418,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
             ("B", "Consistance"),
             ("C", "Achevés (dernières tranches payées)"),
             ("D", "En cours"),
-            ("E", "Non lancés (consistance - premières tranches payées)"),
+            ("E", "Non lancés (consistance - (achevés + en cours))"),
         ]
         header_row: RowData = RowData(
             number=self._current_row,
@@ -488,7 +488,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
                         CellData(
                             "E",
                             row_number,
-                            data_dicts["non_lances"].get(subprogram, 0),
+                            f"=B{row_number}-(C{row_number}+D{row_number})",
                             border=ExcelStylingService.BORDER_THIN,
                         ),
                     ],
@@ -558,12 +558,10 @@ class ActiviteMensuelleGenerator(BaseGenerator):
         data_dicts: Dict[str, Dict[Any, Any]] = {
             "acheves": {},
             "en_cours": {},
-            "non_lances": {},
         }
         mappings: List[Tuple[str, str, str, str]] = [
             ("acheves", "acheves_derniere_tranche", "subprogram", "acheves"),
             ("en_cours", "en_cours_calculation", "subprogram", "en_cours"),
-            ("non_lances", "non_lances_premiere_tranche", "subprogram", "non_lances"),
         ]
         for dict_key, query_key, subprogram_column, value_column in mappings:
             if query_key in query_results:

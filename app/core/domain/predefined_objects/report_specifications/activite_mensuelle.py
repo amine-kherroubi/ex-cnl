@@ -27,7 +27,7 @@ TRANCHES_DE_LIVRAISON: Final[Set[str]] = {
     "C2        ",
 }
 
-TRANCHES_INTERMEDIARES: Final[Set[str]] = {
+AUTRES_TRANCHES: Final[Set[str]] = {
     "T2        ",
     "          ",  # Empty
 }
@@ -219,7 +219,7 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
                     p."Code OV"
                 HAVING decision_value > 0
             )
-            SELECT 
+            SELECT
                 s.subprogram,
                 COALESCE(lances.count, 0) as lances_count,
                 COALESCE(acheves.count, 0) as acheves_count,
@@ -239,31 +239,6 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
                 FROM acheves_summary as_
                 GROUP BY as_."Sous programme"
             ) acheves ON s.subprogram = acheves."Sous programme"
-        """,
-        "non_lances_premiere_tranche": f"""
-            WITH payment_summary AS (
-                SELECT
-                    p."Sous programme",
-                    p."Code OV",
-                    SUM(p."valeur physique") AS decision_value
-                FROM paiements p
-                WHERE p."Tranche du rapport" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                GROUP BY
-                    p."Sous programme",
-                    p."Code OV"
-                HAVING decision_value > 0
-            )
-            SELECT 
-                s.subprogram,
-                COALESCE(s.aid_count - data.count, s.aid_count) as non_lances
-            FROM subprograms s
-            LEFT JOIN (
-                SELECT
-                    ps."Sous programme",
-                    COUNT(*) as count
-                FROM payment_summary ps
-                GROUP BY ps."Sous programme"
-            ) data ON s.subprogram = data."Sous programme"
         """,
     },
 )

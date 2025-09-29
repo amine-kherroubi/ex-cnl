@@ -179,7 +179,7 @@ class SuccessWindow(ctk.CTkToplevel):
         close_button.grid(  # type: ignore
             row=0,
             column=0,
-            padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value),
+            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
             sticky="ew",
         )
 
@@ -201,7 +201,7 @@ class SuccessWindow(ctk.CTkToplevel):
         open_button.grid(  # type: ignore
             row=0,
             column=1,
-            padx=(DesignSystem.Spacing.NONE.value, DesignSystem.Spacing.SM.value),
+            padx=(DesignSystem.Spacing.SM.value, DesignSystem.Spacing.NONE.value),
             sticky="ew",
         )
 
