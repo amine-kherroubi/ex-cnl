@@ -49,7 +49,10 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
                     SUM(p."valeur physique") AS decision_value
                 FROM paiements p
                 WHERE p."Tranche" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LANCEMENT)})
-                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
+                AND (
+                    p."Date OV" LIKE '%/{{month}}/{{year}}'
+                    OR p."Date OV" LIKE '%/0{{month}}/{{year}}'
+                )
                 GROUP BY
                     p."Sous programme",
                     p."Code OV"
@@ -102,7 +105,10 @@ activite_mensuelle_specification: Final[ReportSpecification] = ReportSpecificati
                     SUM(p."valeur physique") AS decision_value
                 FROM paiements p
                 WHERE p."Tranche" IN ({', '.join(f"'{tranche}'" for tranche in TRANCHES_DE_LIVRAISON)})
-                AND p."Date OV" LIKE '%/{{month}}/{{year}}'
+                AND (
+                    p."Date OV" LIKE '%/{{month}}/{{year}}'
+                    OR p."Date OV" LIKE '%/0{{month}}/{{year}}'
+                )
                 GROUP BY
                     p."Sous programme",
                     p."Code OV"
