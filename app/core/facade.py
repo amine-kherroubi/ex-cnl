@@ -1,30 +1,27 @@
 # Standard library imports
-import re
 from logging import Logger
 from pathlib import Path
 from typing import Any, Dict, List
 
 # Local application imports
+from app.common.logging_setup import get_logger
 from app.config import AppConfig
 from app.core.domain.enums.space_time import Month, Wilaya
 from app.core.domain.models.report_context import ReportContext
-from app.core.domain.models.report_specification import (
-    ReportSpecification,
-    RequiredFile,
-)
+from app.core.domain.models.report_specification import ReportSpecification
 from app.core.domain.registries.report_specification_registry import (
     ReportSpecificationRegistry,
 )
 from app.core.domain.registries.subprogram_registry import SubprogramRegistry
 from app.core.infrastructure.data.data_repository import DuckDBRepository
 from app.core.infrastructure.file_io.file_io_service import FileIOService
-from app.core.services.report_generation_service.report_generator_factory import (
-    ReportGeneratorFactory,
-)
 from app.core.services.report_generation_service.base_report_generator import (
     BaseGenerator,
 )
-from app.common.logging_setup import get_logger
+from app.core.services.report_generation_service.report_generator_factory import (
+    ReportGeneratorFactory,
+)
+from app.core.services.file_validation_service import FileValidator
 
 
 class CoreFacade(object):
@@ -75,70 +72,31 @@ class CoreFacade(object):
         self._logger.debug(f"Source files: {[str(f) for f in source_files]}")
         self._logger.debug(f"Output directory: {output_directory_path}")
         self._logger.debug(f"Period: {month.value} {year}")
-        self._logger.debug(f"Additional parameters: {kwargs}")
 
-        if "target_subprogram" in kwargs:
-            self._logger.info(f"Target subprogram: {kwargs['target_subprogram']}")
-        if "target_notification" in kwargs:
-            self._logger.info(f"Target notification: {kwargs['target_notification']}")
+        self._log_additional_parameters(kwargs)
+        self._verify_report_exists(report_name)
 
         try:
-            self._logger.debug("Validating source files against report requirements")
-            validation_result = self._validate_source_files(report_name, source_files)
+            # Validate source files
+            validation_result: Dict[str, Any] = FileValidator.validate(
+                report_name, source_files
+            )
             validated_files: Dict[str, Path] = validation_result["matched_files"]
             unmatched_files: List[Path] = validation_result["unmatched_files"]
 
-            self._logger.info(
-                f"File validation successful. Validated {len(validated_files)} files"
-            )
+            self._log_validation_results(validated_files, unmatched_files)
 
-            if unmatched_files:
-                warning_msg: str = (
-                    f"{len(unmatched_files)} files did not match any pattern and will be "
-                    f"ignored : {', '.join(f.name for f in unmatched_files)}"
-                )
-                self._logger.warning(warning_msg)
+            # Create report context
+            report_context: ReportContext = self._create_report_context(month, year)
 
-            self._logger.debug("Delegating report generation to facade")
-
-            report_context: ReportContext = ReportContext(
-                wilaya=Wilaya.TIZI_OUZOU,
-                year=year,
-                month=month,
-            )
-
-            self._logger.debug(
-                f"Report context created: {report_context.wilaya.value}, "
-                f"Period: {month} {year}, Report date: {report_context.reporting_date}"
-            )
-
-            report_specification: ReportSpecification = ReportSpecificationRegistry.get(
-                report_name
-            )
-            self._logger.info(f"Generating report: {report_specification.display_name}")
-            self._logger.debug(
-                f"Report category: {report_specification.category.value}"
-            )
-
-            generator: BaseGenerator = ReportGeneratorFactory.create_generator(
-                report_name=report_name,
-                file_io_service=self._file_io_service,
-                data_repository=self._data_repository,
-                report_context=report_context,
-                **kwargs,
-            )
-            self._logger.debug(f"Generator created: {generator.__class__.__name__}")
-
-            self._logger.info("Starting report generation process")
-            output_file_path: Path = generator.generate(
-                source_file_paths=validated_files,
-                output_directory_path=output_directory_path,
+            # Generate report
+            output_file_path: Path = self._execute_report_generation(
+                report_name, validated_files, output_directory_path, report_context, kwargs
             )
 
             self._logger.info(
                 f"Report generation completed successfully: {output_file_path}"
             )
-            self._logger.info(f"Report generated successfully: {output_file_path}")
             print(f"Report generated successfully: {output_file_path}")
 
             return output_file_path
@@ -150,13 +108,17 @@ class CoreFacade(object):
             self._logger.exception(f"Unexpected error during report generation: {e}")
             raise
 
-    def _validate_source_files(
-        self, report_name: str, input_files: List[Path]
-    ) -> Dict[str, Any]:
-        self._logger.debug(
-            f"Validating {len(input_files)} source files for report: {report_name}"
-        )
+    def _log_additional_parameters(self, kwargs: Dict[str, Any]) -> None:
+        if kwargs:
+            self._logger.debug(f"Additional parameters: {kwargs}")
 
+        if "target_subprogram" in kwargs:
+            self._logger.info(f"Target subprogram: {kwargs['target_subprogram']}")
+
+        if "target_notification" in kwargs:
+            self._logger.info(f"Target notification: {kwargs['target_notification']}")
+
+    def _verify_report_exists(self, report_name: str) -> None:
         available_reports: Dict[str, ReportSpecification] = self.get_available_reports()
 
         if report_name not in available_reports:
@@ -164,71 +126,63 @@ class CoreFacade(object):
             self._logger.error(error_msg)
             raise ValueError(error_msg)
 
-        report_spec: ReportSpecification = available_reports[report_name]
-        required_files: List[RequiredFile] = report_spec.required_files
-        self._logger.debug(
-            f"Report requires {len(required_files)} files: "
-            f"{[(rf.name, rf.readable_pattern) for rf in required_files]}"
-        )
-
-        self._logger.debug("Checking if all input files exist")
-        for file_path in input_files:
-            if not file_path.exists():
-                error_msg: str = f"File does not exist: {file_path}"
-                self._logger.error(error_msg)
-                raise FileNotFoundError(error_msg)
-        self._logger.debug("All input files exist")
-
-        self._logger.debug("Matching files to required patterns")
-        matched_files: Dict[str, Path] = {}
-        unmatched_files: List[Path] = []
-
-        for file_path in input_files:
-            file_matched: bool = False
-            self._logger.debug(f"Checking file: {file_path.name}")
-
-            for rf in required_files:
-                if re.match(rf.pattern, file_path.name, re.IGNORECASE):
-                    matched_files[rf.table_name] = file_path
-                    file_matched = True
-                    self._logger.debug(
-                        f"File '{file_path.name}' matched pattern '{rf.readable_pattern}' "
-                        f"-> table '{rf.table_name}'"
-                    )
-                    break
-
-            if not file_matched:
-                unmatched_files.append(file_path)
-                self._logger.warning(
-                    f"File '{file_path.name}' did not match any required pattern and will be ignored"
-                )
-
-        self._logger.debug("Checking if all required files are satisfied")
-        missing_files: List[str] = []
-        for rf in required_files:
-            if rf.table_name not in matched_files:
-                missing_files.append(
-                    f"Pattern: '{rf.readable_pattern}' -> Table: '{rf.table_name}'"
-                )
-                self._logger.error(
-                    f"Missing file for required pattern: '{rf.readable_pattern}' -> '{rf.table_name}'"
-                )
-
-        if missing_files:
-            error_msg: str = "Missing files for required patterns:\n" + "\n".join(
-                missing_files
-            )
-            self._logger.error("Validation failed: missing required patterns")
-            raise ValueError(error_msg)
-
+    def _log_validation_results(
+        self, validated_files: Dict[str, Path], unmatched_files: List[Path]
+    ) -> None:
         self._logger.info(
-            f"File validation successful: {len(matched_files)} files matched to required patterns"
+            f"File validation successful. Validated {len(validated_files)} files"
         )
 
         if unmatched_files:
-            self._logger.info(f"{len(unmatched_files)} unmatched files will be ignored")
+            warning_msg: str = (
+                f"{len(unmatched_files)} files did not match any pattern and will be "
+                f"ignored: {', '.join(f.name for f in unmatched_files)}"
+            )
+            self._logger.warning(warning_msg)
 
-        return {
-            "matched_files": matched_files,
-            "unmatched_files": unmatched_files,
-        }
+    def _create_report_context(self, month: Month, year: int) -> ReportContext:
+        report_context: ReportContext = ReportContext(
+            wilaya=Wilaya.TIZI_OUZOU,
+            year=year,
+            month=month,
+        )
+
+        self._logger.debug(
+            f"Report context created: {report_context.wilaya.value}, "
+            f"Period: {month} {year}, Report date: {report_context.reporting_date}"
+        )
+
+        return report_context
+
+    def _execute_report_generation(
+        self,
+        report_name: str,
+        validated_files: Dict[str, Path],
+        output_directory_path: Path,
+        report_context: ReportContext,
+        kwargs: Dict[str, Any],
+    ) -> Path:
+        report_specification: ReportSpecification = ReportSpecificationRegistry.get(
+            report_name
+        )
+
+        self._logger.info(f"Generating report: {report_specification.display_name}")
+        self._logger.debug(f"Report category: {report_specification.category.value}")
+
+        generator: BaseGenerator = ReportGeneratorFactory.create_generator(
+            report_name=report_name,
+            file_io_service=self._file_io_service,
+            data_repository=self._data_repository,
+            report_context=report_context,
+            **kwargs,
+        )
+
+        self._logger.debug(f"Generator created: {generator.__class__.__name__}")
+        self._logger.info("Starting report generation process")
+
+        output_file_path: Path = generator.generate(
+            source_file_paths=validated_files,
+            output_directory_path=output_directory_path,
+        )
+
+        return output_file_path
