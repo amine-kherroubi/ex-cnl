@@ -84,16 +84,14 @@ class CoreFacade(object):
 
         try:
             self._logger.debug("Validating source files against report requirements")
-            validation_result = self._validate_source_files(
-                report_name, source_files
-            )
+            validation_result = self._validate_source_files(report_name, source_files)
             validated_files: Dict[str, Path] = validation_result["matched_files"]
             unmatched_files: List[Path] = validation_result["unmatched_files"]
-            
+
             self._logger.info(
                 f"File validation successful. Validated {len(validated_files)} files"
             )
-            
+
             if unmatched_files:
                 warning_msg: str = (
                     f"{len(unmatched_files)} files did not match any pattern and will be "
@@ -226,11 +224,9 @@ class CoreFacade(object):
         self._logger.info(
             f"File validation successful: {len(matched_files)} files matched to required patterns"
         )
-        
+
         if unmatched_files:
-            self._logger.info(
-                f"{len(unmatched_files)} unmatched files will be ignored"
-            )
+            self._logger.info(f"{len(unmatched_files)} unmatched files will be ignored")
 
         return {
             "matched_files": matched_files,
