@@ -13,7 +13,7 @@ from app.core.infrastructure.file_io.file_io_service import FileIOService
 from app.core.services.report_generation_service.base_report_generator import (
     BaseGenerator,
 )
-from app.core.services.report_generation_service.concrete_generators import *
+from app.core.services.report_generation_service.concrete_report_generators import *
 from app.common.logging_setup import get_logger
 
 

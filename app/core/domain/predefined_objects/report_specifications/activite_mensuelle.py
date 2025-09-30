@@ -11,7 +11,7 @@ from app.core.domain.predefined_objects.tranches import (
     TRANCHES_DE_LANCEMENT,
     TRANCHES_DE_LIVRAISON,
 )
-from app.core.services.report_generation_service.concrete_generators.activite_mensuelle import (
+from app.core.services.report_generation_service.concrete_report_generators.activite_mensuelle import (
     ActiviteMensuelleGenerator,
 )
 

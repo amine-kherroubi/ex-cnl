@@ -1,7 +1,5 @@
 .
 ├── .gitignore
-├── .vscode
-│   └── settings.json
 ├── README.md
 ├── app
 │   ├── common
@@ -21,16 +19,17 @@
 │   │   │   │   └── subprogram.py
 │   │   │   ├── predefined_objects
 │   │   │   │   ├── dairas_et_communes.py
-│   │   │   │   └── report_specifications
-│   │   │   │       ├── activite_mensuelle_specification.py
-│   │   │   │       └── situation_financiere_specification.py
+│   │   │   │   ├── report_specifications
+│   │   │   │   │   ├── activite_mensuelle.py
+│   │   │   │   │   ├── situation_financiere.py
+│   │   │   │   │   └── situation_par_sous_programme.py
+│   │   │   │   └── tranches.py
 │   │   │   └── registries
 │   │   │       ├── report_specification_registry.py
 │   │   │       └── subprogram_registry.py
 │   │   ├── facade.py
 │   │   ├── infrastructure
 │   │   │   ├── data
-│   │   │   │   ├── adhoc_queries.py
 │   │   │   │   └── data_repository.py
 │   │   │   └── file_io
 │   │   │       └── file_io_service.py
@@ -38,15 +37,15 @@
 │   │       ├── date_formatting_service.py
 │   │       ├── excel_styling_service.py
 │   │       └── report_generation_service
-│   │           ├── base_generator.py
-│   │           ├── concrete_generators
+│   │           ├── base_report_generator.py
+│   │           ├── concrete_report_generators
 │   │           │   ├── activite_mensuelle.py
-│   │           │   └── situation_financiere.py
-│   │           └── factories
-│   │               └── report_generator_factory.py
+│   │           │   ├── situation_financiere.py
+│   │           │   └── situation_par_sous_programme.py
+│   │           ├── factories
+│   │           └── report_generator_factory.py
 │   ├── main.py
 │   └── presentation
-│       ├── cli
 │       └── gui
 │           ├── components
 │           │   ├── base_component.py
@@ -66,15 +65,15 @@
 │           │   └── report_views
 │           │       ├── base_report_view.py
 │           │       ├── concrete_report_views
-│           │       │   ├── activite_mensuelle_view.py
-│           │       │   └── situation_financiere_view.py
-│           │       └── factories
-│           │           └── report_view_factory.py
+│           │       │   ├── activite_mensuelle.py
+│           │       │   ├── situation_financiere.py
+│           │       │   └── situation_par_sous_programme.py
+│           │       ├── factories
+│           │       └── report_view_factory.py
 │           └── windows
 │               ├── main_window.py
 │               └── success_window.py
-├── custom_subprograms.json
 ├── project_structure.txt
 └── requirements.txt
 
-29 directories, 49 files
+27 directories, 50 files
