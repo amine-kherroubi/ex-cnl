@@ -30,7 +30,7 @@ def get_app_data_dir() -> Path:
 
 class FileIOConfig(BaseModel):
     allowed_source_file_extensions: List[str] = ["xlsx", "xls"]
-    custom_subprograms_file: str = "sous_programmes.json"
+    custom_subprograms_file: str = "configuration.json"
 
     @property
     def custom_subprograms_path(self) -> Path:
