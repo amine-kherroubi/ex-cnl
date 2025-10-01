@@ -115,10 +115,10 @@ class ExcelStylingService:
         anchor.font = data.font or cls.FONT_NORMAL
         anchor.alignment = data.alignment or cls.ALIGN_CENTER
         if data.border is not None:
-            start_idx = cls.get_column_index_fast(data.start_column)
-            end_idx = cls.get_column_index_fast(data.end_column)
+            start_index: int = cls.get_column_index_fast(data.start_column)
+            end_index: int = cls.get_column_index_fast(data.end_column)
             for row in range(data.start_row, data.end_row + 1):
-                for col_idx in range(start_idx, end_idx + 1):
+                for col_idx in range(start_index, end_index + 1):
                     letter = cls.get_column_letter_fast(col_idx)
                     cell: Cell = sheet[f"{letter}{row}"]
                     cell.border = data.border
@@ -149,7 +149,7 @@ class ExcelStylingService:
                 raise ValueError(
                     f"Different values in {column}{start_row}:{column}{end_row}"
                 )
-        data = MergeData(
+        data: MergeData = MergeData(
             column, column, start_row, end_row, None, font, alignment, border
         )
         cls.merge_and_style_cell(sheet, data)
@@ -164,7 +164,7 @@ class ExcelStylingService:
     ) -> None:
         for col in columns:
             for row in range(start_row, end_row):
-                cell = sheet[f"{col}{row}"]
+                cell: Cell = sheet[f"{col}{row}"]
                 cell.number_format = "#,##0"
 
     @classmethod
