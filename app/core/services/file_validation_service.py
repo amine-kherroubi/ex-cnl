@@ -16,7 +16,7 @@ from app.core.domain.registries.report_specification_registry import (
 @final
 class FileValidator(object):
     __slots__ = ()
-    
+
     _logger: Logger = get_logger(__name__)
 
     def __new__(cls) -> None:
@@ -25,9 +25,7 @@ class FileValidator(object):
         )
 
     @classmethod
-    def validate(
-        cls, report_name: str, input_files: List[Path]
-    ) -> Dict[str, Any]:
+    def validate(cls, report_name: str, input_files: List[Path]) -> Dict[str, Any]:
         cls._logger.debug(
             f"Validating {len(input_files)} source files for report: {report_name}"
         )
@@ -123,7 +121,7 @@ class FileValidator(object):
                 )
 
         if missing_files:
-            error_msg: str = "Missing files for required patterns:\n" + "\n".join(
+            error_msg: str = "Fichiers manquants pour les patterns:\n" + "\n".join(
                 missing_files
             )
             cls._logger.error("Validation failed: missing required patterns")

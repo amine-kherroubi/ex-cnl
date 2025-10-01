@@ -91,7 +91,11 @@ class CoreFacade(object):
 
             # Generate report
             output_file_path: Path = self._execute_report_generation(
-                report_name, validated_files, output_directory_path, report_context, kwargs
+                report_name,
+                validated_files,
+                output_directory_path,
+                report_context,
+                kwargs,
             )
 
             self._logger.info(
