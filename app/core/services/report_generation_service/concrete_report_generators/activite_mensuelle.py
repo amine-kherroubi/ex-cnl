@@ -20,7 +20,6 @@ from app.core.services.excel_styling_service import (
     CellData,
     RowData,
     MergeData,
-    ColumnData,
 )
 
 
@@ -597,10 +596,7 @@ class ActiviteMensuelleGenerator(BaseGenerator):
 
     def _finalize_formatting(self, sheet: Worksheet) -> None:
         column_widths: Dict[str, int] = {"A": 25, "B": 20, "C": 20, "D": 20, "E": 20}
-        ExcelStylingService.batch_style_columns(
-            sheet,
-            [ColumnData(letter, width) for letter, width in column_widths.items()],
-        )
+        ExcelStylingService.batch_style_columns(sheet, column_widths)
         ExcelStylingService.set_page_layout(
             sheet, orientation="portrait", fit_to_width=True
         )

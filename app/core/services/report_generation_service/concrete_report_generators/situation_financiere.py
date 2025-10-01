@@ -26,7 +26,6 @@ from app.core.services.excel_styling_service import (
     CellData,
     RowData,
     MergeData,
-    ColumnData,
 )
 
 
@@ -714,10 +713,7 @@ class SituationFinanciereGenerator(BaseGenerator):
             "S": 12,
         }
 
-        ExcelStylingService.batch_style_columns(
-            sheet,
-            [ColumnData(letter, width) for letter, width in column_widths.items()],
-        )
+        ExcelStylingService.batch_style_columns(sheet, column_widths)
 
         monetary_columns: List[str] = ["D", "F", "H", "L", "P", "Q", "R"]
         ExcelStylingService.format_numbers(

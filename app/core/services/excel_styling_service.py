@@ -33,11 +33,6 @@ class RowData(NamedTuple):
     cells: List[CellData]
 
 
-class ColumnData(NamedTuple):
-    letter: str
-    width: int
-
-
 @final
 class ExcelStylingService:
     __slots__ = ()
@@ -98,13 +93,15 @@ class ExcelStylingService:
             cls.style_row(sheet, data)
 
     @classmethod
-    def style_column(cls, sheet: Worksheet, data: ColumnData) -> None:
-        sheet.column_dimensions[data.letter].width = data.width
+    def style_column(cls, sheet: Worksheet, column: str, width: int) -> None:
+        sheet.column_dimensions[column].width = width
 
     @classmethod
-    def batch_style_columns(cls, sheet: Worksheet, data_list: List[ColumnData]) -> None:
-        for data in data_list:
-            cls.style_column(sheet, data)
+    def batch_style_columns(
+        cls, sheet: Worksheet, column_widths: Dict[str, int]
+    ) -> None:
+        for column, width in column_widths.items():
+            cls.style_column(sheet, column, width)
 
     @classmethod
     def merge_and_style_cell(cls, sheet: Worksheet, data: MergeData) -> None:

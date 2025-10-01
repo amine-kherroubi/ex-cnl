@@ -21,7 +21,6 @@ from app.core.services.excel_styling_service import (
     CellData,
     RowData,
     MergeData,
-    ColumnData,
 )
 
 
@@ -572,10 +571,7 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
             "R": 12,
         }
 
-        ExcelStylingService.batch_style_columns(
-            sheet,
-            [ColumnData(letter, width) for letter, width in column_widths.items()],
-        )
+        ExcelStylingService.batch_style_columns(sheet, column_widths)
 
         monetary_columns: List[str] = ["C", "E", "G", "K", "O", "P", "Q"]
         ExcelStylingService.format_numbers(
