@@ -162,6 +162,15 @@ class ExcelStylingService:
         return f"=SUM({column}{start_row}:{column}{end_row})"
 
     @classmethod
+    def format_numbers(
+        cls, sheet: Worksheet, columns: List[str], start_row: int, end_row: int
+    ) -> None:
+        for col in columns:
+            for row in range(start_row, end_row):
+                cell = sheet[f"{col}{row}"]
+                cell.number_format = "#,##0"
+
+    @classmethod
     def set_page_layout(
         cls,
         sheet: Worksheet,

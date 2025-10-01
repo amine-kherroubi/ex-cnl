@@ -577,7 +577,13 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
             [ColumnData(letter, width) for letter, width in column_widths.items()],
         )
 
-        self._apply_number_formatting(sheet)
+        monetary_columns: List[str] = ["C", "E", "G", "K", "O", "P", "Q"]
+        ExcelStylingService.format_numbers(
+            sheet,
+            monetary_columns,
+            self._data_start_row,
+            self._current_row,
+        )
 
         ExcelStylingService.set_page_layout(
             sheet, orientation="landscape", fit_to_width=True
@@ -585,12 +591,3 @@ class SituationParSousProgrammeGenerator(BaseGenerator):
         ExcelStylingService.set_page_margins(
             sheet, left=0.25, right=0.25, top=0.5, bottom=0.5
         )
-
-    def _apply_number_formatting(self, sheet: Worksheet) -> None:
-        monetary_columns: List[str] = ["C", "E", "G", "K", "O", "P", "Q"]
-        data_end_row: int = self._current_row
-
-        for col in monetary_columns:
-            for row in range(self._data_start_row, data_end_row):
-                cell = sheet[f"{col}{row}"]
-                cell.number_format = "#,##0"
